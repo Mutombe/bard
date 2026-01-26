@@ -41,12 +41,11 @@ RUN pip install --no-cache /wheels/*
 # Copy application code
 COPY . .
 
-# Create directories for static and media files
+# Create directories and set permissions
 RUN mkdir -p staticfiles media logs && \
-    chown -R bardiq:bardiq /app
-
-# Collect static files (done at build time)
-RUN python manage.py collectstatic --no-input --settings=config.settings.base || true
+    touch logs/bard.log && \
+    chown -R bardiq:bardiq /app && \
+    chmod -R 755 /app/logs
 
 # Switch to non-root user
 USER bardiq
@@ -58,5 +57,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health/ || exit 1
 
-# Run migrations and start server
-CMD python manage.py migrate --no-input && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4
+# Run migrations, collect static, and start server
+CMD python manage.py collectstatic --no-input && python manage.py migrate --no-input && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 4
