@@ -121,7 +121,7 @@ export default function NewArticlePage() {
         title: title.trim(),
         excerpt: excerpt.trim(),
         content: content.trim(),
-        status: saveStatus === "published" ? "PUBLISHED" : "DRAFT",
+        status: (saveStatus === "published" ? "PUBLISHED" : "DRAFT") as "PUBLISHED" | "DRAFT",
         is_featured: featured,
         featured_image: featuredImage || undefined,
         content_type: "NEWS" as const,
