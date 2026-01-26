@@ -166,6 +166,12 @@ class NewsArticle(BaseModel):
         null=True,
         blank=True,
     )
+    featured_image_url = models.URLField(
+        "Featured Image URL",
+        max_length=500,
+        blank=True,
+        help_text="External URL for featured image (fallback if no uploaded image)",
+    )
     featured_image_caption = models.CharField(
         "Image Caption",
         max_length=300,
