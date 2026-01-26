@@ -34,7 +34,7 @@ SECURE_HSTS_PRELOAD = True
 # CORS (Strict in production)
 # =========================
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")  # noqa: F405
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])  # noqa: F405
 
 # =========================
 # Database Connection Pooling
