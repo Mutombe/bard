@@ -29,14 +29,26 @@ class Command(BaseCommand):
             action='store_true',
             help='Only run web scrapers',
         )
+        parser.add_argument(
+            '--videos-only',
+            action='store_true',
+            help='Only fetch YouTube videos',
+        )
+        parser.add_argument(
+            '--images-only',
+            action='store_true',
+            help='Only download article images',
+        )
 
     def handle(self, *args, **options):
         news_only = options.get('news_only')
         markets_only = options.get('markets_only')
         scrapers_only = options.get('scrapers_only')
+        videos_only = options.get('videos_only')
+        images_only = options.get('images_only')
 
         # If no specific option, run everything
-        run_all = not (news_only or markets_only or scrapers_only)
+        run_all = not (news_only or markets_only or scrapers_only or videos_only or images_only)
 
         self.stdout.write(self.style.SUCCESS('Starting data population...'))
         self.stdout.write(f'Time: {timezone.now()}')
@@ -57,6 +69,18 @@ class Command(BaseCommand):
         # Run scrapers
         if run_all or scrapers_only:
             self._run_scrapers()
+
+        # Fetch YouTube videos
+        if run_all or videos_only:
+            self._fetch_videos()
+
+        # Download article images
+        if run_all or images_only:
+            self._download_images()
+
+        # Set featured article
+        if run_all:
+            self._set_featured()
 
         self.stdout.write('-' * 50)
         self.stdout.write(self.style.SUCCESS('Data population complete!'))
@@ -194,3 +218,39 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'    {result}'))
         except Exception as e:
             self.stdout.write(self.style.WARNING(f'    BSE scraping failed: {e}'))
+
+    def _fetch_videos(self):
+        """Fetch YouTube videos about African finance."""
+        self.stdout.write('\n[5] Fetching YouTube videos...')
+
+        try:
+            from apps.spider.tasks import fetch_youtube_african_finance
+            self.stdout.write('  Fetching African finance videos...')
+            result = fetch_youtube_african_finance()
+            self.stdout.write(self.style.SUCCESS(f'    {result}'))
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'    YouTube fetch failed: {e}'))
+
+    def _download_images(self):
+        """Download images for articles."""
+        self.stdout.write('\n[6] Downloading article images...')
+
+        try:
+            from apps.spider.tasks import download_article_images
+            self.stdout.write('  Downloading images from Unsplash...')
+            result = download_article_images()
+            self.stdout.write(self.style.SUCCESS(f'    {result}'))
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'    Image download failed: {e}'))
+
+    def _set_featured(self):
+        """Set a featured article."""
+        self.stdout.write('\n[7] Setting featured article...')
+
+        try:
+            from apps.spider.tasks import set_featured_article
+            self.stdout.write('  Setting featured article...')
+            result = set_featured_article()
+            self.stdout.write(self.style.SUCCESS(f'    {result}'))
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'    Set featured failed: {e}'))
