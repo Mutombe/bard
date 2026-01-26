@@ -44,9 +44,7 @@ services:
       - key: CORS_ALLOWED_ORIGINS
         value: https://bardiq-frontend.onrender.com,https://bardiqjournal.com
       - key: DATABASE_URL
-        fromDatabase:
-          name: bardiq-db
-          property: connectionString
+        sync: false
       - key: REDIS_URL
         fromService:
           name: bardiq-redis
@@ -78,9 +76,7 @@ services:
           type: web
           envVarKey: SECRET_KEY
       - key: DATABASE_URL
-        fromDatabase:
-          name: bardiq-db
-          property: connectionString
+        sync: false
       - key: REDIS_URL
         fromService:
           name: bardiq-redis
@@ -107,9 +103,7 @@ services:
           type: web
           envVarKey: SECRET_KEY
       - key: DATABASE_URL
-        fromDatabase:
-          name: bardiq-db
-          property: connectionString
+        sync: false
       - key: REDIS_URL
         fromService:
           name: bardiq-redis
@@ -125,13 +119,3 @@ services:
     region: frankfurt
     plan: starter
     ipAllowList: []
-
-# =========================
-# DATABASE
-# =========================
-databases:
-  - name: bardiq-db
-    region: frankfurt
-    plan: starter
-    databaseName: bardiq
-    user: bardiq
