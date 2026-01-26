@@ -1,0 +1,192 @@
+"""
+News Views
+"""
+from django_filters import rest_framework as filters
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
+from apps.core.pagination import InfiniteScrollPagination
+from apps.users.models import UserRole
+
+from .models import Category, NewsArticle, Tag
+from .serializers import (
+    CategorySerializer,
+    NewsArticleCreateSerializer,
+    NewsArticleDetailSerializer,
+    NewsArticleListSerializer,
+    TagSerializer,
+)
+
+
+class IsEditorOrReadOnly:
+    """Permission class for editor-only write access."""
+
+    def has_permission(self, request, view):
+        if request.method in ["GET", "HEAD", "OPTIONS"]:
+            return True
+        return request.user.is_authenticated and request.user.is_editor
+
+
+class NewsArticleFilter(filters.FilterSet):
+    """Filter for NewsArticle queryset."""
+
+    category = filters.CharFilter(field_name="category__slug")
+    tag = filters.CharFilter(field_name="tags__slug")
+    content_type = filters.CharFilter()
+    company = filters.UUIDFilter(field_name="related_companies__id")
+    author = filters.UUIDFilter(field_name="author__id")
+    is_featured = filters.BooleanFilter()
+    is_premium = filters.BooleanFilter()
+    published_after = filters.DateTimeFilter(
+        field_name="published_at", lookup_expr="gte"
+    )
+    published_before = filters.DateTimeFilter(
+        field_name="published_at", lookup_expr="lte"
+    )
+
+    class Meta:
+        model = NewsArticle
+        fields = ["category", "content_type", "is_featured", "is_premium"]
+
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for Category model."""
+
+    queryset = Category.objects.filter(is_active=True)
+    serializer_class = CategorySerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for Tag model."""
+
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+
+class NewsArticleViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for NewsArticle model.
+
+    Endpoints:
+    - GET /news/ - List published articles
+    - GET /news/{slug}/ - Get article details
+    - POST /news/ - Create article (editors only)
+    - GET /news/featured/ - Featured articles
+    - GET /news/breaking/ - Breaking news
+    - GET /news/by-company/{company_id}/ - Articles related to a company
+    """
+
+    queryset = NewsArticle.objects.all()
+    serializer_class = NewsArticleListSerializer
+    permission_classes = [AllowAny]
+    pagination_class = InfiniteScrollPagination
+    filterset_class = NewsArticleFilter
+    search_fields = ["title", "excerpt", "content"]
+    lookup_field = "slug"
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        # Non-authenticated users only see published articles
+        if not self.request.user.is_authenticated:
+            return queryset.filter(status=NewsArticle.Status.PUBLISHED)
+
+        # Editors can see all their articles
+        if self.request.user.is_editor:
+            return queryset
+
+        # Regular users see published articles
+        return queryset.filter(status=NewsArticle.Status.PUBLISHED)
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return NewsArticleDetailSerializer
+        if self.action in ["create", "update", "partial_update"]:
+            return NewsArticleCreateSerializer
+        return NewsArticleListSerializer
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [IsAuthenticated(), IsEditorOrReadOnly()]
+        return [AllowAny()]
+
+    def retrieve(self, request, *args, **kwargs):
+        """Get article and increment view count."""
+        instance = self.get_object()
+
+        # Check premium access
+        if instance.is_premium:
+            if not request.user.is_authenticated:
+                # Return truncated content for non-authenticated users
+                serializer = self.get_serializer(instance)
+                data = serializer.data
+                data["content"] = data["content"][:500] + "..."
+                data["requires_subscription"] = True
+                return Response(data)
+
+            if not request.user.can_access_premium:
+                serializer = self.get_serializer(instance)
+                data = serializer.data
+                data["content"] = data["content"][:500] + "..."
+                data["requires_subscription"] = True
+                return Response(data)
+
+        # Increment view count
+        instance.increment_view_count()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def featured(self, request):
+        """Get featured articles."""
+        articles = self.get_queryset().filter(
+            is_featured=True, status=NewsArticle.Status.PUBLISHED
+        )[:10]
+        serializer = self.get_serializer(articles, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def breaking(self, request):
+        """Get breaking news."""
+        articles = self.get_queryset().filter(
+            is_breaking=True, status=NewsArticle.Status.PUBLISHED
+        )[:5]
+        serializer = self.get_serializer(articles, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path=r"by-company/(?P<company_id>[^/.]+)")
+    def by_company(self, request, company_id=None):
+        """Get articles related to a specific company."""
+        articles = self.get_queryset().filter(
+            related_companies__id=company_id, status=NewsArticle.Status.PUBLISHED
+        )
+        page = self.paginate_queryset(articles)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(articles, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["post"])
+    def publish(self, request, slug=None):
+        """Publish an article (editors only)."""
+        if not request.user.is_editor:
+            return Response(
+                {"error": "Only editors can publish articles"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        article = self.get_object()
+        article.editor = request.user
+        article.publish()
+
+        serializer = NewsArticleDetailSerializer(article)
+        return Response(serializer.data)

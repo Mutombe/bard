@@ -1,0 +1,41 @@
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
+
+const badgeVariants = cva(
+  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  {
+    variants: {
+      variant: {
+        default:
+          "border-transparent bg-brand-orange text-white hover:bg-brand-orange-light",
+        secondary:
+          "border-transparent bg-terminal-bg-elevated text-foreground hover:bg-terminal-border",
+        destructive:
+          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+        outline: "border-terminal-border text-foreground",
+        success:
+          "border-transparent bg-market-up-bg text-market-up",
+        warning:
+          "border-transparent bg-yellow-500/10 text-yellow-500",
+        error:
+          "border-transparent bg-market-down-bg text-market-down",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+    },
+  }
+);
+
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {}
+
+function Badge({ className, variant, ...props }: BadgeProps) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
+}
+
+export { Badge, badgeVariants };

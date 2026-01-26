@@ -1,0 +1,323 @@
+================================================================================
+BARD SANTNER JOURNAL - IMPLEMENTED FEATURES
+================================================================================
+African Financial News Platform (Similar to Bloomberg/Financial Times)
+Last Updated: January 2026
+================================================================================
+
+================================================================================
+BACKEND (Django REST Framework)
+================================================================================
+
+1. AUTHENTICATION & USERS (apps.authentication, apps.users)
+   - JWT-based authentication with access/refresh tokens
+   - User registration with email verification
+   - Password reset functionality
+   - User profile management
+   - Role-based permissions (subscriber, columnist, editor, admin)
+
+2. NEWS & ARTICLES (apps.news)
+   - Article management with rich text (CKEditor)
+   - Categories and tags
+   - Featured articles
+   - Article status (draft, published, archived)
+   - Related articles
+   - SEO metadata
+
+3. MARKET DATA (apps.markets)
+   - Company profiles and stock data
+   - Exchange management (JSE, NGX, ZSE, BSE, LuSE, NSE, EGX, GSE, etc.)
+   - Market indices tracking
+   - Historical price data (tick, 1min, 5min, hourly, daily)
+   - Sectors and industries classification
+   - Gainers/Losers tracking
+
+4. COLUMNISTS (apps.columnists)
+   - Columnist profiles with bio, photo, expertise
+   - Columnist articles management
+   - Social media links
+   - Engagement metrics
+
+5. EDITORIAL (apps.editorial)
+   - Editorial content management
+   - Opinion pieces
+   - Editor's picks
+
+6. MEDIA (apps.media) - NEW
+   - YouTube API integration (API Key: Configured)
+   - Video management (YouTube, Vimeo, direct upload)
+   - Video categories
+   - Podcast shows and episodes
+   - YouTube channel tracking and sync
+   - 24-hour video caching
+   - Regional search support:
+     * Africa (general)
+     * South Africa
+     * Nigeria
+     * Kenya
+     * Egypt
+     * Zimbabwe
+     * Zambia
+     * Botswana
+     * Tanzania
+     * Ghana
+     * Southern Africa (SADC)
+     * Global
+
+7. ENGAGEMENT (apps.engagement)
+   - Newsletter subscriptions
+   - Email alerts
+   - User notifications
+
+8. SUBSCRIPTIONS (apps.subscriptions)
+   - Subscription plans (Free, Premium, Professional)
+   - Payment integration support (Stripe, Paystack)
+   - Subscription management
+
+9. PORTFOLIO (apps.portfolio)
+   - User watchlists
+   - Portfolio tracking
+   - Holdings management
+
+10. ANALYTICS (apps.analytics)
+    - Page view tracking
+    - Article engagement metrics
+    - User behavior analytics
+
+11. SEO (apps.seo)
+    - Meta tags management
+    - Sitemap generation
+    - SEO optimization tools
+
+12. SPIDER/SCRAPERS (apps.spider)
+    - JSE (Johannesburg Stock Exchange) scraper
+    - ZSE (Zimbabwe Stock Exchange) scraper
+    - BSE (Botswana Stock Exchange) scraper
+    - Polygon.io API integration (market data)
+    - NewsAPI.org integration (news aggregation)
+    - African News Website Scrapers:
+      * empowerafrica.com
+      * africa.businessinsider.com
+      * moneyandmoves.com
+
+13. GEOGRAPHY (apps.geography)
+    - Countries and regions
+    - African market regions
+    - Currency information
+
+14. REAL-TIME (apps.realtime)
+    - WebSocket support via Django Channels
+    - Real-time price updates
+    - Live news feeds
+
+15. CORE (apps.core)
+    - Health check endpoints
+    - Common utilities
+    - Base models
+
+================================================================================
+FRONTEND (Next.js 14 with App Router)
+================================================================================
+
+1. LAYOUT & NAVIGATION
+   - Professional header with dropdown menus
+   - Main navigation: Markets, News, Economics, Sectors, Portfolios, Videos
+   - User authentication UI
+   - Responsive mobile menu
+   - Footer with site links
+
+2. HOME/LANDING PAGE
+   - Featured stories section
+   - Featured YouTube Video (auto-fetched from Southern Africa/Global finance)
+   - Latest news grid
+   - Market summary sidebar
+   - Top gainers/losers
+   - Headlines ticker
+   - Newsletter signup
+
+3. NEWS PAGES
+   - News listing with filters
+   - Article detail pages
+   - Category filtering
+   - Search functionality
+
+4. MARKETS PAGES
+   - /markets - Overview page
+   - /markets/indices - African & global indices
+   - /markets/crypto - Cryptocurrency data
+   - /markets/forex - Currency pairs
+   - /markets/gainers - Top gainers
+   - /markets/losers - Top losers
+
+5. ECONOMICS PAGES
+   - /economics - Overview
+   - /economics/ipo - IPO calendar
+   - /economics/ecb - ECB rate information
+   - /economics/policy - Economic policy
+
+6. VIDEOS PAGE
+   - /videos - Video listing
+   - YouTube API integration
+   - Region filtering (Africa, South Africa, Nigeria, Kenya, Global)
+   - Video modal player
+   - 24-hour auto-refresh
+
+7. SECTORS PAGES
+   - /sectors - Sector overview
+   - Individual sector pages
+
+8. PORTFOLIOS
+   - /portfolios - User portfolio management
+
+9. AUTHENTICATION
+   - /login - User login
+   - /register - User registration
+   - /forgot-password - Password reset
+
+10. SERVICES (API Integration)
+    - apiClient (Axios configuration)
+    - mediaService (YouTube/Video APIs)
+    - authService (Authentication)
+    - newsService (News APIs)
+    - marketsService (Market data)
+
+================================================================================
+ADMIN ACCOUNTS
+================================================================================
+
+1. admin@bardsantner.com
+   - Password: (Set during initial creation)
+   - Role: Superuser with full CMS access
+
+2. editor@bardsantner.com
+   - Password: BardEditor2024!
+   - Role: Superuser with full CMS access
+
+================================================================================
+API ENDPOINTS
+================================================================================
+
+Base URL: http://localhost:8080/api/v1/
+
+MEDIA ENDPOINTS:
+- GET  /media/videos/              - List videos
+- GET  /media/videos/{slug}/       - Get video detail
+- GET  /media/videos/featured/     - Featured videos
+- GET  /media/videos/latest/       - Latest videos
+- GET  /media/videos/youtube_search/ - Search YouTube
+- GET  /media/videos/youtube_finance/?region={region} - Finance videos
+- POST /media/videos/import_youtube/ - Import YouTube video
+- GET  /media/categories/          - Video categories
+- GET  /media/podcasts/shows/      - Podcast shows
+- GET  /media/podcasts/episodes/   - Podcast episodes
+
+NEWS ENDPOINTS:
+- GET  /news/articles/             - List articles
+- GET  /news/articles/{slug}/      - Article detail
+- GET  /news/categories/           - News categories
+
+MARKETS ENDPOINTS:
+- GET  /markets/companies/         - List companies
+- GET  /markets/indices/           - Market indices
+- GET  /markets/tickers/           - Ticker data
+
+AUTHENTICATION:
+- POST /auth/login/                - Login
+- POST /auth/register/             - Register
+- POST /auth/token/refresh/        - Refresh token
+- POST /auth/logout/               - Logout
+
+================================================================================
+CELERY TASKS (Background Jobs)
+================================================================================
+
+1. fetch_polygon_news - Every 30 minutes
+2. fetch_newsapi_headlines - Every 30 minutes
+3. fetch_african_news - Every hour
+4. fetch_polygon_indices - Every 15 minutes (market hours)
+5. scrape_jse_data - Every 5 minutes (market hours)
+6. scrape_zse_data - Every 10 minutes (market hours)
+7. scrape_bse_data - Every 10 minutes (market hours)
+8. scrape_african_news_websites - Every 2 hours
+9. aggregate_daily_data - 18:00 daily
+10. calculate_indices - Every 15 minutes (market hours)
+11. cleanup_old_data - 02:00 daily
+
+================================================================================
+CONFIGURATION FILES
+================================================================================
+
+Backend:
+- backend/.env (Environment variables)
+- backend/config/settings/base.py
+- backend/config/settings/development.py
+- backend/config/settings/production.py
+
+Frontend:
+- frontend/.env.local
+- frontend/next.config.js
+- frontend/tailwind.config.js
+- frontend/tsconfig.json
+
+================================================================================
+DATABASE
+================================================================================
+
+Development: SQLite (db.sqlite3)
+Production: PostgreSQL (configurable via DATABASE_URL)
+
+================================================================================
+CACHING
+================================================================================
+
+- YouTube API responses: 24-hour cache
+- Development: Local memory cache
+- Production: Redis (configurable)
+
+================================================================================
+EXTERNAL API INTEGRATIONS
+================================================================================
+
+1. YouTube Data API v3
+   - API Key: Configured in backend/.env
+   - Used for: Video search, finance videos, channel management
+
+2. Polygon.io
+   - Used for: US/Global market data, indices, news
+
+3. NewsAPI.org
+   - Used for: Business news aggregation
+
+================================================================================
+TECHNOLOGIES USED
+================================================================================
+
+Backend:
+- Python 3.11+
+- Django 5.0
+- Django REST Framework
+- Django Channels (WebSockets)
+- Celery (task queue)
+- PostgreSQL / SQLite
+- Redis (caching/messaging)
+
+Frontend:
+- Next.js 14 (App Router)
+- React 18
+- TypeScript
+- Tailwind CSS
+- Lucide Icons
+- Axios
+
+================================================================================
+NOTES
+================================================================================
+
+- Videos refresh every 24 hours via caching
+- Southern African focus: Zimbabwe, South Africa, Zambia, Botswana, etc.
+- Real-time market data via WebSockets
+- Mobile-responsive design
+- Dark theme (terminal-style) UI
+- SEO optimized
+
+================================================================================
