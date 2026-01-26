@@ -40,9 +40,6 @@ CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")  # noqa: F405
 # Database Connection Pooling
 # =========================
 DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405
-DATABASES["default"]["OPTIONS"] = {  # noqa: F405
-    "MAX_CONNS": 20,
-}
 
 # =========================
 # Static Files (S3 in production)
