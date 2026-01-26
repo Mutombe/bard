@@ -51,14 +51,23 @@ CORS_ALLOW_ALL_ORIGINS = True
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # =========================
-# Database (SQLite for local development)
+# Database (Use production DB if DATABASE_URL is set, otherwise SQLite)
 # =========================
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",  # noqa: F405
+import dj_database_url
+
+DATABASE_URL = env("DATABASE_URL", default=None)  # noqa: F405
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(default=DATABASE_URL, conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",  # noqa: F405
+        }
+    }
 
 # =========================
 # Caching (Local memory for development)

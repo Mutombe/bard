@@ -47,7 +47,7 @@ def fetch_polygon_news():
                 title=item['title'][:500],
                 excerpt=item.get('description', '')[:500],
                 content=item.get('description', ''),
-                featured_image=item.get('image_url', ''),
+                # featured_image requires actual file, skip URL for now
                 category=category,
                 status='published',
                 published_at=timezone.now(),
@@ -93,11 +93,16 @@ def fetch_newsapi_headlines():
             ).exists():
                 continue
 
+            # Ensure we have content
+            content = item.get('content', '') or item.get('description', '') or item.get('title', '')
+            if not content:
+                continue
+
             NewsArticle.objects.create(
                 title=item['title'][:500],
-                excerpt=item.get('description', '')[:500] if item.get('description') else '',
-                content=item.get('content', '') or item.get('description', ''),
-                featured_image=item.get('image_url', ''),
+                excerpt=item.get('description', '')[:500] if item.get('description') else item['title'][:500],
+                content=content,
+                # featured_image requires actual file, skip URL for now
                 category=category,
                 status='published',
                 published_at=timezone.now(),
@@ -146,7 +151,7 @@ def fetch_african_news():
                 title=item['title'][:500],
                 excerpt=item.get('description', '')[:500] if item.get('description') else '',
                 content=item.get('content', '') or item.get('description', ''),
-                featured_image=item.get('image_url', ''),
+                # featured_image requires actual file, skip URL for now
                 category=category,
                 status='published',
                 published_at=timezone.now(),
