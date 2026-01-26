@@ -10,7 +10,7 @@ services:
   - type: web
     name: bardiq-frontend
     runtime: node
-    region: frankfurt  # EU region - closest to Africa
+    region: frankfurt
     plan: starter
     buildCommand: cd frontend && npm install && npm run build
     startCommand: cd frontend && npm start
@@ -18,10 +18,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: bardiq-backend
-          type: web
-          property: url
+        sync: false
       - key: PORT
         value: 3000
     healthCheckPath: /
@@ -70,9 +67,8 @@ services:
     runtime: docker
     region: frankfurt
     plan: starter
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./backend/Dockerfile.worker
     dockerContext: ./backend
-    startCommand: celery -A config worker -l info
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
@@ -100,9 +96,8 @@ services:
     runtime: docker
     region: frankfurt
     plan: starter
-    dockerfilePath: ./backend/Dockerfile
+    dockerfilePath: ./backend/Dockerfile.scheduler
     dockerContext: ./backend
-    startCommand: celery -A config beat -l info
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
@@ -129,7 +124,7 @@ services:
     name: bardiq-redis
     region: frankfurt
     plan: starter
-    ipAllowList: []  # Allow all IPs (internal only)
+    ipAllowList: []
 
 # =========================
 # DATABASE
