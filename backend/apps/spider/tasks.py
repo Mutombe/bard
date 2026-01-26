@@ -553,77 +553,69 @@ def fetch_youtube_african_finance():
         raise
 
 
-@shared_task(name="apps.spider.tasks.download_article_images")
-def download_article_images():
+@shared_task(name="apps.spider.tasks.set_article_images")
+def set_article_images():
     """
-    Download and save images for articles that have image URLs but no local image.
+    Set external image URLs for articles without images.
 
-    Prioritizes featured articles. Uses Lorem Picsum for reliable free images.
+    Uses Unsplash for high-quality, relevant stock images.
+    Prioritizes featured articles.
     Schedule: Every hour
     """
-    import random
-    import httpx
-    from django.core.files.base import ContentFile
     from apps.news.models import NewsArticle
 
     try:
-        # Get articles without images, prioritize featured ones
+        # Get articles without images (both local and URL), prioritize featured
         articles = NewsArticle.objects.filter(
             featured_image='',
+            featured_image_url='',
             status='published',
-        ).order_by('-is_featured', '-published_at')[:20]
+        ).order_by('-is_featured', '-published_at')[:50]
 
         if not articles.exists():
             return "No articles need images"
 
-        client = httpx.Client(
-            timeout=30.0,
-            headers={
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            },
-            follow_redirects=True,
-        )
-
         saved = 0
 
-        # Use Lorem Picsum - reliable free image service
-        # IDs 1-1000 are valid images
-        # Use different seeds for different business-looking images
-        business_image_ids = [
-            3, 20, 60, 180, 186, 201, 308, 366, 368, 380,
-            403, 429, 430, 431, 437, 452, 474, 488, 493, 535,
+        # Unsplash image URLs for different finance/business topics
+        # Using specific photo IDs for consistent, relevant images
+        unsplash_images = [
+            "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=450&fit=crop",  # Stock market
+            "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&h=450&fit=crop",  # Trading
+            "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&h=450&fit=crop",  # Finance
+            "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=800&h=450&fit=crop",  # Charts
+            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",  # Business
+            "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=450&fit=crop",  # News
+            "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&h=450&fit=crop",  # Businessman
+            "https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&h=450&fit=crop",  # Africa map
+            "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=800&h=450&fit=crop",  # Coins/Money
+            "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=450&fit=crop",  # Calculator
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop",  # Tech
+            "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",  # Dashboard
+            "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&h=450&fit=crop",  # City skyline
+            "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=450&fit=crop",  # Office building
+            "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&h=450&fit=crop",  # Growth chart
         ]
 
-        for article in articles:
+        for i, article in enumerate(articles):
             try:
-                # Get a random business-style image from Picsum
-                image_id = business_image_ids[saved % len(business_image_ids)]
-                # Add random grayscale/blur for variety
-                image_url = f'https://picsum.photos/id/{image_id}/800/450'
+                # Select image based on index for variety
+                image_url = unsplash_images[i % len(unsplash_images)]
 
-                response = client.get(image_url)
-                if response.status_code == 200:
-                    filename = f"{article.slug[:50]}_{article.id}.jpg"
-
-                    # Save the image
-                    article.featured_image.save(
-                        filename,
-                        ContentFile(response.content),
-                        save=True
-                    )
-                    saved += 1
-                    logger.info(f"Downloaded image for: {article.title[:50]}...")
+                article.featured_image_url = image_url
+                article.save(update_fields=['featured_image_url'])
+                saved += 1
+                logger.info(f"Set image URL for: {article.title[:50]}...")
 
             except Exception as e:
-                logger.error(f"Failed to download image for article {article.id}: {e}")
+                logger.error(f"Failed to set image for article {article.id}: {e}")
                 continue
 
-        client.close()
-        logger.info(f"Downloaded images for {saved} articles")
-        return f"Downloaded {saved} article images"
+        logger.info(f"Set image URLs for {saved} articles")
+        return f"Set {saved} article image URLs"
 
     except Exception as e:
-        logger.error(f"Image download failed: {e}")
+        logger.error(f"Set article images failed: {e}")
         raise
 
 

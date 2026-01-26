@@ -46,6 +46,7 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     author_name = serializers.CharField(source="author.full_name", read_only=True)
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
+    featured_image = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsArticle
@@ -68,6 +69,15 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
             "related_companies",
         ]
 
+    def get_featured_image(self, obj):
+        """Return uploaded image URL or fallback to external URL"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return obj.featured_image_url or None
+
 
 class NewsArticleDetailSerializer(serializers.ModelSerializer):
     """Serializer for full article details."""
@@ -77,6 +87,7 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     editor = UserSerializer(read_only=True)
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
+    featured_image = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsArticle
@@ -107,6 +118,15 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+    def get_featured_image(self, obj):
+        """Return uploaded image URL or fallback to external URL"""
+        if obj.featured_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.featured_image.url)
+            return obj.featured_image.url
+        return obj.featured_image_url or None
 
 
 class NewsArticleCreateSerializer(serializers.ModelSerializer):

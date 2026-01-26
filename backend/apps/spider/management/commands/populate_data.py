@@ -232,16 +232,16 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f'    YouTube fetch failed: {e}'))
 
     def _download_images(self):
-        """Download images for articles."""
-        self.stdout.write('\n[6] Downloading article images...')
+        """Set image URLs for articles."""
+        self.stdout.write('\n[6] Setting article image URLs...')
 
         try:
-            from apps.spider.tasks import download_article_images
-            self.stdout.write('  Downloading images from Unsplash...')
-            result = download_article_images()
+            from apps.spider.tasks import set_article_images
+            self.stdout.write('  Setting image URLs from Unsplash...')
+            result = set_article_images()
             self.stdout.write(self.style.SUCCESS(f'    {result}'))
         except Exception as e:
-            self.stdout.write(self.style.WARNING(f'    Image download failed: {e}'))
+            self.stdout.write(self.style.WARNING(f'    Set image URLs failed: {e}'))
 
     def _set_featured(self):
         """Set a featured article."""
