@@ -16,8 +16,8 @@ export interface StoredAuth {
     role: string;
     subscription_tier: string;
     is_active: boolean;
-    email_verified: boolean;
-    date_joined: string;
+    email_verified?: boolean;
+    date_joined?: string;
   };
   tokens: {
     access: string;
