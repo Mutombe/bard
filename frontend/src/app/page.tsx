@@ -372,7 +372,7 @@ export default function HomePage() {
         // Fetch news articles
         try {
           const newsResponse = await apiClient.get("/news/articles/", {
-            params: { page_size: 15, status: "PUBLISHED" }
+            params: { page_size: 15 }
           });
           const articles = newsResponse.data.results || newsResponse.data || [];
           if (articles.length > 0) {
