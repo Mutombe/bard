@@ -41,6 +41,8 @@ api_v1_patterns = [
 ]
 
 urlpatterns = [
+    # Health check at root (for Render)
+    path("health/", include("apps.core.urls", namespace="core")),
     # Admin
     path("admin/", admin.site.urls),
     # API v1
