@@ -1,0 +1,142 @@
+# =========================
+# BARDIQ JOURNAL - RENDER BLUEPRINT
+# =========================
+# Deploy using: render blueprint sync
+
+services:
+  # =========================
+  # FRONTEND (Next.js)
+  # =========================
+  - type: web
+    name: bardiq-frontend
+    runtime: node
+    region: frankfurt  # EU region - closest to Africa
+    plan: starter
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: bardiq-backend
+          type: web
+          property: url
+      - key: PORT
+        value: 3000
+    healthCheckPath: /
+    autoDeploy: true
+
+  # =========================
+  # BACKEND (Django)
+  # =========================
+  - type: web
+    name: bardiq-backend
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: .onrender.com,.bardiqjournal.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://bardiq-frontend.onrender.com,https://bardiqjournal.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bardiq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: bardiq-redis
+          type: redis
+          property: connectionString
+      - key: USE_S3
+        value: "false"
+      - key: DEBUG
+        value: "false"
+    healthCheckPath: /health/
+    autoDeploy: true
+
+  # =========================
+  # CELERY WORKER
+  # =========================
+  - type: worker
+    name: bardiq-worker
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    startCommand: celery -A config worker -l info
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: bardiq-backend
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bardiq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: bardiq-redis
+          type: redis
+          property: connectionString
+    autoDeploy: true
+
+  # =========================
+  # CELERY BEAT (Scheduler)
+  # =========================
+  - type: worker
+    name: bardiq-scheduler
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    startCommand: celery -A config beat -l info
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: bardiq-backend
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bardiq-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: bardiq-redis
+          type: redis
+          property: connectionString
+    autoDeploy: true
+
+  # =========================
+  # REDIS
+  # =========================
+  - type: redis
+    name: bardiq-redis
+    region: frankfurt
+    plan: starter
+    ipAllowList: []  # Allow all IPs (internal only)
+
+# =========================
+# DATABASE
+# =========================
+databases:
+  - name: bardiq-db
+    region: frankfurt
+    plan: starter
+    databaseName: bardiq
+    user: bardiq
