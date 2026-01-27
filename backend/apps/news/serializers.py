@@ -132,7 +132,13 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
 class NewsArticleCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating/updating articles."""
 
-    tags = serializers.PrimaryKeyRelatedField(
+    # Accept category by slug for easier frontend integration
+    category = serializers.SlugRelatedField(
+        slug_field="slug",
+        queryset=Category.objects.all(),
+    )
+    tags = serializers.SlugRelatedField(
+        slug_field="slug",
         queryset=Tag.objects.all(),
         many=True,
         required=False,
@@ -141,6 +147,12 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         queryset="markets.Company",
         many=True,
         required=False,
+    )
+    # Allow setting external image URL
+    featured_image_url = serializers.URLField(
+        max_length=500,
+        required=False,
+        allow_blank=True,
     )
 
     class Meta:
@@ -151,6 +163,7 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
             "excerpt",
             "content",
             "featured_image",
+            "featured_image_url",
             "featured_image_caption",
             "category",
             "tags",
@@ -170,7 +183,24 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         validated_data["author"] = self.context["request"].user
 
         article = super().create(validated_data)
-        article.tags.set(tags)
-        article.related_companies.set(companies)
+        if tags:
+            article.tags.set(tags)
+        if companies:
+            article.related_companies.set(companies)
 
         return article
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop("tags", None)
+        companies = validated_data.pop("related_companies", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if tags is not None:
+            instance.tags.set(tags)
+        if companies is not None:
+            instance.related_companies.set(companies)
+
+        return instance

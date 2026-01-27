@@ -34,7 +34,34 @@ SECURE_HSTS_PRELOAD = True
 # CORS (Strict in production)
 # =========================
 CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])  # noqa: F405
+CORS_ALLOWED_ORIGINS = env.list(  # noqa: F405
+    "CORS_ALLOWED_ORIGINS",
+    default=[
+        "https://bardiq-frontend.onrender.com",
+        "https://bardiqjournal.com",
+        "https://www.bardiqjournal.com",
+    ]
+)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
 # =========================
 # Database Connection Pooling

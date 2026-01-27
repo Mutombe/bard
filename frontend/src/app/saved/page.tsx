@@ -1,122 +1,199 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
   Bookmark,
   Search,
+  Heart,
+  Play,
+  Newspaper,
   Trash2,
-  ExternalLink,
-  Calendar,
-  Folder,
-  Plus,
-  X,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useAppSelector } from "@/store";
+import { Skeleton } from "@/components/ui/loading";
+import apiClient from "@/services/api/client";
+import { toast } from "sonner";
 
-interface SavedArticle {
-  id: string;
-  title: string;
-  excerpt: string;
-  author: string;
-  category: string;
-  image: string;
-  url: string;
-  savedAt: string;
-  folder?: string;
+// LocalStorage keys (same as in page.tsx)
+const LIKES_KEY = "bardiq_likes";
+const BOOKMARKS_KEY = "bardiq_bookmarks";
+
+function getLikes(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(LIKES_KEY) || "[]");
+  } catch {
+    return [];
+  }
 }
 
-const mockSaved: SavedArticle[] = [
-  {
-    id: "1",
-    title: "JSE All Share Index Hits Record High Amid Global Rally",
-    excerpt: "The Johannesburg Stock Exchange's All Share Index reached unprecedented levels today...",
-    author: "Thabo Mokoena",
-    category: "Markets",
-    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=200&fit=crop",
-    url: "/news/jse-record-high",
-    savedAt: "2025-01-24T10:00:00Z",
-    folder: "Market Analysis",
-  },
-  {
-    id: "2",
-    title: "Central Bank of Nigeria Holds Interest Rates Steady",
-    excerpt: "The Monetary Policy Committee decided to maintain the benchmark rate...",
-    author: "Amara Obi",
-    category: "Economics",
-    image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=400&h=200&fit=crop",
-    url: "/news/cbn-rates-decision",
-    savedAt: "2025-01-23T14:00:00Z",
-    folder: "Central Banks",
-  },
-  {
-    id: "3",
-    title: "Mining Sector Outlook: Opportunities in African Resources",
-    excerpt: "Expert analysis on the African mining sector and investment opportunities...",
-    author: "Dr. Fatima Hassan",
-    category: "Analysis",
-    image: "https://images.unsplash.com/photo-1518640467707-6811f4a6ab73?w=400&h=200&fit=crop",
-    url: "/news/mining-outlook",
-    savedAt: "2025-01-22T09:00:00Z",
-  },
-  {
-    id: "4",
-    title: "Interview: Aliko Dangote on Africa's Industrial Future",
-    excerpt: "Africa's richest man shares his vision for manufacturing...",
-    author: "Chidi Okonkwo",
-    category: "Interview",
-    image: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&h=200&fit=crop",
-    url: "/news/dangote-interview",
-    savedAt: "2025-01-20T16:00:00Z",
-    folder: "Interviews",
-  },
-];
+function getBookmarks(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
 
-const folders = ["All", "Market Analysis", "Central Banks", "Interviews", "Research"];
+function removeBookmark(id: string) {
+  const bookmarks = getBookmarks();
+  const index = bookmarks.indexOf(id);
+  if (index > -1) {
+    bookmarks.splice(index, 1);
+    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
+  }
+}
+
+function removeLike(id: string) {
+  const likes = getLikes();
+  const index = likes.indexOf(id);
+  if (index > -1) {
+    likes.splice(index, 1);
+    localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
+  }
+}
+
+interface SavedItem {
+  id: string;
+  type: "article" | "video";
+  data: any;
+}
+
+function SavedItemSkeleton() {
+  return (
+    <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden animate-pulse">
+      <Skeleton className="aspect-video" />
+      <div className="p-4">
+        <div className="flex items-center gap-2 mb-2">
+          <Skeleton className="h-5 w-16" />
+        </div>
+        <Skeleton className="h-5 w-full mb-2" />
+        <Skeleton className="h-4 w-3/4 mb-3" />
+        <Skeleton className="h-4 w-24" />
+      </div>
+    </div>
+  );
+}
 
 export default function SavedPage() {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [saved, setSaved] = useState(mockSaved);
+  const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<"bookmarks" | "likes">("bookmarks");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedFolder, setSelectedFolder] = useState("All");
+  const [bookmarkedItems, setBookmarkedItems] = useState<SavedItem[]>([]);
+  const [likedItems, setLikedItems] = useState<SavedItem[]>([]);
 
-  const removeFromSaved = (id: string) => {
-    setSaved(saved.filter((article) => article.id !== id));
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    loadSavedItems();
+  }, [mounted]);
+
+  const loadSavedItems = async () => {
+    setLoading(true);
+
+    const bookmarkIds = getBookmarks();
+    const likeIds = getLikes();
+
+    // Parse IDs to get article/video info
+    const articleBookmarkIds = bookmarkIds
+      .filter((id) => id.startsWith("article-"))
+      .map((id) => id.replace("article-", ""));
+    const videoBookmarkIds = bookmarkIds
+      .filter((id) => id.startsWith("video-"))
+      .map((id) => id.replace("video-", ""));
+
+    const articleLikeIds = likeIds
+      .filter((id) => id.startsWith("article-"))
+      .map((id) => id.replace("article-", ""));
+    const videoLikeIds = likeIds
+      .filter((id) => id.startsWith("video-"))
+      .map((id) => id.replace("video-", ""));
+
+    // Fetch articles for bookmarks
+    const bookmarkedArticles: SavedItem[] = [];
+    const likedArticles: SavedItem[] = [];
+
+    // Fetch bookmarked articles
+    for (const id of articleBookmarkIds.slice(0, 20)) {
+      try {
+        const response = await apiClient.get(`/news/articles/${id}/`);
+        bookmarkedArticles.push({
+          id: `article-${id}`,
+          type: "article",
+          data: response.data,
+        });
+      } catch (error) {
+        // Article might be deleted, remove from bookmarks
+        removeBookmark(`article-${id}`);
+      }
+    }
+
+    // Fetch liked articles
+    for (const id of articleLikeIds.slice(0, 20)) {
+      try {
+        const response = await apiClient.get(`/news/articles/${id}/`);
+        likedArticles.push({
+          id: `article-${id}`,
+          type: "article",
+          data: response.data,
+        });
+      } catch (error) {
+        // Article might be deleted, remove from likes
+        removeLike(`article-${id}`);
+      }
+    }
+
+    // Add video placeholders (since we don't have a video API endpoint)
+    for (const id of videoBookmarkIds.slice(0, 10)) {
+      bookmarkedArticles.push({
+        id: `video-${id}`,
+        type: "video",
+        data: { video_id: id, title: "Saved Video" },
+      });
+    }
+
+    for (const id of videoLikeIds.slice(0, 10)) {
+      likedArticles.push({
+        id: `video-${id}`,
+        type: "video",
+        data: { video_id: id, title: "Liked Video" },
+      });
+    }
+
+    setBookmarkedItems(bookmarkedArticles);
+    setLikedItems(likedArticles);
+    setLoading(false);
   };
 
-  const filteredArticles = saved.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.author.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFolder =
-      selectedFolder === "All" || article.folder === selectedFolder;
-    return matchesSearch && matchesFolder;
+  const handleRemove = (id: string, type: "bookmark" | "like") => {
+    if (type === "bookmark") {
+      removeBookmark(id);
+      setBookmarkedItems((items) => items.filter((item) => item.id !== id));
+      toast.success("Removed from reading list");
+    } else {
+      removeLike(id);
+      setLikedItems((items) => items.filter((item) => item.id !== id));
+      toast.success("Removed from liked items");
+    }
+  };
+
+  const currentItems = activeTab === "bookmarks" ? bookmarkedItems : likedItems;
+  const filteredItems = currentItems.filter((item) => {
+    if (!searchQuery) return true;
+    const title = item.data.title || "";
+    return title.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  if (!isAuthenticated) {
-    return (
-      <MainLayout>
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12">
-          <div className="max-w-md mx-auto text-center">
-            <Bookmark className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-            <h1 className="text-2xl font-bold mb-4">Saved Articles</h1>
-            <p className="text-muted-foreground mb-6">
-              Sign in to save articles and read them later.
-            </p>
-            <Link
-              href="/login"
-              className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors inline-block"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </MainLayout>
-    );
-  }
+  if (!mounted) return null;
 
   return (
     <MainLayout>
@@ -126,17 +203,17 @@ export default function SavedPage() {
           <div>
             <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
               <Bookmark className="h-6 w-6 text-brand-orange" />
-              Saved Articles
+              Saved Items
             </h1>
             <p className="text-muted-foreground">
-              {saved.length} articles saved for later reading.
+              Your bookmarked articles and liked content.
             </p>
           </div>
           <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search saved articles..."
+              placeholder="Search saved items..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-terminal-bg-secondary border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
@@ -144,121 +221,167 @@ export default function SavedPage() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Folders Sidebar */}
-          <div className="lg:w-64 flex-shrink-0">
-            <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold flex items-center gap-2">
-                  <Folder className="h-4 w-4 text-brand-orange" />
-                  Folders
-                </h3>
-                <button className="p-1 text-muted-foreground hover:text-foreground">
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="space-y-1">
-                {folders.map((folder) => (
-                  <button
-                    key={folder}
-                    onClick={() => setSelectedFolder(folder)}
-                    className={cn(
-                      "w-full text-left px-3 py-2 rounded-md text-sm transition-colors",
-                      selectedFolder === folder
-                        ? "bg-brand-orange text-white"
-                        : "text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated"
-                    )}
-                  >
-                    {folder}
-                    <span className="float-right">
-                      {folder === "All"
-                        ? saved.length
-                        : saved.filter((a) => a.folder === folder).length}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
+        {/* Tabs */}
+        <div className="flex items-center gap-4 mb-6 border-b border-terminal-border">
+          <button
+            onClick={() => setActiveTab("bookmarks")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors",
+              activeTab === "bookmarks"
+                ? "border-brand-orange text-brand-orange"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Bookmark className="h-4 w-4" />
+            Reading List
+            <span className="px-2 py-0.5 text-xs rounded-full bg-terminal-bg-elevated">
+              {bookmarkedItems.length}
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab("likes")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 -mb-px transition-colors",
+              activeTab === "likes"
+                ? "border-brand-orange text-brand-orange"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Heart className="h-4 w-4" />
+            Liked
+            <span className="px-2 py-0.5 text-xs rounded-full bg-terminal-bg-elevated">
+              {likedItems.length}
+            </span>
+          </button>
+        </div>
 
-          {/* Articles Grid */}
-          <div className="flex-1">
-            {filteredArticles.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredArticles.map((article) => (
-                  <div
-                    key={article.id}
-                    className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden hover:border-brand-orange transition-colors"
-                  >
-                    <div className="relative aspect-video">
-                      <Image
-                        src={article.image}
-                        alt={article.title}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute top-2 right-2">
+        {/* Content */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <SavedItemSkeleton key={i} />
+            ))}
+          </div>
+        ) : filteredItems.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredItems.map((item) => (
+              <div
+                key={item.id}
+                className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden hover:border-brand-orange/50 transition-colors group"
+              >
+                {item.type === "article" ? (
+                  <>
+                    <div className="relative aspect-video bg-terminal-bg-elevated">
+                      {item.data.featured_image ? (
+                        <Image
+                          src={item.data.featured_image}
+                          alt={item.data.title}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Newspaper className="h-12 w-12 text-muted-foreground/30" />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          onClick={() => removeFromSaved(article.id)}
-                          className="p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+                          onClick={() => handleRemove(item.id, activeTab === "bookmarks" ? "bookmark" : "like")}
+                          className="p-2 bg-black/70 rounded-full text-white hover:bg-black/90 transition-colors"
+                          title="Remove"
                         >
-                          <Bookmark className="h-4 w-4 fill-current" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="px-2 py-0.5 text-xs bg-terminal-bg-elevated rounded">
-                          {article.category}
+                        <span className="px-2 py-0.5 text-xs bg-brand-orange/20 text-brand-orange rounded">
+                          {item.data.category?.name || "Article"}
                         </span>
-                        {article.folder && (
-                          <span className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Folder className="h-3 w-3" />
-                            {article.folder}
-                          </span>
-                        )}
                       </div>
-                      <Link href={article.url}>
+                      <Link href={`/news/${item.data.slug}`}>
                         <h3 className="font-semibold mb-2 line-clamp-2 hover:text-brand-orange transition-colors">
-                          {article.title}
+                          {item.data.title}
                         </h3>
                       </Link>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {article.excerpt}
+                        {item.data.excerpt}
                       </p>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{article.author}</span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          Saved {new Date(article.savedAt).toLocaleDateString("en-ZA", {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </span>
+                      <div className="text-xs text-muted-foreground">
+                        {item.data.author?.full_name || "Staff Writer"}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  </>
+                ) : (
+                  <>
+                    <div className="relative aspect-video bg-terminal-bg-elevated">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Play className="h-12 w-12 text-muted-foreground/30" />
+                      </div>
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleRemove(item.id, activeTab === "bookmarks" ? "bookmark" : "like")}
+                          className="p-2 bg-black/70 rounded-full text-white hover:bg-black/90 transition-colors"
+                          title="Remove"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
+                          Video
+                        </span>
+                      </div>
+                      <a
+                        href={`https://www.youtube.com/watch?v=${item.data.video_id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <h3 className="font-semibold mb-2 line-clamp-2 hover:text-brand-orange transition-colors">
+                          {item.data.title}
+                        </h3>
+                      </a>
+                    </div>
+                  </>
+                )}
               </div>
-            ) : (
-              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
+            ))}
+          </div>
+        ) : (
+          <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
+            {activeTab === "bookmarks" ? (
+              <>
                 <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">No saved articles</h3>
                 <p className="text-muted-foreground mb-6">
                   {searchQuery
                     ? "No articles match your search."
-                    : "Save articles to read them later."}
+                    : "Click the bookmark icon on any article to save it for later."}
                 </p>
-                <Link
-                  href="/news"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
-                >
-                  Browse News
-                </Link>
-              </div>
+              </>
+            ) : (
+              <>
+                <Heart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No liked articles</h3>
+                <p className="text-muted-foreground mb-6">
+                  {searchQuery
+                    ? "No articles match your search."
+                    : "Click the heart icon on any article to like it."}
+                </p>
+              </>
             )}
+            <Link
+              href="/news"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
+            >
+              Browse News
+            </Link>
           </div>
-        </div>
+        )}
       </div>
     </MainLayout>
   );

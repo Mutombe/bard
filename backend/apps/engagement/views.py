@@ -1,9 +1,10 @@
 """
 Engagement Views
 """
-from rest_framework import status, viewsets
+from django.db.models import Count, Q
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import NewsletterSubscription, Notification, PriceAlert
@@ -20,15 +21,45 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
     ViewSet for NewsletterSubscription.
 
     Allows public subscription without authentication.
+    Admins can view all subscriptions.
     """
 
     serializer_class = NewsletterSubscriptionSerializer
-    permission_classes = [AllowAny]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["email"]
+
+    def get_permissions(self):
+        if self.action in ["create"]:
+            return [AllowAny()]
+        if self.action in ["list", "stats", "retrieve", "destroy"]:
+            # Admins can list all, regular users see their own
+            return [IsAuthenticated()]
+        return [IsAuthenticated()]
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return NewsletterSubscription.objects.filter(user=self.request.user)
-        return NewsletterSubscription.objects.none()
+        user = self.request.user
+        if not user.is_authenticated:
+            return NewsletterSubscription.objects.none()
+
+        # Admins and editors can see all subscriptions
+        if user.is_staff or (hasattr(user, 'role') and user.role in ['super_admin', 'editor']):
+            queryset = NewsletterSubscription.objects.all()
+        else:
+            queryset = NewsletterSubscription.objects.filter(
+                Q(user=user) | Q(email=user.email)
+            )
+
+        # Filter by newsletter_type
+        newsletter_type = self.request.query_params.get("newsletter_type")
+        if newsletter_type:
+            queryset = queryset.filter(newsletter_type=newsletter_type)
+
+        # Filter by is_active
+        is_active = self.request.query_params.get("is_active")
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active.lower() == "true")
+
+        return queryset.order_by("-created_at")
 
     def perform_create(self, serializer):
         import secrets
@@ -46,6 +77,32 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
 
         # TODO: Send verification email
         # send_verification_email.delay(subscription.id)
+
+    @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
+    def stats(self, request):
+        """Get newsletter subscription statistics (admin only)."""
+        user = request.user
+        if not (user.is_staff or (hasattr(user, 'role') and user.role in ['super_admin', 'editor'])):
+            return Response(
+                {"error": "Admin access required"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        total = NewsletterSubscription.objects.count()
+        active = NewsletterSubscription.objects.filter(is_active=True).count()
+
+        # Get counts by type
+        by_type = NewsletterSubscription.objects.values("newsletter_type").annotate(
+            count=Count("id")
+        )
+
+        return Response({
+            "total_subscribers": total,
+            "active_subscribers": active,
+            "open_rate": 0,  # Placeholder - would need email tracking
+            "click_rate": 0,  # Placeholder - would need email tracking
+            "by_type": {item["newsletter_type"]: item["count"] for item in by_type},
+        })
 
     @action(detail=False, methods=["post"], url_path="unsubscribe")
     def unsubscribe(self, request):

@@ -163,8 +163,26 @@ export const editorialService = {
     return response.data;
   },
 
-  async createArticle(data: Partial<Article>): Promise<Article> {
-    const response = await authClient.post<Article>("/news/articles/", data);
+  async createArticle(data: {
+    title: string;
+    excerpt: string;
+    content: string;
+    category: string; // slug
+    subtitle?: string;
+    tags?: string[]; // slugs
+    content_type?: string;
+    status?: string;
+    is_featured?: boolean;
+    is_breaking?: boolean;
+    is_premium?: boolean;
+    featured_image_url?: string;
+  }): Promise<Article> {
+    // Ensure status is lowercase for backend
+    const payload = {
+      ...data,
+      status: data.status?.toLowerCase() || "draft",
+    };
+    const response = await authClient.post<Article>("/news/articles/", payload);
     return response.data;
   },
 
