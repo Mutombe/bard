@@ -68,7 +68,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: "https://bardiq-api.onrender.com/api/v1"
+        value: "https://bardiq-api.onrender.com"
       - key: NEXT_PUBLIC_WS_URL
         value: "wss://bardiq-api.onrender.com/ws"
       - key: PORT
