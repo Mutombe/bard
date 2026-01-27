@@ -27,17 +27,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
-
-const categories = [
-  "Markets",
-  "Economics",
-  "Companies",
-  "Commodities",
-  "Forex",
-  "Analysis",
-  "Opinion",
-  "Breaking",
-];
+import { newsService } from "@/services/api/news";
+import type { Category } from "@/types";
 
 const availableTags = [
   "JSE",
@@ -72,6 +63,7 @@ export default function NewArticlePage() {
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
@@ -81,6 +73,25 @@ export default function NewArticlePage() {
   const [scheduledDate, setScheduledDate] = useState("");
   const [featured, setFeatured] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await newsService.getCategories();
+        setCategories(cats);
+        if (cats.length > 0 && !category) {
+          setCategory(cats[0].slug);
+        }
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const addTag = (tag: string) => {
     if (tag && !tags.includes(tag)) {
@@ -113,6 +124,21 @@ export default function NewArticlePage() {
       return;
     }
 
+    if (!excerpt.trim()) {
+      setError("Excerpt is required");
+      return;
+    }
+
+    if (!content.trim()) {
+      setError("Content is required");
+      return;
+    }
+
+    if (!category) {
+      setError("Please select a category");
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
@@ -121,10 +147,12 @@ export default function NewArticlePage() {
         title: title.trim(),
         excerpt: excerpt.trim(),
         content: content.trim(),
+        category: category, // slug
         status: (saveStatus === "published" ? "PUBLISHED" : "DRAFT") as "PUBLISHED" | "DRAFT",
         is_featured: featured,
-        featured_image: featuredImage || undefined,
+        featured_image_url: featuredImage || undefined,
         content_type: "NEWS" as const,
+        tags: tags,
       };
 
       await editorialService.createArticle(articleData);
@@ -136,7 +164,12 @@ export default function NewArticlePage() {
       }, 1500);
     } catch (err: any) {
       console.error("Failed to save article:", err);
-      setError(err.response?.data?.message || err.response?.data?.detail || "Failed to save article. Please try again.");
+      const errorMsg = err.response?.data?.detail
+        || err.response?.data?.message
+        || (err.response?.data && typeof err.response.data === "object"
+            ? Object.entries(err.response.data).map(([k, v]) => `${k}: ${v}`).join(", ")
+            : "Failed to save article. Please try again.");
+      setError(errorMsg);
     } finally {
       setIsSaving(false);
     }
@@ -354,14 +387,21 @@ Start writing..."
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+              disabled={loadingCategories}
+              className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange disabled:opacity-50"
             >
-              <option value="">Select category...</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
+              {loadingCategories ? (
+                <option value="">Loading categories...</option>
+              ) : (
+                <>
+                  <option value="">Select category...</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.slug}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
           </div>
 
