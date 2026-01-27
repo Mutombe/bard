@@ -4,13 +4,19 @@ import { refreshToken, clearAuth } from "@/store/slices/authSlice";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-// Create axios instance
+// Retry configuration for handling cold starts
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Create axios instance with longer timeout for cold starts
 const apiClient: AxiosInstance = axios.create({
   baseURL: `${API_URL}/api/v1`,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 30000,
+  timeout: 60000, // 60 seconds to handle cold starts
 });
 
 // Request interceptor - add auth token
@@ -104,11 +110,37 @@ export default apiClient;
 // Alias for authenticated client
 export const authClient = apiClient;
 
-// Public client (no auth required)
+// Public client (no auth required) with retry logic for cold starts
 export const publicClient: AxiosInstance = axios.create({
   baseURL: `${API_URL}/api/v1`,
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 30000,
+  timeout: 60000, // 60 seconds to handle cold starts
 });
+
+// Add retry interceptor for network errors (cold starts)
+publicClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const config = error.config as InternalAxiosRequestConfig & { _retryCount?: number };
+
+    // Only retry on network errors or 5xx errors (not 4xx)
+    const shouldRetry =
+      !error.response || // Network error
+      (error.response.status >= 500 && error.response.status < 600); // Server error
+
+    if (shouldRetry && config && (config._retryCount || 0) < MAX_RETRIES) {
+      config._retryCount = (config._retryCount || 0) + 1;
+
+      // Exponential backoff
+      const delay = RETRY_DELAY * Math.pow(2, config._retryCount - 1);
+      console.log(`Retrying request (attempt ${config._retryCount}/${MAX_RETRIES}) after ${delay}ms...`);
+
+      await sleep(delay);
+      return publicClient(config);
+    }
+
+    return Promise.reject(error);
+  }
+);

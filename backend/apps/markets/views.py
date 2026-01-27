@@ -13,6 +13,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from apps.core.cache import (
+    CacheTTL,
+    cache_market_list,
+    cache_reference_data,
+    cache_response,
+    cache_ticker_tape,
+)
 from apps.core.pagination import MarketDataPagination
 
 from .models import Company, Exchange, MarketIndex, MarketTicker, Sector
@@ -50,6 +57,14 @@ class ExchangeViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     lookup_field = "code"
 
+    @cache_reference_data
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @cache_reference_data
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class SectorViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Sector model."""
@@ -58,6 +73,10 @@ class SectorViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = SectorSerializer
     permission_classes = [AllowAny]
     lookup_field = "code"
+
+    @cache_reference_data
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
@@ -87,7 +106,7 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         return CompanySerializer
 
     @action(detail=True, methods=["get"])
-    def chart(self, request, pk=None):
+    def chart(self, request, symbol=None):
         """Get chart data for a company."""
         company = self.get_object()
         interval = request.query_params.get("interval", "1d")
@@ -124,6 +143,7 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
     @action(detail=False, methods=["get"])
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="market_gainers")
     def gainers(self, request):
         """Get top gaining stocks."""
         exchange = request.query_params.get("exchange")
@@ -141,6 +161,7 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="market_losers")
     def losers(self, request):
         """Get top losing stocks."""
         exchange = request.query_params.get("exchange")
@@ -157,6 +178,7 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"], url_path="most-active")
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="market_active")
     def most_active(self, request):
         """Get most actively traded stocks by volume."""
         exchange = request.query_params.get("exchange")
@@ -170,6 +192,7 @@ class CompanyViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @cache_ticker_tape
     def ticker_tape(self, request):
         """Get data for the scrolling ticker tape."""
         companies = self.get_queryset().filter(is_featured=True).order_by("symbol")[:20]
@@ -214,7 +237,12 @@ class MarketIndexViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     lookup_field = "code"
 
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="market_indices")
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(detail=False, methods=["get"])
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="indices_summary")
     def summary(self, request):
         """Get a summary of all indices."""
         exchange = request.query_params.get("exchange")

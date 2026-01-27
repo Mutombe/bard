@@ -103,7 +103,14 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Custom middleware
+    "apps.core.middleware.SecurityHeadersMiddleware",
+    "apps.core.middleware.RequestLoggingMiddleware",
+    "apps.core.middleware.APIVersionMiddleware",
 ]
+
+# Maintenance mode (set to True to enable)
+MAINTENANCE_MODE = env.bool("MAINTENANCE_MODE", default=False)
 
 ROOT_URLCONF = "config.urls"
 
@@ -135,8 +142,16 @@ DATABASES = {
     "default": env.db(
         "DATABASE_URL",
         default="postgres://bard_user:bard_password@localhost:5432/bard_db",
-    )
+    ),
 }
+
+# Read replica for scaling read-heavy operations
+if env("DATABASE_REPLICA_URL", default=""):
+    DATABASES["replica"] = env.db("DATABASE_REPLICA_URL")
+    DATABASES["replica"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)
+    # Enable database router for read/write splitting
+    DATABASE_ROUTERS = ["config.db_router.ReadReplicaRouter"]
+
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=60)
 
@@ -410,6 +425,9 @@ SUBSCRIPTION_SETTINGS = {
 }
 
 # =========================
-# YouTube API Configuration
+# External API Keys
 # =========================
 YOUTUBE_API_KEY = env("YOUTUBE_API_KEY", default="")
+POLYGON_API_KEY = env("POLYGON_API_KEY", default="")
+NEWSAPI_KEY = env("NEWSAPI_KEY", default="")
+UNSPLASH_ACCESS_KEY = env("UNSPLASH_ACCESS_KEY", default="")

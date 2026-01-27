@@ -103,15 +103,15 @@ export default function SavedPage() {
     const bookmarkIds = getBookmarks();
     const likeIds = getLikes();
 
-    // Parse IDs to get article/video info
-    const articleBookmarkIds = bookmarkIds
+    // Parse IDs to get article/video info (now using slugs for articles)
+    const articleBookmarkSlugs = bookmarkIds
       .filter((id) => id.startsWith("article-"))
       .map((id) => id.replace("article-", ""));
     const videoBookmarkIds = bookmarkIds
       .filter((id) => id.startsWith("video-"))
       .map((id) => id.replace("video-", ""));
 
-    const articleLikeIds = likeIds
+    const articleLikeSlugs = likeIds
       .filter((id) => id.startsWith("article-"))
       .map((id) => id.replace("article-", ""));
     const videoLikeIds = likeIds
@@ -122,51 +122,80 @@ export default function SavedPage() {
     const bookmarkedArticles: SavedItem[] = [];
     const likedArticles: SavedItem[] = [];
 
-    // Fetch bookmarked articles
-    for (const id of articleBookmarkIds.slice(0, 20)) {
+    // Fetch bookmarked articles by slug
+    for (const slug of articleBookmarkSlugs.slice(0, 20)) {
       try {
-        const response = await apiClient.get(`/news/articles/${id}/`);
+        const response = await apiClient.get(`/news/articles/${slug}/`);
         bookmarkedArticles.push({
-          id: `article-${id}`,
+          id: `article-${slug}`,
           type: "article",
           data: response.data,
         });
       } catch (error) {
         // Article might be deleted, remove from bookmarks
-        removeBookmark(`article-${id}`);
+        removeBookmark(`article-${slug}`);
       }
     }
 
-    // Fetch liked articles
-    for (const id of articleLikeIds.slice(0, 20)) {
+    // Fetch liked articles by slug
+    for (const slug of articleLikeSlugs.slice(0, 20)) {
       try {
-        const response = await apiClient.get(`/news/articles/${id}/`);
+        const response = await apiClient.get(`/news/articles/${slug}/`);
         likedArticles.push({
-          id: `article-${id}`,
+          id: `article-${slug}`,
           type: "article",
           data: response.data,
         });
       } catch (error) {
         // Article might be deleted, remove from likes
-        removeLike(`article-${id}`);
+        removeLike(`article-${slug}`);
       }
     }
 
-    // Add video placeholders (since we don't have a video API endpoint)
-    for (const id of videoBookmarkIds.slice(0, 10)) {
-      bookmarkedArticles.push({
-        id: `video-${id}`,
-        type: "video",
-        data: { video_id: id, title: "Saved Video" },
-      });
+    // Fetch bookmarked videos
+    for (const videoId of videoBookmarkIds.slice(0, 10)) {
+      try {
+        const response = await apiClient.get(`/media/videos/${videoId}/`);
+        bookmarkedArticles.push({
+          id: `video-${videoId}`,
+          type: "video",
+          data: response.data,
+        });
+      } catch (error) {
+        // Video might not exist in DB, create placeholder
+        bookmarkedArticles.push({
+          id: `video-${videoId}`,
+          type: "video",
+          data: {
+            video_id: videoId,
+            title: "Saved Video",
+            thumbnail_url: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+          },
+        });
+      }
     }
 
-    for (const id of videoLikeIds.slice(0, 10)) {
-      likedArticles.push({
-        id: `video-${id}`,
-        type: "video",
-        data: { video_id: id, title: "Liked Video" },
-      });
+    // Fetch liked videos
+    for (const videoId of videoLikeIds.slice(0, 10)) {
+      try {
+        const response = await apiClient.get(`/media/videos/${videoId}/`);
+        likedArticles.push({
+          id: `video-${videoId}`,
+          type: "video",
+          data: response.data,
+        });
+      } catch (error) {
+        // Video might not exist in DB, create placeholder with YouTube thumbnail
+        likedArticles.push({
+          id: `video-${videoId}`,
+          type: "video",
+          data: {
+            video_id: videoId,
+            title: "Liked Video",
+            thumbnail_url: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+          },
+        });
+      }
     }
 
     setBookmarkedItems(bookmarkedArticles);
@@ -317,8 +346,23 @@ export default function SavedPage() {
                 ) : (
                   <>
                     <div className="relative aspect-video bg-terminal-bg-elevated">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Play className="h-12 w-12 text-muted-foreground/30" />
+                      {item.data.thumbnail_url ? (
+                        <Image
+                          src={item.data.thumbnail_url}
+                          alt={item.data.title}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Play className="h-12 w-12 text-muted-foreground/30" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center">
+                          <Play className="h-6 w-6 text-white ml-0.5" fill="white" />
+                        </div>
                       </div>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -335,6 +379,11 @@ export default function SavedPage() {
                         <span className="px-2 py-0.5 text-xs bg-red-500/20 text-red-400 rounded">
                           Video
                         </span>
+                        {item.data.channel_title && (
+                          <span className="text-xs text-muted-foreground">
+                            {item.data.channel_title}
+                          </span>
+                        )}
                       </div>
                       <a
                         href={`https://www.youtube.com/watch?v=${item.data.video_id}`}
@@ -345,6 +394,11 @@ export default function SavedPage() {
                           {item.data.title}
                         </h3>
                       </a>
+                      {item.data.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {item.data.description}
+                        </p>
+                      )}
                     </div>
                   </>
                 )}

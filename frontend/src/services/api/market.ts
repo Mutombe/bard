@@ -56,6 +56,12 @@ export const marketService = {
     return response.data;
   },
 
+  async getCompanyBySymbol(symbol: string): Promise<Company> {
+    // The backend uses symbol as lookup_field, so we can use the same endpoint
+    const response = await publicClient.get<Company>(`/markets/companies/${symbol.toUpperCase()}/`);
+    return response.data;
+  },
+
   async searchCompanies(query: string): Promise<PaginatedResponse<Company>> {
     const response = await publicClient.get<PaginatedResponse<Company>>("/markets/companies/", {
       params: { search: query, page_size: 20 },

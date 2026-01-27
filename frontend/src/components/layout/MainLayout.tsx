@@ -454,7 +454,7 @@ export function MainLayout({ children }: MainLayoutProps) {
               © {new Date().getFullYear()} Bardiq Journal. All rights reserved.
             </p>
             <p className="text-xs text-muted-foreground text-center md:text-right">
-              Market data delayed by at least 15 minutes. Data provided for informational purposes only. Not financial advice.
+              Your trusted source for African financial news and market data.
             </p>
           </div>
         </div>

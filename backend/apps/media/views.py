@@ -72,6 +72,66 @@ class VideoViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    def cnbc_africa(self, request):
+        """
+        Get the current featured CNBC Africa video for the feed.
+        This video is refreshed every 12 hours.
+        """
+        # CNBC Africa channel ID
+        CNBC_AFRICA_CHANNEL_ID = "UCsba91UGiQLFOb5DN3Z_AdQ"
+
+        # First try to get featured CNBC Africa video
+        video = Video.objects.filter(
+            channel_id=CNBC_AFRICA_CHANNEL_ID,
+            status="published",
+            is_featured=True,
+        ).first()
+
+        # Fallback to most recent CNBC Africa video
+        if not video:
+            video = Video.objects.filter(
+                channel_id=CNBC_AFRICA_CHANNEL_ID,
+                status="published",
+            ).order_by("-published_at").first()
+
+        # If still no video, try to fetch one from YouTube API
+        if not video:
+            try:
+                videos = youtube_service.get_channel_videos(
+                    channel_id=CNBC_AFRICA_CHANNEL_ID,
+                    max_results=1,
+                )
+                if videos:
+                    video_data = videos[0]
+                    return Response({
+                        "video_id": video_data.get("video_id"),
+                        "title": video_data.get("title"),
+                        "description": video_data.get("description", "")[:500],
+                        "embed_url": video_data.get("embed_url"),
+                        "thumbnail_url": video_data.get("thumbnail_url"),
+                        "duration": video_data.get("duration_formatted"),
+                        "channel_title": "CNBC Africa",
+                        "published_at": video_data.get("published_at").isoformat() if video_data.get("published_at") else None,
+                        "view_count": video_data.get("view_count", 0),
+                    })
+            except Exception:
+                pass
+            return Response({"message": "No CNBC Africa video available"}, status=404)
+
+        return Response({
+            "id": str(video.id),
+            "video_id": video.video_id,
+            "title": video.title,
+            "description": video.description[:500] if video.description else "",
+            "embed_url": video.get_embed_url(),
+            "thumbnail_url": video.thumbnail_url,
+            "duration": video.duration,
+            "channel_title": video.channel_title,
+            "published_at": video.published_at.isoformat() if video.published_at else None,
+            "view_count": video.view_count,
+        })
+
+    @action(detail=False, methods=["get"])
     def youtube_search(self, request):
         """Search YouTube for videos (live API call)"""
         query = request.query_params.get("q", "African stock market")

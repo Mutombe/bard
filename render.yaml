@@ -1,121 +1,88 @@
 # =========================
-# BARDIQ JOURNAL - RENDER BLUEPRINT
+# BARDIQ JOURNAL - RENDER BLUEPRINT (FREE TIER)
 # =========================
 # Deploy using: render blueprint sync
+# Note: Free tier has limitations - backend may sleep after 15 minutes of inactivity
 
 services:
   # =========================
-  # FRONTEND (Next.js)
+  # BACKEND (Django) - Free Tier
+  # =========================
+  - type: web
+    name: bardiq-api
+    runtime: python
+    region: frankfurt
+    plan: free
+    rootDir: backend
+    buildCommand: |
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput
+    startCommand: gunicorn config.wsgi:application -c gunicorn.conf.py
+    healthCheckPath: /health/
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "bardiq-api.onrender.com,.onrender.com"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://bardiq-frontend.onrender.com,https://bardiqjournal.com,http://localhost:3000"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bardiq-db
+          property: connectionString
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: CONN_MAX_AGE
+        value: "0"
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      # External API Keys (set manually in Render dashboard)
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_KEY
+        sync: false
+
+  # =========================
+  # FRONTEND (Next.js) - Free Tier
   # =========================
   - type: web
     name: bardiq-frontend
     runtime: node
     region: frankfurt
-    plan: starter
-    buildCommand: cd frontend && npm install && npm run build
-    startCommand: cd frontend && npm start
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
     envVars:
+      - key: NODE_VERSION
+        value: "20"
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        sync: false
+        value: "https://bardiq-api.onrender.com/api/v1"
+      - key: NEXT_PUBLIC_WS_URL
+        value: "wss://bardiq-api.onrender.com/ws"
       - key: PORT
-        value: 3000
-    healthCheckPath: /
-    autoDeploy: true
+        value: "3000"
 
-  # =========================
-  # BACKEND (Django)
-  # =========================
-  - type: web
-    name: bardiq-backend
-    runtime: docker
+# =========================
+# DATABASE (PostgreSQL) - Free Tier
+# =========================
+databases:
+  - name: bardiq-db
+    plan: free
     region: frankfurt
-    plan: starter
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: config.settings.production
-      - key: SECRET_KEY
-        generateValue: true
-      - key: ALLOWED_HOSTS
-        value: .onrender.com,.bardiqjournal.com
-      - key: CORS_ALLOWED_ORIGINS
-        value: https://bardiq-frontend.onrender.com,https://bardiqjournal.com
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          name: bardiq-redis
-          type: redis
-          property: connectionString
-      - key: USE_S3
-        value: "false"
-      - key: DEBUG
-        value: "false"
-    healthCheckPath: /health/
-    autoDeploy: true
+    postgresMajorVersion: 15
 
-  # =========================
-  # CELERY WORKER
-  # =========================
-  - type: worker
-    name: bardiq-worker
-    runtime: docker
-    region: frankfurt
-    plan: starter
-    dockerfilePath: ./backend/Dockerfile.worker
-    dockerContext: ./backend
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: config.settings.production
-      - key: SECRET_KEY
-        fromService:
-          name: bardiq-backend
-          type: web
-          envVarKey: SECRET_KEY
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          name: bardiq-redis
-          type: redis
-          property: connectionString
-    autoDeploy: true
-
-  # =========================
-  # CELERY BEAT (Scheduler)
-  # =========================
-  - type: worker
-    name: bardiq-scheduler
-    runtime: docker
-    region: frankfurt
-    plan: starter
-    dockerfilePath: ./backend/Dockerfile.scheduler
-    dockerContext: ./backend
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: config.settings.production
-      - key: SECRET_KEY
-        fromService:
-          name: bardiq-backend
-          type: web
-          envVarKey: SECRET_KEY
-      - key: DATABASE_URL
-        sync: false
-      - key: REDIS_URL
-        fromService:
-          name: bardiq-redis
-          type: redis
-          property: connectionString
-    autoDeploy: true
-
-  # =========================
-  # REDIS
-  # =========================
-  - type: redis
-    name: bardiq-redis
-    region: frankfurt
-    plan: starter
-    ipAllowList: []
+# Note: Redis is not available on free tier
+# The backend is configured to work without Redis by falling back to local memory cache
+# For production with Redis, upgrade to a paid plan

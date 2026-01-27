@@ -4,6 +4,7 @@ News Serializers
 from rest_framework import serializers
 
 from apps.markets.serializers import CompanyMinimalSerializer
+from apps.media.image_service import get_article_image
 from apps.users.serializers import UserSerializer
 
 from .models import Category, NewsArticle, Tag
@@ -47,6 +48,7 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source="author.full_name", read_only=True)
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
     featured_image = serializers.SerializerMethodField()
+    image_attribution = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsArticle
@@ -57,8 +59,12 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
             "subtitle",
             "excerpt",
             "featured_image",
+            "image_attribution",
             "category",
             "content_type",
+            "source",
+            "external_url",
+            "external_source_name",
             "author_name",
             "published_at",
             "is_featured",
@@ -70,13 +76,50 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
         ]
 
     def get_featured_image(self, obj):
-        """Return uploaded image URL or fallback to external URL"""
+        """
+        Return image URL with intelligent fallback.
+
+        Priority:
+        1. Uploaded featured image
+        2. External featured image URL
+        3. Dynamic image from Unsplash based on article content
+        4. Category-based fallback image
+        """
+        # Check for uploaded image
         if obj.featured_image:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.featured_image.url)
             return obj.featured_image.url
-        return obj.featured_image_url or None
+
+        # Check for external image URL
+        if obj.featured_image_url:
+            return obj.featured_image_url
+
+        # Generate dynamic image based on article content
+        category_slug = obj.category.slug if obj.category else ""
+        image_data = get_article_image(
+            title=obj.title,
+            excerpt=obj.excerpt or "",
+            category_slug=category_slug,
+        )
+        return image_data.get("url")
+
+    def get_image_attribution(self, obj):
+        """Return image attribution for Unsplash images (list view)."""
+        if obj.featured_image or obj.featured_image_url:
+            return None
+
+        category_slug = obj.category.slug if obj.category else ""
+        image_data = get_article_image(
+            title=obj.title,
+            excerpt=obj.excerpt or "",
+            category_slug=category_slug,
+        )
+
+        if image_data.get("source") == "unsplash":
+            return {"photographer": image_data.get("photographer")}
+        return None
 
 
 class NewsArticleDetailSerializer(serializers.ModelSerializer):
@@ -88,6 +131,7 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
     editor = UserSerializer(read_only=True)
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
     featured_image = serializers.SerializerMethodField()
+    image_attribution = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsArticle
@@ -100,6 +144,7 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
             "content",
             "featured_image",
             "featured_image_caption",
+            "image_attribution",
             "category",
             "tags",
             "content_type",
@@ -120,13 +165,60 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_featured_image(self, obj):
-        """Return uploaded image URL or fallback to external URL"""
+        """
+        Return image URL with intelligent fallback.
+
+        Priority:
+        1. Uploaded featured image
+        2. External featured image URL
+        3. Dynamic image from Unsplash based on article content
+        4. Category-based fallback image
+        """
+        # Check for uploaded image
         if obj.featured_image:
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.featured_image.url)
             return obj.featured_image.url
-        return obj.featured_image_url or None
+
+        # Check for external image URL
+        if obj.featured_image_url:
+            return obj.featured_image_url
+
+        # Generate dynamic image based on article content
+        category_slug = obj.category.slug if obj.category else ""
+        image_data = get_article_image(
+            title=obj.title,
+            excerpt=obj.excerpt or "",
+            category_slug=category_slug,
+        )
+        return image_data.get("url")
+
+    def get_image_attribution(self, obj):
+        """
+        Return image attribution for Unsplash images.
+
+        Only returns attribution when a dynamic Unsplash image is used.
+        """
+        # No attribution needed for uploaded or external images
+        if obj.featured_image or obj.featured_image_url:
+            return None
+
+        # Get dynamic image data (cached)
+        category_slug = obj.category.slug if obj.category else ""
+        image_data = get_article_image(
+            title=obj.title,
+            excerpt=obj.excerpt or "",
+            category_slug=category_slug,
+        )
+
+        # Only return attribution for Unsplash images
+        if image_data.get("source") == "unsplash":
+            return {
+                "html": image_data.get("attribution"),
+                "photographer": image_data.get("photographer"),
+            }
+        return None
 
 
 class NewsArticleCreateSerializer(serializers.ModelSerializer):

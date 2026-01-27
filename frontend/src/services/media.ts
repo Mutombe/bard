@@ -1,7 +1,7 @@
 /**
  * Media API Service - Videos and Podcasts
  */
-import apiClient from "./api/client";
+import apiClient, { publicClient } from "./api/client";
 
 // Types
 export interface YouTubeVideo {
@@ -151,22 +151,22 @@ export const mediaService = {
     search?: string;
     ordering?: string;
   }): Promise<PaginatedResponse<VideoListItem>> {
-    const response = await apiClient.get("/media/videos/", { params });
+    const response = await publicClient.get("/media/videos/", { params });
     return response.data;
   },
 
   async getVideo(slug: string): Promise<Video> {
-    const response = await apiClient.get(`/media/videos/${slug}/`);
+    const response = await publicClient.get(`/media/videos/${slug}/`);
     return response.data;
   },
 
   async getFeaturedVideos(): Promise<VideoListItem[]> {
-    const response = await apiClient.get("/media/videos/featured/");
+    const response = await publicClient.get("/media/videos/featured/");
     return response.data;
   },
 
   async getLatestVideos(): Promise<VideoListItem[]> {
-    const response = await apiClient.get("/media/videos/latest/");
+    const response = await publicClient.get("/media/videos/latest/");
     return response.data;
   },
 
@@ -176,7 +176,7 @@ export const mediaService = {
     max_results?: number;
     region?: string;
   }): Promise<YouTubeVideo[]> {
-    const response = await apiClient.get("/media/videos/youtube_search/", { params });
+    const response = await publicClient.get("/media/videos/youtube_search/", { params });
     return response.data;
   },
 
@@ -184,7 +184,7 @@ export const mediaService = {
     region?: string;
     max_results?: number;
   }): Promise<YouTubeVideo[]> {
-    const response = await apiClient.get("/media/videos/youtube_finance/", { params });
+    const response = await publicClient.get("/media/videos/youtube_finance/", { params });
     return response.data;
   },
 
@@ -195,25 +195,36 @@ export const mediaService = {
     return response.data;
   },
 
+  // CNBC Africa Video (featured video for the feed)
+  async getCNBCAfricaVideo(): Promise<YouTubeVideo | null> {
+    try {
+      const response = await publicClient.get("/media/videos/cnbc_africa/");
+      return response.data;
+    } catch (error) {
+      console.warn("CNBC Africa video not available");
+      return null;
+    }
+  },
+
   // Video Categories
   async getCategories(): Promise<VideoCategory[]> {
-    const response = await apiClient.get("/media/categories/");
+    const response = await publicClient.get("/media/categories/");
     return response.data;
   },
 
   // Podcasts - Shows
   async getPodcastShows(): Promise<PodcastShow[]> {
-    const response = await apiClient.get("/media/podcasts/shows/");
+    const response = await publicClient.get("/media/podcasts/shows/");
     return response.data;
   },
 
   async getPodcastShow(slug: string): Promise<PodcastShow> {
-    const response = await apiClient.get(`/media/podcasts/shows/${slug}/`);
+    const response = await publicClient.get(`/media/podcasts/shows/${slug}/`);
     return response.data;
   },
 
   async getShowEpisodes(slug: string): Promise<PodcastEpisodeListItem[]> {
-    const response = await apiClient.get(`/media/podcasts/shows/${slug}/episodes/`);
+    const response = await publicClient.get(`/media/podcasts/shows/${slug}/episodes/`);
     return response.data;
   },
 
@@ -224,22 +235,22 @@ export const mediaService = {
     search?: string;
     ordering?: string;
   }): Promise<PaginatedResponse<PodcastEpisodeListItem>> {
-    const response = await apiClient.get("/media/podcasts/episodes/", { params });
+    const response = await publicClient.get("/media/podcasts/episodes/", { params });
     return response.data;
   },
 
   async getPodcastEpisode(id: number): Promise<PodcastEpisode> {
-    const response = await apiClient.get(`/media/podcasts/episodes/${id}/`);
+    const response = await publicClient.get(`/media/podcasts/episodes/${id}/`);
     return response.data;
   },
 
   async getFeaturedEpisodes(): Promise<PodcastEpisodeListItem[]> {
-    const response = await apiClient.get("/media/podcasts/episodes/featured/");
+    const response = await publicClient.get("/media/podcasts/episodes/featured/");
     return response.data;
   },
 
   async getLatestEpisodes(): Promise<PodcastEpisodeListItem[]> {
-    const response = await apiClient.get("/media/podcasts/episodes/latest/");
+    const response = await publicClient.get("/media/podcasts/episodes/latest/");
     return response.data;
   },
 };

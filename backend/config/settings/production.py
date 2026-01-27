@@ -20,7 +20,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")  # noqa: F405
 # HTTPS / Security Headers
 # =========================
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)  # noqa: F405
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
@@ -66,7 +66,15 @@ CORS_ALLOW_METHODS = [
 # =========================
 # Database Connection Pooling
 # =========================
-DATABASES["default"]["CONN_MAX_AGE"] = 60  # noqa: F405
+# Use shorter connection age on Render to prevent stale connections
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=0)  # noqa: F405
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True  # noqa: F405
+# Disable server-side cursors which can cause issues with connection pooling
+DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True  # noqa: F405
+DATABASES["default"]["OPTIONS"] = {  # noqa: F405
+    "connect_timeout": 10,
+    "options": "-c statement_timeout=30000",  # 30 second query timeout
+}
 
 # =========================
 # Static Files (S3 in production)
@@ -122,27 +130,96 @@ ANYMAIL = {
 # =========================
 # Caching (Redis in production)
 # =========================
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": env("REDIS_URL"),  # noqa: F405
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-            "IGNORE_EXCEPTIONS": True,
-        },
-        "KEY_PREFIX": "bard",
+REDIS_URL = env("REDIS_URL", default="")  # noqa: F405
+
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+                "IGNORE_EXCEPTIONS": True,  # Don't crash if Redis is down
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "CONNECTION_POOL_KWARGS": {
+                    "max_connections": 10,
+                    "retry_on_timeout": True,
+                },
+            },
+            "KEY_PREFIX": "bard",
+        }
     }
-}
+else:
+    # Fallback to local memory cache if Redis not available
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
 
 # =========================
-# Session (Redis backed)
+# Session (Redis backed if available, otherwise DB)
 # =========================
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+if REDIS_URL:
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+# =========================
+# Celery (Production)
+# =========================
+if REDIS_URL:
+    CELERY_BROKER_URL = REDIS_URL
+else:
+    # Disable Celery tasks if no Redis
+    CELERY_TASK_ALWAYS_EAGER = True
+
+# Reduce Celery task timeout to prevent long-running tasks
+CELERY_TASK_TIME_LIMIT = 60 * 5  # 5 minutes max
+CELERY_TASK_SOFT_TIME_LIMIT = 60 * 4  # Soft limit at 4 minutes
 
 # =========================
 # Logging (Production)
 # =========================
-LOGGING["handlers"]["file"]["level"] = "WARNING"  # noqa: F405
-LOGGING["loggers"]["django"]["level"] = "WARNING"  # noqa: F405
+LOGGING = {  # noqa: F405
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{levelname}] {asctime} {name} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "apps": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

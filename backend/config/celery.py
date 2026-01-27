@@ -76,6 +76,38 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute=0, hour=2),
         "options": {"queue": "maintenance"},
     },
+    # ----- News Feed (Bloomberg-style refresh) -----
+    "refresh-feed-content-every-30-min": {
+        "task": "apps.spider.tasks.refresh_feed_content",
+        "schedule": crontab(minute="*/30"),
+        "options": {"queue": "scraping"},
+    },
+    "fetch-polygon-news-every-30-min": {
+        "task": "apps.spider.tasks.fetch_polygon_news",
+        "schedule": crontab(minute="15,45"),
+        "options": {"queue": "scraping"},
+    },
+    "set-article-images-hourly": {
+        "task": "apps.spider.tasks.set_article_images",
+        "schedule": crontab(minute=5),
+        "options": {"queue": "maintenance"},
+    },
+    "set-featured-article-every-2-hours": {
+        "task": "apps.spider.tasks.set_featured_article",
+        "schedule": crontab(minute=0, hour="*/2"),
+        "options": {"queue": "maintenance"},
+    },
+    # ----- CNBC Africa Video (every 12 hours) -----
+    "fetch-cnbc-africa-video-every-12-hours": {
+        "task": "apps.spider.tasks.fetch_cnbc_africa_video",
+        "schedule": crontab(minute=0, hour="6,18"),
+        "options": {"queue": "scraping"},
+    },
+    "fetch-youtube-african-finance-every-4-hours": {
+        "task": "apps.spider.tasks.fetch_youtube_african_finance",
+        "schedule": crontab(minute=30, hour="*/4"),
+        "options": {"queue": "scraping"},
+    },
 }
 
 # =========================
