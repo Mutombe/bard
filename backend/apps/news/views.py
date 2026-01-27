@@ -7,6 +7,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from apps.core.cache import (
+    CacheTTL,
+    CacheVersionManager,
+    cache_news_list,
+    cache_reference_data,
+    cache_response,
+)
 from apps.core.pagination import InfiniteScrollPagination
 from apps.users.models import UserRole
 
@@ -59,6 +66,14 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     lookup_field = "slug"
 
+    @cache_reference_data
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @cache_reference_data
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """ViewSet for Tag model."""
@@ -67,6 +82,10 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = TagSerializer
     permission_classes = [AllowAny]
     lookup_field = "slug"
+
+    @cache_reference_data
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class NewsArticleViewSet(viewsets.ModelViewSet):
@@ -82,7 +101,15 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     - GET /news/by-company/{company_id}/ - Articles related to a company
     """
 
-    queryset = NewsArticle.objects.all()
+    # Optimized queryset with select_related for ForeignKey and prefetch_related for ManyToMany
+    queryset = NewsArticle.objects.select_related(
+        "category",
+        "author",
+        "editor",
+    ).prefetch_related(
+        "tags",
+        "related_companies",
+    )
     serializer_class = NewsArticleListSerializer
     permission_classes = [AllowAny]
     pagination_class = InfiniteScrollPagination
@@ -144,6 +171,7 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="news_featured")
     def featured(self, request):
         """Get featured articles."""
         articles = self.get_queryset().filter(
@@ -153,6 +181,7 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
+    @cache_response(ttl=CacheTTL.VERY_SHORT, key_prefix="news_breaking")
     def breaking(self, request):
         """Get breaking news."""
         articles = self.get_queryset().filter(

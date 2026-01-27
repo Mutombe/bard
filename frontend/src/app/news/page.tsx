@@ -18,6 +18,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
+import { useCategories } from "@/hooks";
 
 // Types
 interface NewsArticle {
@@ -243,7 +244,7 @@ function ArticleCard({ article }: { article: NewsArticle }) {
                 </span>
               )}
             </div>
-            <ArticleActions articleId={`article-${article.id}`} compact />
+            <ArticleActions articleId={`article-${article.slug}`} compact />
           </div>
           <h3 className="font-semibold mb-1 group-hover:text-brand-orange transition-colors line-clamp-2 leading-snug">
             {article.title}
@@ -297,7 +298,7 @@ function FeaturedArticle({ article }: { article: NewsArticle }) {
                 {article.category?.name || "News"}
               </span>
             </div>
-            <ArticleActions articleId={`article-${article.id}`} />
+            <ArticleActions articleId={`article-${article.slug}`} />
           </div>
           <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-brand-orange transition-colors leading-tight">
             {article.title}
@@ -385,26 +386,15 @@ function NewsletterSignup() {
 export default function NewsPage() {
   const [loading, setLoading] = useState(true);
   const [articles, setArticles] = useState<NewsArticle[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [trendingArticles, setTrendingArticles] = useState<NewsArticle[]>([]);
 
-  // Fetch categories on mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await apiClient.get("/news/categories/");
-        const cats = response.data.results || response.data || [];
-        setCategories(cats);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
+  // Use SWR hook for categories (cached for 1 hour)
+  const { data: categoriesData } = useCategories();
+  const categories = categoriesData || [];
 
   // Fetch articles when category or page changes
   useEffect(() => {

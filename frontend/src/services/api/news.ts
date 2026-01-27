@@ -13,8 +13,12 @@ export const newsService = {
   // =========================
 
   async getCategories(): Promise<Category[]> {
-    const response = await publicClient.get<Category[]>("/news/categories/");
-    return response.data;
+    const response = await publicClient.get<{ results: Category[] } | Category[]>("/news/categories/");
+    // Handle both paginated and direct array responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data.results || [];
   },
 
   async getCategory(slug: string): Promise<Category> {
@@ -27,8 +31,12 @@ export const newsService = {
   // =========================
 
   async getTags(): Promise<Tag[]> {
-    const response = await publicClient.get<Tag[]>("/news/tags/");
-    return response.data;
+    const response = await publicClient.get<{ results: Tag[] } | Tag[]>("/news/tags/");
+    // Handle both paginated and direct array responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data.results || [];
   },
 
   // =========================

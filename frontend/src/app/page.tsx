@@ -18,26 +18,33 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { mediaService, YouTubeVideo } from "@/services/media";
+import { YouTubeVideo } from "@/services/media";
 import { Skeleton } from "@/components/ui/loading";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
+import {
+  useArticles,
+  useIndices,
+  useGainers,
+  useLosers,
+  useYouTubeFinanceVideos,
+} from "@/hooks";
 
 // Types
 interface NewsArticle {
-  id: number;
+  id: string;
   title: string;
   slug: string;
   excerpt: string;
   content?: string;
-  featured_image?: string;
+  featured_image?: string | null;
   category?: {
-    id: number;
+    id: string;
     name: string;
     slug: string;
   };
   author?: {
-    id: number;
+    id: string;
     full_name: string;
   };
   published_at?: string;
@@ -299,7 +306,7 @@ function FeaturedArticle({ article }: { article: NewsArticle }) {
             </span>
             <span className="text-xs text-muted-foreground">{timeAgo(article.published_at)}</span>
           </div>
-          <ArticleActions articleId={`article-${article.id}`} />
+          <ArticleActions articleId={`article-${article.slug}`} />
         </div>
         <h2 className="text-2xl font-bold mb-2 group-hover:text-brand-orange transition-colors leading-tight">
           {article.title}
@@ -342,7 +349,7 @@ function SecondaryArticle({ article }: { article: NewsArticle }) {
                 </span>
               )}
             </div>
-            <ArticleActions articleId={`article-${article.id}`} compact />
+            <ArticleActions articleId={`article-${article.slug}`} compact />
           </div>
           <h3 className="font-semibold mb-1 group-hover:text-brand-orange transition-colors line-clamp-2 leading-snug">
             {article.title}
@@ -368,7 +375,7 @@ function NewsListItem({ article }: { article: NewsArticle }) {
               {timeAgo(article.published_at)}
             </span>
           </div>
-          <ArticleActions articleId={`article-${article.id}`} compact />
+          <ArticleActions articleId={`article-${article.slug}`} compact />
         </div>
         <h3 className="font-medium group-hover:text-brand-orange transition-colors leading-snug">
           {article.title}
@@ -638,97 +645,30 @@ function NewsletterSignup() {
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [featuredVideo, setFeaturedVideo] = useState<YouTubeVideo | null>(null);
-  const [featuredArticles, setFeaturedArticles] = useState<NewsArticle[]>([]);
-  const [latestArticles, setLatestArticles] = useState<NewsArticle[]>([]);
-  const [marketIndices, setMarketIndices] = useState<MarketIndex[]>([]);
-  const [topGainers, setTopGainers] = useState<Company[]>([]);
-  const [topLosers, setTopLosers] = useState<Company[]>([]);
+
+  // Use SWR hooks for all data fetching with automatic caching and revalidation
+  const { data: articlesData, isLoading: articlesLoading } = useArticles();
+  const { data: indicesData, isLoading: indicesLoading } = useIndices();
+  const { data: gainersData, isLoading: gainersLoading } = useGainers(undefined, 5);
+  const { data: losersData, isLoading: usersLoading } = useLosers(undefined, 5);
+  const { data: videosData, isLoading: videosLoading } = useYouTubeFinanceVideos("southern_africa", 1);
 
   // Handle client-side mounting for localStorage access
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Fetch all data on mount and when page becomes visible
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  // Derive data from SWR responses
+  const articles = articlesData?.results || [];
+  const featuredArticles = articles.slice(0, 3);
+  const latestArticles = articles.slice(3, 12);
+  const marketIndices = (indicesData || []).slice(0, 5);
+  const topGainers = (gainersData || []).slice(0, 5);
+  const topLosers = (losersData || []).slice(0, 5);
+  const featuredVideo = videosData?.[0] || null;
 
-      try {
-        // Fetch YouTube video
-        try {
-          const videos = await mediaService.getYouTubeFinanceVideos({
-            region: "southern_africa",
-            max_results: 1,
-          });
-          if (videos && videos.length > 0) {
-            setFeaturedVideo(videos[0]);
-          } else {
-            // Fallback to global
-            const globalVideos = await mediaService.getYouTubeFinanceVideos({
-              region: "global",
-              max_results: 1,
-            });
-            if (globalVideos && globalVideos.length > 0) {
-              setFeaturedVideo(globalVideos[0]);
-            }
-          }
-        } catch (err) {
-          console.error("Failed to fetch video:", err);
-        }
-
-        // Fetch news articles
-        try {
-          const newsResponse = await apiClient.get("/news/articles/", {
-            params: { page_size: 15 }
-          });
-          const articles = newsResponse.data.results || newsResponse.data || [];
-          if (articles.length > 0) {
-            setFeaturedArticles(articles.slice(0, 3));
-            setLatestArticles(articles.slice(3, 12));
-          }
-        } catch (err) {
-          console.error("Failed to fetch news:", err);
-        }
-
-        // Fetch market indices
-        try {
-          const indicesResponse = await apiClient.get("/markets/indices/");
-          const indices = indicesResponse.data.results || indicesResponse.data || [];
-          setMarketIndices(indices.slice(0, 5));
-        } catch (err) {
-          console.error("Failed to fetch indices:", err);
-        }
-
-        // Fetch top gainers
-        try {
-          const gainersResponse = await apiClient.get("/markets/companies/gainers/");
-          const gainers = gainersResponse.data.results || gainersResponse.data || [];
-          setTopGainers(gainers.slice(0, 5));
-        } catch (err) {
-          console.error("Failed to fetch gainers:", err);
-        }
-
-        // Fetch top losers
-        try {
-          const losersResponse = await apiClient.get("/markets/companies/losers/");
-          const losers = losersResponse.data.results || losersResponse.data || [];
-          setTopLosers(losers.slice(0, 5));
-        } catch (err) {
-          console.error("Failed to fetch losers:", err);
-        }
-
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [mounted]);
+  // Combined loading state
+  const loading = articlesLoading || indicesLoading || gainersLoading || usersLoading;
 
   if (!mounted) {
     return null;
@@ -781,7 +721,7 @@ export default function HomePage() {
             <div className="border-t border-terminal-border" />
 
             {/* Featured YouTube Video - Second item after news */}
-            {loading ? (
+            {videosLoading ? (
               <section className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <Skeleton className="h-6 w-40" />
@@ -847,7 +787,7 @@ export default function HomePage() {
                             </span>
                             <span className="text-xs text-muted-foreground">{timeAgo(article.published_at)}</span>
                           </div>
-                          <ArticleActions articleId={`article-${article.id}`} compact />
+                          <ArticleActions articleId={`article-${article.slug}`} compact />
                         </div>
                         <h3 className="font-semibold mb-2 group-hover:text-brand-orange transition-colors line-clamp-2 leading-snug">
                           {article.title}

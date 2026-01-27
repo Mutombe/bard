@@ -4,64 +4,76 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Search,
-  Filter,
   ChevronRight,
   TrendingUp,
   TrendingDown,
   Building2,
   ArrowUpDown,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { Skeleton } from "@/components/ui/loading";
+import { useCompanies, useExchanges, useSectors } from "@/hooks";
 
-interface Company {
-  symbol: string;
-  name: string;
-  exchange: string;
-  sector: string;
-  price: number;
-  change: number;
-  changePercent: number;
-  marketCap: string;
-  peRatio: number;
-  dividend: number;
-  volume: string;
-}
-
-const sectors = [
-  { id: "all", label: "All Sectors" },
-  { id: "banking", label: "Banking" },
-  { id: "mining", label: "Mining" },
-  { id: "technology", label: "Technology" },
-  { id: "telecom", label: "Telecommunications" },
-  { id: "retail", label: "Retail" },
-  { id: "energy", label: "Energy" },
-  { id: "industrial", label: "Industrial" },
+const exchangeFilters = [
+  { id: "all", label: "All Exchanges" },
+  { id: "JSE", label: "JSE" },
+  { id: "NSE", label: "NGX" },
+  { id: "EGX", label: "EGX" },
+  { id: "BRVM", label: "BRVM" },
+  { id: "BSE", label: "BSE" },
+  { id: "ZSE", label: "ZSE" },
 ];
 
-const companies: Company[] = [
-  { symbol: "NPN", name: "Naspers Ltd", exchange: "JSE", sector: "Technology", price: 3245.67, change: 89.34, changePercent: 2.83, marketCap: "R1.2T", peRatio: 18.5, dividend: 0.8, volume: "1.2M" },
-  { symbol: "AGL", name: "Anglo American Plc", exchange: "JSE", sector: "Mining", price: 567.34, change: 45.67, changePercent: 8.75, marketCap: "R756B", peRatio: 12.3, dividend: 4.2, volume: "890K" },
-  { symbol: "MTN", name: "MTN Group Ltd", exchange: "JSE", sector: "Telecommunications", price: 156.78, change: 9.45, changePercent: 6.41, marketCap: "R285B", peRatio: 14.2, dividend: 5.1, volume: "2.3M" },
-  { symbol: "SBK", name: "Standard Bank Group", exchange: "JSE", sector: "Banking", price: 189.45, change: 8.67, changePercent: 4.80, marketCap: "R298B", peRatio: 9.8, dividend: 6.2, volume: "1.5M" },
-  { symbol: "SOL", name: "Sasol Ltd", exchange: "JSE", sector: "Energy", price: 267.89, change: -5.67, changePercent: -2.07, marketCap: "R168B", peRatio: 8.5, dividend: 3.8, volume: "780K" },
-  { symbol: "FSR", name: "FirstRand Ltd", exchange: "JSE", sector: "Banking", price: 67.89, change: 2.34, changePercent: 3.57, marketCap: "R380B", peRatio: 11.2, dividend: 5.8, volume: "3.2M" },
-  { symbol: "BHP", name: "BHP Group Ltd", exchange: "JSE", sector: "Mining", price: 456.78, change: -12.34, changePercent: -2.63, marketCap: "R890B", peRatio: 10.5, dividend: 5.5, volume: "560K" },
-  { symbol: "VOD", name: "Vodacom Group Ltd", exchange: "JSE", sector: "Telecommunications", price: 98.45, change: -1.23, changePercent: -1.23, marketCap: "R180B", peRatio: 13.8, dividend: 6.8, volume: "1.8M" },
-  { symbol: "SHP", name: "Shoprite Holdings", exchange: "JSE", sector: "Retail", price: 234.56, change: 5.67, changePercent: 2.48, marketCap: "R132B", peRatio: 22.5, dividend: 2.1, volume: "920K" },
-  { symbol: "ABG", name: "Absa Group Ltd", exchange: "JSE", sector: "Banking", price: 156.78, change: -3.45, changePercent: -2.15, marketCap: "R132B", peRatio: 8.9, dividend: 6.5, volume: "1.1M" },
-  { symbol: "DANGCEM", name: "Dangote Cement Plc", exchange: "NGX", sector: "Industrial", price: 289.50, change: 4.50, changePercent: 1.58, marketCap: "₦4.9T", peRatio: 15.2, dividend: 3.2, volume: "3.4M" },
-  { symbol: "MTNN", name: "MTN Nigeria", exchange: "NGX", sector: "Telecommunications", price: 245.60, change: -3.40, changePercent: -1.37, marketCap: "₦5.0T", peRatio: 16.8, dividend: 4.5, volume: "5.6M" },
-];
-
-type SortField = "symbol" | "price" | "changePercent" | "marketCap" | "peRatio";
+type SortField = "symbol" | "current_price" | "price_change_percent" | "market_cap" | "volume";
 type SortDirection = "asc" | "desc";
 
+function CompanyRowSkeleton() {
+  return (
+    <div className="grid grid-cols-12 gap-4 p-4 border-b border-terminal-border animate-pulse">
+      <div className="col-span-3">
+        <Skeleton className="h-5 w-16 mb-1" />
+        <Skeleton className="h-4 w-32" />
+      </div>
+      <div className="col-span-2 flex justify-center">
+        <Skeleton className="h-6 w-12" />
+      </div>
+      <div className="col-span-2 flex justify-end">
+        <Skeleton className="h-5 w-16" />
+      </div>
+      <div className="col-span-2 flex justify-end">
+        <Skeleton className="h-5 w-14" />
+      </div>
+      <div className="col-span-1 flex justify-end">
+        <Skeleton className="h-5 w-12" />
+      </div>
+      <div className="col-span-2 flex justify-end">
+        <Skeleton className="h-5 w-16" />
+      </div>
+    </div>
+  );
+}
+
 export default function CompaniesPage() {
-  const [selectedSector, setSelectedSector] = useState("all");
+  const [selectedExchange, setSelectedExchange] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortField, setSortField] = useState<SortField>("marketCap");
+  const [sortField, setSortField] = useState<SortField>("market_cap");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [page, setPage] = useState(1);
+
+  // Fetch companies from API
+  const { data: companiesData, isLoading, error } = useCompanies({
+    exchange: selectedExchange !== "all" ? selectedExchange : undefined,
+    search: searchQuery || undefined,
+    ordering: `${sortDirection === "desc" ? "-" : ""}${sortField}`,
+    page,
+    page_size: 20,
+  });
+
+  const companies = companiesData?.results || [];
+  const totalCount = companiesData?.count || 0;
+  const totalPages = Math.ceil(totalCount / 20);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -70,31 +82,33 @@ export default function CompaniesPage() {
       setSortField(field);
       setSortDirection("desc");
     }
+    setPage(1); // Reset to first page on sort change
   };
 
-  const filteredCompanies = companies
-    .filter((company) => {
-      const matchesSector =
-        selectedSector === "all" ||
-        company.sector.toLowerCase() === selectedSector;
-      const matchesSearch =
-        searchQuery === "" ||
-        company.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        company.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSector && matchesSearch;
-    })
-    .sort((a, b) => {
-      const aValue = a[sortField];
-      const bValue = b[sortField];
-      if (typeof aValue === "string" && typeof bValue === "string") {
-        return sortDirection === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-      return sortDirection === "asc"
-        ? (aValue as number) - (bValue as number)
-        : (bValue as number) - (aValue as number);
-    });
+  const handleExchangeChange = (exchange: string) => {
+    setSelectedExchange(exchange);
+    setPage(1);
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
+  const formatMarketCap = (marketCap: number | null) => {
+    if (!marketCap) return "-";
+    if (marketCap >= 1e12) return `${(marketCap / 1e12).toFixed(2)}T`;
+    if (marketCap >= 1e9) return `${(marketCap / 1e9).toFixed(2)}B`;
+    if (marketCap >= 1e6) return `${(marketCap / 1e6).toFixed(2)}M`;
+    return marketCap.toLocaleString();
+  };
+
+  const formatVolume = (volume: number | null) => {
+    if (!volume) return "-";
+    if (volume >= 1e6) return `${(volume / 1e6).toFixed(2)}M`;
+    if (volume >= 1e3) return `${(volume / 1e3).toFixed(1)}K`;
+    return volume.toLocaleString();
+  };
 
   return (
     <MainLayout>
@@ -118,29 +132,36 @@ export default function CompaniesPage() {
               type="text"
               placeholder="Search by name or symbol..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
             />
           </div>
         </div>
 
-        {/* Sector Filter */}
+        {/* Exchange Filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-          {sectors.map((sector) => (
+          {exchangeFilters.map((exchange) => (
             <button
-              key={sector.id}
-              onClick={() => setSelectedSector(sector.id)}
+              key={exchange.id}
+              onClick={() => handleExchangeChange(exchange.id)}
               className={cn(
                 "px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors",
-                selectedSector === sector.id
+                selectedExchange === exchange.id
                   ? "bg-brand-orange text-white"
                   : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
               )}
             >
-              {sector.label}
+              {exchange.label}
             </button>
           ))}
         </div>
+
+        {/* Error State */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mb-6">
+            <p className="text-red-400">Failed to load companies. Please try again.</p>
+          </div>
+        )}
 
         {/* Companies Table */}
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
@@ -155,90 +176,133 @@ export default function CompaniesPage() {
             </button>
             <div className="col-span-2 text-center">Exchange</div>
             <button
-              onClick={() => handleSort("price")}
+              onClick={() => handleSort("current_price")}
               className="col-span-2 flex items-center justify-end gap-1 hover:text-foreground"
             >
               Price
               <ArrowUpDown className="h-3 w-3" />
             </button>
             <button
-              onClick={() => handleSort("changePercent")}
+              onClick={() => handleSort("price_change_percent")}
               className="col-span-2 flex items-center justify-end gap-1 hover:text-foreground"
             >
               Change
               <ArrowUpDown className="h-3 w-3" />
             </button>
-            <div className="col-span-1 text-right hidden md:block">P/E</div>
-            <div className="col-span-2 text-right hidden lg:block">Mkt Cap</div>
+            <button
+              onClick={() => handleSort("volume")}
+              className="col-span-1 text-right hidden md:flex items-center justify-end gap-1 hover:text-foreground"
+            >
+              Volume
+              <ArrowUpDown className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => handleSort("market_cap")}
+              className="col-span-2 text-right hidden lg:flex items-center justify-end gap-1 hover:text-foreground"
+            >
+              Mkt Cap
+              <ArrowUpDown className="h-3 w-3" />
+            </button>
           </div>
 
           {/* Table Body */}
           <div className="divide-y divide-terminal-border">
-            {filteredCompanies.map((company) => {
-              const isUp = company.change >= 0;
+            {isLoading ? (
+              // Loading skeletons
+              [...Array(10)].map((_, i) => <CompanyRowSkeleton key={i} />)
+            ) : companies.length > 0 ? (
+              companies.map((company: any) => {
+                const price = Number(company.current_price) || 0;
+                const change = Number(company.price_change) || 0;
+                const changePercent = Number(company.price_change_percent) || 0;
+                const isUp = change >= 0;
 
-              return (
-                <Link
-                  key={company.symbol}
-                  href={`/companies/${company.symbol.toLowerCase()}`}
-                  className="grid grid-cols-12 gap-4 p-4 hover:bg-terminal-bg-elevated transition-colors items-center"
-                >
-                  <div className="col-span-3">
-                    <div className="font-mono font-semibold">{company.symbol}</div>
-                    <div className="text-sm text-muted-foreground truncate">
-                      {company.name}
-                    </div>
-                  </div>
-                  <div className="col-span-2 text-center">
-                    <span className="px-2 py-1 text-xs bg-terminal-bg-elevated rounded">
-                      {company.exchange}
-                    </span>
-                  </div>
-                  <div className="col-span-2 text-right font-mono">
-                    {company.price.toFixed(2)}
-                  </div>
-                  <div
-                    className={cn(
-                      "col-span-2 text-right flex items-center justify-end gap-1",
-                      isUp ? "text-market-up" : "text-market-down"
-                    )}
+                return (
+                  <Link
+                    key={company.id || company.symbol}
+                    href={`/companies/${company.symbol?.toLowerCase()}`}
+                    className="grid grid-cols-12 gap-4 p-4 hover:bg-terminal-bg-elevated transition-colors items-center"
                   >
-                    {isUp ? (
-                      <TrendingUp className="h-4 w-4" />
-                    ) : (
-                      <TrendingDown className="h-4 w-4" />
-                    )}
-                    <span className="font-mono">
-                      {isUp ? "+" : ""}
-                      {company.changePercent.toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="col-span-1 text-right hidden md:block text-sm">
-                    {company.peRatio.toFixed(1)}
-                  </div>
-                  <div className="col-span-2 text-right hidden lg:block text-sm">
-                    {company.marketCap}
-                  </div>
-                </Link>
-              );
-            })}
+                    <div className="col-span-3">
+                      <div className="font-mono font-semibold">{company.symbol}</div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {company.name || company.short_name}
+                      </div>
+                    </div>
+                    <div className="col-span-2 text-center">
+                      <span className="px-2 py-1 text-xs bg-terminal-bg-elevated rounded">
+                        {company.exchange_code || company.exchange?.code || "-"}
+                      </span>
+                    </div>
+                    <div className="col-span-2 text-right font-mono">
+                      {price.toFixed(2)}
+                    </div>
+                    <div
+                      className={cn(
+                        "col-span-2 text-right flex items-center justify-end gap-1",
+                        isUp ? "text-market-up" : "text-market-down"
+                      )}
+                    >
+                      {isUp ? (
+                        <TrendingUp className="h-4 w-4" />
+                      ) : (
+                        <TrendingDown className="h-4 w-4" />
+                      )}
+                      <span className="font-mono">
+                        {isUp ? "+" : ""}
+                        {changePercent.toFixed(2)}%
+                      </span>
+                    </div>
+                    <div className="col-span-1 text-right hidden md:block text-sm font-mono">
+                      {formatVolume(company.volume)}
+                    </div>
+                    <div className="col-span-2 text-right hidden lg:block text-sm">
+                      {formatMarketCap(company.market_cap)}
+                    </div>
+                  </Link>
+                );
+              })
+            ) : (
+              <div className="p-12 text-center">
+                <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+                <h3 className="font-medium mb-2">No companies found</h3>
+                <p className="text-sm text-muted-foreground">
+                  {searchQuery
+                    ? "Try adjusting your search terms"
+                    : "No companies available for this exchange"}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-6">
-          <p className="text-sm text-muted-foreground">
-            Showing {filteredCompanies.length} of {companies.length} companies
-          </p>
-          <div className="flex items-center gap-2">
-            <button className="px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50">
-              Previous
-            </button>
-            <button className="px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors">
-              Next
-            </button>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-6">
+            <p className="text-sm text-muted-foreground">
+              Showing {companies.length} of {totalCount} companies
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1 || isLoading}
+                className="px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-muted-foreground px-2">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage(Math.min(totalPages, page + 1))}
+                disabled={page === totalPages || isLoading}
+                className="px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </MainLayout>
   );

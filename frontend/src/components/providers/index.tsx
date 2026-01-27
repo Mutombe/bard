@@ -5,6 +5,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { ThemeProvider } from "./theme-provider";
 import { AuthInitializer } from "./AuthInitializer";
 import { NavigationProgress } from "./NavigationProgress";
+import { SWRProvider } from "@/hooks/use-swr-config";
 import { store } from "@/store";
 
 interface ProvidersProps {
@@ -21,12 +22,14 @@ export function Providers({ children }: ProvidersProps) {
       storageKey="bard-theme"
     >
       <ReduxProvider store={store}>
-        <AuthInitializer>
-          <Suspense fallback={null}>
-            <NavigationProgress />
-          </Suspense>
-          {children}
-        </AuthInitializer>
+        <SWRProvider>
+          <AuthInitializer>
+            <Suspense fallback={null}>
+              <NavigationProgress />
+            </Suspense>
+            {children}
+          </AuthInitializer>
+        </SWRProvider>
       </ReduxProvider>
     </ThemeProvider>
   );

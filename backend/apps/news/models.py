@@ -129,6 +129,13 @@ class NewsArticle(BaseModel):
         MARKET_UPDATE = "market_update", "Market Update"
         EARNINGS = "earnings", "Earnings Report"
 
+    class Source(models.TextChoices):
+        EDITORIAL = "editorial", "Editorial"  # Written by in-house editors
+        NEWSAPI = "newsapi", "NewsAPI"
+        POLYGON = "polygon", "Polygon.io"
+        SCRAPED = "scraped", "Web Scraped"
+        SYNDICATED = "syndicated", "Syndicated"  # Partner content
+
     # =========================
     # Core Content
     # =========================
@@ -196,6 +203,32 @@ class NewsArticle(BaseModel):
         max_length=20,
         choices=ContentType.choices,
         default=ContentType.NEWS,
+    )
+    source = models.CharField(
+        "Source",
+        max_length=20,
+        choices=Source.choices,
+        default=Source.EDITORIAL,
+        db_index=True,
+        help_text="Where the article originated from",
+    )
+    external_url = models.URLField(
+        "External URL",
+        max_length=500,
+        blank=True,
+        help_text="Original article URL for aggregated content",
+    )
+    external_source_name = models.CharField(
+        "Source Name",
+        max_length=100,
+        blank=True,
+        help_text="Name of external source (e.g., 'Reuters', 'Bloomberg')",
+    )
+    priority = models.PositiveSmallIntegerField(
+        "Priority",
+        default=0,
+        db_index=True,
+        help_text="Higher priority articles appear first (editorial content gets +10)",
     )
 
     # =========================
@@ -286,12 +319,15 @@ class NewsArticle(BaseModel):
     class Meta:
         verbose_name = "News Article"
         verbose_name_plural = "News Articles"
-        ordering = ["-published_at", "-created_at"]
+        # Bloomberg-style ordering: breaking > featured > priority > recency
+        ordering = ["-is_breaking", "-is_featured", "-priority", "-published_at", "-created_at"]
         indexes = [
             models.Index(fields=["status", "published_at"]),
             models.Index(fields=["category", "status"]),
             models.Index(fields=["author", "status"]),
             models.Index(fields=["is_featured", "status"]),
+            models.Index(fields=["source", "status"]),
+            models.Index(fields=["-priority", "-published_at"]),
         ]
 
     def __str__(self):
@@ -304,6 +340,19 @@ class NewsArticle(BaseModel):
         # Auto-set published_at when status changes to published
         if self.status == self.Status.PUBLISHED and not self.published_at:
             self.published_at = timezone.now()
+
+        # Auto-set priority based on source (editorial content ranks higher)
+        # This ensures in-house content appears above aggregated content
+        if self.source == self.Source.EDITORIAL:
+            base_priority = 10
+        elif self.source == self.Source.SYNDICATED:
+            base_priority = 5
+        else:
+            base_priority = 0
+
+        # Only set if priority hasn't been manually adjusted
+        if self.priority == 0 or self.priority in [0, 5, 10]:
+            self.priority = base_priority
 
         # Calculate read time (average 200 words per minute)
         if self.content:
