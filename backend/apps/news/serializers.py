@@ -230,11 +230,10 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         slug_field="slug",
         queryset=Category.objects.all(),
     )
-    tags = serializers.SlugRelatedField(
-        slug_field="slug",
-        queryset=Tag.objects.all(),
-        many=True,
+    tags = serializers.ListField(
+        child=serializers.CharField(max_length=50),
         required=False,
+        allow_empty=True,
     )
     related_companies = serializers.PrimaryKeyRelatedField(
         queryset=Company.objects.all(),
@@ -271,28 +270,50 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
-        tags = validated_data.pop("tags", [])
+        tag_slugs = validated_data.pop("tags", [])
         companies = validated_data.pop("related_companies", [])
         validated_data["author"] = self.context["request"].user
 
         article = super().create(validated_data)
-        if tags:
-            article.tags.set(tags)
+
+        # Get or create tags by slug
+        if tag_slugs:
+            tag_objects = []
+            for slug in tag_slugs:
+                # Create tag name from slug (capitalize words)
+                name = " ".join(word.capitalize() for word in slug.replace("-", " ").split())
+                tag, _ = Tag.objects.get_or_create(
+                    slug=slug,
+                    defaults={"name": name}
+                )
+                tag_objects.append(tag)
+            article.tags.set(tag_objects)
+
         if companies:
             article.related_companies.set(companies)
 
         return article
 
     def update(self, instance, validated_data):
-        tags = validated_data.pop("tags", None)
+        tag_slugs = validated_data.pop("tags", None)
         companies = validated_data.pop("related_companies", None)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        if tags is not None:
-            instance.tags.set(tags)
+        # Get or create tags by slug
+        if tag_slugs is not None:
+            tag_objects = []
+            for slug in tag_slugs:
+                name = " ".join(word.capitalize() for word in slug.replace("-", " ").split())
+                tag, _ = Tag.objects.get_or_create(
+                    slug=slug,
+                    defaults={"name": name}
+                )
+                tag_objects.append(tag)
+            instance.tags.set(tag_objects)
+
         if companies is not None:
             instance.related_companies.set(companies)
 
