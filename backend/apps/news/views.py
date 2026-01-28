@@ -234,3 +234,30 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                 {"error": f"Failed to delete article: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
+    @action(detail=False, methods=["delete"], url_path=r"by-id/(?P<article_id>\d+)")
+    def delete_by_id(self, request, article_id=None):
+        """Delete an article by ID (more reliable than slug)."""
+        if not request.user.is_editor:
+            return Response(
+                {"error": "Only editors can delete articles"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        try:
+            article = NewsArticle.objects.get(id=article_id)
+            article.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except NewsArticle.DoesNotExist:
+            return Response(
+                {"error": "Article not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error deleting article by ID: {str(e)}", exc_info=True)
+            return Response(
+                {"error": f"Failed to delete article: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

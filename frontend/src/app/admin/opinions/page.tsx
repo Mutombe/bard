@@ -142,16 +142,16 @@ export default function OpinionsPage() {
     });
   };
 
-  // Execute delete after confirmation
+  // Execute delete after confirmation - use ID for reliable deletion
   const executeDelete = async () => {
-    const { opinionId, opinionSlug } = deleteModal;
-    if (!opinionId || !opinionSlug) return;
+    const { opinionId } = deleteModal;
+    if (!opinionId) return;
 
     setDeleteLoading(true);
     setDeletingIds((prev) => [...prev, opinionId]);
 
     try {
-      await editorialService.deleteArticle(opinionSlug);
+      await editorialService.deleteArticle(opinionId);
       setOpinions((prev) => prev.filter((o) => o.id !== opinionId));
       toast.success("Opinion deleted successfully");
       setDeleteModal({ open: false });

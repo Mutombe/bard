@@ -279,16 +279,16 @@ export default function ArticlesPage() {
       return;
     }
 
-    // Handle single delete
-    const { articleSlug, articleId } = deleteModal;
-    if (!articleSlug || !articleId) return;
+    // Handle single delete - use ID for more reliable deletion
+    const { articleId } = deleteModal;
+    if (!articleId) return;
 
     // Optimistic update
     const previousArticles = [...articles];
     setArticles((prev) => prev.filter((a) => a.id !== articleId));
 
     try {
-      await editorialService.deleteArticle(articleSlug);
+      await editorialService.deleteArticle(articleId);
       toast.success("Article deleted successfully");
       setDeleteModal({ open: false, type: "single" });
     } catch (err) {
