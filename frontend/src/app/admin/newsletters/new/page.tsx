@@ -16,9 +16,11 @@ import {
   Grip,
   Loader2,
   Check,
+  Image as ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminService } from "@/services/api/admin";
+import { UnsplashImagePicker } from "@/components/editor/UnsplashImagePicker";
 import { toast } from "sonner";
 
 const NEWSLETTER_TYPES = [
@@ -43,6 +45,7 @@ export default function NewNewsletterPage() {
     emails_sent: number;
     total_subscribers: number;
   } | null>(null);
+  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -77,6 +80,15 @@ export default function NewNewsletterPage() {
 
   const handleSendTest = async () => {
     toast.info("Test email feature coming soon");
+  };
+
+  const handleInsertImage = (image: { url: string; photographer: string; alt: string }) => {
+    const imageHtml = `\n<div style="margin: 20px 0; text-align: center;">
+  <img src="${image.url}" alt="${image.alt}" style="max-width: 100%; height: auto; border-radius: 8px;" />
+  <p style="font-size: 12px; color: #888; margin-top: 8px;">Photo by ${image.photographer} on Unsplash</p>
+</div>\n`;
+    setContent((prev) => prev + imageHtml);
+    toast.success("Image inserted into content");
   };
 
   const handleSend = async () => {
@@ -214,9 +226,19 @@ export default function NewNewsletterPage() {
 
           {/* Content */}
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
-            <label className="block text-sm font-medium text-muted-foreground mb-2">
-              Newsletter Content *
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-muted-foreground">
+                Newsletter Content *
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowUnsplashPicker(true)}
+                className="px-3 py-1.5 text-xs bg-terminal-bg-elevated border border-terminal-border rounded-md hover:bg-terminal-bg flex items-center gap-2"
+              >
+                <ImageIcon className="h-3 w-3" />
+                Insert Image
+              </button>
+            </div>
             <p className="text-xs text-muted-foreground mb-3">
               You can use HTML tags for formatting. The content will be wrapped in a professional email template.
             </p>
@@ -320,6 +342,14 @@ export default function NewNewsletterPage() {
           </div>
         </div>
       </div>
+
+      {/* Unsplash Image Picker Modal */}
+      <UnsplashImagePicker
+        isOpen={showUnsplashPicker}
+        onClose={() => setShowUnsplashPicker(false)}
+        onSelect={handleInsertImage}
+        defaultQuery={subject ? subject.split(" ").slice(0, 2).join(" ") : ""}
+      />
     </div>
   );
 }
