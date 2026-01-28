@@ -6,6 +6,7 @@ import { ThemeProvider } from "./theme-provider";
 import { AuthInitializer } from "./AuthInitializer";
 import { NavigationProgress } from "./NavigationProgress";
 import { SWRProvider } from "@/hooks/use-swr-config";
+import { AuthModalProvider } from "@/contexts/AuthModalContext";
 import { store } from "@/store";
 
 interface ProvidersProps {
@@ -24,10 +25,12 @@ export function Providers({ children }: ProvidersProps) {
       <ReduxProvider store={store}>
         <SWRProvider>
           <AuthInitializer>
-            <Suspense fallback={null}>
-              <NavigationProgress />
-            </Suspense>
-            {children}
+            <AuthModalProvider>
+              <Suspense fallback={null}>
+                <NavigationProgress />
+              </Suspense>
+              {children}
+            </AuthModalProvider>
           </AuthInitializer>
         </SWRProvider>
       </ReduxProvider>

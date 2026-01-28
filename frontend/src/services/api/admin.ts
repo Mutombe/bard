@@ -155,7 +155,7 @@ export const adminService = {
     content: string;
     subscription_types: string[];
     scheduled_for?: string;
-  }): Promise<{ id: number; status: string }> {
+  }): Promise<{ status: string; emails_sent: number; total_subscribers: number; errors?: any[] }> {
     const response = await authClient.post("/engagement/newsletters/send/", data);
     return response.data;
   },

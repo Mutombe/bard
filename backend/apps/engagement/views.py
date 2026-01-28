@@ -13,6 +13,7 @@ from .serializers import (
     NotificationSerializer,
     PriceAlertCreateSerializer,
     PriceAlertSerializer,
+    SendNewsletterSerializer,
 )
 
 
@@ -124,6 +125,81 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
                 {"error": "Invalid unsubscribe token"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+    @action(detail=False, methods=["post"], url_path="send", permission_classes=[IsAdminUser])
+    def send(self, request):
+        """Send newsletter to subscribers (admin only)."""
+        from django.core.mail import send_mass_mail
+        from django.template.loader import render_to_string
+        from django.conf import settings
+
+        serializer = SendNewsletterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        subject = serializer.validated_data["subject"]
+        content = serializer.validated_data["content"]
+        subscription_types = serializer.validated_data["subscription_types"]
+        scheduled_for = serializer.validated_data.get("scheduled_for")
+
+        # Get active subscribers for the selected newsletter types
+        subscribers = NewsletterSubscription.objects.filter(
+            newsletter_type__in=subscription_types,
+            is_active=True,
+        ).values_list("email", "unsubscribe_token")
+
+        if not subscribers:
+            return Response(
+                {"error": "No active subscribers found for selected newsletter types"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # If scheduled for future, we'd queue the task (for now just send immediately)
+        if scheduled_for:
+            # TODO: Implement Celery task for scheduled sending
+            pass
+
+        # Prepare emails
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@bardiqjournal.com")
+        emails_sent = 0
+        errors = []
+
+        for email, unsubscribe_token in subscribers:
+            try:
+                # Build unsubscribe URL
+                unsubscribe_url = f"{getattr(settings, 'FRONTEND_URL', 'https://bardiqjournal.com')}/unsubscribe?token={unsubscribe_token}"
+
+                # Create email content with unsubscribe link
+                html_content = f"""
+                <html>
+                <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="padding: 20px;">
+                        {content}
+                    </div>
+                    <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+                    <div style="text-align: center; color: #666; font-size: 12px;">
+                        <p>You received this email because you subscribed to Bardiq Journal newsletters.</p>
+                        <p><a href="{unsubscribe_url}" style="color: #666;">Unsubscribe</a></p>
+                    </div>
+                </body>
+                </html>
+                """
+
+                text_content = f"{content}\n\n---\nUnsubscribe: {unsubscribe_url}"
+
+                from django.core.mail import EmailMultiAlternatives
+                msg = EmailMultiAlternatives(subject, text_content, from_email, [email])
+                msg.attach_alternative(html_content, "text/html")
+                msg.send()
+                emails_sent += 1
+            except Exception as e:
+                errors.append({"email": email, "error": str(e)})
+
+        return Response({
+            "status": "sent",
+            "emails_sent": emails_sent,
+            "total_subscribers": len(subscribers),
+            "errors": errors[:10] if errors else [],  # Return first 10 errors only
+        })
 
 
 class PriceAlertViewSet(viewsets.ModelViewSet):

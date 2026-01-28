@@ -106,3 +106,21 @@ class NotificationSerializer(serializers.ModelSerializer):
             "created_at",
         ]
         read_only_fields = ["id", "notification_type", "title", "message", "data", "created_at"]
+
+
+class SendNewsletterSerializer(serializers.Serializer):
+    """Serializer for sending newsletters to subscribers."""
+
+    subject = serializers.CharField(max_length=255)
+    content = serializers.CharField()
+    subscription_types = serializers.ListField(
+        child=serializers.ChoiceField(choices=[
+            ("morning_brief", "Morning Brief"),
+            ("evening_wrap", "Evening Wrap"),
+            ("weekly_digest", "Weekly Digest"),
+            ("breaking_news", "Breaking News"),
+            ("earnings", "Earnings Alerts"),
+        ]),
+        min_length=1
+    )
+    scheduled_for = serializers.DateTimeField(required=False, allow_null=True)
