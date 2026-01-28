@@ -14,14 +14,15 @@ interface ThemeLogoProps {
 
 /**
  * Logo component that switches between light and dark versions based on theme.
+ * The logo images already contain the brand text "Bard Global Finance Institute"
  * - Light theme: uses logo-dark.png (dark logo on light background)
  * - Dark theme: uses logo-light.png (light logo on dark background)
  */
 export function ThemeLogo({
   className,
-  width = 40,
-  height = 40,
-  priority = false,
+  width = 180,
+  height = 50,
+  priority = true,
 }: ThemeLogoProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
@@ -40,61 +41,18 @@ export function ThemeLogo({
   return (
     <Image
       src={logoSrc}
-      alt="Bardiq Journal"
+      alt="Bard Global Finance Institute"
       width={width}
       height={height}
-      className={cn("transition-opacity duration-300", className)}
+      className={cn("h-auto", className)}
       priority={priority}
     />
   );
 }
 
 /**
- * Full logo with text that adapts to theme
+ * @deprecated Use ThemeLogo instead - logo already contains brand text
  */
-export function ThemeLogoFull({
-  className,
-  logoWidth = 40,
-  logoHeight = 40,
-}: {
-  className?: string;
-  logoWidth?: number;
-  logoHeight?: number;
-}) {
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const logoSrc = mounted
-    ? resolvedTheme === "dark"
-      ? "/images/logo-light.png"
-      : "/images/logo-dark.png"
-    : "/images/logo-dark.png";
-
-  return (
-    <div className={cn("flex items-center gap-3", className)}>
-      <Image
-        src={logoSrc}
-        alt="Bardiq Journal"
-        width={logoWidth}
-        height={logoHeight}
-        className="transition-opacity duration-300"
-        priority
-      />
-      <div className="hidden sm:block">
-        <div className="font-bold text-xl tracking-tight">
-          <span className="text-foreground">Bardiq</span>
-          <span className="text-primary"> Journal</span>
-        </div>
-        <div className="text-[10px] text-muted-foreground tracking-widest uppercase -mt-0.5">
-          A publication of the BGFI
-        </div>
-      </div>
-    </div>
-  );
-}
+export const ThemeLogoFull = ThemeLogo;
 
 export default ThemeLogo;

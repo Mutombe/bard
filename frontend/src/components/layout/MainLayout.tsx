@@ -38,7 +38,7 @@ import { MarketStrip } from "./MarketStrip";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { LiveSearch } from "@/components/search/LiveSearch";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { ThemeLogo, ThemeLogoFull } from "@/components/ui/theme-logo";
+import { ThemeLogo } from "@/components/ui/theme-logo";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -191,8 +191,8 @@ export function MainLayout({ children }: MainLayoutProps) {
         <div className="max-w-[1600px] mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3">
-              <ThemeLogoFull logoWidth={40} logoHeight={40} />
+            <Link href="/" className="flex items-center">
+              <ThemeLogo width={160} height={44} />
             </Link>
 
             {/* Desktop Navigation */}
@@ -354,15 +354,11 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <ThemeLogo width={32} height={32} className="h-8 w-8" />
-                <span className="font-bold">Bardiq Journal</span>
+              <div className="mb-4">
+                <ThemeLogo width={140} height={38} />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
                 Your trusted source for African financial intelligence and market data.
-              </p>
-              <p className="text-xs text-muted-foreground/80 mb-4 italic">
-                A publication of the Bard Global Finance Institute (BGFI).
               </p>
               <div className="flex items-center gap-3">
                 <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
