@@ -88,7 +88,7 @@ export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedArticles, setSelectedArticles] = useState<number[]>([]);
+  const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,

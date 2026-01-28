@@ -197,10 +197,38 @@ export default function ArticlePage() {
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [subscribeEmail, setSubscribeEmail] = useState("");
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subscribeEmail.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    setSubscribing(true);
+    try {
+      await apiClient.post("/engagement/subscriptions/", {
+        email: subscribeEmail.trim(),
+        newsletter_type: "daily_digest",
+      });
+      toast.success("Subscribed! Check your email for confirmation.");
+      setSubscribeEmail("");
+    } catch (err: any) {
+      console.error("Subscription error:", err);
+      const errorMsg = err.response?.data?.email?.[0] ||
+                       err.response?.data?.detail ||
+                       "Failed to subscribe. Please try again.";
+      toast.error(errorMsg);
+    } finally {
+      setSubscribing(false);
+    }
+  };
 
   useEffect(() => {
     if (!slug) return;
@@ -593,17 +621,28 @@ export default function ArticlePage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Get breaking news and market analysis delivered to your inbox.
               </p>
-              <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-2" onSubmit={handleSubscribe}>
                 <input
                   type="email"
                   placeholder="your@email.com"
-                  className="w-full px-3 py-2 text-sm bg-terminal-bg border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                  value={subscribeEmail}
+                  onChange={(e) => setSubscribeEmail(e.target.value)}
+                  disabled={subscribing}
+                  className="w-full px-3 py-2 text-sm bg-terminal-bg border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange disabled:opacity-50"
                 />
                 <button
                   type="submit"
-                  className="w-full px-4 py-2 bg-brand-orange text-white text-sm font-medium rounded-md hover:bg-brand-orange-dark transition-colors"
+                  disabled={subscribing}
+                  className="w-full px-4 py-2 bg-brand-orange text-white text-sm font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Subscribe
+                  {subscribing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Subscribing...
+                    </>
+                  ) : (
+                    "Subscribe"
+                  )}
                 </button>
               </form>
             </section>

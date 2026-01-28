@@ -6,32 +6,33 @@ import type { PaginatedResponse } from "@/types";
 // =========================
 
 export interface Article {
-  id: number;
+  id: string; // UUID
   title: string;
   slug: string;
   subtitle?: string;
   excerpt: string;
   content: string;
   featured_image?: string;
+  featured_image_url?: string;
   featured_image_caption?: string;
   category: {
-    id: number;
+    id: string;
     name: string;
     slug: string;
-  };
-  tags: Array<{ id: number; name: string; slug: string }>;
-  content_type: "NEWS" | "ANALYSIS" | "RESEARCH" | "OPINION" | "MARKET_UPDATE" | "EARNINGS";
+  } | null;
+  tags: Array<{ id: string; name: string; slug: string } | string>;
+  content_type: string;
   author: {
-    id: number;
+    id: string;
     email: string;
     full_name: string;
-  };
+  } | null;
   editor?: {
-    id: number;
+    id: string;
     email: string;
     full_name: string;
-  };
-  status: "DRAFT" | "PENDING_REVIEW" | "PUBLISHED" | "ARCHIVED";
+  } | null;
+  status: string;
   published_at?: string;
   is_featured: boolean;
   is_breaking: boolean;
@@ -41,7 +42,7 @@ export interface Article {
   meta_title?: string;
   meta_description?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 export interface ContentBucket {
@@ -191,9 +192,10 @@ export const editorialService = {
     return response.data;
   },
 
-  async deleteArticle(idOrSlug: string | number): Promise<void> {
-    // Use delete-by-id endpoint for numeric IDs (more reliable)
-    if (typeof idOrSlug === "number" || /^\d+$/.test(String(idOrSlug))) {
+  async deleteArticle(idOrSlug: string): Promise<void> {
+    // UUIDs contain hyphens, slugs typically don't have the UUID pattern
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+    if (isUuid) {
       await authClient.delete(`/news/articles/by-id/${idOrSlug}/`);
     } else {
       await authClient.delete(`/news/articles/${idOrSlug}/`);

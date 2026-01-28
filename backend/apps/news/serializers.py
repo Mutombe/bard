@@ -46,7 +46,7 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
     """Serializer for article listings."""
 
     category = CategorySerializer(read_only=True)
-    author_name = serializers.CharField(source="author.full_name", read_only=True)
+    author = serializers.SerializerMethodField()
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
     featured_image = serializers.SerializerMethodField()
     image_attribution = serializers.SerializerMethodField()
@@ -63,11 +63,13 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
             "image_attribution",
             "category",
             "content_type",
+            "status",
             "source",
             "external_url",
             "external_source_name",
-            "author_name",
+            "author",
             "published_at",
+            "created_at",
             "is_featured",
             "is_breaking",
             "is_premium",
@@ -75,6 +77,16 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
             "read_time_minutes",
             "related_companies",
         ]
+
+    def get_author(self, obj):
+        """Return author data with full_name."""
+        if obj.author:
+            return {
+                "id": str(obj.author.id),
+                "email": obj.author.email,
+                "full_name": obj.author.full_name or obj.author.email,
+            }
+        return None
 
     def get_featured_image(self, obj):
         """
