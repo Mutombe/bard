@@ -11,12 +11,26 @@ API Structure:
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import include, path
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+
+
+# Simple health check that bypasses DRF completely (no throttling)
+@csrf_exempt
+@never_cache
+def simple_health_check(request):
+    """Simple health check for Render - no DRF, no throttling."""
+    return JsonResponse({
+        "status": "healthy",
+        "service": "Bardiq Journal API",
+    })
 
 # =========================
 # API URL Patterns
@@ -41,8 +55,10 @@ api_v1_patterns = [
 ]
 
 urlpatterns = [
-    # Health check at root (for Render)
-    path("health/", include("apps.core.urls", namespace="core")),
+    # Simple health check at root (for Render) - bypasses DRF throttling
+    path("health/", simple_health_check, name="health-check"),
+    # Extended health checks (DRF-based, with more details)
+    path("health/ready/", include("apps.core.urls", namespace="core")),
     # Admin
     path("admin/", admin.site.urls),
     # API v1
