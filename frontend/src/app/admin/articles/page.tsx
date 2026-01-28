@@ -444,7 +444,7 @@ export default function ArticlesPage() {
                 </div>
                 <div className="col-span-5 min-w-0">
                   <Link
-                    href={`/admin/articles/${article.slug}`}
+                    href={`/admin/articles/${article.id}`}
                     className="font-medium hover:text-brand-orange transition-colors line-clamp-1"
                   >
                     {article.is_featured && (
@@ -491,7 +491,7 @@ export default function ArticlesPage() {
                 </div>
                 <div className="col-span-1 flex justify-end gap-1">
                   <Link
-                    href={`/admin/articles/${article.slug}`}
+                    href={`/admin/articles/${article.id}`}
                     className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
                     title="Edit"
                   >

@@ -1,6 +1,7 @@
 """
-Media Views - Videos and Podcasts
+Media Views - Videos, Podcasts, and Media Library
 """
+from django.http import FileResponse
 from django.utils.text import slugify
 from django.utils import timezone
 
@@ -8,10 +9,11 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from .models import Video, VideoCategory, PodcastShow, PodcastEpisode, YouTubeChannel
+from .models import Video, VideoCategory, PodcastShow, PodcastEpisode, YouTubeChannel, MediaFile
 from .serializers import (
     VideoSerializer,
     VideoListSerializer,
@@ -21,8 +23,96 @@ from .serializers import (
     PodcastEpisodeListSerializer,
     YouTubeChannelSerializer,
     YouTubeVideoSerializer,
+    MediaFileSerializer,
+    MediaFileUploadSerializer,
 )
 from .services import youtube_service
+
+
+class MediaFileViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Media Library files.
+
+    Supports:
+    - GET /library/ - List all files
+    - POST /library/ - Upload a file
+    - GET /library/{id}/ - Get file details
+    - DELETE /library/{id}/ - Delete a file
+    - GET /library/{id}/download/ - Download a file
+    - GET /library/stats/ - Get library statistics
+    """
+    queryset = MediaFile.objects.select_related("uploaded_by")
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ["file_type"]
+    search_fields = ["name", "alt_text", "caption"]
+    ordering_fields = ["created_at", "name", "size"]
+    ordering = ["-created_at"]
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return MediaFileUploadSerializer
+        return MediaFileSerializer
+
+    @action(detail=True, methods=["get"])
+    def download(self, request, pk=None):
+        """Download a file."""
+        media_file = self.get_object()
+        if not media_file.file:
+            return Response(
+                {"error": "File not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        response = FileResponse(
+            media_file.file.open("rb"),
+            as_attachment=True,
+            filename=media_file.name
+        )
+        return response
+
+    @action(detail=False, methods=["get"])
+    def stats(self, request):
+        """Get library statistics."""
+        from django.db.models import Sum, Count
+
+        queryset = self.get_queryset()
+        stats = queryset.aggregate(
+            total_files=Count("id"),
+            total_size=Sum("size"),
+        )
+        type_breakdown = queryset.values("file_type").annotate(count=Count("id"))
+
+        return Response({
+            "total_files": stats["total_files"] or 0,
+            "total_size": stats["total_size"] or 0,
+            "total_size_display": self._format_size(stats["total_size"] or 0),
+            "by_type": {item["file_type"]: item["count"] for item in type_breakdown},
+        })
+
+    @action(detail=False, methods=["post"])
+    def bulk_delete(self, request):
+        """Delete multiple files at once."""
+        file_ids = request.data.get("ids", [])
+        if not file_ids:
+            return Response(
+                {"error": "No file IDs provided"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        deleted_count, _ = MediaFile.objects.filter(id__in=file_ids).delete()
+        return Response({
+            "message": f"Deleted {deleted_count} files",
+            "deleted_count": deleted_count
+        })
+
+    def _format_size(self, size):
+        """Format bytes to human-readable size."""
+        for unit in ["B", "KB", "MB", "GB"]:
+            if size < 1024:
+                return f"{size:.1f} {unit}"
+            size /= 1024
+        return f"{size:.1f} TB"
 
 
 class VideoCategoryViewSet(viewsets.ModelViewSet):
