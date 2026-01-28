@@ -71,9 +71,10 @@ DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=0)  # noq
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True  # noqa: F405
 # Disable server-side cursors which can cause issues with connection pooling
 DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True  # noqa: F405
+# Neon-compatible options (no statement_timeout in startup params)
 DATABASES["default"]["OPTIONS"] = {  # noqa: F405
     "connect_timeout": 10,
-    "options": "-c statement_timeout=30000",  # 30 second query timeout
+    "sslmode": "require",  # Required for Neon
 }
 
 # =========================
