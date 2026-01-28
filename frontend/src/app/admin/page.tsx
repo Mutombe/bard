@@ -8,8 +8,6 @@ import {
   Users,
   TrendingUp,
   Eye,
-  ArrowUpRight,
-  ArrowDownRight,
   Clock,
   AlertCircle,
   RefreshCw,
@@ -17,12 +15,16 @@ import {
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton, Skeleton } from "@/components/ui/loading";
 import { editorialService, type Article, type EditorialAssignment } from "@/services/api/editorial";
+import { adminService } from "@/services/api/admin";
+import { toast } from "sonner";
 
 interface DashboardStats {
   totalArticles: number;
-  activeUsers: number;
-  pageViews: number;
+  publishedToday: number;
+  pendingReview: number;
+  totalUsers: number;
   newsletterSubs: number;
+  draftCount: number;
 }
 
 function getStatusColor(status: string) {
@@ -122,9 +124,11 @@ export default function AdminDashboard() {
   const [assignments, setAssignments] = useState<EditorialAssignment[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     totalArticles: 0,
-    activeUsers: 0,
-    pageViews: 0,
+    publishedToday: 0,
+    pendingReview: 0,
+    totalUsers: 0,
     newsletterSubs: 0,
+    draftCount: 0,
   });
 
   const fetchDashboardData = async (showRefreshIndicator = false) => {
@@ -133,10 +137,20 @@ export default function AdminDashboard() {
         setRefreshing(true);
       }
 
-      // Fetch articles
-      const articlesResponse = await editorialService.getArticles({ page_size: 5 });
+      // Fetch articles - run in parallel for speed
+      const [articlesResponse, userStats, newsletterStats] = await Promise.all([
+        editorialService.getArticles({ page_size: 5 }),
+        adminService.getUserStats().catch(() => ({ total_users: 0, premium_users: 0, admin_count: 0, new_today: 0 })),
+        adminService.getNewsletterStats().catch(() => ({ total_subscribers: 0, active_subscribers: 0, open_rate: 0, click_rate: 0 })),
+      ]);
+
       setArticles(articlesResponse.results || []);
-      setStats(prev => ({ ...prev, totalArticles: articlesResponse.count || 0 }));
+      setStats(prev => ({
+        ...prev,
+        totalArticles: articlesResponse.count || 0,
+        totalUsers: userStats.total_users || 0,
+        newsletterSubs: newsletterStats.total_subscribers || 0,
+      }));
 
       // Try to fetch assignments (may fail if not authenticated as editor)
       try {
@@ -146,21 +160,22 @@ export default function AdminDashboard() {
         setAssignments([]);
       }
 
-      // Try to fetch dashboard stats
+      // Try to fetch editor dashboard stats for more details
       try {
         const dashboardData = await editorialService.getDashboard();
         setStats(prev => ({
           ...prev,
           totalArticles: dashboardData.articles_count || prev.totalArticles,
-          activeUsers: 0, // Would come from analytics API
-          pageViews: 0, // Would come from analytics API
-          newsletterSubs: 0, // Would come from engagement API
+          publishedToday: dashboardData.published_today || 0,
+          pendingReview: dashboardData.pending_review || 0,
+          draftCount: dashboardData.draft_count || 0,
         }));
       } catch {
         // Dashboard endpoint may not be available
       }
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
+      toast.error("Failed to load dashboard data");
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -175,32 +190,28 @@ export default function AdminDashboard() {
     {
       label: "Total Articles",
       value: stats.totalArticles.toLocaleString(),
-      change: "+12%",
-      isUp: true,
+      subtext: stats.publishedToday > 0 ? `${stats.publishedToday} published today` : undefined,
       icon: FileText,
       href: "/admin/articles",
     },
     {
-      label: "Active Users",
-      value: stats.activeUsers > 0 ? stats.activeUsers.toLocaleString() : "45,892",
-      change: "+8%",
-      isUp: true,
+      label: "Total Users",
+      value: stats.totalUsers.toLocaleString(),
+      subtext: undefined,
       icon: Users,
       href: "/admin/users",
     },
     {
-      label: "Page Views (Today)",
-      value: stats.pageViews > 0 ? stats.pageViews.toLocaleString() : "128,456",
-      change: "+23%",
-      isUp: true,
+      label: "Pending Review",
+      value: stats.pendingReview.toLocaleString(),
+      subtext: stats.draftCount > 0 ? `${stats.draftCount} drafts` : undefined,
       icon: Eye,
-      href: "/admin",
+      href: "/admin/articles?status=pending_review",
     },
     {
       label: "Newsletter Subs",
-      value: stats.newsletterSubs > 0 ? stats.newsletterSubs.toLocaleString() : "68,234",
-      change: "+5%",
-      isUp: true,
+      value: stats.newsletterSubs.toLocaleString(),
+      subtext: undefined,
       icon: TrendingUp,
       href: "/admin/newsletters",
     },
@@ -235,28 +246,18 @@ export default function AdminDashboard() {
             <Link
               key={stat.label}
               href={stat.href}
-              className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6 hover:border-brand-orange transition-colors"
+              className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6 hover:border-primary transition-colors"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center">
+                <div className="h-10 w-10 rounded-lg bg-primary/20 text-primary flex items-center justify-center">
                   <stat.icon className="h-5 w-5" />
-                </div>
-                <div
-                  className={cn(
-                    "flex items-center text-sm",
-                    stat.isUp ? "text-market-up" : "text-market-down"
-                  )}
-                >
-                  {stat.isUp ? (
-                    <ArrowUpRight className="h-4 w-4" />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4" />
-                  )}
-                  {stat.change}
                 </div>
               </div>
               <div className="text-2xl font-bold mb-1">{stat.value}</div>
               <div className="text-sm text-muted-foreground">{stat.label}</div>
+              {stat.subtext && (
+                <div className="text-xs text-primary mt-1">{stat.subtext}</div>
+              )}
             </Link>
           ))}
         </div>
@@ -281,7 +282,7 @@ export default function AdminDashboard() {
               {articles.map((article) => (
                 <Link
                   key={article.id}
-                  href={`/admin/articles/${article.slug}`}
+                  href={`/admin/articles/${article.id}`}
                   className="flex items-center justify-between p-4 hover:bg-terminal-bg-elevated transition-colors"
                 >
                   <div className="flex-1 min-w-0 mr-4">

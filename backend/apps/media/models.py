@@ -1,10 +1,78 @@
 """
-Media Models - Videos and Podcasts
+Media Models - Videos, Podcasts, and Media Library
 """
+import os
 from django.conf import settings
 from django.db import models
 
 from apps.core.models import TimeStampedModel
+
+
+class MediaFile(TimeStampedModel):
+    """Uploaded media files (images, documents, etc.)"""
+    FILE_TYPE_CHOICES = [
+        ("image", "Image"),
+        ("video", "Video"),
+        ("document", "Document"),
+        ("audio", "Audio"),
+        ("other", "Other"),
+    ]
+
+    name = models.CharField(max_length=255)
+    file = models.FileField(upload_to="uploads/%Y/%m/")
+    file_type = models.CharField(max_length=20, choices=FILE_TYPE_CHOICES, default="image")
+    mime_type = models.CharField(max_length=100, blank=True)
+    size = models.PositiveIntegerField(default=0, help_text="File size in bytes")
+
+    # Image specific
+    width = models.PositiveIntegerField(null=True, blank=True)
+    height = models.PositiveIntegerField(null=True, blank=True)
+
+    # Metadata
+    alt_text = models.CharField(max_length=255, blank=True)
+    caption = models.TextField(blank=True)
+
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="uploaded_files"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["file_type", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def url(self):
+        return self.file.url if self.file else None
+
+    @property
+    def size_display(self):
+        """Return human-readable file size."""
+        size = self.size
+        for unit in ["B", "KB", "MB", "GB"]:
+            if size < 1024:
+                return f"{size:.1f} {unit}"
+            size /= 1024
+        return f"{size:.1f} TB"
+
+    @property
+    def dimensions(self):
+        """Return dimensions string for images."""
+        if self.width and self.height:
+            return f"{self.width}x{self.height}"
+        return None
+
+    def save(self, *args, **kwargs):
+        if self.file and not self.name:
+            self.name = os.path.basename(self.file.name)
+        super().save(*args, **kwargs)
 
 
 class VideoCategory(TimeStampedModel):

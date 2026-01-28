@@ -9,6 +9,7 @@ from . import views
 app_name = "media"
 
 router = DefaultRouter()
+router.register(r"library", views.MediaFileViewSet, basename="library")
 router.register(r"videos", views.VideoViewSet, basename="video")
 router.register(r"categories", views.VideoCategoryViewSet, basename="category")
 router.register(r"podcasts/shows", views.PodcastShowViewSet, basename="podcast-show")

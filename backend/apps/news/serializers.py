@@ -318,3 +318,14 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
             instance.related_companies.set(companies)
 
         return instance
+
+    def to_representation(self, instance):
+        """Convert tags ManyRelatedManager to list of slugs for response."""
+        data = super().to_representation(instance)
+        # Convert tags M2M to list of slugs
+        data["tags"] = list(instance.tags.values_list("slug", flat=True))
+        # Convert related_companies M2M to list of IDs
+        data["related_companies"] = list(instance.related_companies.values_list("id", flat=True))
+        # Convert category to slug
+        data["category"] = instance.category.slug if instance.category else None
+        return data

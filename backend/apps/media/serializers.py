@@ -3,7 +3,83 @@ Media Serializers
 """
 from rest_framework import serializers
 
-from .models import Video, VideoCategory, PodcastShow, PodcastEpisode, YouTubeChannel
+from .models import Video, VideoCategory, PodcastShow, PodcastEpisode, YouTubeChannel, MediaFile
+
+
+class MediaFileSerializer(serializers.ModelSerializer):
+    """Serializer for MediaFile model."""
+    url = serializers.SerializerMethodField()
+    size_display = serializers.CharField(read_only=True)
+    dimensions = serializers.CharField(read_only=True)
+    uploaded_by_name = serializers.CharField(source="uploaded_by.full_name", read_only=True)
+
+    class Meta:
+        model = MediaFile
+        fields = [
+            "id",
+            "name",
+            "file",
+            "url",
+            "file_type",
+            "mime_type",
+            "size",
+            "size_display",
+            "width",
+            "height",
+            "dimensions",
+            "alt_text",
+            "caption",
+            "uploaded_by",
+            "uploaded_by_name",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "url", "size", "mime_type", "width", "height", "uploaded_by", "created_at", "updated_at"]
+
+    def get_url(self, obj):
+        request = self.context.get("request")
+        if obj.file and request:
+            return request.build_absolute_uri(obj.file.url)
+        return obj.url
+
+
+class MediaFileUploadSerializer(serializers.ModelSerializer):
+    """Serializer for uploading media files."""
+
+    class Meta:
+        model = MediaFile
+        fields = ["file", "name", "alt_text", "caption", "file_type"]
+
+    def create(self, validated_data):
+        file = validated_data.get("file")
+        if file:
+            # Auto-detect file type from mime type
+            mime_type = file.content_type
+            validated_data["mime_type"] = mime_type
+            validated_data["size"] = file.size
+
+            if mime_type.startswith("image/"):
+                validated_data["file_type"] = "image"
+                # Get image dimensions
+                try:
+                    from PIL import Image
+                    img = Image.open(file)
+                    validated_data["width"], validated_data["height"] = img.size
+                    file.seek(0)  # Reset file pointer
+                except Exception:
+                    pass
+            elif mime_type.startswith("video/"):
+                validated_data["file_type"] = "video"
+            elif mime_type.startswith("audio/"):
+                validated_data["file_type"] = "audio"
+            elif mime_type in ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]:
+                validated_data["file_type"] = "document"
+
+            if not validated_data.get("name"):
+                validated_data["name"] = file.name
+
+        validated_data["uploaded_by"] = self.context["request"].user
+        return super().create(validated_data)
 
 
 class VideoCategorySerializer(serializers.ModelSerializer):
