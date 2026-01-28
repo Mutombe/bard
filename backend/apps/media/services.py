@@ -139,12 +139,12 @@ class YouTubeService:
         return results[0] if results else None
 
     def get_videos_details(self, video_ids: list) -> list:
-        """Get detailed information about multiple videos"""
+        """Get detailed information about multiple videos, filtering out unavailable ones"""
         if not video_ids:
             return []
 
         params = {
-            "part": "snippet,contentDetails,statistics",
+            "part": "snippet,contentDetails,statistics,status",
             "id": ",".join(video_ids),
         }
 
@@ -154,6 +154,23 @@ class YouTubeService:
 
         videos = []
         for item in data.get("items", []):
+            # Filter out unavailable videos
+            status = item.get("status", {})
+            privacy_status = status.get("privacyStatus", "")
+            upload_status = status.get("uploadStatus", "")
+
+            # Skip if not public or not fully processed
+            if privacy_status != "public":
+                logger.info(f"Skipping non-public video: {item.get('id')} (privacy: {privacy_status})")
+                continue
+            if upload_status not in ["processed", ""]:
+                logger.info(f"Skipping unprocessed video: {item.get('id')} (status: {upload_status})")
+                continue
+
+            # Check for embeddable
+            if not status.get("embeddable", True):
+                logger.info(f"Skipping non-embeddable video: {item.get('id')}")
+                continue
             snippet = item.get("snippet", {})
             content_details = item.get("contentDetails", {})
             statistics = item.get("statistics", {})
