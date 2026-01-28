@@ -16,28 +16,32 @@ const config: Config = {
       },
     },
     extend: {
-      // Bloomberg-inspired color palette
+      // Brand color palette - Navy Blue
       colors: {
-        // Primary brand colors
+        // Primary brand colors - Navy Blue
         brand: {
-          orange: "#FF6B00",
-          "orange-light": "#FF8533",
-          "orange-dark": "#CC5500",
+          navy: "#1e3a5f",
+          "navy-light": "#2d5a8a",
+          "navy-dark": "#152a47",
+          // Keep orange as secondary for legacy support
+          orange: "#1e3a5f", // Mapped to navy
+          "orange-light": "#2d5a8a",
+          "orange-dark": "#152a47",
         },
-        // Terminal dark theme
+        // Terminal theme (adapts via CSS variables)
         terminal: {
-          bg: "#0A0A0A",
-          "bg-secondary": "#111111",
-          "bg-elevated": "#1A1A1A",
-          border: "#2A2A2A",
-          "border-light": "#3A3A3A",
+          bg: "hsl(var(--terminal-bg))",
+          "bg-secondary": "hsl(var(--terminal-bg-secondary))",
+          "bg-elevated": "hsl(var(--terminal-bg-elevated))",
+          border: "hsl(var(--terminal-border))",
+          "border-light": "hsl(var(--terminal-border-light))",
         },
         // Market colors
         market: {
-          up: "#00D775",
-          "up-bg": "rgba(0, 215, 117, 0.1)",
-          down: "#FF3B3B",
-          "down-bg": "rgba(255, 59, 59, 0.1)",
+          up: "hsl(var(--market-up))",
+          "up-bg": "hsl(var(--market-up-bg))",
+          down: "hsl(var(--market-down))",
+          "down-bg": "hsl(var(--market-down-bg))",
           neutral: "#808080",
         },
         // Shadcn/ui colors
@@ -133,9 +137,9 @@ const config: Config = {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-terminal":
-          "linear-gradient(180deg, #0A0A0A 0%, #111111 100%)",
+          "linear-gradient(180deg, hsl(var(--terminal-bg)) 0%, hsl(var(--terminal-bg-secondary)) 100%)",
         "shimmer-gradient":
-          "linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent)",
+          "linear-gradient(90deg, transparent, hsl(var(--muted-foreground) / 0.1), transparent)",
       },
     },
   },

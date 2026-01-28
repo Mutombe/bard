@@ -3,86 +3,89 @@
 @tailwind utilities;
 
 /* =========================
-   BLOOMBERG-INSPIRED THEME SYSTEM
-   Supports both dark (default) and light modes
+   BARDIQ JOURNAL THEME SYSTEM
+   Light theme (default) and Dark theme
+   Primary color: Navy Blue
    ========================= */
 
 @layer base {
-  /* Light mode variables */
+  /* Light mode variables (DEFAULT) */
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 10%;
+    --foreground: 220 20% 10%;
 
-    --card: 0 0% 98%;
-    --card-foreground: 0 0% 10%;
+    --card: 210 20% 98%;
+    --card-foreground: 220 20% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 220 20% 10%;
 
-    --primary: 24 100% 50%;
+    /* Navy Blue as primary */
+    --primary: 220 70% 35%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 95%;
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 210 20% 95%;
+    --secondary-foreground: 220 20% 10%;
 
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 210 20% 95%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 0 0% 95%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 210 20% 93%;
+    --accent-foreground: 220 20% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 24 100% 50%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 220 70% 35%;
 
     --radius: 0.375rem;
 
     /* Market colors - light mode */
-    --market-up: 152 72% 35%;
+    --market-up: 152 72% 30%;
     --market-down: 0 84% 50%;
-    --market-up-bg: 152 72% 95%;
-    --market-down-bg: 0 84% 95%;
+    --market-up-bg: 152 60% 92%;
+    --market-down-bg: 0 80% 95%;
 
     /* Terminal colors - light mode */
     --terminal-bg: 0 0% 100%;
-    --terminal-bg-secondary: 0 0% 98%;
-    --terminal-bg-elevated: 0 0% 96%;
-    --terminal-border: 0 0% 90%;
-    --terminal-border-light: 0 0% 85%;
+    --terminal-bg-secondary: 210 20% 98%;
+    --terminal-bg-elevated: 210 20% 96%;
+    --terminal-border: 210 20% 88%;
+    --terminal-border-light: 210 20% 82%;
   }
 
-  /* Dark mode variables (Bloomberg terminal style) */
+  /* Dark mode variables */
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 95%;
+    --background: 220 20% 6%;
+    --foreground: 210 20% 95%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 95%;
+    --card: 220 20% 9%;
+    --card-foreground: 210 20% 95%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 220 20% 9%;
+    --popover-foreground: 210 20% 95%;
 
-    --primary: 24 100% 50%;
+    /* Navy Blue as primary (lighter for dark mode) */
+    --primary: 215 80% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 210 20% 95%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 220 15% 15%;
+    --muted-foreground: 210 15% 60%;
 
-    --accent: 0 0% 15%;
-    --accent-foreground: 0 0% 95%;
+    --accent: 220 15% 18%;
+    --accent-foreground: 210 20% 95%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 17%;
-    --input: 0 0% 17%;
-    --ring: 24 100% 50%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 215 80% 55%;
 
     /* Market colors - dark mode */
     --market-up: 152 100% 42%;
@@ -91,11 +94,11 @@
     --market-down-bg: 0 100% 10%;
 
     /* Terminal colors - dark mode */
-    --terminal-bg: 0 0% 4%;
-    --terminal-bg-secondary: 0 0% 7%;
-    --terminal-bg-elevated: 0 0% 10%;
-    --terminal-border: 0 0% 17%;
-    --terminal-border-light: 0 0% 25%;
+    --terminal-bg: 220 20% 6%;
+    --terminal-bg-secondary: 220 20% 9%;
+    --terminal-bg-elevated: 220 15% 12%;
+    --terminal-border: 220 15% 18%;
+    --terminal-border-light: 220 15% 25%;
   }
 }
 
@@ -118,13 +121,13 @@
   html.theme-transition *,
   html.theme-transition *::before,
   html.theme-transition *::after {
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease, box-shadow 0.3s ease !important;
   }
 
   /* Custom scrollbar - adapts to theme */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   ::-webkit-scrollbar-track {
@@ -221,8 +224,14 @@
   }
 
   .skeleton::after {
-    @apply absolute inset-0 -translate-x-full bg-shimmer-gradient animate-shimmer;
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
     content: "";
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--muted-foreground) / 0.1),
+      transparent
+    );
   }
 
   /* Stat card */
@@ -278,7 +287,7 @@
 
   /* Form inputs */
   .input-terminal {
-    @apply rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary;
+    @apply rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary;
     background-color: hsl(var(--background));
     border: 1px solid hsl(var(--terminal-border));
   }
@@ -328,6 +337,30 @@
 
   .badge-premium {
     @apply bg-primary/20 text-primary;
+  }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    @apply relative inline-flex items-center justify-center rounded-lg p-2 transition-colors;
+    @apply hover:bg-terminal-bg-elevated text-muted-foreground hover:text-foreground;
+  }
+
+  .theme-toggle-icon {
+    @apply h-5 w-5 transition-transform duration-300;
+  }
+
+  /* Light mode specific styles */
+  :root:not(.dark) {
+    /* Subtle shadows for depth in light mode */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+
+  .dark {
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
   }
 }
 
@@ -379,5 +412,18 @@
 
   .bg-terminal-elevated {
     background-color: hsl(var(--terminal-bg-elevated));
+  }
+
+  /* Shadow utilities */
+  .shadow-theme-sm {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .shadow-theme-md {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-theme-lg {
+    box-shadow: var(--shadow-lg);
   }
 }
