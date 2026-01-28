@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
 import { UnsplashImagePicker } from "@/components/editor/UnsplashImagePicker";
+import { toast } from "sonner";
 import type { Category } from "@/types";
 
 // Helper to convert tag name to slug
@@ -409,22 +410,22 @@ export default function NewArticlePage() {
 
   const handleSave = async (saveStatus: typeof status) => {
     if (!title.trim()) {
-      setError("Title is required");
+      toast.error("Title is required");
       return;
     }
 
     if (!excerpt.trim()) {
-      setError("Excerpt is required");
+      toast.error("Excerpt is required");
       return;
     }
 
     if (!content.trim()) {
-      setError("Content is required");
+      toast.error("Content is required");
       return;
     }
 
     if (!category) {
-      setError("Please select a category");
+      toast.error("Please select a category");
       return;
     }
 
@@ -444,29 +445,42 @@ export default function NewArticlePage() {
         tags: tags.map(t => t.slug),
       };
 
-      await editorialService.createArticle(articleData);
-      setSuccess(true);
+      console.log("Saving article with data:", articleData);
+      const result = await editorialService.createArticle(articleData);
+      console.log("Article saved successfully:", result);
 
-      setTimeout(() => {
-        router.push("/admin/articles");
-      }, 1500);
+      setSuccess(true);
+      toast.success(saveStatus === "published" ? "Article published!" : "Draft saved!");
+
+      // Use replace instead of push to prevent back navigation issues
+      router.replace("/admin/articles");
     } catch (err: any) {
       console.error("Failed to save article:", err);
-      const errorData = err.response?.data?.error;
+      console.error("Error response:", err.response?.data);
+      console.error("Error status:", err.response?.status);
+
+      // Check if article might have been saved despite error
+      if (err.code === "ECONNABORTED" || err.message?.includes("timeout")) {
+        toast.warning("Request timed out, but article may have been saved. Check the articles list.");
+        setTimeout(() => router.replace("/admin/articles"), 2000);
+        return;
+      }
+
+      const errorData = err.response?.data;
       let errorMsg = "Failed to save article. Please try again.";
 
-      if (errorData?.details) {
-        const details = errorData.details;
-        const messages: string[] = [];
-        if (details.tags) messages.push(`Tags: ${details.tags.join(", ")}`);
-        if (details.content_type) messages.push(`Content Type: ${details.content_type.join(", ")}`);
-        if (details.category) messages.push(`Category: ${details.category.join(", ")}`);
-        if (messages.length > 0) errorMsg = messages.join("; ");
-      } else if (err.response?.data?.detail) {
-        errorMsg = err.response.data.detail;
+      if (typeof errorData === "string") {
+        errorMsg = errorData;
+      } else if (errorData?.error) {
+        errorMsg = typeof errorData.error === "string" ? errorData.error : JSON.stringify(errorData.error);
+      } else if (errorData?.detail) {
+        errorMsg = errorData.detail;
+      } else if (errorData?.non_field_errors) {
+        errorMsg = errorData.non_field_errors.join(", ");
       }
 
       setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsSaving(false);
     }
