@@ -320,12 +320,31 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         return instance
 
     def to_representation(self, instance):
-        """Convert tags ManyRelatedManager to list of slugs for response."""
-        data = super().to_representation(instance)
-        # Convert tags M2M to list of slugs
-        data["tags"] = list(instance.tags.values_list("slug", flat=True))
-        # Convert related_companies M2M to list of IDs
-        data["related_companies"] = list(instance.related_companies.values_list("id", flat=True))
-        # Convert category to slug
-        data["category"] = instance.category.slug if instance.category else None
-        return data
+        """
+        Custom representation to handle ManyToMany fields properly.
+        The ListField for tags works for input but not for output serialization.
+        """
+        # Build response manually to avoid field serializer issues
+        return {
+            "id": instance.id,
+            "title": instance.title,
+            "slug": instance.slug,
+            "subtitle": instance.subtitle or "",
+            "excerpt": instance.excerpt,
+            "content": instance.content,
+            "featured_image": instance.featured_image.url if instance.featured_image else None,
+            "featured_image_url": instance.featured_image_url or "",
+            "featured_image_caption": instance.featured_image_caption or "",
+            "category": instance.category.slug if instance.category else None,
+            "tags": list(instance.tags.values_list("slug", flat=True)),
+            "content_type": instance.content_type,
+            "related_companies": list(instance.related_companies.values_list("id", flat=True)),
+            "status": instance.status,
+            "is_featured": instance.is_featured,
+            "is_breaking": instance.is_breaking,
+            "is_premium": instance.is_premium,
+            "meta_title": instance.meta_title or "",
+            "meta_description": instance.meta_description or "",
+            "created_at": instance.created_at.isoformat() if instance.created_at else None,
+            "updated_at": instance.updated_at.isoformat() if instance.updated_at else None,
+        }
