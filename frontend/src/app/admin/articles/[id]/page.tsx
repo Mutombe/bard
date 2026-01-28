@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -88,6 +88,92 @@ export default function EditArticlePage() {
   const [featured, setFeatured] = useState(mockArticle.featured);
   const [isSaving, setIsSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Markdown formatting functions
+  const wrapSelection = useCallback((prefix: string, suffix: string = prefix) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end);
+
+    if (start === end) {
+      const newText = text.substring(0, start) + prefix + suffix + text.substring(end);
+      setContent(newText);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + prefix.length, start + prefix.length);
+      }, 0);
+    } else {
+      const newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+      setContent(newText);
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + prefix.length, end + prefix.length);
+      }, 0);
+    }
+  }, []);
+
+  const insertAtCursor = useCallback((insertText: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+
+    const newText = text.substring(0, start) + insertText + text.substring(end);
+    setContent(newText);
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + insertText.length, start + insertText.length);
+    }, 0);
+  }, []);
+
+  const insertLinePrefix = useCallback((prefix: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const text = textarea.value;
+
+    let lineStart = start;
+    while (lineStart > 0 && text[lineStart - 1] !== "\n") {
+      lineStart--;
+    }
+
+    const newText = text.substring(0, lineStart) + prefix + text.substring(lineStart);
+    setContent(newText);
+
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + prefix.length, start + prefix.length);
+    }, 0);
+  }, []);
+
+  const formatBold = () => wrapSelection("**");
+  const formatItalic = () => wrapSelection("*");
+  const formatHeading1 = () => insertLinePrefix("# ");
+  const formatHeading2 = () => insertLinePrefix("## ");
+  const formatQuote = () => insertLinePrefix("> ");
+  const formatCode = () => wrapSelection("`");
+  const formatBulletList = () => insertLinePrefix("- ");
+  const formatNumberedList = () => insertLinePrefix("1. ");
+  const formatLink = () => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+    if (selectedText) {
+      wrapSelection("[", "](url)");
+    } else {
+      insertAtCursor("[link text](url)");
+    }
+  };
+  const formatImage = () => insertAtCursor("![alt text](image-url)");
 
   const addTag = (tag: string) => {
     if (tag && !tags.includes(tag)) {
@@ -159,7 +245,7 @@ export default function EditArticlePage() {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors text-sm flex items-center gap-2"
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors text-sm flex items-center gap-2"
           >
             <Save className="h-4 w-4" />
             {isSaving ? "Saving..." : "Save Changes"}
@@ -218,51 +304,105 @@ export default function EditArticlePage() {
               onChange={(e) => setExcerpt(e.target.value)}
               placeholder="Brief summary of the article..."
               rows={3}
-              className="w-full bg-transparent border border-terminal-border rounded-md p-3 outline-none focus:border-brand-orange resize-none"
+              className="w-full bg-transparent border border-terminal-border rounded-md p-3 outline-none focus:border-primary resize-none"
             />
           </div>
 
           {/* Content Editor */}
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
+            {/* Toolbar */}
             <div className="flex items-center gap-1 p-2 border-b border-terminal-border bg-terminal-bg overflow-x-auto">
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatHeading1}
+                title="Heading 1 (# )"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <Heading1 className="h-4 w-4" />
               </button>
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatHeading2}
+                title="Heading 2 (## )"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <Heading2 className="h-4 w-4" />
               </button>
               <div className="w-px h-6 bg-terminal-border mx-1" />
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatBold}
+                title="Bold (**text**)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <Bold className="h-4 w-4" />
               </button>
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatItalic}
+                title="Italic (*text*)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <Italic className="h-4 w-4" />
               </button>
               <div className="w-px h-6 bg-terminal-border mx-1" />
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatBulletList}
+                title="Bullet list (- item)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <List className="h-4 w-4" />
               </button>
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatNumberedList}
+                title="Numbered list (1. item)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <ListOrdered className="h-4 w-4" />
               </button>
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatQuote}
+                title="Quote (> text)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <Quote className="h-4 w-4" />
               </button>
               <div className="w-px h-6 bg-terminal-border mx-1" />
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatLink}
+                title="Insert link [text](url)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <LinkIcon className="h-4 w-4" />
               </button>
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatImage}
+                title="Insert image ![alt](url)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <ImageIcon className="h-4 w-4" />
               </button>
-              <button className="p-2 hover:bg-terminal-bg-elevated rounded">
+              <button
+                type="button"
+                onClick={formatCode}
+                title="Inline code (`code`)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
+              >
                 <Code className="h-4 w-4" />
               </button>
             </div>
+
+            {/* Editor Area */}
             <textarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full h-[500px] p-6 bg-transparent border-none outline-none resize-none font-mono text-sm"
+              className="w-full h-[500px] p-6 bg-transparent border-none outline-none resize-none font-mono text-sm leading-relaxed"
             />
           </div>
         </div>
@@ -278,7 +418,7 @@ export default function EditArticlePage() {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as typeof status)}
-                  className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+                  className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
@@ -294,7 +434,7 @@ export default function EditArticlePage() {
                     type="datetime-local"
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+                    className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
                   />
                 </div>
               )}
@@ -319,7 +459,7 @@ export default function EditArticlePage() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+              className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
             >
               {categories.map((cat) => (
                 <option key={cat} value={cat}>
@@ -336,7 +476,7 @@ export default function EditArticlePage() {
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="flex items-center gap-1 px-2 py-1 text-xs bg-brand-orange/20 text-brand-orange rounded"
+                  className="flex items-center gap-1 px-2 py-1 text-xs bg-primary/20 text-primary rounded"
                 >
                   {tag}
                   <button onClick={() => removeTag(tag)}>
@@ -352,7 +492,7 @@ export default function EditArticlePage() {
                 onChange={(e) => setTagInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
                 placeholder="Add tag..."
-                className="flex-1 px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+                className="flex-1 px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
               />
               <button
                 onClick={() => addTag(tagInput)}
@@ -386,7 +526,7 @@ export default function EditArticlePage() {
               value={featuredImage}
               onChange={(e) => setFeaturedImage(e.target.value)}
               placeholder="Image URL..."
-              className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+              className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
             />
           </div>
 
@@ -413,7 +553,7 @@ export default function EditArticlePage() {
                 onChange={(e) => setStockInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addStock()}
                 placeholder="Add stock symbol..."
-                className="flex-1 px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange font-mono uppercase"
+                className="flex-1 px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary font-mono uppercase"
               />
               <button
                 onClick={addStock}
