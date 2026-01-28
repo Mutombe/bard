@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 import {
   ArrowLeft,
   Save,
@@ -24,6 +25,11 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  Maximize2,
+  Minimize2,
+  Undo,
+  Redo,
+  FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
@@ -31,31 +37,43 @@ import { newsService } from "@/services/api/news";
 import { UnsplashImagePicker } from "@/components/editor/UnsplashImagePicker";
 import type { Category } from "@/types";
 
+// Helper to convert tag name to slug
+const toSlug = (text: string) => text.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
 const availableTags = [
-  "JSE",
-  "NGX",
-  "EGX",
-  "South Africa",
-  "Nigeria",
-  "Egypt",
-  "Kenya",
-  "Banking",
-  "Mining",
-  "Telecom",
-  "Energy",
-  "Retail",
-  "Technology",
-  "Earnings",
-  "IPO",
-  "M&A",
-  "Interest Rates",
-  "Inflation",
-  "GDP",
-  "Forex",
-  "Commodities",
-  "Gold",
-  "Oil",
-  "Research",
+  { name: "JSE", slug: "jse" },
+  { name: "NGX", slug: "ngx" },
+  { name: "EGX", slug: "egx" },
+  { name: "South Africa", slug: "south-africa" },
+  { name: "Nigeria", slug: "nigeria" },
+  { name: "Egypt", slug: "egypt" },
+  { name: "Kenya", slug: "kenya" },
+  { name: "Banking", slug: "banking" },
+  { name: "Mining", slug: "mining" },
+  { name: "Telecom", slug: "telecom" },
+  { name: "Energy", slug: "energy" },
+  { name: "Retail", slug: "retail" },
+  { name: "Technology", slug: "technology" },
+  { name: "Earnings", slug: "earnings" },
+  { name: "IPO", slug: "ipo" },
+  { name: "M&A", slug: "m-a" },
+  { name: "Interest Rates", slug: "interest-rates" },
+  { name: "Inflation", slug: "inflation" },
+  { name: "GDP", slug: "gdp" },
+  { name: "Forex", slug: "forex" },
+  { name: "Commodities", slug: "commodities" },
+  { name: "Gold", slug: "gold" },
+  { name: "Oil", slug: "oil" },
+  { name: "Research", slug: "research" },
+];
+
+const contentTypes = [
+  { value: "news", label: "News" },
+  { value: "analysis", label: "Analysis" },
+  { value: "research", label: "Research Report" },
+  { value: "opinion", label: "Opinion" },
+  { value: "market_update", label: "Market Update" },
+  { value: "earnings", label: "Earnings Report" },
 ];
 
 export default function NewArticlePage() {
@@ -65,18 +83,28 @@ export default function NewArticlePage() {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<{ name: string; slug: string }[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
   const [relatedStocks, setRelatedStocks] = useState<string[]>([]);
   const [stockInput, setStockInput] = useState("");
   const [status, setStatus] = useState<"draft" | "published" | "scheduled">("draft");
+  const [contentType, setContentType] = useState("news");
   const [scheduledDate, setScheduledDate] = useState("");
   const [featured, setFeatured] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
   const [imageCredit, setImageCredit] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+  const [charCount, setCharCount] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
 
   // Fetch categories on mount
   useEffect(() => {
@@ -96,15 +124,47 @@ export default function NewArticlePage() {
     fetchCategories();
   }, []);
 
-  const addTag = (tag: string) => {
-    if (tag && !tags.includes(tag)) {
-      setTags([...tags, tag]);
+  // Update word/char count
+  useEffect(() => {
+    const words = content.trim().split(/\s+/).filter(Boolean).length;
+    setWordCount(words);
+    setCharCount(content.length);
+  }, [content]);
+
+  // Undo/Redo functionality
+  const saveToUndo = useCallback((text: string) => {
+    setUndoStack(prev => [...prev.slice(-20), text]);
+    setRedoStack([]);
+  }, []);
+
+  const handleUndo = () => {
+    if (undoStack.length > 0) {
+      const previous = undoStack[undoStack.length - 1];
+      setRedoStack(prev => [...prev, content]);
+      setContent(previous);
+      setUndoStack(prev => prev.slice(0, -1));
+    }
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length > 0) {
+      const next = redoStack[redoStack.length - 1];
+      setUndoStack(prev => [...prev, content]);
+      setContent(next);
+      setRedoStack(prev => prev.slice(0, -1));
+    }
+  };
+
+  const addTag = (tagName: string, tagSlug?: string) => {
+    const slug = tagSlug || toSlug(tagName);
+    if (tagName && !tags.find(t => t.slug === slug)) {
+      setTags([...tags, { name: tagName, slug }]);
       setTagInput("");
     }
   };
 
-  const removeTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
+  const removeTag = (slug: string) => {
+    setTags(tags.filter((t) => t.slug !== slug));
   };
 
   const addStock = () => {
@@ -118,45 +178,39 @@ export default function NewArticlePage() {
     setRelatedStocks(relatedStocks.filter((s) => s !== stock));
   };
 
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
   // Markdown formatting functions
   const wrapSelection = useCallback((prefix: string, suffix: string = prefix) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
+    saveToUndo(content);
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const text = textarea.value;
     const selectedText = text.substring(start, end);
 
-    // If no selection, just insert the markers
     if (start === end) {
       const newText = text.substring(0, start) + prefix + suffix + text.substring(end);
       setContent(newText);
-      // Position cursor between markers
       setTimeout(() => {
         textarea.focus();
         textarea.setSelectionRange(start + prefix.length, start + prefix.length);
       }, 0);
     } else {
-      // Wrap selected text
       const newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
       setContent(newText);
-      // Select the wrapped text
       setTimeout(() => {
         textarea.focus();
         textarea.setSelectionRange(start + prefix.length, end + prefix.length);
       }, 0);
     }
-  }, []);
+  }, [content, saveToUndo]);
 
   const insertAtCursor = useCallback((insertText: string) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
+    saveToUndo(content);
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const text = textarea.value;
@@ -168,16 +222,16 @@ export default function NewArticlePage() {
       textarea.focus();
       textarea.setSelectionRange(start + insertText.length, start + insertText.length);
     }, 0);
-  }, []);
+  }, [content, saveToUndo]);
 
   const insertLinePrefix = useCallback((prefix: string) => {
     const textarea = textareaRef.current;
     if (!textarea) return;
 
+    saveToUndo(content);
     const start = textarea.selectionStart;
     const text = textarea.value;
 
-    // Find the start of the current line
     let lineStart = start;
     while (lineStart > 0 && text[lineStart - 1] !== "\n") {
       lineStart--;
@@ -190,7 +244,7 @@ export default function NewArticlePage() {
       textarea.focus();
       textarea.setSelectionRange(start + prefix.length, start + prefix.length);
     }, 0);
-  }, []);
+  }, [content, saveToUndo]);
 
   const formatBold = () => wrapSelection("**");
   const formatItalic = () => wrapSelection("*");
@@ -211,6 +265,147 @@ export default function NewArticlePage() {
     }
   };
   const formatImage = () => insertAtCursor("![alt text](image-url)");
+
+  // Handle keyboard shortcuts and auto-continue lists
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Keyboard shortcuts
+    if (e.ctrlKey || e.metaKey) {
+      switch (e.key.toLowerCase()) {
+        case "b":
+          e.preventDefault();
+          formatBold();
+          return;
+        case "i":
+          e.preventDefault();
+          formatItalic();
+          return;
+        case "k":
+          e.preventDefault();
+          formatLink();
+          return;
+        case "z":
+          if (e.shiftKey) {
+            e.preventDefault();
+            handleRedo();
+          } else {
+            e.preventDefault();
+            handleUndo();
+          }
+          return;
+        case "y":
+          e.preventDefault();
+          handleRedo();
+          return;
+      }
+    }
+
+    // Auto-continue lists on Enter
+    if (e.key === "Enter") {
+      const cursorPos = textarea.selectionStart;
+      const text = textarea.value;
+
+      // Find the current line
+      let lineStart = cursorPos;
+      while (lineStart > 0 && text[lineStart - 1] !== "\n") {
+        lineStart--;
+      }
+      const currentLine = text.substring(lineStart, cursorPos);
+
+      // Check for numbered list (e.g., "1. ", "2. ", "10. ")
+      const numberedMatch = currentLine.match(/^(\d+)\.\s/);
+      if (numberedMatch) {
+        const num = parseInt(numberedMatch[1], 10);
+        const lineContent = currentLine.substring(numberedMatch[0].length);
+
+        // If line is empty (just the number), remove it
+        if (!lineContent.trim()) {
+          e.preventDefault();
+          const newText = text.substring(0, lineStart) + text.substring(cursorPos);
+          setContent(newText);
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(lineStart, lineStart);
+          }, 0);
+          return;
+        }
+
+        // Continue with next number
+        e.preventDefault();
+        const nextNum = `${num + 1}. `;
+        const newText = text.substring(0, cursorPos) + "\n" + nextNum + text.substring(cursorPos);
+        saveToUndo(content);
+        setContent(newText);
+        setTimeout(() => {
+          textarea.focus();
+          const newPos = cursorPos + 1 + nextNum.length;
+          textarea.setSelectionRange(newPos, newPos);
+        }, 0);
+        return;
+      }
+
+      // Check for bullet list (e.g., "- " or "* ")
+      const bulletMatch = currentLine.match(/^([-*])\s/);
+      if (bulletMatch) {
+        const lineContent = currentLine.substring(bulletMatch[0].length);
+
+        // If line is empty (just the bullet), remove it
+        if (!lineContent.trim()) {
+          e.preventDefault();
+          const newText = text.substring(0, lineStart) + text.substring(cursorPos);
+          setContent(newText);
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(lineStart, lineStart);
+          }, 0);
+          return;
+        }
+
+        // Continue with bullet
+        e.preventDefault();
+        const bullet = `${bulletMatch[1]} `;
+        const newText = text.substring(0, cursorPos) + "\n" + bullet + text.substring(cursorPos);
+        saveToUndo(content);
+        setContent(newText);
+        setTimeout(() => {
+          textarea.focus();
+          const newPos = cursorPos + 1 + bullet.length;
+          textarea.setSelectionRange(newPos, newPos);
+        }, 0);
+        return;
+      }
+
+      // Check for blockquote
+      const quoteMatch = currentLine.match(/^>\s/);
+      if (quoteMatch) {
+        const lineContent = currentLine.substring(quoteMatch[0].length);
+
+        if (!lineContent.trim()) {
+          e.preventDefault();
+          const newText = text.substring(0, lineStart) + text.substring(cursorPos);
+          setContent(newText);
+          setTimeout(() => {
+            textarea.focus();
+            textarea.setSelectionRange(lineStart, lineStart);
+          }, 0);
+          return;
+        }
+
+        e.preventDefault();
+        const newText = text.substring(0, cursorPos) + "\n> " + text.substring(cursorPos);
+        saveToUndo(content);
+        setContent(newText);
+        setTimeout(() => {
+          textarea.focus();
+          const newPos = cursorPos + 3;
+          textarea.setSelectionRange(newPos, newPos);
+        }, 0);
+        return;
+      }
+    }
+  };
 
   const handleSave = async (saveStatus: typeof status) => {
     if (!title.trim()) {
@@ -241,36 +436,47 @@ export default function NewArticlePage() {
         title: title.trim(),
         excerpt: excerpt.trim(),
         content: content.trim(),
-        category: category, // slug
-        status: (saveStatus === "published" ? "PUBLISHED" : "DRAFT") as "PUBLISHED" | "DRAFT",
+        category: category,
+        status: saveStatus === "published" ? "published" : "draft",
         is_featured: featured,
         featured_image_url: featuredImage || undefined,
-        content_type: "NEWS" as const,
-        tags: tags,
+        content_type: contentType,
+        tags: tags.map(t => t.slug),
       };
 
       await editorialService.createArticle(articleData);
       setSuccess(true);
 
-      // Redirect after short delay to show success
       setTimeout(() => {
         router.push("/admin/articles");
       }, 1500);
     } catch (err: any) {
       console.error("Failed to save article:", err);
-      const errorMsg = err.response?.data?.detail
-        || err.response?.data?.message
-        || (err.response?.data && typeof err.response.data === "object"
-            ? Object.entries(err.response.data).map(([k, v]) => `${k}: ${v}`).join(", ")
-            : "Failed to save article. Please try again.");
+      const errorData = err.response?.data?.error;
+      let errorMsg = "Failed to save article. Please try again.";
+
+      if (errorData?.details) {
+        const details = errorData.details;
+        const messages: string[] = [];
+        if (details.tags) messages.push(`Tags: ${details.tags.join(", ")}`);
+        if (details.content_type) messages.push(`Content Type: ${details.content_type.join(", ")}`);
+        if (details.category) messages.push(`Category: ${details.category.join(", ")}`);
+        if (messages.length > 0) errorMsg = messages.join("; ");
+      } else if (err.response?.data?.detail) {
+        errorMsg = err.response.data.detail;
+      }
+
       setError(errorMsg);
     } finally {
       setIsSaving(false);
     }
   };
 
+  // Calculate estimated read time
+  const readTime = Math.max(1, Math.ceil(wordCount / 200));
+
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className={cn("max-w-6xl mx-auto", isFullscreen && "fixed inset-0 z-50 bg-terminal-bg p-6 overflow-auto max-w-none")}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -283,11 +489,18 @@ export default function NewArticlePage() {
           <div>
             <h1 className="text-2xl font-bold">New Article</h1>
             <p className="text-sm text-muted-foreground">
-              Create a new news article or story
+              {wordCount} words · {readTime} min read
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="p-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors"
+            title={isFullscreen ? "Exit fullscreen" : "Fullscreen editor"}
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </button>
           <button
             onClick={() => handleSave("draft")}
             disabled={isSaving || success}
@@ -297,7 +510,7 @@ export default function NewArticlePage() {
             Save Draft
           </button>
           <button
-            onClick={() => {}}
+            onClick={() => setShowPreview(true)}
             className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors text-sm flex items-center gap-2"
           >
             <Eye className="h-4 w-4" />
@@ -306,7 +519,7 @@ export default function NewArticlePage() {
           <button
             onClick={() => handleSave("published")}
             disabled={isSaving || success}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
+            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
           >
             {isSaving ? (
               <>
@@ -375,6 +588,25 @@ export default function NewArticlePage() {
             <div className="flex items-center gap-1 p-2 border-b border-terminal-border bg-terminal-bg overflow-x-auto">
               <button
                 type="button"
+                onClick={handleUndo}
+                disabled={undoStack.length === 0}
+                title="Undo (Ctrl+Z)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors disabled:opacity-30"
+              >
+                <Undo className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={handleRedo}
+                disabled={redoStack.length === 0}
+                title="Redo (Ctrl+Y)"
+                className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors disabled:opacity-30"
+              >
+                <Redo className="h-4 w-4" />
+              </button>
+              <div className="w-px h-6 bg-terminal-border mx-1" />
+              <button
+                type="button"
                 onClick={formatHeading1}
                 title="Heading 1 (# )"
                 className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
@@ -393,7 +625,7 @@ export default function NewArticlePage() {
               <button
                 type="button"
                 onClick={formatBold}
-                title="Bold (**text**)"
+                title="Bold (Ctrl+B)"
                 className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
               >
                 <Bold className="h-4 w-4" />
@@ -401,7 +633,7 @@ export default function NewArticlePage() {
               <button
                 type="button"
                 onClick={formatItalic}
-                title="Italic (*text*)"
+                title="Italic (Ctrl+I)"
                 className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
               >
                 <Italic className="h-4 w-4" />
@@ -418,7 +650,7 @@ export default function NewArticlePage() {
               <button
                 type="button"
                 onClick={formatNumberedList}
-                title="Numbered list (1. item)"
+                title="Numbered list (1. item) - auto-continues on Enter"
                 className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
               >
                 <ListOrdered className="h-4 w-4" />
@@ -426,7 +658,7 @@ export default function NewArticlePage() {
               <button
                 type="button"
                 onClick={formatQuote}
-                title="Quote (> text)"
+                title="Blockquote (> text)"
                 className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
               >
                 <Quote className="h-4 w-4" />
@@ -435,7 +667,7 @@ export default function NewArticlePage() {
               <button
                 type="button"
                 onClick={formatLink}
-                title="Insert link [text](url)"
+                title="Insert link (Ctrl+K)"
                 className="p-2 hover:bg-terminal-bg-elevated rounded transition-colors"
               >
                 <LinkIcon className="h-4 w-4" />
@@ -456,26 +688,35 @@ export default function NewArticlePage() {
               >
                 <Code className="h-4 w-4" />
               </button>
+              <div className="flex-1" />
+              <span className="text-xs text-muted-foreground px-2">
+                {charCount} chars
+              </span>
             </div>
 
             {/* Editor Area */}
             <textarea
               ref={textareaRef}
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                saveToUndo(content);
+                setContent(e.target.value);
+              }}
+              onKeyDown={handleKeyDown}
               placeholder="Write your article content here...
 
-Use the toolbar buttons above or type markdown directly:
-• **bold** for emphasis
-• *italic* for subtle emphasis
-• # Heading 1, ## Heading 2
-• [link text](url) for links
-• > blockquote for citations
-• - bullet list items
-• 1. numbered list items
+Tips:
+• Use toolbar buttons or keyboard shortcuts (Ctrl+B, Ctrl+I, Ctrl+K)
+• Type 1. to start a numbered list - it auto-continues when you press Enter
+• Type - for bullet lists
+• Type > for blockquotes
+• Press Enter on empty list item to exit list
 
 Start writing your article..."
-              className="w-full h-[500px] p-6 bg-transparent border-none outline-none resize-none font-mono text-sm leading-relaxed"
+              className={cn(
+                "w-full p-6 bg-transparent border-none outline-none resize-none font-mono text-sm leading-relaxed",
+                isFullscreen ? "h-[calc(100vh-400px)]" : "h-[500px]"
+              )}
             />
           </div>
         </div>
@@ -497,6 +738,21 @@ Start writing your article..."
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
                   <option value="scheduled">Scheduled</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Content Type</label>
+                <select
+                  value={contentType}
+                  onChange={(e) => setContentType(e.target.value)}
+                  className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
+                >
+                  {contentTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -559,11 +815,11 @@ Start writing your article..."
             <div className="flex flex-wrap gap-2 mb-3">
               {tags.map((tag) => (
                 <span
-                  key={tag}
+                  key={tag.slug}
                   className="flex items-center gap-1 px-2 py-1 text-xs bg-primary/20 text-primary rounded"
                 >
-                  {tag}
-                  <button onClick={() => removeTag(tag)}>
+                  {tag.name}
+                  <button onClick={() => removeTag(tag.slug)}>
                     <X className="h-3 w-3" />
                   </button>
                 </span>
@@ -574,7 +830,12 @@ Start writing your article..."
                 type="text"
                 value={tagInput}
                 onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addTag(tagInput)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addTag(tagInput);
+                  }
+                }}
                 placeholder="Add tag..."
                 className="flex-1 px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
               />
@@ -591,15 +852,15 @@ Start writing your article..."
               </div>
               <div className="flex flex-wrap gap-1">
                 {availableTags
-                  .filter((t) => !tags.includes(t))
+                  .filter((t) => !tags.find(tag => tag.slug === t.slug))
                   .slice(0, 8)
                   .map((tag) => (
                     <button
-                      key={tag}
-                      onClick={() => addTag(tag)}
+                      key={tag.slug}
+                      onClick={() => addTag(tag.name, tag.slug)}
                       className="px-2 py-0.5 text-xs bg-terminal-bg-elevated rounded hover:bg-terminal-bg"
                     >
-                      {tag}
+                      {tag.name}
                     </button>
                   ))}
               </div>
@@ -635,7 +896,7 @@ Start writing your article..."
                 <button
                   type="button"
                   onClick={() => setShowUnsplashPicker(true)}
-                  className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary-dark"
+                  className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90"
                 >
                   Search Unsplash
                 </button>
@@ -714,6 +975,118 @@ Start writing your article..."
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70" onClick={() => setShowPreview(false)} />
+          <div className="relative bg-terminal-bg border border-terminal-border rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Preview Header */}
+            <div className="flex items-center justify-between p-4 border-b border-terminal-border">
+              <div className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                <h2 className="font-semibold">Article Preview</h2>
+              </div>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="p-2 hover:bg-terminal-bg-elevated rounded-md"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Preview Content */}
+            <div className="flex-1 overflow-auto p-6">
+              {featuredImage && (
+                <div className="aspect-video rounded-lg overflow-hidden mb-6">
+                  <img
+                    src={featuredImage}
+                    alt={title}
+                    className="w-full h-full object-cover"
+                  />
+                  {imageCredit && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Photo by {imageCredit} on Unsplash
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 mb-4">
+                {categories.find(c => c.slug === category)?.name && (
+                  <span className="px-2 py-1 text-xs bg-primary/20 text-primary rounded">
+                    {categories.find(c => c.slug === category)?.name}
+                  </span>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {readTime} min read
+                </span>
+              </div>
+
+              <h1 className="text-3xl font-bold mb-4">{title || "Untitled Article"}</h1>
+
+              {excerpt && (
+                <p className="text-lg text-muted-foreground mb-6 border-l-4 border-primary pl-4">
+                  {excerpt}
+                </p>
+              )}
+
+              <div className="prose prose-invert max-w-none">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-2xl font-bold mt-8 mb-4">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-bold mt-6 mb-3">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-lg font-semibold mt-4 mb-2">{children}</h3>,
+                    p: ({ children }) => <p className="mb-4 leading-relaxed">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-primary pl-4 my-4 italic text-muted-foreground">
+                        {children}
+                      </blockquote>
+                    ),
+                    code: ({ children }) => (
+                      <code className="bg-terminal-bg-elevated px-1 py-0.5 rounded text-sm font-mono">
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ children }) => (
+                      <pre className="bg-terminal-bg-elevated p-4 rounded-lg overflow-x-auto my-4">
+                        {children}
+                      </pre>
+                    ),
+                    a: ({ href, children }) => (
+                      <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                        {children}
+                      </a>
+                    ),
+                    strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                  }}
+                >
+                  {content || "*No content yet*"}
+                </ReactMarkdown>
+              </div>
+
+              {tags.length > 0 && (
+                <div className="mt-8 pt-6 border-t border-terminal-border">
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <span
+                        key={tag.slug}
+                        className="px-3 py-1 text-sm bg-terminal-bg-elevated rounded-full"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
