@@ -219,3 +219,18 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
 
         serializer = NewsArticleDetailSerializer(article)
         return Response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        """Delete an article (editors only)."""
+        try:
+            instance = self.get_object()
+            self.perform_destroy(instance)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error deleting article: {str(e)}", exc_info=True)
+            return Response(
+                {"error": f"Failed to delete article: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
