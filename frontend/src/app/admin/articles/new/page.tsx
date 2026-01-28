@@ -28,6 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
+import { UnsplashImagePicker } from "@/components/editor/UnsplashImagePicker";
 import type { Category } from "@/types";
 
 const availableTags = [
@@ -74,6 +75,8 @@ export default function NewArticlePage() {
   const [featured, setFeatured] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
+  const [imageCredit, setImageCredit] = useState("");
 
   // Fetch categories on mount
   useEffect(() => {
@@ -469,7 +472,10 @@ Start writing..."
                   className="w-full h-full object-cover"
                 />
                 <button
-                  onClick={() => setFeaturedImage("")}
+                  onClick={() => {
+                    setFeaturedImage("");
+                    setImageCredit("");
+                  }}
                   className="absolute top-2 right-2 p-1 bg-black/50 rounded-full hover:bg-black/70"
                 >
                   <X className="h-4 w-4" />
@@ -479,21 +485,54 @@ Start writing..."
               <div className="border-2 border-dashed border-terminal-border rounded-md p-6 text-center">
                 <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  Drag and drop or click to upload
+                  Search Unsplash or paste URL
                 </p>
-                <button className="px-3 py-1 text-sm bg-terminal-bg-elevated rounded hover:bg-terminal-bg">
-                  Browse
+                <button
+                  type="button"
+                  onClick={() => setShowUnsplashPicker(true)}
+                  className="px-3 py-1 text-sm bg-brand-orange text-white rounded hover:bg-brand-orange-dark"
+                >
+                  Search Unsplash
                 </button>
               </div>
+            )}
+            {imageCredit && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Photo by {imageCredit} on Unsplash
+              </p>
             )}
             <input
               type="text"
               value={featuredImage}
-              onChange={(e) => setFeaturedImage(e.target.value)}
+              onChange={(e) => {
+                setFeaturedImage(e.target.value);
+                setImageCredit("");
+              }}
               placeholder="Or paste image URL..."
               className="w-full mt-3 px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
             />
+            {!featuredImage && (
+              <button
+                type="button"
+                onClick={() => setShowUnsplashPicker(true)}
+                className="w-full mt-2 px-3 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated text-sm flex items-center justify-center gap-2"
+              >
+                <ImageIcon className="h-4 w-4" />
+                Search Unsplash
+              </button>
+            )}
           </div>
+
+          {/* Unsplash Picker Modal */}
+          <UnsplashImagePicker
+            isOpen={showUnsplashPicker}
+            onClose={() => setShowUnsplashPicker(false)}
+            onSelect={(image) => {
+              setFeaturedImage(image.url);
+              setImageCredit(image.photographer);
+            }}
+            defaultQuery={title ? title.split(" ").slice(0, 2).join(" ") : ""}
+          />
 
           {/* Related Stocks */}
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">

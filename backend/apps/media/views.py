@@ -416,3 +416,72 @@ class YouTubeChannelViewSet(viewsets.ModelViewSet):
 
         serializer = YouTubeVideoSerializer(videos, many=True)
         return Response(serializer.data)
+
+
+class UnsplashSearchView(viewsets.ViewSet):
+    """
+    ViewSet for searching Unsplash images.
+    Provides image search functionality for article/newsletter editors.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get"], url_path="search")
+    def search(self, request):
+        """
+        Search Unsplash for images.
+
+        Query params:
+        - q: Search query (required)
+        - orientation: landscape, portrait, squarish (default: landscape)
+        - per_page: Results per page (default: 12, max: 30)
+        - page: Page number (default: 1)
+        """
+        from .image_service import UnsplashService
+
+        query = request.query_params.get("q", "").strip()
+        if not query:
+            return Response(
+                {"error": "Search query 'q' is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        orientation = request.query_params.get("orientation", "landscape")
+        per_page = min(int(request.query_params.get("per_page", 12)), 30)
+        page = int(request.query_params.get("page", 1))
+
+        unsplash = UnsplashService()
+        if not unsplash.is_configured:
+            return Response(
+                {"error": "Unsplash API is not configured"},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        result = unsplash.search_photo(
+            query=query,
+            orientation=orientation,
+            use_cache=False,  # Don't cache search results for editors
+            page=page,
+            per_page=per_page,
+        )
+
+        if not result:
+            return Response({"results": [], "total": 0})
+
+        # Format results for frontend
+        images = result.get("all_results", [])
+        formatted_results = []
+        for img in images:
+            formatted_results.append({
+                "id": img.get("id"),
+                "url": img.get("url"),
+                "thumb": img.get("url").replace("w=800", "w=200") if img.get("url") else None,
+                "photographer": img.get("photographer"),
+                "alt": img.get("alt_description", ""),
+            })
+
+        return Response({
+            "results": formatted_results,
+            "query": query,
+            "page": page,
+            "per_page": per_page,
+        })
