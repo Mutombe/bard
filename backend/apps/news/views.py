@@ -246,11 +246,15 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
 
         try:
             article = NewsArticle.objects.get(id=article_id)
+            title = article.title
             article.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {"message": f"Article '{title}' deleted successfully"},
+                status=status.HTTP_200_OK,
+            )
         except NewsArticle.DoesNotExist:
             return Response(
-                {"error": "Article not found"},
+                {"error": f"Article with ID {article_id} not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Exception as e:

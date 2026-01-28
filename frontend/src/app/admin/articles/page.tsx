@@ -291,10 +291,17 @@ export default function ArticlesPage() {
       await editorialService.deleteArticle(articleId);
       toast.success("Article deleted successfully");
       setDeleteModal({ open: false, type: "single" });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to delete article:", err);
-      toast.error("Failed to delete article");
-      setArticles(previousArticles);
+      const errorMessage = err?.response?.data?.error || "Failed to delete article";
+      if (err?.response?.status === 404) {
+        // Article already deleted or doesn't exist - remove from UI
+        toast.info("Article was already deleted");
+        setDeleteModal({ open: false, type: "single" });
+      } else {
+        toast.error(errorMessage);
+        setArticles(previousArticles);
+      }
     } finally {
       setDeleteLoading(false);
     }
