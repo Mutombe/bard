@@ -3,6 +3,7 @@ News Serializers
 """
 from rest_framework import serializers
 
+from apps.markets.models import Company
 from apps.markets.serializers import CompanyMinimalSerializer
 from apps.media.image_service import get_article_image
 from apps.users.serializers import UserSerializer
@@ -236,7 +237,7 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         required=False,
     )
     related_companies = serializers.PrimaryKeyRelatedField(
-        queryset="markets.Company",
+        queryset=Company.objects.all(),
         many=True,
         required=False,
     )

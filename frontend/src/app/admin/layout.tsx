@@ -64,6 +64,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [isAuthenticated, openLogin]);
 
+  // Listen for session expiry events
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      openLogin();
+    };
+
+    window.addEventListener("auth:session-expired", handleSessionExpired);
+    return () => {
+      window.removeEventListener("auth:session-expired", handleSessionExpired);
+    };
+  }, [openLogin]);
+
   // Show overlay while not authenticated - modal will handle the login
   if (!isAuthenticated) {
     return (
@@ -76,7 +88,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </p>
           <button
             onClick={openLogin}
-            className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
+            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
           >
             Sign In
           </button>
@@ -99,7 +111,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </p>
           <Link
             href="/"
-            className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
+            className="px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
           >
             Return Home
           </Link>
@@ -126,7 +138,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="h-16 flex items-center justify-between px-4 border-b border-terminal-border">
           {!sidebarCollapsed && (
             <Link href="/admin" className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-brand-orange rounded-sm flex items-center justify-center">
+              <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center">
                 <span className="font-bold text-white text-sm">BS</span>
               </div>
               <span className="font-bold">Admin</span>
@@ -157,7 +169,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors",
                   isActive
-                    ? "bg-brand-orange text-white"
+                    ? "bg-primary text-white"
                     : "text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated"
                 )}
               >
@@ -172,8 +184,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-terminal-border">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-brand-orange/20 flex items-center justify-center">
-                <span className="text-brand-orange font-medium">
+              <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <span className="text-primary font-medium">
                   {user?.first_name?.[0]}{user?.last_name?.[0]}
                 </span>
               </div>
@@ -203,7 +215,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-terminal-bg-secondary border-b border-terminal-border">
         <div className="h-16 flex items-center justify-between px-4">
           <Link href="/admin" className="flex items-center gap-2">
-            <div className="h-8 w-8 bg-brand-orange rounded-sm flex items-center justify-center">
+            <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center">
               <span className="font-bold text-white text-sm">BS</span>
             </div>
             <span className="font-bold">Admin</span>
@@ -229,7 +241,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors",
                       isActive
-                        ? "bg-brand-orange text-white"
+                        ? "bg-primary text-white"
                         : "text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated"
                     )}
                   >
@@ -258,7 +270,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <input
               type="text"
               placeholder="Search articles, users..."
-              className="w-full pl-10 pr-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+              className="w-full pl-10 pr-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
             />
           </div>
           <div className="flex items-center gap-4">
@@ -267,7 +279,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </Link>
             <button className="relative p-2 text-muted-foreground hover:text-foreground">
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-brand-orange rounded-full" />
+              <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full" />
             </button>
           </div>
         </div>

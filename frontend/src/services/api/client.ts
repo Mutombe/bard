@@ -91,9 +91,12 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(new Error("Token refresh failed"));
         store.dispatch(clearAuth());
-        // Redirect to login
+        // Clear tokens from storage - let components handle showing auth modal
         if (typeof window !== "undefined") {
-          window.location.href = "/login";
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          // Dispatch custom event so components can react
+          window.dispatchEvent(new CustomEvent("auth:session-expired"));
         }
         return Promise.reject(refreshError);
       } finally {
