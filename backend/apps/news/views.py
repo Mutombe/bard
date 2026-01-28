@@ -4,7 +4,7 @@ News Views
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.core.cache import (
@@ -27,7 +27,7 @@ from .serializers import (
 )
 
 
-class IsEditorOrReadOnly:
+class IsEditorOrReadOnly(BasePermission):
     """Permission class for editor-only write access."""
 
     def has_permission(self, request, view):
