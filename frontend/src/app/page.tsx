@@ -27,7 +27,7 @@ import {
   useIndices,
   useGainers,
   useLosers,
-  useYouTubeFinanceVideos,
+  useLiveYouTubeVideos,
 } from "@/hooks";
 
 // Types
@@ -651,7 +651,7 @@ export default function HomePage() {
   const { data: indicesData, isLoading: indicesLoading } = useIndices();
   const { data: gainersData, isLoading: gainersLoading } = useGainers(undefined, 5);
   const { data: losersData, isLoading: usersLoading } = useLosers(undefined, 5);
-  const { data: videosData, isLoading: videosLoading } = useYouTubeFinanceVideos("southern_africa", 1);
+  const { data: videosData, isLoading: videosLoading } = useLiveYouTubeVideos(3);
 
   // Handle client-side mounting for localStorage access
   useEffect(() => {

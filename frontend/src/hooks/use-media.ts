@@ -123,6 +123,25 @@ export function useYouTubeFinanceVideos(region: string = "africa", maxResults: n
 }
 
 /**
+ * Live YouTube Videos (always fetches from YouTube API)
+ *
+ * Use this when you need real-time videos directly from YouTube.
+ * Falls back to searchYouTube with African finance query.
+ */
+export function useLiveYouTubeVideos(maxResults: number = 5) {
+  const defaultQuery = "African stock market OR CNBC Africa OR JSE news";
+  return useSWR<YouTubeVideo[]>(
+    `/media/videos/youtube_search/?q=${encodeURIComponent(defaultQuery)}&max_results=${maxResults}`,
+    () => mediaService.searchYouTube({ q: defaultQuery, max_results: maxResults }),
+    {
+      revalidateOnFocus: true,
+      dedupingInterval: 300000, // 5 minutes (longer cache since it's live API)
+      refreshInterval: 600000, // Auto-refresh every 10 minutes
+    }
+  );
+}
+
+/**
  * CNBC Africa Featured Video
  *
  * Returns the current featured CNBC Africa video.

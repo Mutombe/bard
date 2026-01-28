@@ -7,9 +7,6 @@ import {
   TrendingUp,
   TrendingDown,
   ChevronRight,
-  Star,
-  Bell,
-  Share2,
   Calendar,
   AlertCircle,
   ArrowLeft,
@@ -19,6 +16,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
 import { newsService } from "@/services/api/news";
 import { ProfessionalChart, generateChartData } from "@/components/charts/ProfessionalChart";
+import { StockActions } from "@/components/stock/StockActions";
 import type { Company, NewsArticle } from "@/types";
 
 // Skeleton component for loading states
@@ -122,7 +120,6 @@ export default function CompanyDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [news, setNews] = useState<NewsArticle[]>([]);
   const [timeframe, setTimeframe] = useState<string>("1M");
-  const [isWatched, setIsWatched] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -275,26 +272,7 @@ export default function CompanyDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsWatched(!isWatched)}
-                className={cn(
-                  "p-2 border rounded-md transition-colors",
-                  isWatched
-                    ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
-                    : "border-terminal-border hover:bg-terminal-bg-elevated"
-                )}
-                title={isWatched ? "Remove from Watchlist" : "Add to Watchlist"}
-              >
-                <Star className={cn("h-5 w-5", isWatched && "fill-current")} />
-              </button>
-              <button className="p-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors">
-                <Bell className="h-5 w-5" />
-              </button>
-              <button className="p-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors">
-                <Share2 className="h-5 w-5" />
-              </button>
-            </div>
+            <StockActions company={company} />
           </div>
         </div>
 

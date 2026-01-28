@@ -2,20 +2,20 @@
 
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   TrendingUp,
   TrendingDown,
-  Clock,
   BarChart3,
   Globe,
   ChevronRight,
-  ExternalLink,
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
+import { ProfessionalChart, generateChartData } from "@/components/charts/ProfessionalChart";
+import { IndexActions } from "@/components/stock/StockActions";
 import type { MarketIndex } from "@/types";
 
 // Skeleton component
@@ -25,93 +25,16 @@ function Skeleton({ className }: { className?: string }) {
   );
 }
 
-function IndexChart({ data, isUp }: { data: number[]; isUp: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || data.length === 0) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const width = canvas.width;
-    const height = canvas.height;
-    const padding = 40;
-
-    ctx.clearRect(0, 0, width, height);
-
-    const minValue = Math.min(...data) * 0.998;
-    const maxValue = Math.max(...data) * 1.002;
-    const range = maxValue - minValue;
-
-    const getX = (index: number) => padding + (index / (data.length - 1)) * (width - padding * 2);
-    const getY = (value: number) => height - padding - ((value - minValue) / range) * (height - padding * 2);
-
-    // Draw grid
-    ctx.strokeStyle = "#2a2a2a";
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-      const y = padding + (i / 4) * (height - padding * 2);
-      ctx.beginPath();
-      ctx.moveTo(padding, y);
-      ctx.lineTo(width - padding, y);
-      ctx.stroke();
-
-      const value = maxValue - (i / 4) * range;
-      ctx.fillStyle = "#666";
-      ctx.font = "11px monospace";
-      ctx.textAlign = "right";
-      ctx.fillText(value.toFixed(0), padding - 5, y + 4);
-    }
-
-    // Draw gradient fill
-    const gradient = ctx.createLinearGradient(0, padding, 0, height - padding);
-    if (isUp) {
-      gradient.addColorStop(0, "rgba(0, 215, 117, 0.3)");
-      gradient.addColorStop(1, "rgba(0, 215, 117, 0)");
-    } else {
-      gradient.addColorStop(0, "rgba(255, 59, 59, 0.3)");
-      gradient.addColorStop(1, "rgba(255, 59, 59, 0)");
-    }
-
-    ctx.beginPath();
-    ctx.moveTo(getX(0), height - padding);
-    data.forEach((value, index) => {
-      ctx.lineTo(getX(index), getY(value));
-    });
-    ctx.lineTo(getX(data.length - 1), height - padding);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    // Draw line
-    ctx.beginPath();
-    ctx.moveTo(getX(0), getY(data[0]));
-    data.forEach((value, index) => {
-      ctx.lineTo(getX(index), getY(value));
-    });
-    ctx.strokeStyle = isUp ? "#00D775" : "#FF3B3B";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Draw current value dot
-    const lastX = getX(data.length - 1);
-    const lastY = getY(data[data.length - 1]);
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
-    ctx.fillStyle = isUp ? "#00D775" : "#FF3B3B";
-    ctx.fill();
-  }, [data, isUp]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      width={800}
-      height={300}
-      className="w-full h-auto"
-    />
-  );
+// Helper to get currency symbol for index
+function getIndexCurrency(exchangeCode?: string): string {
+  const currencies: Record<string, string> = {
+    "JSE": "R",
+    "ZSE": "ZiG",
+    "VFEX": "$",
+    "NGX": "₦",
+    "EGX": "E£",
+  };
+  return currencies[exchangeCode || "JSE"] || "";
 }
 
 // Loading skeleton for the index page
@@ -151,9 +74,8 @@ function IndexPageSkeleton() {
 export default function IndexDetailPage() {
   const params = useParams();
   const symbol = params.symbol as string;
-  const [timeframe, setTimeframe] = useState("1D");
+  const [timeframe, setTimeframe] = useState("1M");
   const [indexData, setIndexData] = useState<MarketIndex | null>(null);
-  const [chartData, setChartData] = useState<number[]>([]);
   const [relatedIndices, setRelatedIndices] = useState<MarketIndex[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -167,18 +89,6 @@ export default function IndexDetailPage() {
         // Fetch index data
         const data = await marketService.getIndex(symbol);
         setIndexData(data);
-
-        // Generate chart data based on current value
-        const baseValue = parseFloat(String(data.current_value || data.value || 50000));
-        const dataChange = parseFloat(String(data.change || 0));
-        const chartPoints: number[] = [];
-        for (let i = 0; i < 20; i++) {
-          const randomChange = (Math.random() - 0.5) * baseValue * 0.02;
-          const trendFactor = dataChange >= 0 ? 0.001 * i : -0.001 * i;
-          chartPoints.push(baseValue * (0.99 + trendFactor) + randomChange);
-        }
-        chartPoints.push(baseValue); // End at current value
-        setChartData(chartPoints);
 
         // Fetch related indices
         try {
@@ -199,6 +109,32 @@ export default function IndexDetailPage() {
       fetchData();
     }
   }, [symbol]);
+
+  // Get timeframe days mapping
+  const getTimeframeDays = (tf: string): number => {
+    const mapping: Record<string, number> = {
+      "1D": 1,
+      "1W": 7,
+      "1M": 30,
+      "3M": 90,
+      "6M": 180,
+      "YTD": Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 1).getTime()) / (1000 * 60 * 60 * 24)),
+      "1Y": 365,
+      "5Y": 1825,
+      "ALL": 3650,
+    };
+    return mapping[tf] || 30;
+  };
+
+  // Generate chart data with useMemo
+  const chartData = useMemo(() => {
+    if (!indexData) return [];
+    const baseValue = parseFloat(String(indexData.current_value || indexData.value || 50000));
+    const changePercent = parseFloat(String(indexData.change_percent || 0));
+    const days = getTimeframeDays(timeframe);
+    const trend = changePercent / 100 * (days / 30);
+    return generateChartData(baseValue, days, 0.015, trend);
+  }, [indexData, timeframe]);
 
   if (isLoading) {
     return <IndexPageSkeleton />;
@@ -259,51 +195,48 @@ export default function IndexDetailPage() {
                   <h1 className="text-2xl font-bold">{indexData.name}</h1>
                   <p className="text-muted-foreground">{indexData.code}</p>
                 </div>
-                <div className="text-right">
-                  <div className="text-3xl font-mono font-bold">
-                    {value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                <div className="flex items-center gap-6">
+                  <div className="text-right">
+                    <div className="text-3xl font-mono font-bold">
+                      {value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className={cn(
+                      "flex items-center justify-end gap-1 text-lg",
+                      isUp ? "text-market-up" : "text-market-down"
+                    )}>
+                      {isUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                      <span className="font-mono">
+                        {isUp ? "+" : ""}{change.toFixed(2)} ({isUp ? "+" : ""}{changePercent.toFixed(2)}%)
+                      </span>
+                    </div>
                   </div>
-                  <div className={cn(
-                    "flex items-center justify-end gap-1 text-lg",
-                    isUp ? "text-market-up" : "text-market-down"
-                  )}>
-                    {isUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
-                    <span className="font-mono">
-                      {isUp ? "+" : ""}{change.toFixed(2)} ({isUp ? "+" : ""}{changePercent.toFixed(2)}%)
-                    </span>
-                  </div>
+                  <IndexActions index={{ code: indexData.code, name: indexData.name }} />
                 </div>
               </div>
+            </div>
 
-              {/* Chart */}
-              <div className="mb-4">
-                <div className="flex items-center gap-2 mb-4">
-                  {["1D", "1W", "1M", "3M", "1Y", "5Y"].map((tf) => (
-                    <button
-                      key={tf}
-                      onClick={() => setTimeframe(tf)}
-                      className={cn(
-                        "px-3 py-1 text-sm rounded transition-colors",
-                        timeframe === tf
-                          ? "bg-brand-orange text-white"
-                          : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      {tf}
-                    </button>
-                  ))}
+            {/* Professional Chart */}
+            {chartData.length > 0 ? (
+              <ProfessionalChart
+                symbol={indexData.code}
+                data={chartData}
+                currency={getIndexCurrency(indexData.exchange?.code)}
+                height={450}
+                showVolume={false}
+                showToolbar={true}
+                onTimeframeChange={setTimeframe}
+              />
+            ) : (
+              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+                <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                  Loading chart data...
                 </div>
-                {chartData.length > 0 ? (
-                  <IndexChart data={chartData} isUp={isUp} />
-                ) : (
-                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                    No chart data available
-                  </div>
-                )}
               </div>
+            )}
 
-              {/* Stats Row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-terminal-border">
+            {/* Stats Row */}
+            <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <div className="text-xs text-muted-foreground">Open</div>
                   <div className="font-mono">{parseFloat(String(indexData.open || value)).toLocaleString()}</div>

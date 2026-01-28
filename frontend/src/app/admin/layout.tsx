@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -19,10 +19,12 @@ import {
   LogOut,
   Menu,
   X,
+  Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { logout } from "@/store/slices/authSlice";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -44,6 +46,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { openLogin } = useAuthModal();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -54,20 +57,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   user?.is_staff === true ||
                   user?.is_superuser === true;
 
+  // Open auth modal if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      openLogin();
+    }
+  }, [isAuthenticated, openLogin]);
+
+  // Show overlay while not authenticated - modal will handle the login
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-terminal-bg flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Login Required</h1>
+          <Lock className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-4">Admin Access</h1>
           <p className="text-muted-foreground mb-6">
-            Please log in to access the admin area.
+            Please sign in to access the admin area.
           </p>
-          <Link
-            href="/login?redirect=/admin"
+          <button
+            onClick={openLogin}
             className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
           >
-            Log In
-          </Link>
+            Sign In
+          </button>
         </div>
       </div>
     );
@@ -77,6 +89,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
       <div className="min-h-screen bg-terminal-bg flex items-center justify-center">
         <div className="text-center">
+          <Lock className="h-16 w-16 text-market-down mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
           <p className="text-muted-foreground mb-6">
             You need admin privileges to access this area.

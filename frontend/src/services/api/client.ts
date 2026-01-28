@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 import { store } from "@/store";
 import { refreshToken, clearAuth } from "@/store/slices/authSlice";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 // Retry configuration for handling cold starts
 const MAX_RETRIES = 3;

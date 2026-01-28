@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Navigation, navigationData } from "./Navigation";
 import { MarketStrip } from "./MarketStrip";
-import { AuthModal } from "@/components/auth/AuthModal";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 import { LiveSearch } from "@/components/search/LiveSearch";
 
 interface MainLayoutProps {
@@ -142,18 +142,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const { mobileMenuOpen, searchOpen } = useAppSelector((state) => state.ui);
   const { unreadCount } = useAppSelector((state) => state.notifications);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
-
-  const openLoginModal = () => {
-    setAuthModalMode("login");
-    setAuthModalOpen(true);
-  };
-
-  const openRegisterModal = () => {
-    setAuthModalMode("register");
-    setAuthModalOpen(true);
-  };
+  const { openLogin, openRegister } = useAuthModal();
 
   const handleLogout = () => {
     dispatch(clearAuth());
@@ -336,14 +325,14 @@ export function MainLayout({ children }: MainLayoutProps) {
                     variant="ghost"
                     size="sm"
                     className="hidden sm:inline-flex"
-                    onClick={openLoginModal}
+                    onClick={openLogin}
                   >
                     Sign In
                   </Button>
                   <Button
                     size="sm"
                     className="bg-brand-orange hover:bg-brand-orange-dark text-white"
-                    onClick={openRegisterModal}
+                    onClick={openRegister}
                   >
                     Subscribe
                   </Button>
@@ -465,13 +454,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Live Search */}
       <LiveSearch isOpen={searchOpen} onClose={() => dispatch(toggleSearch())} />
-
-      {/* Auth Modal */}
-      <AuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-        initialMode={authModalMode}
-      />
     </div>
   );
 }

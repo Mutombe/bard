@@ -52,6 +52,7 @@ export {
   useVideoCategories,
   useYouTubeSearch,
   useYouTubeFinanceVideos,
+  useLiveYouTubeVideos,
   useCNBCAfricaVideo,
   usePodcastShows,
   usePodcastShow,
