@@ -17,10 +17,10 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="dark"
-      enableSystem
+      defaultTheme="light"
+      enableSystem={false}
       disableTransitionOnChange={false}
-      storageKey="bard-theme"
+      storageKey="bardiq-theme"
     >
       <ReduxProvider store={store}>
         <SWRProvider>

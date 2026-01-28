@@ -2,7 +2,6 @@
 
 import { ReactNode, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Search,
@@ -38,6 +37,8 @@ import { Navigation, navigationData } from "./Navigation";
 import { MarketStrip } from "./MarketStrip";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { LiveSearch } from "@/components/search/LiveSearch";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ThemeLogo, ThemeLogoFull } from "@/components/ui/theme-logo";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -121,7 +122,7 @@ function MobileNavigation({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 className={cn(
                   "block px-3 py-3 rounded-md",
                   link.highlight
-                    ? "bg-brand-orange text-white font-medium"
+                    ? "bg-primary text-white font-medium"
                     : "text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated"
                 )}
               >
@@ -173,7 +174,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   className={cn(
                     "transition-colors",
                     link.highlight
-                      ? "text-brand-orange hover:text-brand-orange-light font-medium"
+                      ? "text-primary hover:text-primary-light font-medium"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -191,22 +192,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-3">
-              <Image
-                src="/images/logo.png"
-                alt="Bardiq Journal"
-                width={40}
-                height={40}
-                className="h-10 w-10"
-              />
-              <div className="hidden sm:block">
-                <div className="font-bold text-xl tracking-tight">
-                  <span className="text-foreground">Bardiq</span>
-                  <span className="text-brand-orange"> Journal</span>
-                </div>
-                <div className="text-[10px] text-muted-foreground tracking-widest uppercase -mt-0.5">
-                  A publication of the BGFI
-                </div>
-              </div>
+              <ThemeLogoFull logoWidth={40} logoHeight={40} />
             </Link>
 
             {/* Desktop Navigation */}
@@ -214,6 +200,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-1">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Search */}
               <Button
                 variant="ghost"
@@ -238,7 +227,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     <Button variant="ghost" size="icon">
                       <Bell className="h-5 w-5" />
                       {unreadCount > 0 && (
-                        <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-brand-orange text-[10px] flex items-center justify-center text-white font-medium">
+                        <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-primary text-[10px] flex items-center justify-center text-white font-medium">
                           {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                       )}
@@ -304,7 +293,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                         <>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem asChild>
-                            <Link href="/admin" className="text-brand-orange">
+                            <Link href="/admin" className="text-primary">
                               <LayoutDashboard className="h-4 w-4 mr-2" />
                               Admin Dashboard
                             </Link>
@@ -331,7 +320,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-brand-orange hover:bg-brand-orange-dark text-white"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={openRegister}
                   >
                     Subscribe
@@ -366,13 +355,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <div className="flex items-center gap-2 mb-4">
-                <Image
-                  src="/images/logo.png"
-                  alt="Bardiq Journal"
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
-                />
+                <ThemeLogo width={32} height={32} className="h-8 w-8" />
                 <span className="font-bold">Bardiq Journal</span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">

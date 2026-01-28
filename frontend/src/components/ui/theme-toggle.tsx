@@ -1,19 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+interface ThemeToggleProps {
+  className?: string;
+}
+
+/**
+ * Theme toggle button - switches between light and dark mode
+ */
+export function ThemeToggle({ className }: ThemeToggleProps) {
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   // Avoid hydration mismatch
@@ -23,81 +25,84 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9">
-        <Sun className="h-4 w-4" />
+      <Button variant="ghost" size="icon" className={cn("h-9 w-9", className)}>
+        <Sun className="h-5 w-5" />
       </Button>
     );
   }
 
+  const isDark = resolvedTheme === "dark";
+
+  const toggleTheme = () => {
+    setTheme(isDark ? "light" : "dark");
+  };
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          <Sun className="mr-2 h-4 w-4" />
-          <span>Light</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          <Moon className="mr-2 h-4 w-4" />
-          <span>Dark</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          <Monitor className="mr-2 h-4 w-4" />
-          <span>System</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn("h-9 w-9 relative", className)}
+      onClick={toggleTheme}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      <Sun
+        className={cn(
+          "h-5 w-5 transition-all duration-300 absolute",
+          isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+        )}
+      />
+      <Moon
+        className={cn(
+          "h-5 w-5 transition-all duration-300 absolute",
+          isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+        )}
+      />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
   );
 }
 
 /**
- * Simple theme toggle button without dropdown.
- * Cycles through: light -> dark -> system
+ * Compact theme toggle switch
  */
-export function ThemeToggleSimple() {
-  const { theme, setTheme } = useTheme();
+export function ThemeToggleSwitch({ className }: ThemeToggleProps) {
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  const cycleTheme = () => {
-    if (theme === "light") {
-      setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("system");
-    } else {
-      setTheme("light");
-    }
-  };
-
   if (!mounted) {
-    return (
-      <Button variant="ghost" size="icon" className="h-9 w-9">
-        <Sun className="h-4 w-4" />
-      </Button>
-    );
+    return <div className={cn("h-6 w-11 rounded-full bg-muted", className)} />;
   }
 
+  const isDark = resolvedTheme === "dark";
+
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-9 w-9"
-      onClick={cycleTheme}
-      title={`Current: ${theme}. Click to change.`}
+    <button
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      className={cn(
+        "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        isDark ? "bg-primary" : "bg-muted-foreground/30",
+        className
+      )}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      {theme === "light" && <Sun className="h-4 w-4" />}
-      {theme === "dark" && <Moon className="h-4 w-4" />}
-      {theme === "system" && <Monitor className="h-4 w-4" />}
-      <span className="sr-only">Toggle theme</span>
-    </Button>
+      <span
+        className={cn(
+          "inline-flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow-md transition-transform duration-200",
+          isDark ? "translate-x-5" : "translate-x-0.5"
+        )}
+      >
+        {isDark ? (
+          <Moon className="h-3 w-3 text-primary" />
+        ) : (
+          <Sun className="h-3 w-3 text-amber-500" />
+        )}
+      </span>
+    </button>
   );
 }
+
+export default ThemeToggle;

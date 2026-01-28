@@ -19,6 +19,7 @@ import { useAppDispatch } from "@/store";
 import { setCredentials } from "@/store/slices/authSlice";
 import { saveAuthToStorage } from "@/components/providers/AuthInitializer";
 import { authService } from "@/services/api/auth";
+import { ThemeLogo } from "@/components/ui/theme-logo";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -208,7 +209,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2 mb-2">
-              <img src="/images/logo.png" alt="Bardiq Journal" className="h-8 w-8" />
+              <ThemeLogo width={32} height={32} className="h-8 w-8" />
               <span className="font-bold">Bardiq Journal</span>
             </div>
             <h2 className="text-xl font-bold">
@@ -250,7 +251,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -265,7 +266,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
                     required
-                    className="w-full pl-10 pr-12 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full pl-10 pr-12 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                   <button
                     type="button"
@@ -281,7 +282,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                 <button
                   type="button"
                   onClick={() => switchMode("forgot")}
-                  className="text-sm text-brand-orange hover:text-brand-orange-light"
+                  className="text-sm text-primary hover:text-primary-light"
                 >
                   Forgot password?
                 </button>
@@ -290,7 +291,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -321,7 +322,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                       onChange={(e) => setFirstName(e.target.value)}
                       placeholder="John"
                       required
-                      className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                      className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                     />
                   </div>
                 </div>
@@ -333,7 +334,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setLastName(e.target.value)}
                     placeholder="Doe"
                     required
-                    className="w-full px-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full px-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -348,7 +349,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -363,7 +364,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
                     required
-                    className="w-full pl-10 pr-12 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full pl-10 pr-12 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                   <button
                     type="button"
@@ -385,7 +386,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm your password"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -393,7 +394,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -423,7 +424,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                    className="w-full pl-10 pr-4 py-2.5 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -431,7 +432,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-2.5 bg-primary text-white font-medium rounded-md hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -460,7 +461,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                 {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
                 <button
                   onClick={() => switchMode(mode === "login" ? "register" : "login")}
-                  className="text-brand-orange hover:text-brand-orange-light font-medium"
+                  className="text-primary hover:text-primary-light font-medium"
                 >
                   {mode === "login" ? "Create one" : "Sign in"}
                 </button>
