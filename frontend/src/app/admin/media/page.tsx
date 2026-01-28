@@ -21,6 +21,7 @@ import {
   File,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { mediaService, type MediaFile } from "@/services/api/media";
 import { toast } from "sonner";
 
@@ -101,6 +102,16 @@ export default function MediaPage() {
   const [deletingIds, setDeletingIds] = useState<number[]>([]);
   const [stats, setStats] = useState<{ total_files: number; total_size_display: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Delete modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    type: "single" | "bulk";
+    fileId?: number;
+    fileName?: string;
+    count?: number;
+  }>({ open: false, type: "single" });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Fetch files
   const fetchFiles = useCallback(async () => {
@@ -191,40 +202,68 @@ export default function MediaPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleDelete = async (id: number) => {
-    setDeletingIds((prev) => [...prev, id]);
+  // Open delete confirmation modal for single file
+  const openDeleteModal = (file: MediaFile) => {
+    setDeleteModal({
+      open: true,
+      type: "single",
+      fileId: file.id,
+      fileName: file.name,
+    });
+  };
+
+  // Open delete confirmation modal for bulk delete
+  const openBulkDeleteModal = () => {
+    if (selectedItems.length === 0) return;
+    setDeleteModal({
+      open: true,
+      type: "bulk",
+      count: selectedItems.length,
+    });
+  };
+
+  // Execute delete after confirmation
+  const executeDelete = async () => {
+    setDeleteLoading(true);
+
+    if (deleteModal.type === "bulk") {
+      // Handle bulk delete
+      setDeletingIds(selectedItems);
+      try {
+        const result = await mediaService.bulkDelete(selectedItems);
+        setFiles((prev) => prev.filter((f) => !selectedItems.includes(f.id)));
+        setSelectedItems([]);
+        toast.success(result.message);
+        fetchStats();
+        setDeleteModal({ open: false, type: "single" });
+      } catch (error) {
+        console.error("Bulk delete failed:", error);
+        toast.error("Failed to delete files");
+      } finally {
+        setDeletingIds([]);
+        setDeleteLoading(false);
+      }
+      return;
+    }
+
+    // Handle single delete
+    const { fileId } = deleteModal;
+    if (!fileId) return;
+
+    setDeletingIds((prev) => [...prev, fileId]);
     try {
-      await mediaService.deleteFile(id);
-      setFiles((prev) => prev.filter((f) => f.id !== id));
-      setSelectedItems((prev) => prev.filter((i) => i !== id));
+      await mediaService.deleteFile(fileId);
+      setFiles((prev) => prev.filter((f) => f.id !== fileId));
+      setSelectedItems((prev) => prev.filter((i) => i !== fileId));
       toast.success("File deleted");
       fetchStats();
+      setDeleteModal({ open: false, type: "single" });
     } catch (error) {
       console.error("Delete failed:", error);
       toast.error("Failed to delete file");
     } finally {
-      setDeletingIds((prev) => prev.filter((i) => i !== id));
-    }
-  };
-
-  const handleBulkDelete = async () => {
-    if (selectedItems.length === 0) return;
-
-    const confirmed = window.confirm(`Delete ${selectedItems.length} file${selectedItems.length > 1 ? "s" : ""}?`);
-    if (!confirmed) return;
-
-    setDeletingIds(selectedItems);
-    try {
-      const result = await mediaService.bulkDelete(selectedItems);
-      setFiles((prev) => prev.filter((f) => !selectedItems.includes(f.id)));
-      setSelectedItems([]);
-      toast.success(result.message);
-      fetchStats();
-    } catch (error) {
-      console.error("Bulk delete failed:", error);
-      toast.error("Failed to delete files");
-    } finally {
-      setDeletingIds([]);
+      setDeletingIds((prev) => prev.filter((i) => i !== fileId));
+      setDeleteLoading(false);
     }
   };
 
@@ -351,7 +390,7 @@ export default function MediaPage() {
             {selectedItems.length} selected
           </span>
           <button
-            onClick={handleBulkDelete}
+            onClick={openBulkDeleteModal}
             disabled={deletingIds.length > 0}
             className="px-3 py-1 text-sm bg-market-down/20 text-market-down rounded hover:bg-market-down/30 flex items-center gap-1 disabled:opacity-50"
           >
@@ -462,7 +501,7 @@ export default function MediaPage() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(item.id);
+                        openDeleteModal(item);
                       }}
                       disabled={deletingIds.includes(item.id)}
                       className="p-2 bg-market-down/80 rounded-full hover:bg-market-down"
@@ -567,7 +606,7 @@ export default function MediaPage() {
                     <Download className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDelete(item.id)}
+                    onClick={() => openDeleteModal(item)}
                     disabled={deletingIds.includes(item.id)}
                     className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded disabled:opacity-50"
                     title="Delete"
@@ -621,6 +660,28 @@ export default function MediaPage() {
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDialog
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal((prev) => ({ ...prev, open }))}
+        title={
+          deleteModal.type === "bulk"
+            ? `Delete ${deleteModal.count} file${deleteModal.count !== 1 ? "s" : ""}?`
+            : "Delete file?"
+        }
+        description={
+          deleteModal.type === "bulk"
+            ? `Are you sure you want to delete ${deleteModal.count} selected file${deleteModal.count !== 1 ? "s" : ""}? This action cannot be undone.`
+            : `Are you sure you want to delete "${deleteModal.fileName}"? This action cannot be undone.`
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={deleteLoading}
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteModal({ open: false, type: "single" })}
+      />
     </div>
   );
 }

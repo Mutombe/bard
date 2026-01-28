@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { editorialService, type Article } from "@/services/api/editorial";
 import { toast } from "sonner";
 
@@ -91,6 +92,15 @@ export default function OpinionsPage() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [deletingIds, setDeletingIds] = useState<number[]>([]);
 
+  // Delete modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    opinionId?: number;
+    opinionSlug?: string;
+    opinionTitle?: string;
+  }>({ open: false });
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const fetchOpinions = useCallback(async () => {
     try {
       const response = await editorialService.getArticles({
@@ -122,20 +132,35 @@ export default function OpinionsPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const handleDelete = async (id: number, slug: string) => {
-    const confirmed = window.confirm("Are you sure you want to delete this opinion piece?");
-    if (!confirmed) return;
+  // Open delete confirmation modal
+  const openDeleteModal = (opinion: Opinion) => {
+    setDeleteModal({
+      open: true,
+      opinionId: opinion.id,
+      opinionSlug: opinion.slug,
+      opinionTitle: opinion.title,
+    });
+  };
 
-    setDeletingIds((prev) => [...prev, id]);
+  // Execute delete after confirmation
+  const executeDelete = async () => {
+    const { opinionId, opinionSlug } = deleteModal;
+    if (!opinionId || !opinionSlug) return;
+
+    setDeleteLoading(true);
+    setDeletingIds((prev) => [...prev, opinionId]);
+
     try {
-      await editorialService.deleteArticle(slug);
-      setOpinions((prev) => prev.filter((o) => o.id !== id));
+      await editorialService.deleteArticle(opinionSlug);
+      setOpinions((prev) => prev.filter((o) => o.id !== opinionId));
       toast.success("Opinion deleted successfully");
+      setDeleteModal({ open: false });
     } catch (error) {
       console.error("Failed to delete opinion:", error);
       toast.error("Failed to delete opinion");
     } finally {
-      setDeletingIds((prev) => prev.filter((i) => i !== id));
+      setDeleteLoading(false);
+      setDeletingIds((prev) => prev.filter((i) => i !== opinionId));
     }
   };
 
@@ -292,7 +317,7 @@ export default function OpinionsPage() {
                       <Edit className="h-4 w-4" />
                     </Link>
                     <button
-                      onClick={() => handleDelete(opinion.id, opinion.slug)}
+                      onClick={() => openDeleteModal(opinion)}
                       disabled={deletingIds.includes(opinion.id)}
                       className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg-elevated rounded disabled:opacity-50"
                       title="Delete"
@@ -310,6 +335,20 @@ export default function OpinionsPage() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDialog
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal((prev) => ({ ...prev, open }))}
+        title="Delete opinion?"
+        description={`Are you sure you want to delete "${deleteModal.opinionTitle}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={deleteLoading}
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteModal({ open: false })}
+      />
     </div>
   );
 }

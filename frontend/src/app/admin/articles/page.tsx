@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton, LoadingSpinner } from "@/components/ui/loading";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { editorialService, type Article } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
 import { toast } from "sonner";
@@ -94,6 +95,20 @@ export default function ArticlesPage() {
     pageSize: 20,
     total: 0,
   });
+
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    type: "single" | "bulk";
+    articleSlug?: string;
+    articleId?: number;
+    articleTitle?: string;
+    count?: number;
+  }>({
+    open: false,
+    type: "single",
+  });
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   // Fetch articles
   const fetchArticles = useCallback(async (showRefreshIndicator = false) => {
@@ -187,12 +202,21 @@ export default function ArticlesPage() {
   const handleBulkAction = async (action: "publish" | "unpublish" | "delete") => {
     if (selectedArticles.length === 0) return;
 
-    const confirmed = action === "delete"
-      ? window.confirm(`Are you sure you want to delete ${selectedArticles.length} article(s)?`)
-      : true;
+    // For delete, show confirmation modal
+    if (action === "delete") {
+      setDeleteModal({
+        open: true,
+        type: "bulk",
+        count: selectedArticles.length,
+      });
+      return;
+    }
 
-    if (!confirmed) return;
+    await executeBulkAction(action);
+  };
 
+  // Execute bulk action (called after confirmation for delete)
+  const executeBulkAction = async (action: "publish" | "unpublish" | "delete") => {
     setActionLoading(true);
 
     // Optimistic update
@@ -229,22 +253,50 @@ export default function ArticlesPage() {
     }
   };
 
-  // Delete single article
-  const handleDelete = async (slug: string, id: number) => {
-    const confirmed = window.confirm("Are you sure you want to delete this article?");
-    if (!confirmed) return;
+  // Open delete confirmation modal for single article
+  const openDeleteModal = (article: Article) => {
+    setDeleteModal({
+      open: true,
+      type: "single",
+      articleSlug: article.slug,
+      articleId: article.id,
+      articleTitle: article.title,
+    });
+  };
+
+  // Execute delete after confirmation
+  const executeDelete = async () => {
+    setDeleteLoading(true);
+
+    if (deleteModal.type === "bulk") {
+      // Handle bulk delete
+      try {
+        await executeBulkAction("delete");
+        setDeleteModal({ open: false, type: "single" });
+      } finally {
+        setDeleteLoading(false);
+      }
+      return;
+    }
+
+    // Handle single delete
+    const { articleSlug, articleId } = deleteModal;
+    if (!articleSlug || !articleId) return;
 
     // Optimistic update
     const previousArticles = [...articles];
-    setArticles((prev) => prev.filter((a) => a.id !== id));
+    setArticles((prev) => prev.filter((a) => a.id !== articleId));
 
     try {
-      await editorialService.deleteArticle(slug);
+      await editorialService.deleteArticle(articleSlug);
       toast.success("Article deleted successfully");
+      setDeleteModal({ open: false, type: "single" });
     } catch (err) {
       console.error("Failed to delete article:", err);
       toast.error("Failed to delete article");
       setArticles(previousArticles);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -498,7 +550,7 @@ export default function ArticlesPage() {
                     <Edit className="h-4 w-4" />
                   </Link>
                   <button
-                    onClick={() => handleDelete(article.slug, article.id)}
+                    onClick={() => openDeleteModal(article)}
                     className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded"
                     title="Delete"
                   >
@@ -540,6 +592,28 @@ export default function ArticlesPage() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDialog
+        open={deleteModal.open}
+        onOpenChange={(open) => setDeleteModal((prev) => ({ ...prev, open }))}
+        title={
+          deleteModal.type === "bulk"
+            ? `Delete ${deleteModal.count} article${deleteModal.count !== 1 ? "s" : ""}?`
+            : "Delete article?"
+        }
+        description={
+          deleteModal.type === "bulk"
+            ? `Are you sure you want to delete ${deleteModal.count} selected article${deleteModal.count !== 1 ? "s" : ""}? This action cannot be undone.`
+            : `Are you sure you want to delete "${deleteModal.articleTitle}"? This action cannot be undone.`
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={deleteLoading}
+        onConfirm={executeDelete}
+        onCancel={() => setDeleteModal({ open: false, type: "single" })}
+      />
     </div>
   );
 }
