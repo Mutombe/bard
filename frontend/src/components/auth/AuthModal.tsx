@@ -208,9 +208,8 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
         <div className="p-6">
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <ThemeLogo width={32} height={32} className="h-8 w-8" />
-              <span className="font-bold">Bardiq Journal</span>
+            <div className="mb-3">
+              <ThemeLogo width={140} height={38} />
             </div>
             <h2 className="text-xl font-bold">
               {mode === "login" && "Welcome back"}
