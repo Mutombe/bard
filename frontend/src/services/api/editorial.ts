@@ -191,8 +191,13 @@ export const editorialService = {
     return response.data;
   },
 
-  async deleteArticle(slug: string): Promise<void> {
-    await authClient.delete(`/news/articles/${slug}/`);
+  async deleteArticle(idOrSlug: string | number): Promise<void> {
+    // Use delete-by-id endpoint for numeric IDs (more reliable)
+    if (typeof idOrSlug === "number" || /^\d+$/.test(String(idOrSlug))) {
+      await authClient.delete(`/news/articles/by-id/${idOrSlug}/`);
+    } else {
+      await authClient.delete(`/news/articles/${idOrSlug}/`);
+    }
   },
 
   async publishArticle(slug: string): Promise<Article> {
