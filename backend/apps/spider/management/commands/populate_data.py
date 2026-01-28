@@ -114,10 +114,16 @@ class Command(BaseCommand):
         # Create exchanges
         exchanges = [
             ('JSE', 'Johannesburg Stock Exchange', 'South Africa', 'ZAR', 'Africa/Johannesburg'),
-            ('ZSE', 'Zimbabwe Stock Exchange', 'Zimbabwe', 'USD', 'Africa/Harare'),
+            ('ZSE', 'Zimbabwe Stock Exchange', 'Zimbabwe', 'ZIG', 'Africa/Harare'),  # ZiG (Zimbabwe Gold)
+            ('VFEX', 'Victoria Falls Stock Exchange', 'Zimbabwe', 'USD', 'Africa/Harare'),  # USD denominated
             ('BSE', 'Botswana Stock Exchange', 'Botswana', 'BWP', 'Africa/Gaborone'),
             ('NSE', 'Nigerian Stock Exchange', 'Nigeria', 'NGN', 'Africa/Lagos'),
+            ('NGX', 'Nigerian Exchange', 'Nigeria', 'NGN', 'Africa/Lagos'),  # New code
             ('EGX', 'Egyptian Exchange', 'Egypt', 'EGP', 'Africa/Cairo'),
+            ('GSE', 'Ghana Stock Exchange', 'Ghana', 'GHS', 'Africa/Accra'),
+            ('NSE_KE', 'Nairobi Securities Exchange', 'Kenya', 'KES', 'Africa/Nairobi'),
+            ('LuSE', 'Lusaka Stock Exchange', 'Zambia', 'ZMW', 'Africa/Lusaka'),
+            ('DSE', 'Dar es Salaam Stock Exchange', 'Tanzania', 'TZS', 'Africa/Dar_es_Salaam'),
             ('BRVM', 'Bourse Regionale', 'Ivory Coast', 'XOF', 'Africa/Abidjan'),
         ]
 
@@ -132,7 +138,17 @@ class Command(BaseCommand):
                     'is_active': True,
                 }
             )
-            status = 'Created' if created else 'Exists'
+            if created:
+                status = 'Created'
+            else:
+                # Update currency if it changed (e.g., ZSE USD -> ZIG)
+                if exchange.currency != currency:
+                    old_currency = exchange.currency
+                    exchange.currency = currency
+                    exchange.save(update_fields=['currency'])
+                    status = f'Updated currency {old_currency} -> {currency}'
+                else:
+                    status = 'Exists'
             self.stdout.write(f'  Exchange: {name} - {status}')
 
     def _fetch_news(self):
