@@ -235,9 +235,9 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    @action(detail=False, methods=["delete"], url_path=r"by-id/(?P<article_id>\d+)")
+    @action(detail=False, methods=["delete"], url_path=r"by-id/(?P<article_id>[0-9a-f-]+)")
     def delete_by_id(self, request, article_id=None):
-        """Delete an article by ID (more reliable than slug)."""
+        """Delete an article by ID/UUID (more reliable than slug)."""
         if not request.user.is_editor:
             return Response(
                 {"error": "Only editors can delete articles"},
