@@ -5,18 +5,19 @@ import Link from "next/link";
 import {
   Plus,
   Search,
-  Filter,
   Clock,
   User,
   FileText,
   CheckCircle2,
-  Circle,
   AlertCircle,
   Loader2,
-  ChevronDown,
+  X,
+  Edit2,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { editorialService, type EditorialAssignment } from "@/services/api/editorial";
+import { editorialService, type EditorialAssignment, type Article } from "@/services/api/editorial";
+import { adminService, type AdminUser } from "@/services/api/admin";
 import { toast } from "sonner";
 
 const statusOptions = [
@@ -27,6 +28,21 @@ const statusOptions = [
   { value: "SUBMITTED", label: "Submitted" },
   { value: "COMPLETED", label: "Completed" },
   { value: "REJECTED", label: "Rejected" },
+];
+
+const assignmentTypes = [
+  { value: "WRITE", label: "Write" },
+  { value: "EDIT", label: "Edit" },
+  { value: "REVIEW", label: "Review" },
+  { value: "PROOFREAD", label: "Proofread" },
+  { value: "FACT_CHECK", label: "Fact Check" },
+];
+
+const priorityOptions = [
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
+  { value: "URGENT", label: "Urgent" },
 ];
 
 const priorityColors: Record<string, string> = {
@@ -53,6 +69,24 @@ const typeLabels: Record<string, string> = {
   FACT_CHECK: "Fact Check",
 };
 
+interface TaskFormData {
+  article: string;
+  assignee: string;
+  assignment_type: string;
+  priority: string;
+  deadline: string;
+  instructions: string;
+}
+
+const initialFormData: TaskFormData = {
+  article: "",
+  assignee: "",
+  assignment_type: "EDIT",
+  priority: "MEDIUM",
+  deadline: "",
+  instructions: "",
+};
+
 function TaskSkeleton() {
   return (
     <div className="divide-y divide-terminal-border">
@@ -77,10 +111,24 @@ function TaskSkeleton() {
 
 export default function TasksPage() {
   const [assignments, setAssignments] = useState<EditorialAssignment[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  // Modal state
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+  const [editingTask, setEditingTask] = useState<EditorialAssignment | null>(null);
+  const [formData, setFormData] = useState<TaskFormData>(initialFormData);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Delete confirmation
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<EditorialAssignment | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchAssignments = useCallback(async () => {
     try {
@@ -97,9 +145,29 @@ export default function TasksPage() {
     }
   }, [statusFilter]);
 
+  const fetchArticles = useCallback(async () => {
+    try {
+      const response = await editorialService.getArticles({ page_size: 100 });
+      setArticles(response.results || []);
+    } catch (error) {
+      console.error("Failed to fetch articles:", error);
+    }
+  }, []);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const response = await adminService.getUsers({ page_size: 100 });
+      setUsers(response.results || []);
+    } catch (error) {
+      console.error("Failed to fetch users:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchAssignments();
-  }, [fetchAssignments]);
+    fetchArticles();
+    fetchUsers();
+  }, [fetchAssignments, fetchArticles, fetchUsers]);
 
   const handleAccept = async (assignmentId: number) => {
     setActionLoading(assignmentId);
@@ -124,6 +192,95 @@ export default function TasksPage() {
       toast.error("Failed to complete task");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const openCreateModal = () => {
+    setModalMode("create");
+    setEditingTask(null);
+    setFormData(initialFormData);
+    setShowModal(true);
+  };
+
+  const openEditModal = (task: EditorialAssignment) => {
+    setModalMode("edit");
+    setEditingTask(task);
+    setFormData({
+      article: String(task.article?.id || ""),
+      assignee: String(task.assigned_to?.id || ""),
+      assignment_type: task.assignment_type || "EDIT",
+      priority: task.priority || "MEDIUM",
+      deadline: task.due_date ? task.due_date.split("T")[0] : "",
+      instructions: task.notes || "",
+    });
+    setShowModal(true);
+  };
+
+  const openDeleteConfirm = (task: EditorialAssignment) => {
+    setTaskToDelete(task);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.article) {
+      toast.error("Please select an article");
+      return;
+    }
+    if (!formData.assignee) {
+      toast.error("Please select an assignee");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      if (modalMode === "create") {
+        await editorialService.createAssignment({
+          article: formData.article,
+          assignee: formData.assignee,
+          assignment_type: formData.assignment_type,
+          priority: formData.priority,
+          deadline: formData.deadline || undefined,
+          instructions: formData.instructions || undefined,
+        });
+        toast.success("Task created successfully");
+      } else if (editingTask) {
+        await editorialService.updateAssignment(editingTask.id, {
+          assignment_type: formData.assignment_type,
+          priority: formData.priority,
+          deadline: formData.deadline || undefined,
+          instructions: formData.instructions || undefined,
+        });
+        toast.success("Task updated successfully");
+      }
+      setShowModal(false);
+      fetchAssignments();
+    } catch (error: any) {
+      const message = error?.response?.data?.detail ||
+                      error?.response?.data?.message ||
+                      `Failed to ${modalMode} task`;
+      toast.error(message);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!taskToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await editorialService.deleteAssignment(taskToDelete.id);
+      toast.success("Task deleted successfully");
+      setShowDeleteConfirm(false);
+      setTaskToDelete(null);
+      fetchAssignments();
+    } catch (error: any) {
+      const message = error?.response?.data?.detail || "Failed to delete task";
+      toast.error(message);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -157,6 +314,7 @@ export default function TasksPage() {
           </p>
         </div>
         <button
+          onClick={openCreateModal}
           className="flex items-center gap-2 px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
         >
           <Plus className="h-4 w-4" />
@@ -240,11 +398,18 @@ export default function TasksPage() {
           <div className="p-12 text-center">
             <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No tasks found</h3>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mb-4">
               {searchQuery || statusFilter
                 ? "Try adjusting your filters."
                 : "No tasks have been assigned yet."}
             </p>
+            <button
+              onClick={openCreateModal}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Create Task
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-terminal-border">
@@ -337,6 +502,22 @@ export default function TasksPage() {
                           )}
                         </button>
                       )}
+
+                      <button
+                        onClick={() => openEditModal(assignment)}
+                        className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded transition-colors"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+
+                      <button
+                        onClick={() => openDeleteConfirm(assignment)}
+                        className="p-1.5 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -345,6 +526,187 @@ export default function TasksPage() {
           </div>
         )}
       </div>
+
+      {/* Create/Edit Task Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70" onClick={() => !isSaving && setShowModal(false)} />
+          <div className="relative bg-terminal-bg-secondary border border-terminal-border rounded-lg w-full max-w-lg max-h-[90vh] overflow-auto">
+            <div className="flex items-center justify-between p-4 border-b border-terminal-border">
+              <h3 className="text-lg font-semibold">
+                {modalMode === "create" ? "Create New Task" : "Edit Task"}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                disabled={isSaving}
+                className="p-2 hover:bg-terminal-bg rounded transition-colors disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+              {/* Article Selection */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Article <span className="text-market-down">*</span>
+                </label>
+                <select
+                  value={formData.article}
+                  onChange={(e) => setFormData({ ...formData, article: e.target.value })}
+                  disabled={modalMode === "edit"}
+                  className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange disabled:opacity-50"
+                >
+                  <option value="">Select an article...</option>
+                  {articles.map((article) => (
+                    <option key={article.id} value={article.id}>
+                      {article.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Assignee Selection */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Assign To <span className="text-market-down">*</span>
+                </label>
+                <select
+                  value={formData.assignee}
+                  onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
+                  disabled={modalMode === "edit"}
+                  className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange disabled:opacity-50"
+                >
+                  <option value="">Select a user...</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.full_name || user.email} {user.role && `(${user.role})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Assignment Type */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Task Type</label>
+                <select
+                  value={formData.assignment_type}
+                  onChange={(e) => setFormData({ ...formData, assignment_type: e.target.value })}
+                  className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+                >
+                  {assignmentTypes.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Priority */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Priority</label>
+                <select
+                  value={formData.priority}
+                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                  className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+                >
+                  {priorityOptions.map((priority) => (
+                    <option key={priority.value} value={priority.value}>
+                      {priority.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Deadline */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Deadline</label>
+                <input
+                  type="date"
+                  value={formData.deadline}
+                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                  className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
+                />
+              </div>
+
+              {/* Instructions */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Instructions / Notes</label>
+                <textarea
+                  value={formData.instructions}
+                  onChange={(e) => setFormData({ ...formData, instructions: e.target.value })}
+                  placeholder="Add any instructions or notes for the assignee..."
+                  rows={3}
+                  className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-terminal-border">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  disabled={isSaving}
+                  className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {modalMode === "create" ? "Creating..." : "Saving..."}
+                    </>
+                  ) : (
+                    modalMode === "create" ? "Create Task" : "Save Changes"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && taskToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/70" onClick={() => !isDeleting && setShowDeleteConfirm(false)} />
+          <div className="relative bg-terminal-bg-secondary border border-terminal-border rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2">Delete Task?</h3>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to delete this task for "{taskToDelete.article?.title}"?
+              This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="px-4 py-2 bg-market-down text-white rounded-md hover:bg-market-down/80 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

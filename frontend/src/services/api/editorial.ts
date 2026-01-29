@@ -352,9 +352,34 @@ export const editorialService = {
     return response.data.results || [];
   },
 
-  async createAssignment(data: Partial<EditorialAssignment>): Promise<EditorialAssignment> {
+  async createAssignment(data: {
+    article: string | number;
+    assignee: string | number;
+    assignment_type: string;
+    priority?: string;
+    deadline?: string;
+    instructions?: string;
+  }): Promise<EditorialAssignment> {
     const response = await authClient.post<EditorialAssignment>("/editorial/assignments/", data);
     return response.data;
+  },
+
+  async updateAssignment(assignmentId: number, data: {
+    assignment_type?: string;
+    priority?: string;
+    deadline?: string;
+    instructions?: string;
+    status?: string;
+  }): Promise<EditorialAssignment> {
+    const response = await authClient.patch<EditorialAssignment>(
+      `/editorial/assignments/${assignmentId}/`,
+      data
+    );
+    return response.data;
+  },
+
+  async deleteAssignment(assignmentId: number): Promise<void> {
+    await authClient.delete(`/editorial/assignments/${assignmentId}/`);
   },
 
   async acceptAssignment(assignmentId: number): Promise<EditorialAssignment> {
