@@ -95,4 +95,12 @@ export const authService = {
   }): Promise<void> {
     await publicClient.post("/auth/password/reset/confirm/", data);
   },
+
+  /**
+   * Authenticate with Google OAuth
+   */
+  async googleAuth(credential: string): Promise<LoginResponse> {
+    const response = await publicClient.post<LoginResponse>("/auth/google/", { credential });
+    return response.data;
+  },
 };

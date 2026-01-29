@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import {
   X,
   Eye,
@@ -21,6 +22,8 @@ import { saveAuthToStorage } from "@/components/providers/AuthInitializer";
 import { authService } from "@/services/api/auth";
 import { ThemeLogo } from "@/components/ui/theme-logo";
 import { toast } from "sonner";
+
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 // Google Icon component
 function GoogleIcon({ className }: { className?: string }) {
@@ -46,6 +49,31 @@ function GoogleIcon({ className }: { className?: string }) {
   );
 }
 
+// Extend window type for Google
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+            auto_select?: boolean;
+          }) => void;
+          renderButton: (element: HTMLElement, config: {
+            theme?: string;
+            size?: string;
+            width?: string | number;
+            text?: string;
+            shape?: string;
+          }) => void;
+          prompt: () => void;
+        };
+      };
+    };
+  }
+}
+
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -63,8 +91,70 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
   const [lastName, setLastName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [googleScriptLoaded, setGoogleScriptLoaded] = useState(false);
+
+  // Handle Google OAuth callback
+  const handleGoogleCallback = async (response: { credential: string }) => {
+    setIsGoogleLoading(true);
+    setError("");
+
+    try {
+      const result = await authService.googleAuth(response.credential);
+
+      const authData = {
+        user: result.user,
+        tokens: {
+          access: result.access,
+          refresh: result.refresh,
+        },
+      };
+
+      dispatch(setCredentials(authData));
+      saveAuthToStorage(authData);
+
+      localStorage.setItem("access_token", result.access);
+      localStorage.setItem("refresh_token", result.refresh);
+
+      toast.success("Signed in with Google successfully!");
+      onClose();
+      router.push("/profile");
+      router.refresh();
+    } catch (err: any) {
+      console.error("Google auth error:", err);
+      const errorMessage = err.response?.data?.error || "Google authentication failed. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
+  // Initialize Google Sign-In when script loads
+  useEffect(() => {
+    if (googleScriptLoaded && isOpen && GOOGLE_CLIENT_ID && window.google) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCallback,
+      });
+
+      // Render the Google button based on current mode
+      const buttonId = mode === "login" ? "google-signin-button" : "google-signup-button";
+      const googleButtonDiv = document.getElementById(buttonId);
+      if (googleButtonDiv) {
+        googleButtonDiv.innerHTML = ""; // Clear previous button
+        window.google.accounts.id.renderButton(googleButtonDiv, {
+          theme: "outline",
+          size: "large",
+          width: "100%",
+          text: mode === "login" ? "signin_with" : "signup_with",
+          shape: "rectangular",
+        });
+      }
+    }
+  }, [googleScriptLoaded, isOpen, mode]);
 
   if (!isOpen) return null;
 
@@ -216,9 +306,19 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/70" onClick={onClose} />
+    <>
+      {/* Google Identity Services Script */}
+      {GOOGLE_CLIENT_ID && (
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          onLoad={() => setGoogleScriptLoaded(true)}
+          strategy="lazyOnload"
+        />
+      )}
+
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <div className="fixed inset-0 bg-black/70" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative w-full max-w-md bg-terminal-bg border border-terminal-border rounded-lg shadow-2xl">
@@ -341,14 +441,25 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               </div>
 
               {/* Google Sign In Button */}
-              <button
-                type="button"
-                onClick={() => toast.info("Feature Pending", { description: "Google authentication will be available soon." })}
-                className="w-full py-2.5 bg-white text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 border border-gray-300"
-              >
-                <GoogleIcon className="h-5 w-5" />
-                Sign in with Google
-              </button>
+              {GOOGLE_CLIENT_ID ? (
+                <div className="relative">
+                  {isGoogleLoading && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-md z-10">
+                      <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
+                    </div>
+                  )}
+                  <div id="google-signin-button" className="flex justify-center" />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toast.info("Feature Pending", { description: "Google authentication will be available soon." })}
+                  className="w-full py-2.5 bg-white text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 border border-gray-300"
+                >
+                  <GoogleIcon className="h-5 w-5" />
+                  Sign in with Google
+                </button>
+              )}
             </form>
           )}
 
@@ -464,14 +575,25 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               </div>
 
               {/* Google Sign Up Button */}
-              <button
-                type="button"
-                onClick={() => toast.info("Feature Pending", { description: "Google authentication will be available soon." })}
-                className="w-full py-2.5 bg-white text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 border border-gray-300"
-              >
-                <GoogleIcon className="h-5 w-5" />
-                Sign up with Google
-              </button>
+              {GOOGLE_CLIENT_ID ? (
+                <div className="relative">
+                  {isGoogleLoading && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-md z-10">
+                      <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
+                    </div>
+                  )}
+                  <div id="google-signup-button" className="flex justify-center" />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toast.info("Feature Pending", { description: "Google authentication will be available soon." })}
+                  className="w-full py-2.5 bg-white text-gray-900 font-medium rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center gap-3 border border-gray-300"
+                >
+                  <GoogleIcon className="h-5 w-5" />
+                  Sign up with Google
+                </button>
+              )}
             </form>
           )}
 
@@ -535,5 +657,6 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
         </div>
       </div>
     </div>
+    </>
   );
 }
