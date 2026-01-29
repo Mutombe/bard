@@ -192,7 +192,7 @@ class GoogleOAuthView(APIView):
                 defaults={
                     "first_name": first_name,
                     "last_name": last_name,
-                    "is_email_verified": True,
+                    "email_verified": True,
                 }
             )
 
@@ -202,8 +202,8 @@ class GoogleOAuthView(APIView):
                     user.first_name = first_name
                 if not user.last_name and last_name:
                     user.last_name = last_name
-                if not user.is_email_verified:
-                    user.is_email_verified = True
+                if not user.email_verified:
+                    user.email_verified = True
                 user.save()
 
             # Update profile picture if available
