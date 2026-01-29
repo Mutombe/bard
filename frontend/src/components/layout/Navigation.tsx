@@ -288,7 +288,7 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
   );
 }
 
-function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number; savedCounts?: { watchlistCount: number; savedArticlesCount: number } }) {
+function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number; savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number } }) {
   if (!isOpen) return null;
 
   // Only pass savedCounts to Personal Finance dropdown
