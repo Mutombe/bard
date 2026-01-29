@@ -8,6 +8,28 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 User = get_user_model()
 
 
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for user info in auth responses."""
+
+    full_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "full_name",
+            "role",
+            "subscription_tier",
+            "is_staff",
+            "is_superuser",
+            "is_active",
+        ]
+        read_only_fields = fields
+
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """
     Custom token serializer that includes user info in response.

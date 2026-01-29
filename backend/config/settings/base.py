@@ -325,6 +325,12 @@ ADMIN_EMAIL = env("ADMIN_EMAIL", default="admin@bardglobal.com")
 SITE_URL = env("SITE_URL", default="https://bardglobal.com")
 
 # =========================
+# Google OAuth Configuration
+# =========================
+GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID", default="")
+GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET", default="")
+
+# =========================
 # Logging Configuration
 # =========================
 LOGGING = {

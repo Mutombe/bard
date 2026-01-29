@@ -21,4 +21,7 @@ urlpatterns = [
     path("password/change/", views.ChangePasswordView.as_view(), name="password-change"),
     path("password/reset/", views.PasswordResetRequestView.as_view(), name="password-reset"),
     path("password/reset/confirm/", views.PasswordResetConfirmView.as_view(), name="password-reset-confirm"),
+
+    # Social OAuth
+    path("google/", views.GoogleOAuthView.as_view(), name="google-oauth"),
 ]

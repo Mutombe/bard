@@ -3,6 +3,7 @@ Authentication Views
 
 JWT authentication and password management endpoints.
 """
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -16,9 +17,13 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
+    UserSerializer,
 )
 
 User = get_user_model()
+
+# Google OAuth Client ID
+GOOGLE_CLIENT_ID = getattr(settings, 'GOOGLE_OAUTH_CLIENT_ID', None)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -124,3 +129,107 @@ class PasswordResetConfirmView(APIView):
             {"message": "Password has been reset successfully"},
             status=status.HTTP_200_OK,
         )
+
+
+class GoogleOAuthView(APIView):
+    """
+    Handle Google OAuth authentication.
+
+    Receives a Google ID token from the frontend, verifies it,
+    and returns JWT tokens for the authenticated user.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+
+        credential = request.data.get("credential")
+
+        if not credential:
+            return Response(
+                {"error": "Google credential is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not GOOGLE_CLIENT_ID:
+            return Response(
+                {"error": "Google OAuth is not configured"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        try:
+            # Verify the Google ID token
+            idinfo = id_token.verify_oauth2_token(
+                credential,
+                google_requests.Request(),
+                GOOGLE_CLIENT_ID
+            )
+
+            # Get user info from the verified token
+            email = idinfo.get("email")
+            email_verified = idinfo.get("email_verified", False)
+            first_name = idinfo.get("given_name", "")
+            last_name = idinfo.get("family_name", "")
+            picture = idinfo.get("picture", "")
+
+            if not email:
+                return Response(
+                    {"error": "Email not provided by Google"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if not email_verified:
+                return Response(
+                    {"error": "Google email not verified"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Get or create user
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "is_email_verified": True,
+                }
+            )
+
+            # Update user info if they already exist
+            if not created:
+                if not user.first_name and first_name:
+                    user.first_name = first_name
+                if not user.last_name and last_name:
+                    user.last_name = last_name
+                if not user.is_email_verified:
+                    user.is_email_verified = True
+                user.save()
+
+            # Update profile picture if available
+            if picture and hasattr(user, 'profile'):
+                profile = user.profile
+                if not profile.avatar:
+                    profile.avatar = picture
+                    profile.save()
+
+            # Generate JWT tokens
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": UserSerializer(user).data,
+            })
+
+        except ValueError as e:
+            # Invalid token
+            return Response(
+                {"error": f"Invalid Google token: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Authentication failed: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
