@@ -17,7 +17,7 @@ import {
   Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { adminService } from "@/services/api/admin";
+import { adminService, type NewsletterStats } from "@/services/api/admin";
 import { toast } from "sonner";
 
 interface Newsletter {
@@ -31,13 +31,6 @@ interface Newsletter {
   scheduled_for?: string;
   sent_at?: string;
   created_at: string;
-}
-
-interface NewsletterStats {
-  total_subscribers: number;
-  active_subscribers: number;
-  newsletters_sent: number;
-  avg_open_rate: number;
 }
 
 function getStatusColor(status: Newsletter["status"]) {
