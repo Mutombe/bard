@@ -101,7 +101,7 @@ export default function ArticlesPage() {
     open: boolean;
     type: "single" | "bulk";
     articleSlug?: string;
-    articleId?: number;
+    articleId?: string;
     articleTitle?: string;
     count?: number;
   }>({
