@@ -577,8 +577,9 @@ class AdminStatsView(APIView):
 
     def get(self, request):
         user = request.user
-        # Check if user is admin/editor
-        if not (user.is_staff or (hasattr(user, "role") and user.role in ["super_admin", "editor"])):
+        # Check if user is admin/editor using the model property
+        is_editor = getattr(user, "is_editor", False)
+        if not (user.is_staff or is_editor):
             return Response(
                 {"error": "Admin access required"},
                 status=status.HTTP_403_FORBIDDEN,

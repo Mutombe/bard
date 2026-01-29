@@ -140,7 +140,7 @@ export const adminService = {
 
   async getNewsletterStats(): Promise<NewsletterStats> {
     try {
-      const response = await authClient.get<NewsletterStats>("/engagement/subscriptions/stats/");
+      const response = await authClient.get<NewsletterStats>("/engagement/newsletters/stats/");
       return response.data;
     } catch {
       return {

@@ -85,7 +85,9 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
     def stats(self, request):
         """Get newsletter subscription statistics (admin only)."""
         user = request.user
-        if not (user.is_staff or (hasattr(user, 'role') and user.role in ['super_admin', 'editor'])):
+        # Check if user is admin/editor using the model property
+        is_editor = getattr(user, "is_editor", False)
+        if not (user.is_staff or is_editor):
             return Response(
                 {"error": "Admin access required"},
                 status=status.HTTP_403_FORBIDDEN,
