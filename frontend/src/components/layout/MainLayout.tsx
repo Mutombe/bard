@@ -16,9 +16,10 @@ import {
   ChevronRight,
   Bookmark,
   Mail,
-  ExternalLink,
+  Linkedin,
   LayoutDashboard,
 } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { toggleMobileMenu, toggleSearch } from "@/store/slices/uiSlice";
 import { clearAuth } from "@/store/slices/authSlice";
@@ -361,11 +362,11 @@ export function MainLayout({ children }: MainLayoutProps) {
                 Your trusted source for African financial intelligence and market data.
               </p>
               <div className="flex items-center gap-3">
-                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <ExternalLink className="h-4 w-4" />
+                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                  <FaXTwitter className="h-4 w-4" />
                 </a>
                 <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <ExternalLink className="h-4 w-4" />
+                  <Linkedin className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -419,7 +420,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
           <div className="mt-12 pt-8 border-t border-terminal-border flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Bardiq Journal. All rights reserved.
+              © {new Date().getFullYear()} Bard Global Finance Institute. All rights reserved.
             </p>
             <p className="text-xs text-muted-foreground text-center md:text-right">
               Your trusted source for African financial news and market data.

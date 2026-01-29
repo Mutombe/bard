@@ -11,7 +11,6 @@ import {
   MessageSquare,
   Heart,
   ChevronRight,
-  Twitter,
   Linkedin,
   Facebook,
   Link as LinkIcon,
@@ -21,6 +20,7 @@ import {
   Loader2,
   ArrowLeft,
 } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -213,7 +213,7 @@ export default function ArticlePage() {
 
     setSubscribing(true);
     try {
-      await apiClient.post("/engagement/subscriptions/", {
+      await apiClient.post("/engagement/newsletters/", {
         email: subscribeEmail.trim(),
         newsletter_type: "daily_digest",
       });
@@ -532,7 +532,7 @@ export default function ArticlePage() {
                   onClick={() => handleShare("twitter")}
                   className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <FaXTwitter className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => handleShare("linkedin")}

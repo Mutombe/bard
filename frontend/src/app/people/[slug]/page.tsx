@@ -9,13 +9,13 @@ import {
   MapPin,
   Calendar,
   ExternalLink,
-  Twitter,
   Linkedin,
   Mail,
   ChevronRight,
   TrendingUp,
   FileText,
 } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -221,7 +221,7 @@ export default function PersonPage() {
                         rel="noopener noreferrer"
                         className="p-2 bg-terminal-bg-elevated rounded hover:bg-brand-orange/20 hover:text-brand-orange transition-colors"
                       >
-                        <Twitter className="h-4 w-4" />
+                        <FaXTwitter className="h-4 w-4" />
                       </a>
                     )}
                     {person.socialLinks.email && (

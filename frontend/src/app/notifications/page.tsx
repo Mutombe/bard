@@ -67,7 +67,7 @@ const mockNotifications: Notification[] = [
   {
     id: "5",
     type: "system",
-    title: "Welcome to Bardiq Journal",
+    title: "Welcome to Bard Global Finance Institute",
     message: "Complete your profile to get personalized recommendations.",
     link: "/profile",
     isRead: true,
