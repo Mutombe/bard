@@ -313,14 +313,31 @@ export const editorialService = {
   // Assignments
   // =========================
 
-  async getAssignments(params?: { status?: string }): Promise<EditorialAssignment[]> {
-    const response = await authClient.get<EditorialAssignment[]>("/editorial/assignments/", { params });
-    return response.data;
+  async getAssignments(params?: { status?: string; page?: number; page_size?: number }): Promise<EditorialAssignment[]> {
+    const response = await authClient.get<{ results: EditorialAssignment[] } | EditorialAssignment[]>("/editorial/assignments/", { params });
+    // Handle both paginated and non-paginated responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data.results || [];
   },
 
   async getMyAssignments(): Promise<EditorialAssignment[]> {
-    const response = await authClient.get<EditorialAssignment[]>("/editorial/assignments/my_assignments/");
-    return response.data;
+    const response = await authClient.get<{ results: EditorialAssignment[] } | EditorialAssignment[]>("/editorial/assignments/my_assignments/");
+    // Handle both paginated and non-paginated responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data.results || [];
+  },
+
+  async getAllAssignments(params?: { status?: string; assignee?: string }): Promise<EditorialAssignment[]> {
+    const response = await authClient.get<{ results: EditorialAssignment[] } | EditorialAssignment[]>("/editorial/assignments/", { params });
+    // Handle both paginated and non-paginated responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data.results || [];
   },
 
   async createAssignment(data: Partial<EditorialAssignment>): Promise<EditorialAssignment> {

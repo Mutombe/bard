@@ -20,6 +20,7 @@ import {
   Menu,
   X,
   Lock,
+  ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -34,6 +35,7 @@ const sidebarItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/opinions", label: "Opinions", icon: MessageSquare },
+  { href: "/admin/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/admin/newsletters", label: "Newsletters", icon: Mail },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/users", label: "Users", icon: Users },
