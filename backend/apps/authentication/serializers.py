@@ -26,6 +26,8 @@ class UserSerializer(serializers.ModelSerializer):
             "is_staff",
             "is_superuser",
             "is_active",
+            "email_verified",
+            "date_joined",
         ]
         read_only_fields = fields
 
@@ -50,6 +52,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "is_staff": self.user.is_staff,
             "is_superuser": self.user.is_superuser,
             "is_active": self.user.is_active,
+            "email_verified": self.user.email_verified,
+            "date_joined": self.user.date_joined.isoformat() if self.user.date_joined else None,
         }
 
         return data

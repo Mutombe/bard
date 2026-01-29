@@ -8,7 +8,6 @@ import {
   Eye,
   Calendar,
   RefreshCw,
-  ExternalLink,
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -191,19 +190,12 @@ export default function VideosPage() {
               </div>
               <div className="mt-4 bg-terminal-bg-secondary rounded-lg p-4">
                 <h3 className="font-semibold text-lg mb-2">{selectedVideo.title}</h3>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span>{selectedVideo.channel_title}</span>
                   <span>{formatViews(selectedVideo.view_count)} views</span>
                   <span>{formatDate(selectedVideo.published_at)}</span>
+                  <span>{selectedVideo.duration_formatted}</span>
                 </div>
-                <a
-                  href={selectedVideo.video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-brand-orange hover:underline"
-                >
-                  Watch on YouTube <ExternalLink className="h-4 w-4" />
-                </a>
               </div>
               <button
                 onClick={() => setSelectedVideo(null)}

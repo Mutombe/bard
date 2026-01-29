@@ -244,41 +244,11 @@ class VideoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def youtube_finance(self, request):
-        """Get finance-related videos - from database first, fallback to YouTube API"""
+        """Get finance-related videos - always fetch fresh from YouTube API"""
         max_results = int(request.query_params.get("max_results", 12))
-
-        # First, try to get videos from our database (african-finance category)
-        db_videos = Video.objects.filter(
-            status="published",
-            platform="youtube",
-        ).order_by("-published_at", "-created_at")[:max_results]
-
-        if db_videos.exists():
-            # Return database videos formatted as YouTubeVideo
-            videos_data = []
-            for video in db_videos:
-                videos_data.append({
-                    "video_id": video.video_id,
-                    "title": video.title,
-                    "description": video.description,
-                    "channel_id": video.channel_id,
-                    "channel_title": video.channel_title,
-                    "published_at": video.published_at.isoformat() if video.published_at else None,
-                    "thumbnail_url": video.thumbnail_url,
-                    "duration": video.duration,
-                    "duration_seconds": video.duration_seconds,
-                    "duration_formatted": f"{video.duration_seconds // 60}:{video.duration_seconds % 60:02d}",
-                    "view_count": video.view_count,
-                    "like_count": video.like_count,
-                    "comment_count": video.comment_count,
-                    "tags": video.tags if isinstance(video.tags, list) else [],
-                    "video_url": video.video_url or f"https://www.youtube.com/watch?v={video.video_id}",
-                    "embed_url": video.embed_url or f"https://www.youtube.com/embed/{video.video_id}",
-                })
-            return Response(videos_data)
-
-        # Fallback to YouTube API if no database videos
         region = request.query_params.get("region", "africa")
+
+        # Always fetch fresh videos from YouTube API
         try:
             videos = youtube_service.search_finance_videos(
                 region=region,
@@ -286,7 +256,36 @@ class VideoViewSet(viewsets.ModelViewSet):
             )
             serializer = YouTubeVideoSerializer(videos, many=True)
             return Response(serializer.data)
-        except Exception:
+        except Exception as e:
+            # Fallback to database if API fails
+            db_videos = Video.objects.filter(
+                status="published",
+                platform="youtube",
+            ).order_by("-published_at", "-created_at")[:max_results]
+
+            if db_videos.exists():
+                videos_data = []
+                for video in db_videos:
+                    videos_data.append({
+                        "video_id": video.video_id,
+                        "title": video.title,
+                        "description": video.description,
+                        "channel_id": video.channel_id,
+                        "channel_title": video.channel_title,
+                        "published_at": video.published_at.isoformat() if video.published_at else None,
+                        "thumbnail_url": video.thumbnail_url,
+                        "duration": video.duration,
+                        "duration_seconds": video.duration_seconds,
+                        "duration_formatted": f"{video.duration_seconds // 60}:{video.duration_seconds % 60:02d}",
+                        "view_count": video.view_count,
+                        "like_count": video.like_count,
+                        "comment_count": video.comment_count,
+                        "tags": video.tags if isinstance(video.tags, list) else [],
+                        "video_url": video.video_url or f"https://www.youtube.com/watch?v={video.video_id}",
+                        "embed_url": video.embed_url or f"https://www.youtube.com/embed/{video.video_id}",
+                    })
+                return Response(videos_data)
+
             # Return empty list if everything fails
             return Response([])
 
