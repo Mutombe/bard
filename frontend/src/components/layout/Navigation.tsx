@@ -226,7 +226,7 @@ const navigationData: NavDropdown[] = [
   },
 ];
 
-function DropdownSection({ section, savedCounts }: { section: NavSection; savedCounts?: { watchlistCount: number; savedArticlesCount: number } }) {
+function DropdownSection({ section, savedCounts }: { section: NavSection; savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number } }) {
   // Map hrefs to their saved counts
   const getItemBadge = (href: string | undefined) => {
     if (!savedCounts || !href) return null;
@@ -234,8 +234,10 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
     if (href === "/watchlist" && savedCounts.watchlistCount > 0) {
       return savedCounts.watchlistCount;
     }
-    if (href === "/saved" && savedCounts.savedArticlesCount > 0) {
-      return savedCounts.savedArticlesCount;
+    // Saved Articles shows bookmarks + likes combined
+    if (href === "/saved") {
+      const total = savedCounts.savedArticlesCount + savedCounts.likesCount;
+      return total > 0 ? total : null;
     }
     return null;
   };
