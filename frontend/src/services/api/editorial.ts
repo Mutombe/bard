@@ -197,6 +197,9 @@ export const editorialService = {
     is_breaking?: boolean;
     is_premium?: boolean;
     featured_image_url?: string;
+    featured_image_caption?: string;
+    meta_title?: string;
+    meta_description?: string;
   }): Promise<Article> {
     // Ensure status is lowercase for backend
     const payload = {
