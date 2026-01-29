@@ -226,8 +226,14 @@ export const editorialService = {
     return response.data;
   },
 
-  async updateArticle(slug: string, data: ArticleInput): Promise<Article> {
-    const response = await authClient.patch<Article>(`/news/articles/${slug}/`, data);
+  async updateArticle(idOrSlug: string, data: ArticleInput): Promise<Article> {
+    // UUIDs contain hyphens, but we need to distinguish from slugs
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+    if (isUuid) {
+      const response = await authClient.patch<Article>(`/news/articles/by-id/${idOrSlug}/`, data);
+      return response.data;
+    }
+    const response = await authClient.patch<Article>(`/news/articles/${idOrSlug}/`, data);
     return response.data;
   },
 
