@@ -184,7 +184,7 @@ export default function ArticlesPage() {
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, [selectedCategory, selectedStatus]);
 
-  const toggleSelectArticle = (id: number) => {
+  const toggleSelectArticle = (id: string) => {
     setSelectedArticles((prev) =>
       prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]
     );
