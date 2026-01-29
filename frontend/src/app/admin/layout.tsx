@@ -35,6 +35,7 @@ const sidebarItems = [
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/opinions", label: "Opinions", icon: MessageSquare },
   { href: "/admin/newsletters", label: "Newsletters", icon: Mail },
+  { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/markets", label: "Market Data", icon: TrendingUp },
   { href: "/admin/media", label: "Media Library", icon: ImageIcon },
@@ -277,10 +278,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
               View Site
             </Link>
-            <button className="relative p-2 text-muted-foreground hover:text-foreground">
+            <Link
+              href="/admin/notifications"
+              className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
+            >
               <Bell className="h-5 w-5" />
               <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full" />
-            </button>
+            </Link>
           </div>
         </div>
 

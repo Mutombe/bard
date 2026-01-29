@@ -18,8 +18,8 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Bardiq Journal | Financial Intelligence Platform",
-    template: "%s | Bardiq Journal",
+    default: "Bard Global Finance Institute | Financial Intelligence Platform",
+    template: "%s | Bard Global Finance Institute",
   },
   description:
     "The Bloomberg of Africa - Real-time African market data, financial news, and research for institutional investors and traders.",
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
     "investment research",
     "Africa finance",
   ],
-  authors: [{ name: "Bardiq Journal" }],
-  creator: "Bardiq Journal",
-  publisher: "Bardiq Journal",
+  authors: [{ name: "Bard Global Finance Institute" }],
+  creator: "Bard Global Finance Institute",
+  publisher: "Bard Global Finance Institute",
   robots: {
     index: true,
     follow: true,
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_ZA",
-    url: "https://bardiqjournal.com",
-    siteName: "Bardiq Journal",
-    title: "Bardiq Journal | Financial Intelligence Platform",
+    url: "https://bardglobal.com",
+    siteName: "Bard Global Finance Institute",
+    title: "Bard Global Finance Institute | Financial Intelligence Platform",
     description:
       "The Bloomberg of Africa - Real-time African market data, financial news, and research.",
     images: [
@@ -52,13 +52,13 @@ export const metadata: Metadata = {
         url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Bardiq Journal",
+        alt: "Bard Global Finance Institute",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Bardiq Journal",
+    title: "Bard Global Finance Institute",
     description: "The Bloomberg of Africa",
     images: ["/og-image.png"],
   },

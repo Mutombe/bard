@@ -74,7 +74,7 @@ export default function AboutPage() {
             African Financial Intelligence
           </h1>
           <p className="text-xl text-muted-foreground">
-            Bardiq Journal is the leading source of financial news, data, and analysis for Africa&apos;s dynamic markets. We empower investors with the insights they need to navigate the continent&apos;s opportunities.
+            Bard Global Finance Institute is the leading source of financial news, data, and analysis for Africa&apos;s dynamic markets. We empower investors with the insights they need to navigate the continent&apos;s opportunities.
           </p>
         </div>
 
@@ -99,7 +99,7 @@ export default function AboutPage() {
             <h2 className="text-2xl font-bold mb-4">Our Story</h2>
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Founded in 2013 in Johannesburg, Bardiq Journal emerged from a simple observation: African investors deserved the same quality of financial journalism available in developed markets.
+                Founded in 2013 in Johannesburg, Bard Global Finance Institute emerged from a simple observation: African investors deserved the same quality of financial journalism available in developed markets.
               </p>
               <p>
                 What started as a small newsletter has grown into a comprehensive platform serving hundreds of thousands of investors, fund managers, and business leaders across the continent and beyond.

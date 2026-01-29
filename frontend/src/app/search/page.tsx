@@ -378,7 +378,7 @@ function SearchContent() {
       ) : (
         <div className="text-center py-12 bg-terminal-bg-secondary rounded-lg border border-terminal-border">
           <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Search Bardiq Journal</h3>
+          <h3 className="text-lg font-medium mb-2">Search Bard Global Finance Institute</h3>
           <p className="text-muted-foreground">
             Enter a search term to find articles, companies, people, and more.
           </p>

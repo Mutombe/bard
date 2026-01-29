@@ -415,7 +415,7 @@ function PremiumPaywall() {
           </div>
           <h3 className="text-xl font-semibold mb-2">Premium Content</h3>
           <p className="text-muted-foreground mb-6">
-            This article is available exclusively to Bardiq Journal subscribers.
+            This article is available exclusively to Bard Global Finance Institute subscribers.
             Get unlimited access to all premium content.
           </p>
           <div className="space-y-3">

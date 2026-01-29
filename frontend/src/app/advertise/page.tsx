@@ -112,11 +112,11 @@ export default function AdvertisePage() {
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
               Connect your brand with decision-makers, investors, and business leaders
-              across the African continent through Bardiq Journal's trusted platform.
+              across the African continent through Bard Global Finance Institute's trusted platform.
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                href="mailto:advertising@Bardiq Journal.com"
+                href="mailto:advertising@Bard Global Finance Institute.com"
                 className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors font-medium"
               >
                 Contact Sales
@@ -150,7 +150,7 @@ export default function AdvertisePage() {
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold mb-4">Our Audience</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Bardiq Journal attracts Africa's most influential business and financial professionals,
+              Bard Global Finance Institute attracts Africa's most influential business and financial professionals,
               offering advertisers access to high-value decision makers.
             </p>
           </div>
@@ -291,7 +291,7 @@ export default function AdvertisePage() {
                   ))}
                 </ul>
                 <a
-                  href="mailto:advertising@Bardiq Journal.com"
+                  href="mailto:advertising@Bard Global Finance Institute.com"
                   className={cn(
                     "block text-center py-3 rounded-md font-medium transition-colors",
                     pkg.highlighted
@@ -315,11 +315,11 @@ export default function AdvertisePage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="mailto:advertising@Bardiq Journal.com"
+              href="mailto:advertising@Bard Global Finance Institute.com"
               className="flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors font-medium"
             >
               <Mail className="h-4 w-4" />
-              advertising@Bardiq Journal.com
+              advertising@Bard Global Finance Institute.com
             </a>
             <Link
               href="/contact"

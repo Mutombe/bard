@@ -60,7 +60,7 @@ export default function LoginPage() {
           <div className="mb-6 p-4 bg-brand-orange/10 border border-brand-orange/30 rounded-md">
             <p className="text-sm font-medium text-brand-orange mb-1">Admin Login</p>
             <p className="text-xs text-muted-foreground">
-              Email: <code className="text-foreground">editor@bardiqjournal.com</code><br />
+              Email: <code className="text-foreground">editor@bardglobal.com</code><br />
               Password: <code className="text-foreground">BardEditor2024!</code>
             </p>
           </div>

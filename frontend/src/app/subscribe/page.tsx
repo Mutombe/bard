@@ -297,7 +297,7 @@ export default function SubscribePage() {
               Ready to Start Investing Smarter?
             </h2>
             <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Join thousands of investors across Africa who trust Bardiq Journal
+              Join thousands of investors across Africa who trust Bard Global Finance Institute
               for their market intelligence needs.
             </p>
             <div className="flex items-center justify-center gap-4">

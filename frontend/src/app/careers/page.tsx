@@ -183,7 +183,7 @@ export default function CareersPage() {
 
         {/* Benefits */}
         <div className="mb-16">
-          <h2 className="text-2xl font-bold mb-8 text-center">Why Work at Bardiq Journal?</h2>
+          <h2 className="text-2xl font-bold mb-8 text-center">Why Work at Bard Global Finance Institute?</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {benefits.map((benefit) => (
               <div
@@ -293,10 +293,10 @@ export default function CareersPage() {
         <div className="mt-12 bg-terminal-bg-secondary rounded-lg border border-terminal-border p-8 text-center">
           <h2 className="text-xl font-semibold mb-4">Don&apos;t see the right role?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            We&apos;re always looking for talented people. Send us your resume and tell us how you&apos;d like to contribute to Bardiq Journal.
+            We&apos;re always looking for talented people. Send us your resume and tell us how you&apos;d like to contribute to Bard Global Finance Institute.
           </p>
           <Link
-            href="mailto:careers@Bardiq Journal.com"
+            href="mailto:careers@Bard Global Finance Institute.com"
             className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
           >
             Send General Application

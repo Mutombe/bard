@@ -319,7 +319,7 @@ export default function EventsPage() {
         <div className="mt-12 bg-terminal-bg-secondary rounded-lg border border-terminal-border p-8 text-center">
           <h2 className="text-xl font-semibold mb-2">Want to host an event with us?</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Partner with Bardiq Journal to reach Africa&apos;s investment community. We offer sponsorship opportunities, speaking slots, and co-hosting arrangements.
+            Partner with Bard Global Finance Institute to reach Africa&apos;s investment community. We offer sponsorship opportunities, speaking slots, and co-hosting arrangements.
           </p>
           <Link
             href="/contact"

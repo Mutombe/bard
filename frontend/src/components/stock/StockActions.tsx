@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Bell, Share2, Check, Copy, Link2, Twitter, Facebook, Linkedin } from "lucide-react";
+import { Star, Bell, Share2, Check, Copy, Link2, Facebook, Linkedin } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { useAppSelector } from "@/store";
@@ -68,7 +69,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
   };
 
   const shareToTwitter = () => {
-    const text = `Check out ${company.name} (${company.symbol}) on Bardiq Journal`;
+    const text = `Check out ${company.name} (${company.symbol}) on Bard Global Finance Institute`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank");
     setShowShareMenu(false);
   };
@@ -146,7 +147,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
                   onClick={shareToTwitter}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <FaXTwitter className="h-4 w-4" />
                   Share on X
                 </button>
 
@@ -317,7 +318,7 @@ export function IndexActions({ index, className }: IndexActionsProps) {
   };
 
   const shareToTwitter = () => {
-    const text = `Check out ${index.name} (${index.code}) on Bardiq Journal`;
+    const text = `Check out ${index.name} (${index.code}) on Bard Global Finance Institute`;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank");
     setShowShareMenu(false);
   };
@@ -379,7 +380,7 @@ export function IndexActions({ index, className }: IndexActionsProps) {
                   onClick={shareToTwitter}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <Twitter className="h-4 w-4" />
+                  <FaXTwitter className="h-4 w-4" />
                   Share on X
                 </button>
 

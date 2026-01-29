@@ -14,7 +14,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Bardiq Journal (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile applications, and services.
+              Bard Global Finance Institute (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website, mobile applications, and services.
             </p>
           </section>
 
@@ -122,7 +122,7 @@ export default function PrivacyPage() {
               <li>Withdraw consent at any time</li>
             </ul>
             <p className="text-muted-foreground leading-relaxed mt-4">
-              To exercise these rights, please contact us at privacy@Bardiq Journal.com.
+              To exercise these rights, please contact us at privacy@Bard Global Finance Institute.com.
             </p>
           </section>
 
@@ -153,8 +153,8 @@ export default function PrivacyPage() {
               If you have any questions about this Privacy Policy, please contact us:
             </p>
             <div className="mt-4 p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border">
-              <p className="text-foreground">Bardiq Journal Privacy Team</p>
-              <p className="text-muted-foreground">Email: privacy@Bardiq Journal.com</p>
+              <p className="text-foreground">Bard Global Finance Institute Privacy Team</p>
+              <p className="text-muted-foreground">Email: privacy@Bard Global Finance Institute.com</p>
               <p className="text-muted-foreground">The Towers, Sandton, Johannesburg, South Africa</p>
             </div>
           </section>

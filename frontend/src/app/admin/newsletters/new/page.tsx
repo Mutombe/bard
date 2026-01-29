@@ -254,7 +254,7 @@ export default function NewNewsletterPage() {
   <li>Stock B: -3.1%</li>
 </ul>
 
-<p>Stay informed with Bardiq Journal.</p>"
+<p>Stay informed with Bard Global Finance Institute.</p>"
               rows={20}
               className="w-full bg-terminal-bg-elevated border border-terminal-border rounded-md p-4 outline-none focus:border-brand-orange font-mono text-sm resize-none"
             />

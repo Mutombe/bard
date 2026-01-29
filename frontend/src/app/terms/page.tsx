@@ -14,14 +14,14 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">1. Acceptance of Terms</h2>
             <p className="text-muted-foreground leading-relaxed">
-              By accessing or using the Bardiq Journal website, mobile applications, APIs, or any other products or services (collectively, the &quot;Services&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not use our Services.
+              By accessing or using the Bard Global Finance Institute website, mobile applications, APIs, or any other products or services (collectively, the &quot;Services&quot;), you agree to be bound by these Terms of Service (&quot;Terms&quot;). If you do not agree to these Terms, please do not use our Services.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold mb-4">2. Description of Services</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Bardiq Journal provides financial news, market data, analysis, and related content focused on African markets. Our Services include:
+              Bard Global Finance Institute provides financial news, market data, analysis, and related content focused on African markets. Our Services include:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mt-4">
               <li>Financial news articles and analysis</li>
@@ -65,7 +65,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">5. Intellectual Property</h2>
             <p className="text-muted-foreground leading-relaxed">
-              All content on Bardiq Journal, including text, graphics, logos, images, data, and software, is the property of Bardiq Journal or its content suppliers and is protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works without our express written permission.
+              All content on Bard Global Finance Institute, including text, graphics, logos, images, data, and software, is the property of Bard Global Finance Institute or its content suppliers and is protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works without our express written permission.
             </p>
           </section>
 
@@ -74,7 +74,7 @@ export default function TermsPage() {
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
               <p className="text-yellow-400 font-medium mb-2">Important Notice</p>
               <p className="text-muted-foreground">
-                The information provided through our Services is for informational purposes only and does not constitute investment advice, financial advice, trading advice, or any other sort of advice. You should not treat any of the content as such. Bardiq Journal does not recommend that any securities or financial products should be bought, sold, or held by you. Always conduct your own due diligence and consult a licensed financial advisor before making any investment decisions.
+                The information provided through our Services is for informational purposes only and does not constitute investment advice, financial advice, trading advice, or any other sort of advice. You should not treat any of the content as such. Bard Global Finance Institute does not recommend that any securities or financial products should be bought, sold, or held by you. Always conduct your own due diligence and consult a licensed financial advisor before making any investment decisions.
               </p>
             </div>
           </section>
@@ -89,7 +89,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold mb-4">8. Limitation of Liability</h2>
             <p className="text-muted-foreground leading-relaxed">
-              To the maximum extent permitted by law, Bardiq Journal shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from your use of our Services.
+              To the maximum extent permitted by law, Bard Global Finance Institute shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from your use of our Services.
             </p>
           </section>
 
@@ -113,8 +113,8 @@ export default function TermsPage() {
               If you have any questions about these Terms, please contact us at:
             </p>
             <div className="mt-4 p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border">
-              <p className="text-foreground">Bardiq Journal Legal Department</p>
-              <p className="text-muted-foreground">Email: legal@Bardiq Journal.com</p>
+              <p className="text-foreground">Bard Global Finance Institute Legal Department</p>
+              <p className="text-muted-foreground">Email: legal@Bard Global Finance Institute.com</p>
               <p className="text-muted-foreground">The Towers, Sandton, Johannesburg, South Africa</p>
             </div>
           </section>
