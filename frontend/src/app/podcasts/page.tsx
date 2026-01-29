@@ -8,14 +8,15 @@ import {
   Clock,
   Calendar,
   Headphones,
-  ExternalLink,
   Eye,
   ThumbsUp,
   RefreshCw,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useYouTubeSearch } from "@/hooks";
+import { YouTubeVideo } from "@/services/media";
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse bg-terminal-bg-elevated rounded", className)} />;
@@ -64,7 +65,7 @@ const podcastSeries = [
 ];
 
 export default function PodcastsPage() {
-  const [playing, setPlaying] = useState<string | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<YouTubeVideo | null>(null);
 
   // Fetch African finance podcasts from YouTube
   const { data: podcasts, isLoading, error, mutate } = useYouTubeSearch({
@@ -73,18 +74,39 @@ export default function PodcastsPage() {
     region: "ZA",
   });
 
-  const handlePlay = (videoId: string, videoUrl: string) => {
-    if (playing === videoId) {
-      setPlaying(null);
-    } else {
-      setPlaying(videoId);
-      window.open(videoUrl, "_blank");
-    }
-  };
-
   return (
     <MainLayout>
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+        {/* Video Modal */}
+        {selectedEpisode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setSelectedEpisode(null)}>
+            <div className="w-full max-w-4xl mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="relative pb-[56.25%] bg-black rounded-lg overflow-hidden">
+                <iframe
+                  src={`${selectedEpisode.embed_url}?autoplay=1`}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <div className="mt-4 bg-terminal-bg-secondary rounded-lg p-4">
+                <h3 className="font-semibold text-lg mb-2">{selectedEpisode.title}</h3>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>{selectedEpisode.channel_title}</span>
+                  <span>{formatViewCount(selectedEpisode.view_count)} views</span>
+                  <span>{selectedEpisode.duration_formatted || formatDuration(selectedEpisode.duration_seconds)}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedEpisode(null)}
+                className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -149,15 +171,13 @@ export default function PodcastsPage() {
                     </span>
                   )}
                 </div>
-                <a
-                  href={podcasts[0].video_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() => setSelectedEpisode(podcasts[0])}
                   className="flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors w-fit"
                 >
                   <Play className="h-5 w-5" />
                   Watch Episode
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -231,16 +251,14 @@ export default function PodcastsPage() {
               {podcasts?.slice(1).map((episode) => (
                 <div
                   key={episode.video_id}
-                  className="flex items-center gap-4 p-4 hover:bg-terminal-bg-elevated transition-colors"
+                  className="flex items-center gap-4 p-4 hover:bg-terminal-bg-elevated transition-colors cursor-pointer"
+                  onClick={() => setSelectedEpisode(episode)}
                 >
-                  <a
-                    href={episode.video_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
                     className="flex-shrink-0 h-12 w-12 rounded-full bg-brand-orange/20 text-brand-orange flex items-center justify-center hover:bg-brand-orange hover:text-white transition-colors"
                   >
                     <Play className="h-5 w-5 ml-0.5" />
-                  </a>
+                  </button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs text-brand-orange">{episode.channel_title}</span>
@@ -254,14 +272,9 @@ export default function PodcastsPage() {
                         </span>
                       )}
                     </div>
-                    <a
-                      href={episode.video_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-medium truncate block hover:text-brand-orange"
-                    >
+                    <span className="font-medium truncate block hover:text-brand-orange">
                       {episode.title}
-                    </a>
+                    </span>
                     <p className="text-sm text-muted-foreground truncate">{episode.description}</p>
                   </div>
                   <div className="hidden sm:flex items-center gap-4 text-sm text-muted-foreground">
@@ -293,10 +306,9 @@ export default function PodcastsPage() {
                 href={`https://www.youtube.com/results?search_query=${encodeURIComponent(platform)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm hover:border-brand-orange transition-colors"
+                className="px-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md text-sm hover:border-brand-orange transition-colors"
               >
                 {platform}
-                <ExternalLink className="h-3 w-3" />
               </a>
             ))}
           </div>

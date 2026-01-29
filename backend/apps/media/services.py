@@ -16,8 +16,8 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# Cache duration: 24 hours (in seconds)
-CACHE_DURATION = 24 * 60 * 60
+# Cache duration: 1 hour (in seconds) - refresh videos more frequently
+CACHE_DURATION = 60 * 60
 
 
 class YouTubeService:
@@ -126,10 +126,10 @@ class YouTubeService:
         video_ids = [item["id"]["videoId"] for item in data.get("items", [])]
         results = self.get_videos_details(video_ids)
 
-        # Cache results for 24 hours
+        # Cache results for 1 hour
         if results and use_cache:
             cache.set(cache_key, results, CACHE_DURATION)
-            logger.info(f"YouTube search cached for 24 hours: {query}")
+            logger.info(f"YouTube search cached for 1 hour: {query}")
 
         return results
 

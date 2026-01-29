@@ -560,14 +560,9 @@ function FeaturedVideoSection({ video }: { video: YouTubeVideo | null }) {
             </p>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>{video.view_count.toLocaleString()} views</span>
-              <a
-                href={video.video_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-brand-orange hover:text-brand-orange-light"
-              >
-                Watch on YouTube <ExternalLink className="h-3 w-3" />
-              </a>
+              <span className="text-muted-foreground">
+                {video.duration_formatted}
+              </span>
             </div>
           </div>
         </div>

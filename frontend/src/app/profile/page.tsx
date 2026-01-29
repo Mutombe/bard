@@ -172,19 +172,19 @@ export default function ProfilePage() {
               <h3 className="font-semibold mb-4">Account Activity</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-terminal-bg-elevated rounded-lg text-center">
-                  <div className="text-2xl font-bold text-brand-orange">127</div>
+                  <div className="text-2xl font-bold text-brand-orange">—</div>
                   <div className="text-sm text-muted-foreground">Articles Read</div>
                 </div>
                 <div className="p-4 bg-terminal-bg-elevated rounded-lg text-center">
-                  <div className="text-2xl font-bold text-brand-orange">24</div>
+                  <div className="text-2xl font-bold text-brand-orange">—</div>
                   <div className="text-sm text-muted-foreground">Saved Articles</div>
                 </div>
                 <div className="p-4 bg-terminal-bg-elevated rounded-lg text-center">
-                  <div className="text-2xl font-bold text-brand-orange">8</div>
+                  <div className="text-2xl font-bold text-brand-orange">{user?.profile?.watchlist?.length ?? 0}</div>
                   <div className="text-sm text-muted-foreground">Watchlist Items</div>
                 </div>
                 <div className="p-4 bg-terminal-bg-elevated rounded-lg text-center">
-                  <div className="text-2xl font-bold text-brand-orange">5</div>
+                  <div className="text-2xl font-bold text-brand-orange">—</div>
                   <div className="text-sm text-muted-foreground">Price Alerts</div>
                 </div>
               </div>
@@ -263,7 +263,14 @@ export default function ProfilePage() {
                 <Calendar className="h-5 w-5" />
                 <div>
                   <div className="text-xs">Member since</div>
-                  <div className="text-foreground">January 2024</div>
+                  <div className="text-foreground">
+                    {user?.date_joined
+                      ? new Date(user.date_joined).toLocaleDateString("en-US", {
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "—"}
+                  </div>
                 </div>
               </div>
             </div>

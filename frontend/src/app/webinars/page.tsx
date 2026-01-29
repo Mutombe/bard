@@ -11,11 +11,12 @@ import {
   Eye,
   ThumbsUp,
   RefreshCw,
-  ExternalLink,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useYouTubeSearch } from "@/hooks";
+import { YouTubeVideo } from "@/services/media";
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={cn("animate-pulse bg-terminal-bg-elevated rounded", className)} />;
@@ -40,6 +41,7 @@ function formatViewCount(count: number): string {
 
 export default function WebinarsPage() {
   const [filter, setFilter] = useState("all");
+  const [selectedWebinar, setSelectedWebinar] = useState<YouTubeVideo | null>(null);
 
   // Fetch African finance webinars from YouTube
   const { data: webinars, isLoading, error, mutate } = useYouTubeSearch({
@@ -73,6 +75,36 @@ export default function WebinarsPage() {
   return (
     <MainLayout>
       <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6">
+        {/* Video Modal */}
+        {selectedWebinar && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setSelectedWebinar(null)}>
+            <div className="w-full max-w-4xl mx-4" onClick={(e) => e.stopPropagation()}>
+              <div className="relative pb-[56.25%] bg-black rounded-lg overflow-hidden">
+                <iframe
+                  src={`${selectedWebinar.embed_url}?autoplay=1`}
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+              <div className="mt-4 bg-terminal-bg-secondary rounded-lg p-4">
+                <h3 className="font-semibold text-lg mb-2">{selectedWebinar.title}</h3>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span>{selectedWebinar.channel_title}</span>
+                  <span>{formatViewCount(selectedWebinar.view_count)} views</span>
+                  <span>{selectedWebinar.duration_formatted || formatDuration(selectedWebinar.duration_seconds)}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedWebinar(null)}
+                className="absolute top-4 right-4 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
@@ -201,11 +233,9 @@ export default function WebinarsPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {filteredWebinars.map((webinar) => (
-                  <a
+                  <div
                     key={webinar.video_id}
-                    href={webinar.video_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={() => setSelectedWebinar(webinar)}
                     className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden hover:border-brand-orange transition-colors cursor-pointer group"
                   >
                     <div className="relative aspect-video">
@@ -259,7 +289,7 @@ export default function WebinarsPage() {
                         )}
                       </div>
                     </div>
-                  </a>
+                  </div>
                 ))}
               </div>
             )}
@@ -284,10 +314,9 @@ export default function WebinarsPage() {
                 href={channel.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2 bg-terminal-bg text-sm rounded-md hover:bg-brand-orange hover:text-white transition-colors"
+                className="px-4 py-2 bg-terminal-bg text-sm rounded-md hover:bg-brand-orange hover:text-white transition-colors"
               >
                 {channel.name}
-                <ExternalLink className="h-3 w-3" />
               </a>
             ))}
           </div>
