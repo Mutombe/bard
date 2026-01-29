@@ -44,18 +44,26 @@ function getStatusColor(status: string) {
   }
 }
 
-function getPriorityColor(priority: string) {
-  switch (priority?.toUpperCase()) {
-    case "HIGH":
-    case "URGENT":
+// Priority is now an integer: 0=Low, 1=Medium, 2=High, 3=Urgent
+function getPriorityColor(priority: number) {
+  switch (priority) {
+    case 3: // Urgent
+    case 2: // High
       return "text-market-down";
-    case "MEDIUM":
+    case 1: // Medium
       return "text-yellow-400";
-    case "LOW":
+    case 0: // Low
     default:
       return "text-muted-foreground";
   }
 }
+
+const priorityLabels: Record<number, string> = {
+  0: "Low",
+  1: "Medium",
+  2: "High",
+  3: "Urgent",
+};
 
 // Skeleton for stat cards
 function StatCardsSkeleton() {
@@ -353,9 +361,9 @@ export default function AdminDashboard() {
                     <div
                       className={cn(
                         "h-2 w-2 rounded-full mt-2 flex-shrink-0",
-                        (assignment.priority || "").toUpperCase() === "HIGH" || (assignment.priority || "").toUpperCase() === "URGENT"
+                        assignment.priority >= 2
                           ? "bg-market-down"
-                          : (assignment.priority || "").toUpperCase() === "MEDIUM"
+                          : assignment.priority === 1
                           ? "bg-yellow-400"
                           : "bg-muted-foreground"
                       )}
@@ -367,11 +375,11 @@ export default function AdminDashboard() {
                       <div
                         className={cn(
                           "text-xs capitalize mt-1",
-                          getPriorityColor(assignment.priority || "LOW")
+                          getPriorityColor(assignment.priority ?? 0)
                         )}
                       >
-                        {(assignment.priority || "low").toLowerCase()} priority
-                        {assignment.due_date && ` - Due ${new Date(assignment.due_date).toLocaleDateString()}`}
+                        {priorityLabels[assignment.priority ?? 0] || "Medium"} priority
+                        {assignment.deadline && ` - Due ${new Date(assignment.deadline).toLocaleDateString()}`}
                       </div>
                     </div>
                   </div>
