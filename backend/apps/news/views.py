@@ -235,6 +235,37 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    @action(detail=False, methods=["get"], url_path=r"by-id/(?P<article_id>[0-9a-f-]+)")
+    def get_by_id(self, request, article_id=None):
+        """Get an article by ID/UUID (useful for admin edit pages)."""
+        try:
+            queryset = self.get_queryset()
+            article = queryset.get(id=article_id)
+
+            # Check premium access like in retrieve
+            if article.is_premium:
+                if not request.user.is_authenticated:
+                    serializer = NewsArticleDetailSerializer(article)
+                    data = serializer.data
+                    data["content"] = data["content"][:500] + "..."
+                    data["requires_subscription"] = True
+                    return Response(data)
+
+                if not request.user.can_access_premium:
+                    serializer = NewsArticleDetailSerializer(article)
+                    data = serializer.data
+                    data["content"] = data["content"][:500] + "..."
+                    data["requires_subscription"] = True
+                    return Response(data)
+
+            serializer = NewsArticleDetailSerializer(article)
+            return Response(serializer.data)
+        except NewsArticle.DoesNotExist:
+            return Response(
+                {"error": f"Article with ID {article_id} not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
     @action(detail=False, methods=["delete"], url_path=r"by-id/(?P<article_id>[0-9a-f-]+)")
     def delete_by_id(self, request, article_id=None):
         """Delete an article by ID/UUID (more reliable than slug)."""

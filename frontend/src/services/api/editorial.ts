@@ -189,8 +189,14 @@ export const editorialService = {
     return response.data;
   },
 
-  async getArticle(slug: string): Promise<Article> {
-    const response = await authClient.get<Article>(`/news/articles/${slug}/`);
+  async getArticle(idOrSlug: string): Promise<Article> {
+    // UUIDs contain hyphens, but we need to distinguish from slugs which also may contain hyphens
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrSlug);
+    if (isUuid) {
+      const response = await authClient.get<Article>(`/news/articles/by-id/${idOrSlug}/`);
+      return response.data;
+    }
+    const response = await authClient.get<Article>(`/news/articles/${idOrSlug}/`);
     return response.data;
   },
 
