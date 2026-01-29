@@ -159,4 +159,14 @@ export const adminService = {
     const response = await authClient.post("/engagement/newsletters/send/", data);
     return response.data;
   },
+
+  async getNewsletters(): Promise<any[]> {
+    try {
+      const response = await authClient.get("/engagement/newsletters/history/");
+      return response.data.results || response.data || [];
+    } catch {
+      // Return empty array if endpoint doesn't exist yet
+      return [];
+    }
+  },
 };
