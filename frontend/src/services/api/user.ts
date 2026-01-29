@@ -47,8 +47,12 @@ export const userService = {
   // =========================
 
   async getNotifications(): Promise<Notification[]> {
-    const response = await apiClient.get<Notification[]>("/engagement/notifications/");
-    return response.data;
+    const response = await apiClient.get<{ results: Notification[] } | Notification[]>("/engagement/notifications/");
+    // Handle both paginated and non-paginated responses
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+    return response.data.results || [];
   },
 
   async getUnreadNotifications(): Promise<Notification[]> {
