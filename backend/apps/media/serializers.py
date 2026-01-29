@@ -45,6 +45,10 @@ class MediaFileSerializer(serializers.ModelSerializer):
 
 class MediaFileUploadSerializer(serializers.ModelSerializer):
     """Serializer for uploading media files."""
+    name = serializers.CharField(required=False, allow_blank=True)
+    alt_text = serializers.CharField(required=False, allow_blank=True)
+    caption = serializers.CharField(required=False, allow_blank=True)
+    file_type = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = MediaFile
