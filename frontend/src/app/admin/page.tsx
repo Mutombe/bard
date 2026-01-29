@@ -152,12 +152,20 @@ export default function AdminDashboard() {
         newsletterSubs: newsletterStats.total_subscribers || 0,
       }));
 
-      // Try to fetch assignments (may fail if not authenticated as editor)
+      // Fetch all assignments for admin view (not just user's)
       try {
-        const myAssignments = await editorialService.getMyAssignments();
-        setAssignments(myAssignments || []);
+        const allAssignments = await editorialService.getAllAssignments({ status: "PENDING" });
+        // Also get in-progress assignments
+        const inProgressAssignments = await editorialService.getAllAssignments({ status: "IN_PROGRESS" });
+        setAssignments([...allAssignments, ...inProgressAssignments].slice(0, 10) || []);
       } catch {
-        setAssignments([]);
+        // Fall back to user's assignments if all assignments not available
+        try {
+          const myAssignments = await editorialService.getMyAssignments();
+          setAssignments(myAssignments || []);
+        } catch {
+          setAssignments([]);
+        }
       }
 
       // Fetch admin stats for article counts (all articles, not just user's)
@@ -376,9 +384,12 @@ export default function AdminDashboard() {
             </div>
           )}
           <div className="p-4 border-t border-terminal-border">
-            <button className="w-full py-2 text-sm text-brand-orange hover:text-brand-orange-light">
+            <Link
+              href="/admin/tasks"
+              className="block w-full py-2 text-sm text-center text-brand-orange hover:text-brand-orange-light"
+            >
               View All Tasks
-            </button>
+            </Link>
           </div>
         </div>
       </div>
