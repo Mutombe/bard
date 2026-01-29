@@ -69,6 +69,10 @@ export const userService = {
     await apiClient.post("/engagement/notifications/mark-all-read/");
   },
 
+  async deleteNotification(notificationId: string): Promise<void> {
+    await apiClient.delete(`/engagement/notifications/${notificationId}/`);
+  },
+
   // =========================
   // Price Alerts
   // =========================

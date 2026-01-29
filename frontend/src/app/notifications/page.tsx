@@ -1,119 +1,150 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Bell,
   TrendingUp,
-  TrendingDown,
   Newspaper,
   AlertCircle,
   Check,
   Trash2,
   Settings,
   CheckCheck,
+  Loader2,
+  BarChart3,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
+import { userService } from "@/services/api/user";
+import type { Notification, NotificationType } from "@/types";
+import { toast } from "sonner";
 
-interface Notification {
-  id: string;
-  type: "price_alert" | "news" | "system" | "market";
-  title: string;
-  message: string;
-  link?: string;
-  isRead: boolean;
-  createdAt: string;
-}
-
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "price_alert",
-    title: "Price Alert: NPN",
-    message: "Naspers (NPN) has risen above your target of R3,200.00",
-    link: "/companies/npn",
-    isRead: false,
-    createdAt: "2025-01-24T14:30:00Z",
-  },
-  {
-    id: "2",
-    type: "news",
-    title: "Breaking News",
-    message: "JSE All Share Index hits record high amid global rally",
-    link: "/news/jse-record-high",
-    isRead: false,
-    createdAt: "2025-01-24T12:00:00Z",
-  },
-  {
-    id: "3",
-    type: "market",
-    title: "Market Close",
-    message: "JSE has closed. Your portfolio is up 2.3% today.",
-    link: "/portfolio",
-    isRead: false,
-    createdAt: "2025-01-24T17:00:00Z",
-  },
-  {
-    id: "4",
-    type: "price_alert",
-    title: "Price Alert: MTN",
-    message: "MTN Group (MTN) is approaching your target of R160.00",
-    link: "/companies/mtn",
-    isRead: true,
-    createdAt: "2025-01-23T10:30:00Z",
-  },
-  {
-    id: "5",
-    type: "system",
-    title: "Welcome to Bard Global Finance Institute",
-    message: "Complete your profile to get personalized recommendations.",
-    link: "/profile",
-    isRead: true,
-    createdAt: "2025-01-20T08:00:00Z",
-  },
-];
-
-function getNotificationIcon(type: Notification["type"]) {
+function getNotificationIcon(type: NotificationType) {
   switch (type) {
     case "price_alert":
       return <TrendingUp className="h-5 w-5 text-market-up" />;
-    case "news":
+    case "breaking_news":
       return <Newspaper className="h-5 w-5 text-brand-orange" />;
-    case "market":
-      return <TrendingDown className="h-5 w-5 text-blue-400" />;
+    case "earnings":
+      return <BarChart3 className="h-5 w-5 text-blue-400" />;
+    case "watchlist":
+      return <Star className="h-5 w-5 text-yellow-400" />;
     case "system":
       return <AlertCircle className="h-5 w-5 text-purple-400" />;
+    default:
+      return <Bell className="h-5 w-5 text-muted-foreground" />;
   }
+}
+
+function getNotificationLink(notification: Notification): string | undefined {
+  const { data } = notification;
+
+  if (data?.link) return data.link;
+  if (data?.article_slug) return `/news/${data.article_slug}`;
+  if (data?.company_slug) return `/companies/${data.company_slug}`;
+
+  return undefined;
+}
+
+function NotificationSkeleton() {
+  return (
+    <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border divide-y divide-terminal-border">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="p-4 animate-pulse">
+          <div className="flex items-start gap-4">
+            <div className="h-5 w-5 rounded bg-terminal-bg" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 bg-terminal-bg rounded w-1/3" />
+              <div className="h-3 bg-terminal-bg rounded w-2/3" />
+              <div className="h-3 bg-terminal-bg rounded w-1/4" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function NotificationsPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const markAsRead = (id: string) => {
-    setNotifications(
-      notifications.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const data = await userService.getNotifications();
+      setNotifications(data);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+      toast.error("Failed to load notifications");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+    } else {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, fetchNotifications]);
+
+  const markAsRead = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await userService.markNotificationAsRead(id);
+      setNotifications(
+        notifications.map((n) => (n.id === id ? { ...n, is_read: true, read_at: new Date().toISOString() } : n))
+      );
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+      toast.error("Failed to mark as read");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map((n) => ({ ...n, isRead: true })));
+  const markAllAsRead = async () => {
+    setActionLoading("all");
+    try {
+      await userService.markAllNotificationsAsRead();
+      setNotifications(notifications.map((n) => ({ ...n, is_read: true, read_at: new Date().toISOString() })));
+      toast.success("All notifications marked as read");
+    } catch (error) {
+      console.error("Failed to mark all as read:", error);
+      toast.error("Failed to mark all as read");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
-  const deleteNotification = (id: string) => {
-    setNotifications(notifications.filter((n) => n.id !== id));
+  const deleteNotification = async (id: string) => {
+    setActionLoading(id);
+    try {
+      await userService.deleteNotification(id);
+      setNotifications(notifications.filter((n) => n.id !== id));
+      toast.success("Notification deleted");
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+      toast.error("Failed to delete notification");
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   const filteredNotifications = notifications.filter((n) => {
     if (filter === "all") return true;
-    if (filter === "unread") return !n.isRead;
-    return n.type === filter;
+    if (filter === "unread") return !n.is_read;
+    return n.notification_type === filter;
   });
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   if (!isAuthenticated) {
     return (
@@ -160,9 +191,14 @@ export default function NotificationsPage() {
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="flex items-center gap-2 px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                disabled={actionLoading === "all"}
+                className="flex items-center gap-2 px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50"
               >
-                <CheckCheck className="h-4 w-4" />
+                {actionLoading === "all" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCheck className="h-4 w-4" />
+                )}
                 Mark all read
               </button>
             )}
@@ -181,8 +217,9 @@ export default function NotificationsPage() {
             { id: "all", label: "All" },
             { id: "unread", label: `Unread (${unreadCount})` },
             { id: "price_alert", label: "Price Alerts" },
-            { id: "news", label: "News" },
-            { id: "market", label: "Market" },
+            { id: "breaking_news", label: "Breaking News" },
+            { id: "earnings", label: "Earnings" },
+            { id: "watchlist", label: "Watchlist" },
           ].map((f) => (
             <button
               key={f.id}
@@ -200,72 +237,87 @@ export default function NotificationsPage() {
         </div>
 
         {/* Notifications List */}
-        {filteredNotifications.length > 0 ? (
+        {isLoading ? (
+          <NotificationSkeleton />
+        ) : filteredNotifications.length > 0 ? (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border divide-y divide-terminal-border">
-            {filteredNotifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={cn(
-                  "p-4 hover:bg-terminal-bg-elevated transition-colors",
-                  !notification.isRead && "bg-brand-orange/5"
-                )}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 mt-1">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className={cn(
-                          "font-medium",
-                          !notification.isRead && "text-brand-orange"
-                        )}>
-                          {notification.title}
-                        </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {notification.message}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {new Date(notification.createdAt).toLocaleString("en-ZA", {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {!notification.isRead && (
-                          <button
-                            onClick={() => markAsRead(notification.id)}
-                            className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
-                            title="Mark as read"
-                          >
-                            <Check className="h-4 w-4" />
-                          </button>
-                        )}
-                        <button
-                          onClick={() => deleteNotification(notification.id)}
-                          className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
+            {filteredNotifications.map((notification) => {
+              const link = getNotificationLink(notification);
+              return (
+                <div
+                  key={notification.id}
+                  className={cn(
+                    "p-4 hover:bg-terminal-bg-elevated transition-colors",
+                    !notification.is_read && "bg-brand-orange/5"
+                  )}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 mt-1">
+                      {getNotificationIcon(notification.notification_type)}
                     </div>
-                    {notification.link && (
-                      <Link
-                        href={notification.link}
-                        className="inline-block text-sm text-brand-orange hover:text-brand-orange-light mt-2"
-                      >
-                        View details →
-                      </Link>
-                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className={cn(
+                            "font-medium",
+                            !notification.is_read && "text-brand-orange"
+                          )}>
+                            {notification.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            {new Date(notification.created_at).toLocaleString("en-ZA", {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {!notification.is_read && (
+                            <button
+                              onClick={() => markAsRead(notification.id)}
+                              disabled={actionLoading === notification.id}
+                              className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded disabled:opacity-50"
+                              title="Mark as read"
+                            >
+                              {actionLoading === notification.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Check className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => deleteNotification(notification.id)}
+                            disabled={actionLoading === notification.id}
+                            className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded disabled:opacity-50"
+                            title="Delete"
+                          >
+                            {actionLoading === notification.id && notification.is_read ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                      {link && (
+                        <Link
+                          href={link}
+                          className="inline-block text-sm text-brand-orange hover:text-brand-orange-light mt-2"
+                        >
+                          View details →
+                        </Link>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         ) : (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
