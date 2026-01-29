@@ -148,6 +148,7 @@ export interface EditorDashboard {
   articles_count: number;
   published_today: number;
   pending_review: number;
+  draft_count: number;
   my_assignments: number;
   recent_activity: Array<{
     id: number;
