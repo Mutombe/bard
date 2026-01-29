@@ -566,6 +566,46 @@ class EditorDashboardView(APIView):
         return Response(serializer.data)
 
 
+class AdminStatsView(APIView):
+    """
+    Admin Statistics API.
+
+    Provides aggregated stats for all content (not user-specific).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        # Check if user is admin/editor
+        if not (user.is_staff or (hasattr(user, "role") and user.role in ["super_admin", "editor"])):
+            return Response(
+                {"error": "Admin access required"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        today = timezone.now().date()
+
+        # All article stats (not filtered by user)
+        all_articles = NewsArticle.objects.all()
+
+        # Status breakdown
+        status_counts = all_articles.values("status").annotate(count=Count("id"))
+        status_map = {item["status"]: item["count"] for item in status_counts}
+
+        return Response({
+            "articles_count": all_articles.count(),
+            "published_today": all_articles.filter(
+                status="published",
+                published_at__date=today
+            ).count(),
+            "pending_review": status_map.get("pending_review", 0),
+            "draft_count": status_map.get("draft", 0),
+            "published_count": status_map.get("published", 0),
+            "scheduled_count": status_map.get("scheduled", 0),
+        })
+
+
 class BulkActionView(APIView):
     """
     Bulk operations on articles.

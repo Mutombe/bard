@@ -3,7 +3,11 @@ User Views
 
 Provides API endpoints for user management.
 """
+from datetime import timedelta
+
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -135,6 +139,35 @@ class UserViewSet(viewsets.ModelViewSet):
                 profile.set_preference(key, value)
 
         return Response({"preferences": profile.preferences})
+
+    @action(detail=False, methods=["get"])
+    def stats(self, request):
+        """Get user statistics (admin only)."""
+        user = request.user
+        # Check if user is admin/editor
+        if not (user.is_staff or (hasattr(user, "role") and user.role in ["super_admin", "editor"])):
+            return Response(
+                {"error": "Admin access required"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        today = timezone.now().date()
+
+        total_users = User.objects.count()
+        premium_users = User.objects.filter(
+            subscription_tier__in=["basic", "professional", "enterprise"]
+        ).count()
+        admin_count = User.objects.filter(
+            role__in=["super_admin", "editor", "analyst"]
+        ).count()
+        new_today = User.objects.filter(date_joined__date=today).count()
+
+        return Response({
+            "total_users": total_users,
+            "premium_users": premium_users,
+            "admin_count": admin_count,
+            "new_today": new_today,
+        })
 
 
 class UserRegistrationView(viewsets.GenericViewSet):
