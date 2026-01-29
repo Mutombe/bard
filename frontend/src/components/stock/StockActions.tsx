@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Bell, Share2, Check, Copy, Link2, Facebook, Linkedin } from "lucide-react";
+import { Star, Bell, Share2, Check, Copy, Link2, Facebook, Linkedin, Loader2 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { useAppSelector } from "@/store";
 import { useAuthModal } from "@/contexts/AuthModalContext";
+import { toast } from "sonner";
 import type { Company } from "@/types";
 
 interface StockActionsProps {
@@ -26,6 +27,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
   const [alertType, setAlertType] = useState<"above" | "below">("above");
   const [alertSet, setAlertSet] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   const isWatched = isInWatchlist(company.id);
   const shareUrl = typeof window !== "undefined"
@@ -33,7 +35,23 @@ export function StockActions({ company, className, variant = "default" }: StockA
     : "";
 
   const handleWatchlistToggle = async () => {
-    await toggleCompany(company);
+    setIsToggling(true);
+    try {
+      const wasAdded = await toggleCompany(company);
+      if (wasAdded) {
+        toast.success(`${company.symbol} added to watchlist`, {
+          description: company.name,
+        });
+      } else {
+        toast.success(`${company.symbol} removed from watchlist`, {
+          description: company.name,
+        });
+      }
+    } catch (error) {
+      toast.error("Failed to update watchlist");
+    } finally {
+      setIsToggling(false);
+    }
   };
 
   const handleNotify = () => {
@@ -91,15 +109,21 @@ export function StockActions({ company, className, variant = "default" }: StockA
       {/* Watchlist Button */}
       <button
         onClick={handleWatchlistToggle}
+        disabled={isToggling}
         className={cn(
-          "p-2 border rounded-md transition-colors",
+          "p-2 border rounded-md transition-all duration-200",
           isWatched
             ? "border-brand-orange bg-brand-orange/10 text-brand-orange"
-            : "border-terminal-border hover:bg-terminal-bg-elevated"
+            : "border-terminal-border hover:bg-terminal-bg-elevated hover:border-brand-orange/50",
+          isToggling && "opacity-70 cursor-wait"
         )}
         title={isWatched ? "Remove from Watchlist" : "Add to Watchlist"}
       >
-        <Star className={cn("h-5 w-5", isWatched && "fill-current")} />
+        {isToggling ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <Star className={cn("h-5 w-5 transition-all", isWatched && "fill-current")} />
+        )}
       </button>
 
       {/* Notify/Alert Button */}
