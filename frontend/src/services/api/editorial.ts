@@ -375,7 +375,7 @@ export const editorialService = {
 
   async bulkAction(
     action: "publish" | "unpublish" | "delete" | "add_to_bucket" | "remove_from_bucket" | "assign",
-    articleIds: number[],
+    articleIds: string[],
     extraData?: Record<string, any>
   ): Promise<void> {
     await authClient.post("/editorial/bulk-action/", {
