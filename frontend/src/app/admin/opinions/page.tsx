@@ -90,12 +90,12 @@ export default function OpinionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [deletingIds, setDeletingIds] = useState<number[]>([]);
+  const [deletingIds, setDeletingIds] = useState<string[]>([]);
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState<{
     open: boolean;
-    opinionId?: number;
+    opinionId?: string;
     opinionSlug?: string;
     opinionTitle?: string;
   }>({ open: false });
