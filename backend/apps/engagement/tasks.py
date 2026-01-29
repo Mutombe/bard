@@ -200,14 +200,16 @@ def process_price_alerts():
     Process active price alerts and trigger notifications.
 
     Runs every minute during market hours.
+    Respects user notification preferences.
     """
     from .models import Notification, PriceAlert
 
     active_alerts = PriceAlert.objects.filter(
         status=PriceAlert.AlertStatus.ACTIVE
-    ).select_related("company", "user")
+    ).select_related("company", "user", "user__profile")
 
     triggered_count = 0
+    notifications_created = 0
 
     for alert in active_alerts:
         current_price = alert.company.current_price
@@ -218,7 +220,18 @@ def process_price_alerts():
             alert.triggered_price = current_price
             alert.save(update_fields=["status", "triggered_at", "triggered_price"])
 
-            # Create notification
+            triggered_count += 1
+
+            # Check user's notification preferences
+            user_profile = getattr(alert.user, "profile", None)
+            if user_profile:
+                price_alerts_enabled = user_profile.get_preference(
+                    "notifications", "price_alerts", default=True
+                )
+                if not price_alerts_enabled:
+                    continue
+
+            # Create notification only if user has preference enabled
             Notification.objects.create(
                 user=alert.user,
                 notification_type=Notification.NotificationType.PRICE_ALERT,
@@ -231,10 +244,9 @@ def process_price_alerts():
                     "alert_type": alert.alert_type,
                 },
             )
+            notifications_created += 1
 
-            triggered_count += 1
-
-    return f"Processed {active_alerts.count()} alerts, triggered {triggered_count}"
+    return f"Processed {active_alerts.count()} alerts, triggered {triggered_count}, created {notifications_created} notifications"
 
 
 @shared_task(name="apps.engagement.tasks.send_breaking_news_alert")
@@ -243,6 +255,7 @@ def send_breaking_news_alert(article_id: str):
     Send breaking news alert to subscribers.
 
     Called when an article is marked as breaking news.
+    Respects user notification preferences.
     """
     from apps.news.models import NewsArticle
 
@@ -253,45 +266,58 @@ def send_breaking_news_alert(article_id: str):
     except NewsArticle.DoesNotExist:
         return "Article not found or not breaking news"
 
-    # Email subscribers
+    # Email subscribers (newsletter subscriptions are opt-in, so no preference check needed)
     subscriptions = NewsletterSubscription.objects.filter(
         newsletter_type=NewsletterSubscription.NewsletterType.BREAKING_NEWS,
         is_active=True,
         is_verified=True,
     )
 
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@bardglobalfinance.com")
+
     for subscription in subscriptions:
         send_mail(
             subject=f"BREAKING: {article.title}",
             message=article.excerpt,
-            from_email="noreply@bardsantner.com",
+            from_email=from_email,
             recipient_list=[subscription.email],
             fail_silently=True,
         )
 
-    # Create in-app notifications for all users who watch related companies
+    # Create in-app notifications for users who watch related companies
+    # Only for users who have breaking_news notifications enabled
     from apps.users.models import UserProfile
 
     related_company_ids = article.related_companies.values_list("id", flat=True)
 
-    users_watching = UserProfile.objects.filter(
+    # Get profiles of users watching these companies
+    profiles_watching = UserProfile.objects.filter(
         watchlist__id__in=related_company_ids
-    ).values_list("user_id", flat=True).distinct()
+    ).select_related("user").distinct()
 
-    notifications = [
-        Notification(
-            user_id=user_id,
-            notification_type=Notification.NotificationType.BREAKING_NEWS,
-            title=f"Breaking News: {article.title[:50]}",
-            message=article.excerpt[:200],
-            data={
-                "article_id": str(article.id),
-                "slug": article.slug,
-            },
+    notifications = []
+    for profile in profiles_watching:
+        # Check user's notification preferences
+        breaking_news_enabled = profile.get_preference(
+            "notifications", "breaking_news", default=True
         )
-        for user_id in users_watching
-    ]
+        if not breaking_news_enabled:
+            continue
 
-    Notification.objects.bulk_create(notifications)
+        notifications.append(
+            Notification(
+                user=profile.user,
+                notification_type=Notification.NotificationType.BREAKING_NEWS,
+                title=f"Breaking News: {article.title[:50]}",
+                message=article.excerpt[:200],
+                data={
+                    "article_id": str(article.id),
+                    "article_slug": article.slug,
+                },
+            )
+        )
+
+    if notifications:
+        Notification.objects.bulk_create(notifications)
 
     return f"Sent breaking news to {subscriptions.count()} email subscribers and {len(notifications)} app users"
