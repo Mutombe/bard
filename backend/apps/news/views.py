@@ -235,64 +235,85 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    @action(detail=False, methods=["get"], url_path=r"by-id/(?P<article_id>[0-9a-f-]+)")
-    def get_by_id(self, request, article_id=None):
-        """Get an article by ID/UUID (useful for admin edit pages)."""
-        try:
-            queryset = self.get_queryset()
-            article = queryset.get(id=article_id)
+    @action(detail=False, methods=["get", "delete", "patch"], url_path=r"by-id/(?P<article_id>[0-9a-f-]+)")
+    def by_id(self, request, article_id=None):
+        """Get, update, or delete an article by ID/UUID."""
+        if request.method == "GET":
+            # Get article by ID
+            try:
+                queryset = self.get_queryset()
+                article = queryset.get(id=article_id)
 
-            # Check premium access like in retrieve
-            if article.is_premium:
-                if not request.user.is_authenticated:
-                    serializer = NewsArticleDetailSerializer(article)
-                    data = serializer.data
-                    data["content"] = data["content"][:500] + "..."
-                    data["requires_subscription"] = True
-                    return Response(data)
+                # Check premium access like in retrieve
+                if article.is_premium:
+                    if not request.user.is_authenticated:
+                        serializer = NewsArticleDetailSerializer(article)
+                        data = serializer.data
+                        data["content"] = data["content"][:500] + "..."
+                        data["requires_subscription"] = True
+                        return Response(data)
 
-                if not request.user.can_access_premium:
-                    serializer = NewsArticleDetailSerializer(article)
-                    data = serializer.data
-                    data["content"] = data["content"][:500] + "..."
-                    data["requires_subscription"] = True
-                    return Response(data)
+                    if not request.user.can_access_premium:
+                        serializer = NewsArticleDetailSerializer(article)
+                        data = serializer.data
+                        data["content"] = data["content"][:500] + "..."
+                        data["requires_subscription"] = True
+                        return Response(data)
 
-            serializer = NewsArticleDetailSerializer(article)
-            return Response(serializer.data)
-        except NewsArticle.DoesNotExist:
-            return Response(
-                {"error": f"Article with ID {article_id} not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+                serializer = NewsArticleDetailSerializer(article)
+                return Response(serializer.data)
+            except NewsArticle.DoesNotExist:
+                return Response(
+                    {"error": f"Article with ID {article_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
 
-    @action(detail=False, methods=["delete"], url_path=r"by-id/(?P<article_id>[0-9a-f-]+)")
-    def delete_by_id(self, request, article_id=None):
-        """Delete an article by ID/UUID (more reliable than slug)."""
-        if not request.user.is_editor:
-            return Response(
-                {"error": "Only editors can delete articles"},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        elif request.method == "DELETE":
+            # Delete article by ID
+            if not request.user.is_editor:
+                return Response(
+                    {"error": "Only editors can delete articles"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
 
-        try:
-            article = NewsArticle.objects.get(id=article_id)
-            title = article.title
-            article.delete()
-            return Response(
-                {"message": f"Article '{title}' deleted successfully"},
-                status=status.HTTP_200_OK,
-            )
-        except NewsArticle.DoesNotExist:
-            return Response(
-                {"error": f"Article with ID {article_id} not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Exception as e:
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.error(f"Error deleting article by ID: {str(e)}", exc_info=True)
-            return Response(
-                {"error": f"Failed to delete article: {str(e)}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            try:
+                article = NewsArticle.objects.get(id=article_id)
+                title = article.title
+                article.delete()
+                return Response(
+                    {"message": f"Article '{title}' deleted successfully"},
+                    status=status.HTTP_200_OK,
+                )
+            except NewsArticle.DoesNotExist:
+                return Response(
+                    {"error": f"Article with ID {article_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            except Exception as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error deleting article by ID: {str(e)}", exc_info=True)
+                return Response(
+                    {"error": f"Failed to delete article: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+        elif request.method == "PATCH":
+            # Update article by ID
+            if not request.user.is_editor:
+                return Response(
+                    {"error": "Only editors can update articles"},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+            try:
+                article = NewsArticle.objects.get(id=article_id)
+                serializer = NewsArticleCreateSerializer(article, data=request.data, partial=True)
+                serializer.is_valid(raise_exception=True)
+                serializer.save()
+                return Response(NewsArticleDetailSerializer(article).data)
+            except NewsArticle.DoesNotExist:
+                return Response(
+                    {"error": f"Article with ID {article_id} not found"},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
