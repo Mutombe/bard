@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAppSelector } from "@/store";
 
-// Local storage keys (same as use-watchlist.ts)
+// Local storage keys - MUST match what pages actually use
 const GUEST_WATCHLIST_KEY = "bardiq_guest_watchlist";
-const GUEST_SAVES_KEY = "bardiq_guest_saves";
+const LIKES_KEY = "bardiq_likes";
 const BOOKMARKS_KEY = "bardiq_bookmarks";
 
 interface SavedCounts {
   watchlistCount: number;
   savedArticlesCount: number;
+  likesCount: number;
   totalCount: number;
 }
 
@@ -22,49 +23,56 @@ export function useSavedCounts(): SavedCounts {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const { items: watchlistItems } = useAppSelector((state) => state.watchlist);
 
-  const [guestCounts, setGuestCounts] = useState<SavedCounts>({
+  const [counts, setCounts] = useState<SavedCounts>({
     watchlistCount: 0,
     savedArticlesCount: 0,
+    likesCount: 0,
     totalCount: 0,
   });
 
-  // For guest users, read from localStorage
-  useEffect(() => {
+  const updateCounts = useCallback(() => {
     if (typeof window === "undefined") return;
 
-    const updateCounts = () => {
-      try {
-        const watchlist = JSON.parse(localStorage.getItem(GUEST_WATCHLIST_KEY) || "[]");
-        const saves = JSON.parse(localStorage.getItem(GUEST_SAVES_KEY) || "[]");
-        const bookmarks = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "[]");
+    try {
+      const watchlist = JSON.parse(localStorage.getItem(GUEST_WATCHLIST_KEY) || "[]");
+      const likes = JSON.parse(localStorage.getItem(LIKES_KEY) || "[]");
+      const bookmarks = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "[]");
 
-        // Combine saves and bookmarks (they might be stored differently)
-        const savedArticlesCount = saves.length + bookmarks.length;
-        const watchlistCount = watchlist.length;
+      const watchlistCount = Array.isArray(watchlist) ? watchlist.length : 0;
+      const likesCount = Array.isArray(likes) ? likes.length : 0;
+      const savedArticlesCount = Array.isArray(bookmarks) ? bookmarks.length : 0;
 
-        setGuestCounts({
-          watchlistCount,
-          savedArticlesCount,
-          totalCount: watchlistCount + savedArticlesCount,
-        });
-      } catch {
-        setGuestCounts({
-          watchlistCount: 0,
-          savedArticlesCount: 0,
-          totalCount: 0,
-        });
-      }
-    };
+      setCounts({
+        watchlistCount,
+        savedArticlesCount,
+        likesCount,
+        totalCount: watchlistCount + savedArticlesCount + likesCount,
+      });
+    } catch (e) {
+      console.error("Error reading saved counts:", e);
+      setCounts({
+        watchlistCount: 0,
+        savedArticlesCount: 0,
+        likesCount: 0,
+        totalCount: 0,
+      });
+    }
+  }, []);
+
+  // Initial load and set up listeners
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
     // Initial load
     updateCounts();
 
-    // Listen for storage changes (in case another tab updates)
+    // Listen for storage changes (cross-tab)
     const handleStorageChange = (e: StorageEvent) => {
       if (
         e.key === GUEST_WATCHLIST_KEY ||
-        e.key === GUEST_SAVES_KEY ||
-        e.key === BOOKMARKS_KEY
+        e.key === LIKES_KEY ||
+        e.key === BOOKMARKS_KEY ||
+        e.key === null // null means storage was cleared
       ) {
         updateCounts();
       }
@@ -72,30 +80,27 @@ export function useSavedCounts(): SavedCounts {
 
     window.addEventListener("storage", handleStorageChange);
 
-    // Also listen for custom events for same-tab updates
-    const handleCustomUpdate = () => updateCounts();
-    window.addEventListener("savedItemsUpdated", handleCustomUpdate);
+    // Poll for changes every 2 seconds (for same-tab updates since localStorage doesn't trigger events in same tab)
+    const interval = setInterval(updateCounts, 2000);
 
     return () => {
       window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("savedItemsUpdated", handleCustomUpdate);
+      clearInterval(interval);
     };
-  }, []);
+  }, [updateCounts]);
 
-  // For authenticated users, use Redux state
+  // For authenticated users, combine Redux watchlist with localStorage counts
   if (isAuthenticated) {
     const watchlistCount = watchlistItems?.length || 0;
-    // TODO: Get saved articles count from Redux when available
-    const savedArticlesCount = guestCounts.savedArticlesCount; // Fallback to local for now
-
     return {
       watchlistCount,
-      savedArticlesCount,
-      totalCount: watchlistCount + savedArticlesCount,
+      savedArticlesCount: counts.savedArticlesCount,
+      likesCount: counts.likesCount,
+      totalCount: watchlistCount + counts.savedArticlesCount + counts.likesCount,
     };
   }
 
-  return guestCounts;
+  return counts;
 }
 
 export default useSavedCounts;
