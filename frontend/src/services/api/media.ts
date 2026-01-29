@@ -64,7 +64,8 @@ export const mediaService = {
   async uploadFile(file: File, data?: { name?: string; alt_text?: string; caption?: string }): Promise<MediaFile> {
     const formData = new FormData();
     formData.append("file", file);
-    if (data?.name) formData.append("name", data.name);
+    // Use provided name or default to filename
+    formData.append("name", data?.name || file.name);
     if (data?.alt_text) formData.append("alt_text", data.alt_text);
     if (data?.caption) formData.append("caption", data.caption);
 
