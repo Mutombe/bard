@@ -5,11 +5,88 @@ Handles:
 - Newsletter delivery
 - Price alert processing
 - Notification sending
+- Email verification
 """
 from celery import shared_task
+from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
+
+
+@shared_task(name="apps.engagement.tasks.send_verification_email")
+def send_verification_email(subscription_id: str):
+    """
+    Send verification email for newsletter subscription.
+
+    Called when a new subscription is created.
+    """
+    from .models import NewsletterSubscription
+
+    try:
+        subscription = NewsletterSubscription.objects.get(id=subscription_id)
+    except NewsletterSubscription.DoesNotExist:
+        return "Subscription not found"
+
+    if subscription.is_verified:
+        return "Already verified"
+
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://bardglobalfinance.com")
+    verify_url = f"{frontend_url}/newsletter/verify?token={subscription.verification_token}"
+
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #f97316;">Bard Global Finance Institute</h1>
+        </div>
+        <div style="background-color: #1a1a2e; color: #ffffff; padding: 30px; border-radius: 8px;">
+            <h2 style="color: #f97316; margin-top: 0;">Verify Your Subscription</h2>
+            <p>Thank you for subscribing to our {subscription.get_newsletter_type_display()} newsletter!</p>
+            <p>Please click the button below to verify your email address:</p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{verify_url}"
+                   style="background-color: #f97316; color: #ffffff; padding: 12px 30px;
+                          text-decoration: none; border-radius: 4px; font-weight: bold;">
+                    Verify Email
+                </a>
+            </div>
+            <p style="color: #888; font-size: 12px;">
+                If you didn't subscribe to this newsletter, you can safely ignore this email.
+            </p>
+        </div>
+        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+            <p>&copy; Bard Global Finance Institute</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    text_content = f"""
+    Bard Global Finance Institute - Verify Your Subscription
+
+    Thank you for subscribing to our {subscription.get_newsletter_type_display()} newsletter!
+
+    Please click the link below to verify your email address:
+    {verify_url}
+
+    If you didn't subscribe to this newsletter, you can safely ignore this email.
+    """
+
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@bardglobalfinance.com")
+
+    try:
+        send_mail(
+            subject="Verify Your Newsletter Subscription - Bard Global Finance Institute",
+            message=text_content,
+            html_message=html_content,
+            from_email=from_email,
+            recipient_list=[subscription.email],
+            fail_silently=False,
+        )
+        return f"Verification email sent to {subscription.email}"
+    except Exception as e:
+        return f"Failed to send verification email: {str(e)}"
 
 
 @shared_task(name="apps.engagement.tasks.send_morning_brief")

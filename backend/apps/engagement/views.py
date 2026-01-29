@@ -65,6 +65,8 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         import secrets
 
+        from .tasks import send_verification_email
+
         kwargs = {
             "verification_token": secrets.token_urlsafe(32),
             "unsubscribe_token": secrets.token_urlsafe(32),
@@ -74,10 +76,10 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
             kwargs["user"] = self.request.user
             kwargs["email"] = self.request.user.email
 
-        serializer.save(**kwargs)
+        subscription = serializer.save(**kwargs)
 
-        # TODO: Send verification email
-        # send_verification_email.delay(subscription.id)
+        # Send verification email asynchronously
+        send_verification_email.delay(str(subscription.id))
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def stats(self, request):
@@ -104,6 +106,33 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
             "click_rate": 0,  # Placeholder - would need email tracking
             "by_type": {item["newsletter_type"]: item["count"] for item in by_type},
         })
+
+    @action(detail=False, methods=["post"], url_path="verify", permission_classes=[AllowAny])
+    def verify(self, request):
+        """Verify email subscription using token."""
+        token = request.data.get("token")
+        if not token:
+            return Response(
+                {"error": "Verification token is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            subscription = NewsletterSubscription.objects.get(verification_token=token)
+            if subscription.is_verified:
+                return Response({"message": "Email already verified"})
+
+            subscription.is_verified = True
+            subscription.save(update_fields=["is_verified"])
+            return Response({
+                "message": "Email verified successfully",
+                "newsletter_type": subscription.newsletter_type,
+            })
+        except NewsletterSubscription.DoesNotExist:
+            return Response(
+                {"error": "Invalid verification token"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     @action(detail=False, methods=["post"], url_path="unsubscribe")
     def unsubscribe(self, request):
