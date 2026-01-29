@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Plus,
   Search,
-  Mail,
   Send,
   Clock,
   Users,
@@ -13,72 +12,33 @@ import {
   Edit,
   Trash2,
   CheckCircle,
-  XCircle,
   BarChart3,
+  Loader2,
+  Mail,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { adminService } from "@/services/api/admin";
+import { toast } from "sonner";
 
 interface Newsletter {
   id: string;
   subject: string;
-  type: "daily" | "weekly" | "special";
+  subscription_types: string[];
   status: "draft" | "scheduled" | "sent";
-  recipients: number;
-  openRate?: number;
-  clickRate?: number;
-  scheduledAt?: string;
-  sentAt?: string;
-  createdAt: string;
+  recipients_count: number;
+  open_rate?: number;
+  click_rate?: number;
+  scheduled_for?: string;
+  sent_at?: string;
+  created_at: string;
 }
 
-const mockNewsletters: Newsletter[] = [
-  {
-    id: "1",
-    subject: "Daily Market Brief - January 24, 2025",
-    type: "daily",
-    status: "sent",
-    recipients: 45234,
-    openRate: 42.5,
-    clickRate: 8.3,
-    sentAt: "2025-01-24T06:00:00Z",
-    createdAt: "2025-01-23T18:00:00Z",
-  },
-  {
-    id: "2",
-    subject: "Weekly Digest: JSE Hits Record High",
-    type: "weekly",
-    status: "sent",
-    recipients: 68456,
-    openRate: 38.2,
-    clickRate: 12.1,
-    sentAt: "2025-01-20T09:00:00Z",
-    createdAt: "2025-01-19T14:00:00Z",
-  },
-  {
-    id: "3",
-    subject: "Daily Market Brief - January 25, 2025",
-    type: "daily",
-    status: "scheduled",
-    recipients: 45500,
-    scheduledAt: "2025-01-25T06:00:00Z",
-    createdAt: "2025-01-24T16:00:00Z",
-  },
-  {
-    id: "4",
-    subject: "Special Report: Mining Sector Outlook",
-    type: "special",
-    status: "draft",
-    recipients: 0,
-    createdAt: "2025-01-24T10:00:00Z",
-  },
-];
-
-const stats = [
-  { label: "Total Subscribers", value: "68,456", icon: Users, change: "+5.2%" },
-  { label: "Avg Open Rate", value: "40.3%", icon: Eye, change: "+2.1%" },
-  { label: "Newsletters Sent", value: "1,247", icon: Send, change: "+12" },
-  { label: "Click Rate", value: "10.2%", icon: BarChart3, change: "+0.8%" },
-];
+interface NewsletterStats {
+  total_subscribers: number;
+  active_subscribers: number;
+  newsletters_sent: number;
+  avg_open_rate: number;
+}
 
 function getStatusColor(status: Newsletter["status"]) {
   switch (status) {
@@ -91,29 +51,77 @@ function getStatusColor(status: Newsletter["status"]) {
   }
 }
 
-function getTypeLabel(type: Newsletter["type"]) {
-  switch (type) {
-    case "daily":
-      return "Daily Brief";
-    case "weekly":
-      return "Weekly Digest";
-    case "special":
-      return "Special Report";
-  }
+function getTypeLabel(types: string[]) {
+  if (types.length === 0) return "General";
+  const typeLabels: Record<string, string> = {
+    morning_brief: "Morning Brief",
+    evening_wrap: "Evening Wrap",
+    weekly_digest: "Weekly Digest",
+    breaking_news: "Breaking News",
+    earnings: "Earnings Alerts",
+  };
+  return types.map(t => typeLabels[t] || t).join(", ");
 }
 
 export default function NewslettersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedType, setSelectedType] = useState("all");
+  const [newsletters, setNewsletters] = useState<Newsletter[]>([]);
+  const [stats, setStats] = useState<NewsletterStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredNewsletters = mockNewsletters.filter((newsletter) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const [statsData, newslettersData] = await Promise.all([
+        adminService.getNewsletterStats(),
+        adminService.getNewsletters?.() || Promise.resolve([]),
+      ]);
+      setStats(statsData);
+      setNewsletters(newslettersData || []);
+    } catch (error) {
+      console.error("Failed to fetch newsletter data:", error);
+      toast.error("Failed to load newsletters");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredNewsletters = newsletters.filter((newsletter) => {
     const matchesSearch = newsletter.subject
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesType =
-      selectedType === "all" || newsletter.type === selectedType;
+      selectedType === "all" || newsletter.subscription_types.includes(selectedType);
     return matchesSearch && matchesType;
   });
+
+  const statsDisplay = [
+    {
+      label: "Total Subscribers",
+      value: stats?.total_subscribers?.toLocaleString() || "0",
+      icon: Users
+    },
+    {
+      label: "Active Subscribers",
+      value: stats?.active_subscribers?.toLocaleString() || "0",
+      icon: Eye
+    },
+    {
+      label: "Newsletters Sent",
+      value: stats?.newsletters_sent?.toLocaleString() || "0",
+      icon: Send
+    },
+    {
+      label: "Avg Open Rate",
+      value: stats?.avg_open_rate ? `${stats.avg_open_rate}%` : "N/A",
+      icon: BarChart3
+    },
+  ];
 
   return (
     <div>
@@ -136,16 +144,21 @@ export default function NewslettersPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {stats.map((stat) => (
+        {statsDisplay.map((stat) => (
           <div
             key={stat.label}
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4"
           >
             <div className="flex items-center justify-between mb-2">
               <stat.icon className="h-5 w-5 text-brand-orange" />
-              <span className="text-xs text-market-up">{stat.change}</span>
             </div>
-            <div className="text-2xl font-bold">{stat.value}</div>
+            <div className="text-2xl font-bold">
+              {isLoading ? (
+                <span className="inline-block w-16 h-6 bg-terminal-bg-elevated animate-pulse rounded" />
+              ) : (
+                stat.value
+              )}
+            </div>
             <div className="text-sm text-muted-foreground">{stat.label}</div>
           </div>
         ))}
@@ -169,9 +182,11 @@ export default function NewslettersPage() {
           className="px-4 py-2 bg-terminal-bg-secondary border border-terminal-border rounded-md text-sm focus:outline-none focus:border-brand-orange"
         >
           <option value="all">All Types</option>
-          <option value="daily">Daily Brief</option>
-          <option value="weekly">Weekly Digest</option>
-          <option value="special">Special Reports</option>
+          <option value="morning_brief">Morning Brief</option>
+          <option value="evening_wrap">Evening Wrap</option>
+          <option value="weekly_digest">Weekly Digest</option>
+          <option value="breaking_news">Breaking News</option>
+          <option value="earnings">Earnings Alerts</option>
         </select>
       </div>
 
@@ -190,67 +205,89 @@ export default function NewslettersPage() {
 
         {/* Table Body */}
         <div className="divide-y divide-terminal-border">
-          {filteredNewsletters.map((newsletter) => (
-            <div
-              key={newsletter.id}
-              className="grid grid-cols-12 gap-4 p-4 hover:bg-terminal-bg-elevated transition-colors items-center"
-            >
-              <div className="col-span-5">
-                <Link
-                  href={`/admin/newsletters/${newsletter.id}`}
-                  className="font-medium hover:text-brand-orange transition-colors line-clamp-1"
-                >
-                  {newsletter.subject}
-                </Link>
-              </div>
-              <div className="col-span-2">
-                <span className="px-2 py-1 text-xs bg-terminal-bg-elevated rounded">
-                  {getTypeLabel(newsletter.type)}
-                </span>
-              </div>
-              <div className="col-span-1 flex justify-center">
-                <span
-                  className={cn(
-                    "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium capitalize",
-                    getStatusColor(newsletter.status)
-                  )}
-                >
-                  {newsletter.status === "sent" && <CheckCircle className="h-3 w-3" />}
-                  {newsletter.status === "scheduled" && <Clock className="h-3 w-3" />}
-                  {newsletter.status}
-                </span>
-              </div>
-              <div className="col-span-1 text-right text-sm">
-                {newsletter.recipients > 0
-                  ? newsletter.recipients.toLocaleString()
-                  : "-"}
-              </div>
-              <div className="col-span-1 text-right text-sm">
-                {newsletter.openRate ? `${newsletter.openRate}%` : "-"}
-              </div>
-              <div className="col-span-1 text-right text-sm text-muted-foreground">
-                {new Date(
-                  newsletter.sentAt || newsletter.scheduledAt || newsletter.createdAt
-                ).toLocaleDateString("en-ZA", {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </div>
-              <div className="col-span-1 flex justify-end gap-1">
-                <Link
-                  href={`/admin/newsletters/${newsletter.id}`}
-                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
-                >
-                  <Edit className="h-4 w-4" />
-                </Link>
-                {newsletter.status === "draft" && (
-                  <button className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
+          {isLoading ? (
+            <div className="p-8 text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-orange" />
+              <p className="text-muted-foreground mt-2">Loading newsletters...</p>
             </div>
-          ))}
+          ) : filteredNewsletters.length === 0 ? (
+            <div className="p-8 text-center">
+              <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">No newsletters yet</h3>
+              <p className="text-muted-foreground mb-4">
+                Create your first newsletter to engage with your subscribers.
+              </p>
+              <Link
+                href="/admin/newsletters/new"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
+              >
+                <Plus className="h-4 w-4" />
+                Create Newsletter
+              </Link>
+            </div>
+          ) : (
+            filteredNewsletters.map((newsletter) => (
+              <div
+                key={newsletter.id}
+                className="grid grid-cols-12 gap-4 p-4 hover:bg-terminal-bg-elevated transition-colors items-center"
+              >
+                <div className="col-span-5">
+                  <Link
+                    href={`/admin/newsletters/${newsletter.id}`}
+                    className="font-medium hover:text-brand-orange transition-colors line-clamp-1"
+                  >
+                    {newsletter.subject}
+                  </Link>
+                </div>
+                <div className="col-span-2">
+                  <span className="px-2 py-1 text-xs bg-terminal-bg-elevated rounded line-clamp-1">
+                    {getTypeLabel(newsletter.subscription_types)}
+                  </span>
+                </div>
+                <div className="col-span-1 flex justify-center">
+                  <span
+                    className={cn(
+                      "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium capitalize",
+                      getStatusColor(newsletter.status)
+                    )}
+                  >
+                    {newsletter.status === "sent" && <CheckCircle className="h-3 w-3" />}
+                    {newsletter.status === "scheduled" && <Clock className="h-3 w-3" />}
+                    {newsletter.status}
+                  </span>
+                </div>
+                <div className="col-span-1 text-right text-sm">
+                  {newsletter.recipients_count > 0
+                    ? newsletter.recipients_count.toLocaleString()
+                    : "-"}
+                </div>
+                <div className="col-span-1 text-right text-sm">
+                  {newsletter.open_rate ? `${newsletter.open_rate}%` : "-"}
+                </div>
+                <div className="col-span-1 text-right text-sm text-muted-foreground">
+                  {new Date(
+                    newsletter.sent_at || newsletter.scheduled_for || newsletter.created_at
+                  ).toLocaleDateString("en-ZA", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+                <div className="col-span-1 flex justify-end gap-1">
+                  <Link
+                    href={`/admin/newsletters/${newsletter.id}`}
+                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Link>
+                  {newsletter.status === "draft" && (
+                    <button className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

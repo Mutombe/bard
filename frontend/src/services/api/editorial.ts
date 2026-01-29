@@ -106,6 +106,26 @@ export interface EditorialAssignment {
   created_at: string;
 }
 
+// Input type for creating/updating articles (accepts slug strings instead of objects)
+export interface ArticleInput {
+  title?: string;
+  slug?: string;
+  subtitle?: string;
+  excerpt?: string;
+  content?: string;
+  featured_image_url?: string;
+  featured_image_caption?: string;
+  category?: string; // Accepts category slug
+  tags?: string[]; // Accepts tag slugs
+  content_type?: string;
+  status?: string;
+  is_featured?: boolean;
+  is_breaking?: boolean;
+  is_premium?: boolean;
+  meta_title?: string;
+  meta_description?: string;
+}
+
 export interface ContentCalendarItem {
   id: number;
   title: string;
@@ -187,7 +207,7 @@ export const editorialService = {
     return response.data;
   },
 
-  async updateArticle(slug: string, data: Partial<Article>): Promise<Article> {
+  async updateArticle(slug: string, data: ArticleInput): Promise<Article> {
     const response = await authClient.patch<Article>(`/news/articles/${slug}/`, data);
     return response.data;
   },
