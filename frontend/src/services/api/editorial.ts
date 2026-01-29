@@ -90,7 +90,7 @@ export interface EditorialAssignment {
     title: string;
     slug: string;
   };
-  assigned_to: {
+  assignee: {
     id: number;
     full_name: string;
   };
@@ -98,12 +98,20 @@ export interface EditorialAssignment {
     id: number;
     full_name: string;
   };
-  assignment_type: "WRITE" | "EDIT" | "REVIEW" | "PROOFREAD" | "FACT_CHECK";
-  status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "SUBMITTED" | "COMPLETED" | "REJECTED";
-  due_date?: string;
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-  notes?: string;
+  // Backend uses lowercase values
+  assignment_type: string;
+  status: string;
+  deadline?: string;
+  priority: string;
+  instructions?: string;
   created_at: string;
+  // Aliases for backward compatibility with frontend code
+  assigned_to?: {
+    id: number;
+    full_name: string;
+  };
+  due_date?: string;
+  notes?: string;
 }
 
 // Input type for creating/updating articles (accepts slug strings instead of objects)

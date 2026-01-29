@@ -20,53 +20,54 @@ import { editorialService, type EditorialAssignment, type Article } from "@/serv
 import { adminService, type AdminUser } from "@/services/api/admin";
 import { toast } from "sonner";
 
+// Backend uses lowercase values
 const statusOptions = [
   { value: "", label: "All Statuses" },
-  { value: "PENDING", label: "Pending" },
-  { value: "ACCEPTED", label: "Accepted" },
-  { value: "IN_PROGRESS", label: "In Progress" },
-  { value: "SUBMITTED", label: "Submitted" },
-  { value: "COMPLETED", label: "Completed" },
-  { value: "REJECTED", label: "Rejected" },
+  { value: "pending", label: "Pending" },
+  { value: "accepted", label: "Accepted" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "submitted", label: "Submitted" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 const assignmentTypes = [
-  { value: "WRITE", label: "Write" },
-  { value: "EDIT", label: "Edit" },
-  { value: "REVIEW", label: "Review" },
-  { value: "PROOFREAD", label: "Proofread" },
-  { value: "FACT_CHECK", label: "Fact Check" },
+  { value: "write", label: "Write" },
+  { value: "edit", label: "Edit" },
+  { value: "review", label: "Review" },
+  { value: "proofread", label: "Proofread" },
+  { value: "fact_check", label: "Fact Check" },
 ];
 
 const priorityOptions = [
-  { value: "LOW", label: "Low" },
-  { value: "MEDIUM", label: "Medium" },
-  { value: "HIGH", label: "High" },
-  { value: "URGENT", label: "Urgent" },
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+  { value: "urgent", label: "Urgent" },
 ];
 
 const priorityColors: Record<string, string> = {
-  LOW: "text-muted-foreground",
-  MEDIUM: "text-yellow-400",
-  HIGH: "text-orange-400",
-  URGENT: "text-market-down",
+  low: "text-muted-foreground",
+  medium: "text-yellow-400",
+  high: "text-orange-400",
+  urgent: "text-market-down",
 };
 
 const statusColors: Record<string, string> = {
-  PENDING: "bg-yellow-500/20 text-yellow-400",
-  ACCEPTED: "bg-blue-500/20 text-blue-400",
-  IN_PROGRESS: "bg-purple-500/20 text-purple-400",
-  SUBMITTED: "bg-cyan-500/20 text-cyan-400",
-  COMPLETED: "bg-market-up/20 text-market-up",
-  REJECTED: "bg-market-down/20 text-market-down",
+  pending: "bg-yellow-500/20 text-yellow-400",
+  accepted: "bg-blue-500/20 text-blue-400",
+  in_progress: "bg-purple-500/20 text-purple-400",
+  submitted: "bg-cyan-500/20 text-cyan-400",
+  completed: "bg-market-up/20 text-market-up",
+  cancelled: "bg-market-down/20 text-market-down",
 };
 
 const typeLabels: Record<string, string> = {
-  WRITE: "Write",
-  EDIT: "Edit",
-  REVIEW: "Review",
-  PROOFREAD: "Proofread",
-  FACT_CHECK: "Fact Check",
+  write: "Write",
+  edit: "Edit",
+  review: "Review",
+  proofread: "Proofread",
+  fact_check: "Fact Check",
 };
 
 interface TaskFormData {
@@ -81,8 +82,8 @@ interface TaskFormData {
 const initialFormData: TaskFormData = {
   article: "",
   assignee: "",
-  assignment_type: "EDIT",
-  priority: "MEDIUM",
+  assignment_type: "edit",
+  priority: "medium",
   deadline: "",
   instructions: "",
 };
@@ -207,11 +208,11 @@ export default function TasksPage() {
     setEditingTask(task);
     setFormData({
       article: String(task.article?.id || ""),
-      assignee: String(task.assigned_to?.id || ""),
-      assignment_type: task.assignment_type || "EDIT",
-      priority: task.priority || "MEDIUM",
-      deadline: task.due_date ? task.due_date.split("T")[0] : "",
-      instructions: task.notes || "",
+      assignee: String(task.assignee?.id || ""),
+      assignment_type: task.assignment_type || "edit",
+      priority: task.priority || "medium",
+      deadline: task.deadline ? task.deadline.split("T")[0] : "",
+      instructions: task.instructions || "",
     });
     setShowModal(true);
   };
@@ -289,18 +290,18 @@ export default function TasksPage() {
     const query = searchQuery.toLowerCase();
     return (
       assignment.article?.title?.toLowerCase().includes(query) ||
-      assignment.assigned_to?.full_name?.toLowerCase().includes(query) ||
+      assignment.assignee?.full_name?.toLowerCase().includes(query) ||
       assignment.assigned_by?.full_name?.toLowerCase().includes(query)
     );
   });
 
   const pendingCount = assignments.filter((a) =>
-    ["PENDING", "ACCEPTED", "IN_PROGRESS"].includes(a.status)
+    ["pending", "accepted", "in_progress"].includes(a.status)
   ).length;
 
   const overdueCount = assignments.filter((a) => {
-    if (!a.due_date) return false;
-    return new Date(a.due_date) < new Date() && !["COMPLETED", "REJECTED"].includes(a.status);
+    if (!a.deadline) return false;
+    return new Date(a.deadline) < new Date() && !["completed", "cancelled"].includes(a.status);
   }).length;
 
   return (
@@ -353,7 +354,7 @@ export default function TasksPage() {
             </div>
             <div>
               <div className="text-2xl font-bold">
-                {assignments.filter((a) => a.status === "COMPLETED").length}
+                {assignments.filter((a) => a.status === "completed").length}
               </div>
               <div className="text-sm text-muted-foreground">Completed</div>
             </div>
@@ -414,9 +415,9 @@ export default function TasksPage() {
         ) : (
           <div className="divide-y divide-terminal-border">
             {filteredAssignments.map((assignment) => {
-              const isOverdue = assignment.due_date &&
-                new Date(assignment.due_date) < new Date() &&
-                !["COMPLETED", "REJECTED"].includes(assignment.status);
+              const isOverdue = assignment.deadline &&
+                new Date(assignment.deadline) < new Date() &&
+                !["completed", "cancelled"].includes(assignment.status);
 
               return (
                 <div
@@ -427,10 +428,10 @@ export default function TasksPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
-                          "text-xs font-medium px-2 py-0.5 rounded",
+                          "text-xs font-medium px-2 py-0.5 rounded uppercase",
                           priorityColors[assignment.priority] || "text-muted-foreground",
-                          assignment.priority === "URGENT" && "bg-market-down/20",
-                          assignment.priority === "HIGH" && "bg-orange-500/20"
+                          assignment.priority === "urgent" && "bg-market-down/20",
+                          assignment.priority === "high" && "bg-orange-500/20"
                         )}>
                           {assignment.priority}
                         </span>
@@ -449,16 +450,16 @@ export default function TasksPage() {
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <User className="h-3 w-3" />
-                          {assignment.assigned_to?.full_name || "Unassigned"}
+                          {assignment.assignee?.full_name || "Unassigned"}
                         </span>
-                        {assignment.due_date && (
+                        {assignment.deadline && (
                           <span className={cn(
                             "flex items-center gap-1",
                             isOverdue && "text-market-down"
                           )}>
                             <Clock className="h-3 w-3" />
                             {isOverdue && "Overdue: "}
-                            {new Date(assignment.due_date).toLocaleDateString()}
+                            {new Date(assignment.deadline).toLocaleDateString()}
                           </span>
                         )}
                         <span className="text-xs">
@@ -469,13 +470,13 @@ export default function TasksPage() {
 
                     <div className="flex items-center gap-2">
                       <span className={cn(
-                        "px-2 py-1 rounded text-xs font-medium",
+                        "px-2 py-1 rounded text-xs font-medium capitalize",
                         statusColors[assignment.status] || "bg-gray-500/20 text-gray-400"
                       )}>
                         {assignment.status?.replace("_", " ")}
                       </span>
 
-                      {assignment.status === "PENDING" && (
+                      {assignment.status === "pending" && (
                         <button
                           onClick={() => handleAccept(assignment.id)}
                           disabled={actionLoading === assignment.id}
@@ -489,7 +490,7 @@ export default function TasksPage() {
                         </button>
                       )}
 
-                      {["ACCEPTED", "IN_PROGRESS", "SUBMITTED"].includes(assignment.status) && (
+                      {["accepted", "in_progress", "submitted"].includes(assignment.status) && (
                         <button
                           onClick={() => handleComplete(assignment.id)}
                           disabled={actionLoading === assignment.id}
