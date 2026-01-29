@@ -32,6 +32,7 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSavedCounts } from "@/hooks/use-saved-counts";
 
 interface NavItem {
   label: string;
@@ -225,38 +226,71 @@ const navigationData: NavDropdown[] = [
   },
 ];
 
-function DropdownSection({ section }: { section: NavSection }) {
+function DropdownSection({ section, savedCounts }: { section: NavSection; savedCounts?: { watchlistCount: number; savedArticlesCount: number } }) {
+  // Map hrefs to their saved counts
+  const getItemBadge = (href: string | undefined) => {
+    if (!savedCounts || !href) return null;
+
+    if (href === "/watchlist" && savedCounts.watchlistCount > 0) {
+      return savedCounts.watchlistCount;
+    }
+    if (href === "/saved" && savedCounts.savedArticlesCount > 0) {
+      return savedCounts.savedArticlesCount;
+    }
+    return null;
+  };
+
   return (
     <div className="py-2">
       <h4 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
         {section.title}
       </h4>
       <ul className="space-y-0.5">
-        {section.items.map((item) => (
-          <li key={item.href}>
-            <Link
-              href={item.href || "#"}
-              className="flex items-center gap-3 px-3 py-2 text-sm text-foreground/80 hover:text-foreground hover:bg-terminal-bg-elevated rounded-md transition-colors group"
-            >
-              {item.icon && (
-                <item.icon className="h-4 w-4 text-muted-foreground group-hover:text-brand-orange transition-colors" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="font-medium">{item.label}</div>
-                {item.description && (
-                  <div className="text-xs text-muted-foreground truncate">{item.description}</div>
+        {section.items.map((item) => {
+          const badge = getItemBadge(item.href);
+          return (
+            <li key={item.href}>
+              <Link
+                href={item.href || "#"}
+                className="flex items-center gap-3 px-3 py-2 text-sm text-foreground/80 hover:text-foreground hover:bg-terminal-bg-elevated rounded-md transition-colors group"
+              >
+                {item.icon && (
+                  <div className="relative">
+                    <item.icon className="h-4 w-4 text-muted-foreground group-hover:text-brand-orange transition-colors" />
+                    {badge !== null && (
+                      <span className="absolute -top-1.5 -right-1.5 h-3.5 w-3.5 rounded-full bg-brand-orange text-[9px] font-bold text-white flex items-center justify-center">
+                        {badge > 9 ? "9+" : badge}
+                      </span>
+                    )}
+                  </div>
                 )}
-              </div>
-            </Link>
-          </li>
-        ))}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium flex items-center gap-2">
+                    {item.label}
+                    {badge !== null && !item.icon && (
+                      <span className="h-4 min-w-[16px] px-1 rounded-full bg-brand-orange text-[10px] font-bold text-white flex items-center justify-center">
+                        {badge > 9 ? "9+" : badge}
+                      </span>
+                    )}
+                  </div>
+                  {item.description && (
+                    <div className="text-xs text-muted-foreground truncate">{item.description}</div>
+                  )}
+                </div>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
 }
 
-function NavDropdownMenu({ dropdown, isOpen, topOffset }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number }) {
+function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number; savedCounts?: { watchlistCount: number; savedArticlesCount: number } }) {
   if (!isOpen) return null;
+
+  // Only pass savedCounts to Personal Finance dropdown
+  const showSavedCounts = dropdown.label === "Personal Finance" ? savedCounts : undefined;
 
   return (
     <div
@@ -268,7 +302,7 @@ function NavDropdownMenu({ dropdown, isOpen, topOffset }: { dropdown: NavDropdow
           {/* Sections */}
           <div className="flex-1 grid grid-cols-3 gap-6">
             {dropdown.sections.map((section) => (
-              <DropdownSection key={section.title} section={section} />
+              <DropdownSection key={section.title} section={section} savedCounts={showSavedCounts} />
             ))}
           </div>
 
@@ -307,6 +341,7 @@ export function Navigation() {
   const [dropdownTop, setDropdownTop] = useState(65);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
+  const savedCounts = useSavedCounts();
 
   // Calculate dropdown position based on header
   useEffect(() => {
@@ -358,34 +393,43 @@ export function Navigation() {
     }, 150);
   };
 
+  // Check if Personal Finance has any saved items
+  const hasPersonalFinanceItems = savedCounts.totalCount > 0;
+
   return (
     <>
       <nav ref={navRef} className="hidden lg:flex items-center gap-1 relative">
-        {navigationData.map((dropdown) => (
-          <div
-            key={dropdown.label}
-            className="relative"
-            onMouseEnter={() => handleMouseEnter(dropdown.label)}
-            onMouseLeave={handleMouseLeave}
-          >
-            <button
-              className={cn(
-                "flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-md",
-                openDropdown === dropdown.label
-                  ? "text-brand-orange bg-terminal-bg-elevated"
-                  : "text-foreground/80 hover:text-foreground hover:bg-terminal-bg-elevated"
-              )}
+        {navigationData.map((dropdown) => {
+          const showBadge = dropdown.label === "Personal Finance" && hasPersonalFinanceItems;
+          return (
+            <div
+              key={dropdown.label}
+              className="relative"
+              onMouseEnter={() => handleMouseEnter(dropdown.label)}
+              onMouseLeave={handleMouseLeave}
             >
-              {dropdown.label}
-              <ChevronDown
+              <button
                 className={cn(
-                  "h-4 w-4 transition-transform",
-                  openDropdown === dropdown.label && "rotate-180"
+                  "flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-md",
+                  openDropdown === dropdown.label
+                    ? "text-brand-orange bg-terminal-bg-elevated"
+                    : "text-foreground/80 hover:text-foreground hover:bg-terminal-bg-elevated"
                 )}
-              />
-            </button>
-          </div>
-        ))}
+              >
+                {dropdown.label}
+                {showBadge && (
+                  <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
+                )}
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4 transition-transform",
+                    openDropdown === dropdown.label && "rotate-180"
+                  )}
+                />
+              </button>
+            </div>
+          );
+        })}
       </nav>
 
       {/* Dropdown Menus - rendered outside nav for full-width */}
@@ -399,6 +443,7 @@ export function Navigation() {
             dropdown={dropdown}
             isOpen={openDropdown === dropdown.label}
             topOffset={dropdownTop}
+            savedCounts={savedCounts}
           />
         </div>
       ))}
