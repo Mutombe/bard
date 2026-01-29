@@ -45,8 +45,10 @@ export interface NewsletterSubscription {
 export interface NewsletterStats {
   total_subscribers: number;
   active_subscribers: number;
-  open_rate: number;
-  click_rate: number;
+  newsletters_sent: number;
+  avg_open_rate: number;
+  open_rate?: number;
+  click_rate?: number;
 }
 
 // =========================
@@ -144,8 +146,8 @@ export const adminService = {
       return {
         total_subscribers: 0,
         active_subscribers: 0,
-        open_rate: 0,
-        click_rate: 0,
+        newsletters_sent: 0,
+        avg_open_rate: 0,
       };
     }
   },
