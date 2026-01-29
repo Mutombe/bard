@@ -39,18 +39,26 @@ const assignmentTypes = [
   { value: "fact_check", label: "Fact Check" },
 ];
 
+// Priority is an integer field in the backend (higher = more urgent)
 const priorityOptions = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "urgent", label: "Urgent" },
+  { value: "0", label: "Low", num: 0 },
+  { value: "1", label: "Medium", num: 1 },
+  { value: "2", label: "High", num: 2 },
+  { value: "3", label: "Urgent", num: 3 },
 ];
 
-const priorityColors: Record<string, string> = {
-  low: "text-muted-foreground",
-  medium: "text-yellow-400",
-  high: "text-orange-400",
-  urgent: "text-market-down",
+const priorityLabels: Record<number, string> = {
+  0: "Low",
+  1: "Medium",
+  2: "High",
+  3: "Urgent",
+};
+
+const priorityColors: Record<number, string> = {
+  0: "text-muted-foreground",
+  1: "text-yellow-400",
+  2: "text-orange-400",
+  3: "text-market-down",
 };
 
 const statusColors: Record<string, string> = {
@@ -83,7 +91,7 @@ const initialFormData: TaskFormData = {
   article: "",
   assignee: "",
   assignment_type: "edit",
-  priority: "medium",
+  priority: "1", // Medium priority (integer as string for form)
   deadline: "",
   instructions: "",
 };
@@ -210,7 +218,7 @@ export default function TasksPage() {
       article: String(task.article?.id || ""),
       assignee: String(task.assignee?.id || ""),
       assignment_type: task.assignment_type || "edit",
-      priority: task.priority || "medium",
+      priority: String(task.priority ?? 1), // Convert number to string for form
       deadline: task.deadline ? task.deadline.split("T")[0] : "",
       instructions: task.instructions || "",
     });
@@ -236,21 +244,26 @@ export default function TasksPage() {
 
     setIsSaving(true);
     try {
+      // Format deadline as ISO datetime if provided
+      const formattedDeadline = formData.deadline
+        ? new Date(formData.deadline + "T23:59:59").toISOString()
+        : undefined;
+
       if (modalMode === "create") {
         await editorialService.createAssignment({
           article: formData.article,
           assignee: formData.assignee,
           assignment_type: formData.assignment_type,
-          priority: formData.priority,
-          deadline: formData.deadline || undefined,
+          priority: parseInt(formData.priority, 10),
+          deadline: formattedDeadline,
           instructions: formData.instructions || undefined,
         });
         toast.success("Task created successfully");
       } else if (editingTask) {
         await editorialService.updateAssignment(editingTask.id, {
           assignment_type: formData.assignment_type,
-          priority: formData.priority,
-          deadline: formData.deadline || undefined,
+          priority: parseInt(formData.priority, 10),
+          deadline: formattedDeadline,
           instructions: formData.instructions || undefined,
         });
         toast.success("Task updated successfully");
@@ -430,10 +443,10 @@ export default function TasksPage() {
                         <span className={cn(
                           "text-xs font-medium px-2 py-0.5 rounded uppercase",
                           priorityColors[assignment.priority] || "text-muted-foreground",
-                          assignment.priority === "urgent" && "bg-market-down/20",
-                          assignment.priority === "high" && "bg-orange-500/20"
+                          assignment.priority === 3 && "bg-market-down/20",
+                          assignment.priority === 2 && "bg-orange-500/20"
                         )}>
-                          {assignment.priority}
+                          {priorityLabels[assignment.priority] || "Medium"}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {typeLabels[assignment.assignment_type] || assignment.assignment_type}

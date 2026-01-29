@@ -98,20 +98,13 @@ export interface EditorialAssignment {
     id: number;
     full_name: string;
   };
-  // Backend uses lowercase values
+  // Backend uses lowercase values for assignment_type and status
   assignment_type: string;
   status: string;
   deadline?: string;
-  priority: string;
+  priority: number; // Integer: 0=Low, 1=Medium, 2=High, 3=Urgent
   instructions?: string;
   created_at: string;
-  // Aliases for backward compatibility with frontend code
-  assigned_to?: {
-    id: number;
-    full_name: string;
-  };
-  due_date?: string;
-  notes?: string;
 }
 
 // Input type for creating/updating articles (accepts slug strings instead of objects)
@@ -364,7 +357,7 @@ export const editorialService = {
     article: string | number;
     assignee: string | number;
     assignment_type: string;
-    priority?: string;
+    priority?: number;
     deadline?: string;
     instructions?: string;
   }): Promise<EditorialAssignment> {
@@ -374,7 +367,7 @@ export const editorialService = {
 
   async updateAssignment(assignmentId: number, data: {
     assignment_type?: string;
-    priority?: string;
+    priority?: number;
     deadline?: string;
     instructions?: string;
     status?: string;
