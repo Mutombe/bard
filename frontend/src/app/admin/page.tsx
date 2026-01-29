@@ -160,18 +160,18 @@ export default function AdminDashboard() {
         setAssignments([]);
       }
 
-      // Try to fetch editor dashboard stats for more details
+      // Fetch admin stats for article counts (all articles, not just user's)
       try {
-        const dashboardData = await editorialService.getDashboard();
+        const adminStats = await editorialService.getAdminStats();
         setStats(prev => ({
           ...prev,
-          totalArticles: dashboardData.articles_count || prev.totalArticles,
-          publishedToday: dashboardData.published_today || 0,
-          pendingReview: dashboardData.pending_review || 0,
-          draftCount: dashboardData.draft_count || 0,
+          totalArticles: adminStats.articles_count || prev.totalArticles,
+          publishedToday: adminStats.published_today || 0,
+          pendingReview: adminStats.pending_review || 0,
+          draftCount: adminStats.draft_count || 0,
         }));
       } catch {
-        // Dashboard endpoint may not be available
+        // Admin stats endpoint may not be available
       }
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);

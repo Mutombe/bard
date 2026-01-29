@@ -158,6 +158,15 @@ export interface EditorDashboard {
   }>;
 }
 
+export interface AdminStats {
+  articles_count: number;
+  published_today: number;
+  pending_review: number;
+  draft_count: number;
+  published_count: number;
+  scheduled_count: number;
+}
+
 // =========================
 // API Service
 // =========================
@@ -370,6 +379,11 @@ export const editorialService = {
 
   async getDashboard(): Promise<EditorDashboard> {
     const response = await authClient.get<EditorDashboard>("/editorial/dashboard/");
+    return response.data;
+  },
+
+  async getAdminStats(): Promise<AdminStats> {
+    const response = await authClient.get<AdminStats>("/editorial/admin-stats/");
     return response.data;
   },
 

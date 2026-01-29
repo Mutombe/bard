@@ -18,6 +18,7 @@ router.register(r"activity", views.EditorActivityViewSet, basename="activity")
 
 urlpatterns = [
     path("dashboard/", views.EditorDashboardView.as_view(), name="dashboard"),
+    path("admin-stats/", views.AdminStatsView.as_view(), name="admin-stats"),
     path("bulk-action/", views.BulkActionView.as_view(), name="bulk-action"),
     path("", include(router.urls)),
 ]
