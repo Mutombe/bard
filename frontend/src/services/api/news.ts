@@ -1,11 +1,41 @@
-import { publicClient } from "./client";
+import { publicClient, authClient } from "./client";
 import apiClient from "./client";
 import type {
   NewsArticle,
   Category,
   Tag,
   CursorPaginatedResponse,
+  PaginatedResponse,
 } from "@/types";
+
+// =========================
+// Comment Types
+// =========================
+
+export interface CommentAuthor {
+  id: string;
+  full_name: string;
+  email: string;
+}
+
+export interface Comment {
+  id: number;
+  article: string;
+  author: CommentAuthor;
+  parent: number | null;
+  content: string;
+  likes_count: number;
+  is_liked: boolean;
+  is_approved: boolean;
+  is_edited: boolean;
+  edited_at: string | null;
+  reply_count: number;
+  can_edit: boolean;
+  can_delete: boolean;
+  created_at: string;
+  updated_at: string;
+  replies?: Comment[];
+}
 
 export const newsService = {
   // =========================
@@ -125,6 +155,43 @@ export const newsService = {
 
   async publishArticle(slug: string): Promise<NewsArticle> {
     const response = await apiClient.post<NewsArticle>(`/news/articles/${slug}/publish/`);
+    return response.data;
+  },
+
+  // =========================
+  // Comments
+  // =========================
+
+  async getComments(articleId: string, page?: number): Promise<PaginatedResponse<Comment>> {
+    const response = await publicClient.get<PaginatedResponse<Comment>>(
+      `/news/comments/article/${articleId}/`,
+      { params: { page } }
+    );
+    return response.data;
+  },
+
+  async createComment(data: {
+    article: string;
+    content: string;
+    parent?: number | null;
+  }): Promise<Comment> {
+    const response = await authClient.post<Comment>("/news/comments/", data);
+    return response.data;
+  },
+
+  async updateComment(id: number, content: string): Promise<Comment> {
+    const response = await authClient.patch<Comment>(`/news/comments/${id}/`, { content });
+    return response.data;
+  },
+
+  async deleteComment(id: number): Promise<void> {
+    await authClient.delete(`/news/comments/${id}/`);
+  },
+
+  async likeComment(id: number): Promise<{ liked: boolean; likes_count: number }> {
+    const response = await authClient.post<{ liked: boolean; likes_count: number }>(
+      `/news/comments/${id}/like/`
+    );
     return response.data;
   },
 };

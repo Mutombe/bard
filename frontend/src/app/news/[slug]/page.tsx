@@ -24,6 +24,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
+import { CommentSection } from "@/components/news";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
 
@@ -579,6 +580,11 @@ export default function ArticlePage() {
                   ))}
                 </div>
               </section>
+            )}
+
+            {/* Comments Section */}
+            {article.id && (
+              <CommentSection articleId={article.id} />
             )}
           </div>
 

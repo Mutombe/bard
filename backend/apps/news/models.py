@@ -419,3 +419,96 @@ class ArticleView(TimeStampedModel):
 
     def __str__(self):
         return f"View: {self.article.title[:50]}"
+
+
+class Comment(TimeStampedModel):
+    """
+    Comment model for article discussions.
+
+    Supports:
+    - Nested replies (parent/child relationship)
+    - Like/upvote system
+    - Moderation workflow
+    """
+
+    article = models.ForeignKey(
+        NewsArticle,
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    author = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="comments",
+    )
+    parent = models.ForeignKey(
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="replies",
+        help_text="Parent comment for nested replies",
+    )
+    content = models.TextField(
+        "Content",
+        max_length=2000,
+    )
+    likes_count = models.PositiveIntegerField(
+        "Likes",
+        default=0,
+    )
+    is_approved = models.BooleanField(
+        "Approved",
+        default=True,
+        help_text="Moderation status - unapproved comments are hidden",
+    )
+    is_edited = models.BooleanField(
+        "Edited",
+        default=False,
+    )
+    edited_at = models.DateTimeField(
+        "Edited At",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = "Comment"
+        verbose_name_plural = "Comments"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["article", "is_approved"]),
+            models.Index(fields=["author", "created_at"]),
+            models.Index(fields=["parent"]),
+        ]
+
+    def __str__(self):
+        return f"Comment by {self.author.full_name} on {self.article.title[:30]}"
+
+    @property
+    def reply_count(self):
+        """Get count of approved replies."""
+        return self.replies.filter(is_approved=True).count()
+
+
+class CommentLike(TimeStampedModel):
+    """Track which users liked which comments."""
+
+    comment = models.ForeignKey(
+        Comment,
+        on_delete=models.CASCADE,
+        related_name="likes",
+    )
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        related_name="comment_likes",
+    )
+
+    class Meta:
+        verbose_name = "Comment Like"
+        verbose_name_plural = "Comment Likes"
+        unique_together = ["comment", "user"]
+
+    def __str__(self):
+        return f"{self.user.full_name} liked comment {self.comment.id}"

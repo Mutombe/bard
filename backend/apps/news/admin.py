@@ -3,7 +3,7 @@ News Admin Configuration
 """
 from django.contrib import admin
 
-from .models import Category, NewsArticle, Tag
+from .models import Category, NewsArticle, Tag, Comment, CommentLike
 
 
 @admin.register(Category)
@@ -69,3 +69,41 @@ class NewsArticleAdmin(admin.ModelAdmin):
         if not obj.author:
             obj.author = request.user
         super().save_model(request, obj, form, change)
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = [
+        "id",
+        "author",
+        "article",
+        "short_content",
+        "parent",
+        "likes_count",
+        "is_approved",
+        "created_at",
+    ]
+    list_filter = ["is_approved", "created_at"]
+    search_fields = ["content", "author__email", "article__title"]
+    raw_id_fields = ["article", "author", "parent"]
+    readonly_fields = ["likes_count", "is_edited", "edited_at"]
+    actions = ["approve_comments", "unapprove_comments"]
+
+    def short_content(self, obj):
+        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+    short_content.short_description = "Content"
+
+    @admin.action(description="Approve selected comments")
+    def approve_comments(self, request, queryset):
+        queryset.update(is_approved=True)
+
+    @admin.action(description="Unapprove selected comments")
+    def unapprove_comments(self, request, queryset):
+        queryset.update(is_approved=False)
+
+
+@admin.register(CommentLike)
+class CommentLikeAdmin(admin.ModelAdmin):
+    list_display = ["id", "comment", "user", "created_at"]
+    list_filter = ["created_at"]
+    raw_id_fields = ["comment", "user"]

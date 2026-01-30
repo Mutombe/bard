@@ -8,7 +8,7 @@ from apps.markets.serializers import CompanyMinimalSerializer
 from apps.media.image_service import get_article_image
 from apps.users.serializers import UserSerializer
 
-from .models import Category, NewsArticle, Tag
+from .models import Category, NewsArticle, Tag, Comment, CommentLike
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -360,3 +360,143 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
             "created_at": instance.created_at.isoformat() if instance.created_at else None,
             "updated_at": instance.updated_at.isoformat() if instance.updated_at else None,
         }
+
+
+# =========================
+# Comment Serializers
+# =========================
+
+class CommentAuthorSerializer(serializers.Serializer):
+    """Lightweight serializer for comment authors."""
+    id = serializers.UUIDField()
+    full_name = serializers.CharField()
+    email = serializers.EmailField()
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    """Serializer for displaying comments."""
+
+    author = CommentAuthorSerializer(read_only=True)
+    reply_count = serializers.IntegerField(read_only=True)
+    is_liked = serializers.SerializerMethodField()
+    can_edit = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id",
+            "article",
+            "author",
+            "parent",
+            "content",
+            "likes_count",
+            "is_liked",
+            "is_approved",
+            "is_edited",
+            "edited_at",
+            "reply_count",
+            "can_edit",
+            "can_delete",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = [
+            "id", "author", "likes_count", "is_approved",
+            "is_edited", "edited_at", "created_at", "updated_at",
+        ]
+
+    def get_is_liked(self, obj):
+        """Check if the current user has liked this comment."""
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(user=request.user).exists()
+        return False
+
+    def get_can_edit(self, obj):
+        """Check if current user can edit this comment."""
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            return obj.author == request.user
+        return False
+
+    def get_can_delete(self, obj):
+        """Check if current user can delete this comment."""
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            # Author or staff can delete
+            return obj.author == request.user or request.user.is_staff
+        return False
+
+
+class CommentWithRepliesSerializer(CommentSerializer):
+    """Serializer for comments with nested replies."""
+
+    replies = serializers.SerializerMethodField()
+
+    class Meta(CommentSerializer.Meta):
+        fields = CommentSerializer.Meta.fields + ["replies"]
+
+    def get_replies(self, obj):
+        """Get approved replies for this comment."""
+        replies = obj.replies.filter(is_approved=True).order_by("created_at")
+        return CommentSerializer(replies, many=True, context=self.context).data
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating comments."""
+
+    class Meta:
+        model = Comment
+        fields = ["article", "parent", "content"]
+
+    def validate_parent(self, value):
+        """Ensure parent comment belongs to the same article."""
+        if value:
+            article_id = self.initial_data.get("article")
+            if str(value.article_id) != str(article_id):
+                raise serializers.ValidationError(
+                    "Parent comment must belong to the same article."
+                )
+            # Prevent deeply nested comments (max 2 levels)
+            if value.parent is not None:
+                raise serializers.ValidationError(
+                    "Cannot reply to a reply. Maximum nesting depth is 2 levels."
+                )
+        return value
+
+    def validate_content(self, value):
+        """Validate comment content."""
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError(
+                "Comment must be at least 2 characters long."
+            )
+        return value.strip()
+
+    def create(self, validated_data):
+        validated_data["author"] = self.context["request"].user
+        return super().create(validated_data)
+
+
+class CommentUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for updating comments."""
+
+    class Meta:
+        model = Comment
+        fields = ["content"]
+
+    def validate_content(self, value):
+        """Validate comment content."""
+        if len(value.strip()) < 2:
+            raise serializers.ValidationError(
+                "Comment must be at least 2 characters long."
+            )
+        return value.strip()
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+        instance.content = validated_data.get("content", instance.content)
+        instance.is_edited = True
+        instance.edited_at = timezone.now()
+        instance.save()
+        return instance
