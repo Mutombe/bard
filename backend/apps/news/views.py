@@ -17,13 +17,17 @@ from apps.core.cache import (
 from apps.core.pagination import InfiniteScrollPagination
 from apps.users.models import UserRole
 
-from .models import Category, NewsArticle, Tag
+from .models import Category, NewsArticle, Tag, Comment, CommentLike
 from .serializers import (
     CategorySerializer,
     NewsArticleCreateSerializer,
     NewsArticleDetailSerializer,
     NewsArticleListSerializer,
     TagSerializer,
+    CommentSerializer,
+    CommentWithRepliesSerializer,
+    CommentCreateSerializer,
+    CommentUpdateSerializer,
 )
 
 
@@ -317,3 +321,130 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                     {"error": f"Article with ID {article_id} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for Comment model.
+
+    Endpoints:
+    - GET /comments/?article={id} - List comments for an article
+    - POST /comments/ - Create a comment
+    - PATCH /comments/{id}/ - Update own comment
+    - DELETE /comments/{id}/ - Delete own comment or staff
+    - POST /comments/{id}/like/ - Like/unlike a comment
+    """
+
+    queryset = Comment.objects.select_related("author", "parent").prefetch_related("replies", "likes")
+    serializer_class = CommentSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        """Filter comments by article and approval status."""
+        queryset = super().get_queryset()
+
+        # Filter by article if specified
+        article_id = self.request.query_params.get("article")
+        if article_id:
+            queryset = queryset.filter(article_id=article_id)
+
+        # Only show approved comments for non-staff
+        if not self.request.user.is_authenticated or not self.request.user.is_staff:
+            queryset = queryset.filter(is_approved=True)
+
+        # Only get top-level comments (not replies) for list view
+        if self.action == "list":
+            queryset = queryset.filter(parent__isnull=True)
+
+        return queryset.order_by("-created_at")
+
+    def get_serializer_class(self):
+        if self.action == "list":
+            return CommentWithRepliesSerializer
+        if self.action == "create":
+            return CommentCreateSerializer
+        if self.action in ["update", "partial_update"]:
+            return CommentUpdateSerializer
+        return CommentSerializer
+
+    def get_permissions(self):
+        if self.action in ["create", "like"]:
+            return [IsAuthenticated()]
+        if self.action in ["update", "partial_update", "destroy"]:
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    def update(self, request, *args, **kwargs):
+        """Only allow users to update their own comments."""
+        comment = self.get_object()
+        if comment.author != request.user:
+            return Response(
+                {"error": "You can only edit your own comments"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        """Only allow users to update their own comments."""
+        comment = self.get_object()
+        if comment.author != request.user:
+            return Response(
+                {"error": "You can only edit your own comments"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        """Allow users to delete their own comments or staff to delete any."""
+        comment = self.get_object()
+        if comment.author != request.user and not request.user.is_staff:
+            return Response(
+                {"error": "You can only delete your own comments"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    @action(detail=True, methods=["post"])
+    def like(self, request, pk=None):
+        """Like or unlike a comment."""
+        comment = self.get_object()
+
+        # Check if already liked
+        existing_like = CommentLike.objects.filter(
+            comment=comment, user=request.user
+        ).first()
+
+        if existing_like:
+            # Unlike
+            existing_like.delete()
+            comment.likes_count = max(0, comment.likes_count - 1)
+            comment.save(update_fields=["likes_count"])
+            return Response({
+                "liked": False,
+                "likes_count": comment.likes_count,
+            })
+        else:
+            # Like
+            CommentLike.objects.create(comment=comment, user=request.user)
+            comment.likes_count += 1
+            comment.save(update_fields=["likes_count"])
+            return Response({
+                "liked": True,
+                "likes_count": comment.likes_count,
+            })
+
+    @action(detail=False, methods=["get"], url_path=r"article/(?P<article_id>[0-9a-f-]+)")
+    def by_article(self, request, article_id=None):
+        """Get all comments for an article with pagination."""
+        queryset = self.get_queryset().filter(
+            article_id=article_id,
+            parent__isnull=True
+        ).order_by("-created_at")
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = CommentWithRepliesSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = CommentWithRepliesSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data)
