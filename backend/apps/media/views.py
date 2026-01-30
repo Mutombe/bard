@@ -164,62 +164,69 @@ class VideoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["get"])
     def cnbc_africa(self, request):
         """
-        Get the current featured CNBC Africa video for the feed.
-        This video is refreshed every 12 hours.
+        Get the latest CNBC Africa video for the feed.
+        Always fetches fresh from YouTube API with 1-hour cache.
         """
+        from django.core.cache import cache
+
         # CNBC Africa channel ID
         CNBC_AFRICA_CHANNEL_ID = "UCsba91UGiQLFOb5DN3Z_AdQ"
+        CACHE_KEY = "cnbc_africa_featured_video"
+        CACHE_DURATION = 60 * 60  # 1 hour
 
-        # First try to get featured CNBC Africa video
+        # Check cache first
+        cached_video = cache.get(CACHE_KEY)
+        if cached_video:
+            return Response(cached_video)
+
+        # Fetch fresh from YouTube API
+        try:
+            videos = youtube_service.get_channel_videos(
+                channel_id=CNBC_AFRICA_CHANNEL_ID,
+                max_results=1,
+            )
+            if videos:
+                video_data = videos[0]
+                response_data = {
+                    "video_id": video_data.get("video_id"),
+                    "title": video_data.get("title"),
+                    "description": video_data.get("description", "")[:500],
+                    "embed_url": video_data.get("embed_url"),
+                    "thumbnail_url": video_data.get("thumbnail_url"),
+                    "duration": video_data.get("duration_formatted"),
+                    "channel_title": "CNBC Africa",
+                    "published_at": video_data.get("published_at").isoformat() if video_data.get("published_at") else None,
+                    "view_count": video_data.get("view_count", 0),
+                }
+                # Cache the result
+                cache.set(CACHE_KEY, response_data, CACHE_DURATION)
+                return Response(response_data)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to fetch CNBC Africa video: {e}")
+
+        # Fallback to database if API fails
         video = Video.objects.filter(
             channel_id=CNBC_AFRICA_CHANNEL_ID,
             status="published",
-            is_featured=True,
-        ).first()
+        ).order_by("-published_at").first()
 
-        # Fallback to most recent CNBC Africa video
-        if not video:
-            video = Video.objects.filter(
-                channel_id=CNBC_AFRICA_CHANNEL_ID,
-                status="published",
-            ).order_by("-published_at").first()
+        if video:
+            response_data = {
+                "video_id": video.video_id,
+                "title": video.title,
+                "description": video.description[:500] if video.description else "",
+                "embed_url": video.get_embed_url(),
+                "thumbnail_url": video.thumbnail_url,
+                "duration": video.duration,
+                "channel_title": video.channel_title,
+                "published_at": video.published_at.isoformat() if video.published_at else None,
+                "view_count": video.view_count,
+            }
+            return Response(response_data)
 
-        # If still no video, try to fetch one from YouTube API
-        if not video:
-            try:
-                videos = youtube_service.get_channel_videos(
-                    channel_id=CNBC_AFRICA_CHANNEL_ID,
-                    max_results=1,
-                )
-                if videos:
-                    video_data = videos[0]
-                    return Response({
-                        "video_id": video_data.get("video_id"),
-                        "title": video_data.get("title"),
-                        "description": video_data.get("description", "")[:500],
-                        "embed_url": video_data.get("embed_url"),
-                        "thumbnail_url": video_data.get("thumbnail_url"),
-                        "duration": video_data.get("duration_formatted"),
-                        "channel_title": "CNBC Africa",
-                        "published_at": video_data.get("published_at").isoformat() if video_data.get("published_at") else None,
-                        "view_count": video_data.get("view_count", 0),
-                    })
-            except Exception:
-                pass
-            return Response({"message": "No CNBC Africa video available"}, status=404)
-
-        return Response({
-            "id": str(video.id),
-            "video_id": video.video_id,
-            "title": video.title,
-            "description": video.description[:500] if video.description else "",
-            "embed_url": video.get_embed_url(),
-            "thumbnail_url": video.thumbnail_url,
-            "duration": video.duration,
-            "channel_title": video.channel_title,
-            "published_at": video.published_at.isoformat() if video.published_at else None,
-            "view_count": video.view_count,
-        })
+        return Response({"message": "No CNBC Africa video available"}, status=404)
 
     @action(detail=False, methods=["get"])
     def youtube_search(self, request):

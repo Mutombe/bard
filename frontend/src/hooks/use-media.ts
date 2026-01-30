@@ -144,8 +144,8 @@ export function useLiveYouTubeVideos(maxResults: number = 5) {
 /**
  * CNBC Africa Featured Video
  *
- * Returns the current featured CNBC Africa video.
- * This video is refreshed every 12 hours on the backend.
+ * Returns the latest CNBC Africa video.
+ * This video is refreshed every hour on the backend.
  */
 export function useCNBCAfricaVideo() {
   return useSWR<YouTubeVideo | null>(
@@ -153,8 +153,8 @@ export function useCNBCAfricaVideo() {
     () => mediaService.getCNBCAfricaVideo(),
     {
       revalidateOnFocus: true,
-      dedupingInterval: 300000, // 5 minutes
-      refreshInterval: 3600000, // Auto-refresh every hour (video changes every 12 hours)
+      dedupingInterval: 60000, // 1 minute
+      refreshInterval: 3600000, // Auto-refresh every hour
     }
   );
 }
