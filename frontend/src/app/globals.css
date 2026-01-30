@@ -113,7 +113,44 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings: "rlig" 1, "calt" 1, "kern" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Professional headline typography */
+  h1, h2, h3 {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+
+  h3 {
+    font-size: 1.375rem;
+  }
+
+  /* Article body text - slightly larger, more readable */
+  article p, .article-content p {
+    font-family: var(--font-source-serif), Georgia, serif;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+  }
+
+  /* Improve link styling in articles */
+  article a, .article-content a {
+    @apply text-primary underline decoration-primary/30 underline-offset-2 hover:decoration-primary transition-colors;
   }
 
   /* Smooth theme transitions */
@@ -373,6 +410,55 @@
   /* Text balance for headlines */
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Professional headline utilities */
+  .headline {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .headline-lg {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-weight: 700;
+    font-size: 2.5rem;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+  }
+
+  .headline-xl {
+    font-family: var(--font-playfair), Georgia, serif;
+    font-weight: 700;
+    font-size: 3rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  /* Article/reading typography */
+  .prose-article {
+    font-family: var(--font-source-serif), Georgia, serif;
+    font-size: 1.125rem;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+  }
+
+  /* Subtle uppercase labels like Bloomberg/FT style */
+  .label-uppercase {
+    @apply text-xs font-medium uppercase tracking-wider text-muted-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* Financial data display */
+  .data-value {
+    @apply font-mono tabular-nums font-medium tracking-tight;
+  }
+
+  /* Byline/metadata styling */
+  .byline {
+    @apply text-sm text-muted-foreground;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 
   /* Hide scrollbar but allow scrolling */
