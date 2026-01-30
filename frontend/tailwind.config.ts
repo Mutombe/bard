@@ -86,7 +86,10 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-playfair)", "Georgia", "Times New Roman", "serif"],
+        "serif-body": ["var(--font-source-serif)", "Georgia", "serif"],
         mono: ["var(--font-mono)", "Consolas", "Monaco", "monospace"],
+        headline: ["var(--font-playfair)", "Georgia", "serif"],
       },
       fontSize: {
         "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
