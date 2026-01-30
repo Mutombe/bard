@@ -27,7 +27,7 @@ import {
   useIndices,
   useGainers,
   useLosers,
-  useLiveYouTubeVideos,
+  useCNBCAfricaVideo,
 } from "@/hooks";
 
 // Types
@@ -646,7 +646,7 @@ export default function HomePage() {
   const { data: indicesData, isLoading: indicesLoading } = useIndices();
   const { data: gainersData, isLoading: gainersLoading } = useGainers(undefined, 5);
   const { data: losersData, isLoading: usersLoading } = useLosers(undefined, 5);
-  const { data: videosData, isLoading: videosLoading } = useLiveYouTubeVideos(3);
+  const { data: cnbcVideoData, isLoading: videosLoading } = useCNBCAfricaVideo();
 
   // Handle client-side mounting for localStorage access
   useEffect(() => {
@@ -660,7 +660,7 @@ export default function HomePage() {
   const marketIndices = (indicesData || []).slice(0, 5);
   const topGainers = (gainersData || []).slice(0, 5);
   const topLosers = (losersData || []).slice(0, 5);
-  const featuredVideo = videosData?.[0] || null;
+  const featuredVideo = cnbcVideoData || null;
 
   // Combined loading state
   const loading = articlesLoading || indicesLoading || gainersLoading || usersLoading;
