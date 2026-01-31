@@ -33,20 +33,26 @@ const sourceSerif = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://bard-qr16.onrender.com"),
   title: {
-    default: "Bard Global Finance Institute | Financial Intelligence Platform",
+    default: "Bard Global Finance Institute | African Financial Intelligence",
     template: "%s | Bard Global Finance Institute",
   },
   description:
-    "The Bloomberg of Africa - Real-time African market data, financial news, and research for institutional investors and traders.",
+    "Africa's premier financial intelligence platform. Real-time market data, breaking financial news, expert analysis, and research on African stock markets including JSE, NSE, and more.",
   keywords: [
-    "African stocks",
-    "JSE",
-    "financial news",
-    "market data",
-    "stock exchange",
-    "investment research",
-    "Africa finance",
+    "African stock market",
+    "JSE stocks",
+    "African financial news",
+    "South Africa stocks",
+    "Nigeria stock exchange",
+    "African market data",
+    "investment research Africa",
+    "African economy",
+    "emerging markets Africa",
+    "stock trading Africa",
+    "financial analysis",
+    "market intelligence",
   ],
   authors: [{ name: "Bard Global Finance Institute" }],
   creator: "Bard Global Finance Institute",
@@ -54,36 +60,50 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
   openGraph: {
     type: "website",
     locale: "en_ZA",
-    url: "https://bardglobal.com",
+    url: "/",
     siteName: "Bard Global Finance Institute",
-    title: "Bard Global Finance Institute | Financial Intelligence Platform",
+    title: "Bard Global Finance Institute | African Financial Intelligence",
     description:
-      "The Bloomberg of Africa - Real-time African market data, financial news, and research.",
+      "Africa's premier financial intelligence platform. Real-time market data, breaking news, and expert analysis on African stock markets.",
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Bard Global Finance Institute",
+        url: "/images/fav.png",
+        width: 512,
+        height: 512,
+        alt: "Bard Global Finance Institute - African Financial Intelligence",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Bard Global Finance Institute",
-    description: "The Bloomberg of Africa",
-    images: ["/og-image.png"],
+    description: "Africa's premier financial intelligence platform. Real-time market data and expert analysis.",
+    images: ["/images/fav.png"],
+    creator: "@BardGlobalFI",
   },
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    icon: [
+      { url: "/images/fav.png", type: "image/png" },
+    ],
+    shortcut: "/images/fav.png",
+    apple: "/images/fav.png",
   },
   manifest: "/site.webmanifest",
+  alternates: {
+    canonical: "/",
+  },
+  category: "finance",
 };
 
 export const viewport: Viewport = {
