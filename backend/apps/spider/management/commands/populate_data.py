@@ -239,6 +239,16 @@ class Command(BaseCommand):
         """Fetch YouTube videos about African finance."""
         self.stdout.write('\n[5] Fetching YouTube videos...')
 
+        # Fetch CNBC Africa featured video
+        try:
+            from apps.spider.tasks import fetch_cnbc_africa_video
+            self.stdout.write('  Fetching CNBC Africa featured video...')
+            result = fetch_cnbc_africa_video()
+            self.stdout.write(self.style.SUCCESS(f'    {result}'))
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f'    CNBC Africa video fetch failed: {e}'))
+
+        # Fetch general African finance videos
         try:
             from apps.spider.tasks import fetch_youtube_african_finance
             self.stdout.write('  Fetching African finance videos...')
