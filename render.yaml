@@ -80,15 +80,15 @@ services:
         value: "3000"
 
   # =========================
-  # CRON JOB - Data Updates (every 6 hours)
+  # CRON JOB - News Updates (every 2 hours)
   # =========================
   - type: cron
-    name: bardiq-data-updater
+    name: bardiq-news-updater
     runtime: python
     region: frankfurt
     plan: starter
     rootDir: backend
-    schedule: "0 */6 * * *"  # Every 6 hours
+    schedule: "0 */2 * * *"  # Every 2 hours
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py populate_data --news-only
     envVars:
@@ -101,6 +101,50 @@ services:
       - key: POLYGON_API_KEY
         sync: false
       - key: NEWSAPI_KEY
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY
+        sync: false
+
+  # =========================
+  # CRON JOB - Video Updates (every 4 hours)
+  # =========================
+  - type: cron
+    name: bardiq-video-updater
+    runtime: python
+    region: frankfurt
+    plan: starter
+    rootDir: backend
+    schedule: "30 */4 * * *"  # Every 4 hours (at :30)
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py populate_data --videos-only
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DATABASE_URL
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+
+  # =========================
+  # CRON JOB - Images & Featured (every 3 hours)
+  # =========================
+  - type: cron
+    name: bardiq-images-updater
+    runtime: python
+    region: frankfurt
+    plan: starter
+    rootDir: backend
+    schedule: "15 */3 * * *"  # Every 3 hours (at :15)
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py populate_data --images-only
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DATABASE_URL
         sync: false
       - key: UNSPLASH_ACCESS_KEY
         sync: false
