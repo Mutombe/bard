@@ -96,6 +96,11 @@ services:
         value: "3.11.0"
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: bardiq-api
+          type: web
+          envVarKey: SECRET_KEY
       - key: DATABASE_URL
         sync: false
       - key: POLYGON_API_KEY
@@ -122,6 +127,11 @@ services:
         value: "3.11.0"
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: bardiq-api
+          type: web
+          envVarKey: SECRET_KEY
       - key: DATABASE_URL
         sync: false
       - key: YOUTUBE_API_KEY
@@ -144,6 +154,11 @@ services:
         value: "3.11.0"
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
+      - key: SECRET_KEY
+        fromService:
+          name: bardiq-api
+          type: web
+          envVarKey: SECRET_KEY
       - key: DATABASE_URL
         sync: false
       - key: UNSPLASH_ACCESS_KEY
