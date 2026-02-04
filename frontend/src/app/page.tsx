@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -1075,33 +1075,6 @@ function AlternatingSection({ articles, title }: { articles: NewsArticle[]; titl
   );
 }
 
-// Custom hook for intersection observer lazy loading
-function useLazySection(threshold = 0.1) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasLoaded) {
-          setIsVisible(true);
-          setHasLoaded(true);
-        }
-      },
-      { threshold, rootMargin: "200px" } // Start loading 200px before visible
-    );
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-
-    return () => observer.disconnect();
-  }, [threshold, hasLoaded]);
-
-  return { ref, isVisible, hasLoaded };
-}
-
 // Main Page Component
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -1114,10 +1087,6 @@ export default function HomePage() {
   const { data: indicesData, isLoading: indicesLoading } = useIndices();
   const { data: cnbcVideoData, isLoading: videosLoading } = useCNBCAfricaVideo();
 
-  // Lazy load triggers for different sections
-  const section2 = useLazySection();
-  const section3 = useLazySection();
-  const section4 = useLazySection();
 
   useEffect(() => {
     setMounted(true);
@@ -1140,16 +1109,21 @@ export default function HomePage() {
     }
   }, [loadingMore, hasLoadedMore]);
 
-  // Trigger loading more when section 2 becomes visible
-  useEffect(() => {
-    if (section2.isVisible && !hasLoadedMore && !loadingMore) {
-      loadMoreArticles();
-    }
-  }, [section2.isVisible, hasLoadedMore, loadingMore, loadMoreArticles]);
-
   // Combine initial and extended articles
   const initialArticles = articlesData?.results || [];
   const allArticles = [...initialArticles, ...extendedArticles];
+
+  // Load more articles automatically after initial load completes
+  // This ensures content appears quickly while still prioritizing above-the-fold
+  useEffect(() => {
+    if (!articlesLoading && initialArticles.length > 0 && !hasLoadedMore && !loadingMore) {
+      // Small delay to let initial content render first
+      const timer = setTimeout(() => {
+        loadMoreArticles();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [articlesLoading, initialArticles.length, hasLoadedMore, loadingMore, loadMoreArticles]);
 
   // Hero section: 1 featured + 4 side articles (from initial fast load)
   const featuredArticle = initialArticles[0];
@@ -1329,9 +1303,7 @@ export default function HomePage() {
         {/* Newsletter CTA */}
         <NewsletterSection />
 
-        {/* ====== LAZY-LOADED EXTENDED FEED ====== */}
-        {/* Trigger point for loading more articles */}
-        <div ref={section2.ref} className="min-h-[1px]" />
+        {/* ====== EXTENDED FEED (loads automatically after initial content) ====== */}
 
         {/* Show loading indicator or content */}
         {loadingMore && !hasLoadedMore && (
@@ -1361,119 +1333,105 @@ export default function HomePage() {
             {/* More Insights Section 1 */}
             <MixedContentGrid articles={moreSectionOne} title="Markets & Economy" />
 
-            {/* Trigger for section 3 */}
-            <div ref={section3.ref} className="min-h-[1px]" />
+            {/* Quick Reads - Dark Section */}
+            <QuickReads articles={quickReadArticles} />
 
-            {section3.hasLoaded && (
-              <>
-                {/* Quick Reads - Dark Section */}
-                <QuickReads articles={quickReadArticles} />
+            {/* More Insights Section 2 */}
+            <MixedContentGrid articles={moreSectionTwo} title="Industry Spotlight" />
 
-                {/* More Insights Section 2 */}
-                <MixedContentGrid articles={moreSectionTwo} title="Industry Spotlight" />
+            {/* Final Grid Section */}
+            {finalSection.length > 0 && (
+              <section className="py-12 bg-terminal-bg-secondary/30">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+                  <div className="flex items-center justify-between mb-8">
+                    <h2 className="font-serif text-2xl font-bold">More from African Finance Insights</h2>
+                    <Link
+                      href="/news"
+                      className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+                    >
+                      Browse Archive <ChevronRight className="h-4 w-4" />
+                    </Link>
+                  </div>
 
-                {/* Final Grid Section */}
-                {finalSection.length > 0 && (
-                  <section className="py-12 bg-terminal-bg-secondary/30">
-                    <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                      <div className="flex items-center justify-between mb-8">
-                        <h2 className="font-serif text-2xl font-bold">More from African Finance Insights</h2>
-                        <Link
-                          href="/news"
-                          className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-                        >
-                          Browse Archive <ChevronRight className="h-4 w-4" />
-                        </Link>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {finalSection.map((article) => (
+                      <OverlayCard key={article.id} article={article} size="medium" />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {finalSection.map((article) => (
-                          <OverlayCard key={article.id} article={article} size="medium" />
-                        ))}
-                      </div>
+            {/* ====== ADDITIONAL SECTIONS FOR LONGER FEED ====== */}
+
+            {/* Overlay Grid 1 */}
+            <OverlayGridSection articles={overlayGridOne} title="Banking & Finance" />
+
+            {/* Large Feature 1 */}
+            <LargeFeatureGrid articles={largeFeatureOne} title="Featured Analysis" />
+
+            {/* Horizontal Scroll Section */}
+            <HorizontalScrollSection articles={horizontalScroll} title="Quick Browse" />
+
+            {/* Alternating Layout */}
+            <AlternatingSection articles={alternatingSection} title="Regional Focus" />
+
+            {/* Overlay Grid 2 */}
+            <OverlayGridSection articles={overlayGridTwo} title="Technology & Innovation" />
+
+            {/* Large Feature 2 */}
+            <LargeFeatureGrid articles={largeFeatureTwo} title="In-Depth Reports" />
+
+            {/* Bottom Overlay Grid */}
+            {bottomOverlay.length >= 4 && (
+              <section className="py-12">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+                  <h2 className="font-serif text-2xl font-bold mb-8">Latest Updates</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {bottomOverlay.slice(0, 8).map((article) => (
+                      <OverlayCard key={article.id} article={article} size="small" />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Final Large Overlay Section */}
+            {finalOverlay.length >= 4 && (
+              <section className="py-12 bg-slate-900">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+                  <h2 className="font-serif text-2xl font-bold text-white mb-8">Don't Miss</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {finalOverlay.slice(0, 8).map((article) => (
+                      <OverlayCard key={article.id} article={article} size="medium" />
+                    ))}
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Commodities & Resources Section */}
+            {commoditiesSection.length >= 4 && (
+              <section className="py-12">
+                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+                  <div className="flex items-center gap-3 mb-8">
+                    <Pickaxe className="h-6 w-6 text-primary" />
+                    <h2 className="font-serif text-2xl font-bold">Commodities & Resources</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {commoditiesSection.slice(0, 4).map((article) => (
+                      <OverlayCard key={article.id} article={article} size="small" />
+                    ))}
+                  </div>
+                  {commoditiesSection.length > 4 && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                      {commoditiesSection.slice(4, 7).map((article) => (
+                        <InsightCard key={article.id} article={article} />
+                      ))}
                     </div>
-                  </section>
-                )}
-
-                {/* Trigger for section 4 */}
-                <div ref={section4.ref} className="min-h-[1px]" />
-
-                {section4.hasLoaded && (
-                  <>
-                    {/* ====== ADDITIONAL SECTIONS FOR LONGER FEED ====== */}
-
-                    {/* Overlay Grid 1 */}
-                    <OverlayGridSection articles={overlayGridOne} title="Banking & Finance" />
-
-                    {/* Large Feature 1 */}
-                    <LargeFeatureGrid articles={largeFeatureOne} title="Featured Analysis" />
-
-                    {/* Horizontal Scroll Section */}
-                    <HorizontalScrollSection articles={horizontalScroll} title="Quick Browse" />
-
-                    {/* Alternating Layout */}
-                    <AlternatingSection articles={alternatingSection} title="Regional Focus" />
-
-                    {/* Overlay Grid 2 */}
-                    <OverlayGridSection articles={overlayGridTwo} title="Technology & Innovation" />
-
-                    {/* Large Feature 2 */}
-                    <LargeFeatureGrid articles={largeFeatureTwo} title="In-Depth Reports" />
-
-                    {/* Bottom Overlay Grid */}
-                    {bottomOverlay.length >= 4 && (
-                      <section className="py-12">
-                        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                          <h2 className="font-serif text-2xl font-bold mb-8">Latest Updates</h2>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {bottomOverlay.slice(0, 8).map((article) => (
-                              <OverlayCard key={article.id} article={article} size="small" />
-                            ))}
-                          </div>
-                        </div>
-                      </section>
-                    )}
-
-                    {/* Final Large Overlay Section */}
-                    {finalOverlay.length >= 4 && (
-                      <section className="py-12 bg-slate-900">
-                        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                          <h2 className="font-serif text-2xl font-bold text-white mb-8">Don't Miss</h2>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {finalOverlay.slice(0, 8).map((article) => (
-                              <OverlayCard key={article.id} article={article} size="medium" />
-                            ))}
-                          </div>
-                        </div>
-                      </section>
-                    )}
-
-                    {/* Commodities & Resources Section */}
-                    {commoditiesSection.length >= 4 && (
-                      <section className="py-12">
-                        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                          <div className="flex items-center gap-3 mb-8">
-                            <Pickaxe className="h-6 w-6 text-primary" />
-                            <h2 className="font-serif text-2xl font-bold">Commodities & Resources</h2>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {commoditiesSection.slice(0, 4).map((article) => (
-                              <OverlayCard key={article.id} article={article} size="small" />
-                            ))}
-                          </div>
-                          {commoditiesSection.length > 4 && (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                              {commoditiesSection.slice(4, 7).map((article) => (
-                                <InsightCard key={article.id} article={article} />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </section>
-                    )}
-                  </>
-                )}
-              </>
+                  )}
+                </div>
+              </section>
             )}
           </>
         )}
