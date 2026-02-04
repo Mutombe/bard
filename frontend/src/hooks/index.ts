@@ -70,3 +70,17 @@ export {
   useMarketDataSocket,
   useNotificationsSocket,
 } from "./use-websocket";
+
+// Research Hooks
+export {
+  useTopics,
+  useTopic,
+  useFeaturedTopics,
+  useIndustries,
+  useIndustry,
+  useFeaturedIndustries,
+  useResearchReports,
+  useResearchReport,
+  useFeaturedResearchReports,
+} from "./use-research";
+export type { UseResearchReportsParams } from "./use-research";

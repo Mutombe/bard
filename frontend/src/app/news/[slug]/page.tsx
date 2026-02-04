@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -19,6 +19,9 @@ import {
   ExternalLink,
   Loader2,
   ArrowLeft,
+  Printer,
+  Volume2,
+  Mail,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
@@ -27,6 +30,7 @@ import { Skeleton } from "@/components/ui/loading";
 import { CommentSection } from "@/components/news";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
+import { addKeywordLinks } from "@/lib/keyword-linker";
 
 // LocalStorage utilities
 const LIKES_KEY = "bardiq_likes";
@@ -154,6 +158,121 @@ function timeAgo(dateString?: string): string {
   return formatDate(dateString);
 }
 
+// Reading Progress Bar component
+function ReadingProgressBar({ progress }: { progress: number }) {
+  return (
+    <div className="reading-progress">
+      <div
+        className="reading-progress-bar"
+        style={{ width: `${progress}%` }}
+      />
+    </div>
+  );
+}
+
+// Sticky Article Header (appears on scroll)
+function StickyArticleHeader({
+  title,
+  visible,
+  progress,
+  onShare,
+  onBookmark,
+  bookmarked
+}: {
+  title: string;
+  visible: boolean;
+  progress: number;
+  onShare: () => void;
+  onBookmark: () => void;
+  bookmarked: boolean;
+}) {
+  return (
+    <div className={cn("sticky-article-header", visible && "visible")}>
+      <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
+        <h2 className="text-sm font-medium truncate flex-1">{title}</h2>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
+          <button
+            onClick={onBookmark}
+            className={cn(
+              "p-2 rounded-md transition-colors",
+              bookmarked ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
+          </button>
+          <button
+            onClick={onShare}
+            className="p-2 text-muted-foreground hover:text-foreground rounded-md transition-colors"
+          >
+            <Share2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Article Toolbar component (Foreign Affairs style)
+function ArticleToolbar({
+  onPrint,
+  onShare,
+  onEmail,
+  onBookmark,
+  bookmarked,
+  onLike,
+  liked
+}: {
+  onPrint: () => void;
+  onShare: (platform: string) => void;
+  onEmail: () => void;
+  onBookmark: () => void;
+  bookmarked: boolean;
+  onLike: () => void;
+  liked: boolean;
+}) {
+  return (
+    <div className="article-toolbar flex-wrap">
+      <button onClick={onPrint} className="toolbar-btn">
+        <Printer className="h-4 w-4" />
+        <span className="hidden sm:inline">Print</span>
+      </button>
+
+      <button onClick={onEmail} className="toolbar-btn">
+        <Mail className="h-4 w-4" />
+        <span className="hidden sm:inline">Email</span>
+      </button>
+
+      <button onClick={onBookmark} className={cn("toolbar-btn", bookmarked && "active")}>
+        <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
+        <span className="hidden sm:inline">{bookmarked ? "Saved" : "Save"}</span>
+      </button>
+
+      <div className="toolbar-divider" />
+
+      <button onClick={() => onShare("twitter")} className="toolbar-btn">
+        <FaXTwitter className="h-4 w-4" />
+      </button>
+      <button onClick={() => onShare("linkedin")} className="toolbar-btn">
+        <Linkedin className="h-4 w-4" />
+      </button>
+      <button onClick={() => onShare("facebook")} className="toolbar-btn">
+        <Facebook className="h-4 w-4" />
+      </button>
+      <button onClick={() => onShare("copy")} className="toolbar-btn">
+        <LinkIcon className="h-4 w-4" />
+      </button>
+
+      <div className="flex-1" />
+
+      <button onClick={onLike} className={cn("toolbar-btn", liked && "active")}>
+        <Heart className={cn("h-4 w-4", liked && "fill-current")} />
+        <span className="hidden sm:inline">{liked ? "Liked" : "Like"}</span>
+      </button>
+    </div>
+  );
+}
+
 // Loading skeleton
 function ArticleSkeleton() {
   return (
@@ -200,10 +319,36 @@ export default function ArticlePage() {
   const [mounted, setMounted] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const articleRef = useRef<HTMLElement>(null);
+
+  // Reading progress tracking
+  const handleScroll = useCallback(() => {
+    if (!articleRef.current) return;
+
+    const element = articleRef.current;
+    const totalHeight = element.clientHeight;
+    const windowHeight = window.innerHeight;
+    const scrollTop = window.scrollY - element.offsetTop;
+
+    // Calculate progress based on article scroll position
+    const progress = Math.min(
+      Math.max((scrollTop / (totalHeight - windowHeight)) * 100, 0),
+      100
+    );
+
+    setReadingProgress(progress);
+
+    // Show sticky header after scrolling past the title area (400px)
+    setShowStickyHeader(window.scrollY > 400);
+  }, []);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -342,25 +487,53 @@ export default function ArticlePage() {
     );
   }
 
-  // Render article content - handle HTML content safely
+  // Handle print
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // Handle email
+  const handleEmail = () => {
+    const subject = encodeURIComponent(article?.title || "");
+    const body = encodeURIComponent(`Check out this article: ${window.location.href}`);
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+  };
+
+  // Render article content - handle HTML content safely with drop cap and keyword links
   const renderContent = () => {
     if (!article.content) return null;
 
     // If content looks like HTML, render it
     if (article.content.includes("<") && article.content.includes(">")) {
+      // Add drop-cap class to first paragraph and keyword links
+      let processedContent = article.content.replace(
+        /<p>/,
+        '<p class="drop-cap">'
+      );
+      // Add keyword hyperlinks (max 2 per keyword)
+      processedContent = addKeywordLinks(processedContent, 2);
+
       return (
         <div
-          className="prose prose-invert prose-orange max-w-none mb-8"
-          dangerouslySetInnerHTML={{ __html: article.content }}
+          className="prose-journal max-w-none mb-8"
+          dangerouslySetInnerHTML={{ __html: processedContent }}
         />
       );
     }
 
     // Otherwise, render as plain text with paragraphs
+    const paragraphs = article.content.split("\n\n");
+    // Process all paragraphs together for consistent keyword linking
+    const processedParagraphs = paragraphs.map((p) => addKeywordLinks(p, 2));
+
     return (
-      <div className="prose prose-invert prose-orange max-w-none mb-8">
-        {article.content.split("\n\n").map((paragraph, index) => (
-          <p key={index}>{paragraph}</p>
+      <div className="prose-journal max-w-none mb-8">
+        {processedParagraphs.map((paragraph, index) => (
+          <p
+            key={index}
+            className={index === 0 ? "drop-cap" : ""}
+            dangerouslySetInnerHTML={{ __html: paragraph }}
+          />
         ))}
       </div>
     );
@@ -368,78 +541,112 @@ export default function ArticlePage() {
 
   return (
     <MainLayout>
-      <article className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
+      {/* Reading Progress Bar */}
+      <ReadingProgressBar progress={readingProgress} />
+
+      {/* Sticky Header (appears on scroll) */}
+      <StickyArticleHeader
+        title={article.title}
+        visible={showStickyHeader}
+        progress={readingProgress}
+        onShare={() => handleShare("copy")}
+        onBookmark={handleBookmark}
+        bookmarked={bookmarked}
+      />
+
+      <article ref={articleRef} className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>
           <ChevronRight className="h-4 w-4" />
-          <Link href="/news" className="hover:text-foreground">News</Link>
+          <Link href="/insights" className="hover:text-foreground">Insights</Link>
           <ChevronRight className="h-4 w-4" />
-          <span className="text-brand-orange">{article.category?.name || "Article"}</span>
+          <span className="text-primary">{article.category?.name || "Article"}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2">
             {/* Header */}
             <header className="mb-8">
-              <div className="flex items-center gap-3 mb-4 flex-wrap">
-                <span className="px-3 py-1 bg-brand-orange text-white text-xs font-semibold rounded">
-                  {article.category?.name || "News"}
-                </span>
+              {/* Category & Meta badges */}
+              <div className="flex items-center gap-3 mb-5 flex-wrap">
+                <Link
+                  href={`/topics/${article.category?.slug || ''}`}
+                  className="label-uppercase text-primary hover:underline"
+                >
+                  {article.category?.name || "Analysis"}
+                </Link>
                 {article.is_breaking && (
-                  <span className="px-3 py-1 bg-market-down text-white text-xs font-semibold rounded">
+                  <span className="px-2 py-0.5 bg-destructive text-white text-xs font-semibold rounded">
                     BREAKING
                   </span>
                 )}
                 {article.is_premium && (
-                  <span className="px-3 py-1 bg-yellow-500 text-black text-xs font-semibold rounded">
+                  <span className="px-2 py-0.5 bg-primary text-primary-foreground text-xs font-semibold rounded">
                     PREMIUM
                   </span>
                 )}
-                <span className="text-sm text-muted-foreground">
-                  {article.read_time_minutes ? `${article.read_time_minutes} min read` : ""}
-                </span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">
+              {/* Title - Journal style serif */}
+              <h1 className="headline-xl text-balance mb-5">
                 {article.title}
               </h1>
 
+              {/* Subtitle/Deck */}
               {article.subtitle && (
-                <h2 className="text-xl text-muted-foreground mb-4">
+                <h2 className="text-xl md:text-2xl text-muted-foreground mb-5 font-serif leading-relaxed">
                   {article.subtitle}
                 </h2>
               )}
 
-              <p className="text-xl text-muted-foreground mb-6">
+              {/* Excerpt/Lede */}
+              <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed prose-article">
                 {article.excerpt}
               </p>
 
-              {/* Author & Meta */}
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-terminal-bg-elevated flex items-center justify-center">
-                    <span className="font-semibold text-brand-orange">
+              {/* Author & Meta - Journal style */}
+              <div className="flex items-start justify-between flex-wrap gap-4 pb-6 border-b border-terminal-border">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-terminal-bg-elevated flex items-center justify-center">
+                    <span className="font-semibold text-primary text-lg">
                       {(article.author?.full_name || "S").split(" ").map((n) => n[0]).join("").toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <div className="font-medium">{article.author?.full_name || "Staff Writer"}</div>
+                    <div className="font-semibold text-foreground">{article.author?.full_name || "Staff Writer"}</div>
                     <div className="text-sm text-muted-foreground">
-                      {article.external_source_name && (
-                        <span>via {article.external_source_name} • </span>
+                      {article.external_source_name ? (
+                        <span>via {article.external_source_name}</span>
+                      ) : (
+                        <span>African Finance Insights</span>
                       )}
-                      {timeAgo(article.published_at)}
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  {formatDate(article.published_at)}
+                <div className="text-right">
+                  <div className="text-sm text-muted-foreground">
+                    {formatDate(article.published_at)}
+                  </div>
+                  <div className="text-sm text-muted-foreground flex items-center justify-end gap-1 mt-1">
+                    <Clock className="h-3.5 w-3.5" />
+                    {article.read_time_minutes ? `${article.read_time_minutes} min read` : "5 min read"}
+                  </div>
                 </div>
               </div>
+
+              {/* Article Toolbar - Foreign Affairs style */}
+              <ArticleToolbar
+                onPrint={handlePrint}
+                onShare={handleShare}
+                onEmail={handleEmail}
+                onBookmark={handleBookmark}
+                bookmarked={bookmarked}
+                onLike={handleLike}
+                liked={liked}
+              />
             </header>
 
             {/* Featured Image */}
@@ -487,97 +694,87 @@ export default function ArticlePage() {
             {/* Article Content */}
             {renderContent()}
 
-            {/* Tags */}
+            {/* Topics & Tags */}
             {article.tags && article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-8">
-                {article.tags.map((tag) => (
-                  <Link
-                    key={tag.id}
-                    href={`/news?tag=${tag.slug}`}
-                    className="px-3 py-1 text-sm bg-terminal-bg-elevated rounded-full hover:bg-brand-orange hover:text-white transition-colors"
-                  >
-                    {tag.name}
-                  </Link>
-                ))}
+              <div className="mb-8 pt-6 border-t border-terminal-border">
+                <h3 className="label-uppercase mb-3">Topics</h3>
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <Link
+                      key={tag.id}
+                      href={`/topics/${tag.slug}`}
+                      className="topic-tag"
+                    >
+                      {tag.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Share & Actions */}
-            <div className="flex items-center justify-between py-4 border-t border-b border-terminal-border mb-8">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={handleLike}
-                  className={cn(
-                    "flex items-center gap-2 text-sm transition-colors",
-                    liked ? "text-red-500" : "text-muted-foreground hover:text-red-500"
-                  )}
-                >
-                  <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-                  <span>{liked ? "Liked" : "Like"}</span>
-                </button>
-                <button
-                  onClick={handleBookmark}
-                  className={cn(
-                    "flex items-center gap-2 text-sm transition-colors",
-                    bookmarked ? "text-brand-orange" : "text-muted-foreground hover:text-brand-orange"
-                  )}
-                >
-                  <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
-                  <span>{bookmarked ? "Saved" : "Save"}</span>
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground mr-2">Share:</span>
-                <button
-                  onClick={() => handleShare("twitter")}
-                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
-                >
-                  <FaXTwitter className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => handleShare("linkedin")}
-                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
-                >
-                  <Linkedin className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => handleShare("facebook")}
-                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
-                >
-                  <Facebook className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => handleShare("copy")}
-                  className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
-                >
-                  <LinkIcon className="h-4 w-4" />
-                </button>
-              </div>
+            {/* Bottom Action Bar */}
+            <div className="article-toolbar mb-8">
+              <button onClick={handlePrint} className="toolbar-btn">
+                <Printer className="h-4 w-4" />
+                <span>Print</span>
+              </button>
+              <button onClick={handleEmail} className="toolbar-btn">
+                <Mail className="h-4 w-4" />
+                <span>Email</span>
+              </button>
+              <button onClick={handleBookmark} className={cn("toolbar-btn", bookmarked && "active")}>
+                <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
+                <span>{bookmarked ? "Saved" : "Save"}</span>
+              </button>
+              <div className="toolbar-divider" />
+              <button onClick={() => handleShare("twitter")} className="toolbar-btn">
+                <FaXTwitter className="h-4 w-4" />
+              </button>
+              <button onClick={() => handleShare("linkedin")} className="toolbar-btn">
+                <Linkedin className="h-4 w-4" />
+              </button>
+              <button onClick={() => handleShare("copy")} className="toolbar-btn">
+                <LinkIcon className="h-4 w-4" />
+              </button>
             </div>
 
-            {/* Related Articles */}
+            {/* Related Insights */}
             {relatedArticles.length > 0 && (
-              <section>
-                <h2 className="text-xl font-bold mb-4">Related Articles</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {relatedArticles.map((item) => (
+              <section className="mb-8">
+                <h2 className="headline text-xl mb-6">Related Insights</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {relatedArticles.map((item) => {
+                    // Generate fallback image based on article ID for uniqueness
+                    const fallbackImage = `https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80&sig=${item.id}`;
+                    const imageUrl = item.featured_image || fallbackImage;
+
+                    return (
                     <Link
                       key={item.id}
                       href={`/news/${item.slug}`}
-                      className="block p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors group"
+                      className="group block"
                     >
-                      <span className="text-xs font-semibold text-brand-orange uppercase">
-                        {item.category?.name || "News"}
+                      <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-3 bg-terminal-bg-elevated">
+                        <Image
+                          src={imageUrl}
+                          alt={item.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          unoptimized
+                        />
+                      </div>
+                      <span className="label-uppercase text-primary">
+                        {item.category?.name || "Analysis"}
                       </span>
-                      <h3 className="font-semibold mt-1 group-hover:text-brand-orange transition-colors line-clamp-2">
+                      <h3 className="headline text-lg mt-1 group-hover:text-primary transition-colors line-clamp-2">
                         {item.title}
                       </h3>
-                      <span className="text-sm text-muted-foreground">
-                        {timeAgo(item.published_at)}
+                      <span className="text-sm text-muted-foreground mt-1 block">
+                        {formatDate(item.published_at)}
                       </span>
                     </Link>
-                  ))}
+                  );
+                  })}
                 </div>
               </section>
             )}
@@ -589,13 +786,69 @@ export default function ArticlePage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="space-y-6">
-            {/* Related Companies/Stocks */}
+          <aside className="space-y-6 lg:sticky lg:top-24">
+            {/* Author Bio - Enhanced Card */}
+            <section className="author-card">
+              <h3 className="label-uppercase mb-4">About the Author</h3>
+              <div className="flex items-start gap-4 mb-4">
+                <div className="author-card-avatar flex-shrink-0">
+                  {(article.author?.full_name || "S").split(" ").map((n) => n[0]).join("").toUpperCase()}
+                </div>
+                <div>
+                  <div className="font-semibold text-lg">{article.author?.full_name || "Staff Writer"}</div>
+                  <div className="text-sm text-primary">Senior Analyst</div>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Covering African markets and economics with a focus on emerging market dynamics,
+                policy analysis, and institutional investment trends across the continent.
+              </p>
+              <Link
+                href={`/authors/${article.author?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'staff'}`}
+                className="text-sm text-primary hover:underline"
+              >
+                View all articles by this author →
+              </Link>
+            </section>
+
+            {/* Newsletter - Journal style */}
+            <section className="p-6 rounded-lg bg-primary/5 border border-primary/20">
+              <h3 className="headline text-lg mb-2">African Finance Insights</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Weekly analysis and research on African markets, delivered to your inbox.
+              </p>
+              <form className="space-y-3" onSubmit={handleSubscribe}>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={subscribeEmail}
+                  onChange={(e) => setSubscribeEmail(e.target.value)}
+                  disabled={subscribing}
+                  className="w-full px-4 py-2.5 text-sm bg-background border border-terminal-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={subscribing}
+                  className="w-full px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {subscribing ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Subscribing...
+                    </>
+                  ) : (
+                    "Subscribe to Newsletter"
+                  )}
+                </button>
+              </form>
+            </section>
+
+            {/* Related Companies/Stocks - Subtle */}
             {article.related_companies && article.related_companies.length > 0 && (
               <section className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-                <h3 className="font-bold mb-4">Mentioned Stocks</h3>
-                <div className="space-y-3">
-                  {article.related_companies.map((stock) => {
+                <h3 className="label-uppercase mb-3">Related Markets</h3>
+                <div className="space-y-2">
+                  {article.related_companies.slice(0, 4).map((stock) => {
                     const isUp = (stock.price_change_percent || 0) >= 0;
                     return (
                       <Link
@@ -604,12 +857,12 @@ export default function ArticlePage() {
                         className="flex items-center justify-between p-2 rounded hover:bg-terminal-bg-elevated transition-colors"
                       >
                         <div>
-                          <div className="font-mono font-semibold">{stock.symbol}</div>
+                          <div className="font-mono text-sm font-medium">{stock.symbol}</div>
                           <div className="text-xs text-muted-foreground">{stock.name}</div>
                         </div>
                         <div className="text-right">
-                          <div className="font-mono">{Number(stock.current_price).toFixed(2)}</div>
-                          <div className={cn("text-xs flex items-center gap-1", isUp ? "text-market-up" : "text-market-down")}>
+                          <div className="font-mono text-sm">{Number(stock.current_price).toFixed(2)}</div>
+                          <div className={cn("text-xs flex items-center gap-1", isUp ? "text-up" : "text-down")}>
                             {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                             {isUp ? "+" : ""}{Number(stock.price_change_percent).toFixed(2)}%
                           </div>
@@ -621,61 +874,10 @@ export default function ArticlePage() {
               </section>
             )}
 
-            {/* Newsletter */}
-            <section className="p-4 rounded-lg bg-terminal-bg-elevated border border-brand-orange/30">
-              <h3 className="font-bold mb-2">Stay Updated</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Get breaking news and market analysis delivered to your inbox.
-              </p>
-              <form className="space-y-2" onSubmit={handleSubscribe}>
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={subscribeEmail}
-                  onChange={(e) => setSubscribeEmail(e.target.value)}
-                  disabled={subscribing}
-                  className="w-full px-3 py-2 text-sm bg-terminal-bg border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange disabled:opacity-50"
-                />
-                <button
-                  type="submit"
-                  disabled={subscribing}
-                  className="w-full px-4 py-2 bg-brand-orange text-white text-sm font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {subscribing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Subscribing...
-                    </>
-                  ) : (
-                    "Subscribe"
-                  )}
-                </button>
-              </form>
-            </section>
-
-            {/* Author Bio */}
-            <section className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <h3 className="font-bold mb-3">About the Author</h3>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-12 w-12 rounded-full bg-terminal-bg-elevated flex items-center justify-center">
-                  <span className="font-semibold text-brand-orange">
-                    {(article.author?.full_name || "S").split(" ").map((n) => n[0]).join("").toUpperCase()}
-                  </span>
-                </div>
-                <div>
-                  <div className="font-medium">{article.author?.full_name || "Staff Writer"}</div>
-                  <div className="text-sm text-muted-foreground">Reporter</div>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Covering African markets and economics with focus on financial news and market analysis.
-              </p>
-            </section>
-
-            {/* View Count */}
+            {/* View Count - Subtle */}
             {article.view_count !== undefined && article.view_count > 0 && (
-              <div className="text-center text-sm text-muted-foreground">
-                {article.view_count.toLocaleString()} views
+              <div className="text-center text-sm text-muted-foreground py-2">
+                {article.view_count.toLocaleString()} readers
               </div>
             )}
           </aside>

@@ -50,6 +50,8 @@ api_v1_patterns = [
     path("spider/", include("apps.spider.urls", namespace="spider")),
     path("subscriptions/", include("apps.subscriptions.urls", namespace="subscriptions")),
     path("media/", include("apps.media.urls", namespace="media")),
+    path("research/", include("apps.research.urls", namespace="research")),
+    path("podcasts/", include("apps.podcasts.urls", namespace="podcasts")),
     # Health check endpoint
     path("health/", include("apps.core.urls", namespace="core")),
 ]

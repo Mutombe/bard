@@ -68,8 +68,11 @@ class InfiniteScrollPagination(CursorPagination):
     Infinite scroll pagination for news feeds.
 
     Optimized for mobile-friendly infinite scroll UX.
+    Supports page_size query param for larger batch requests.
     """
 
-    page_size = 10
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 100
     ordering = "-published_at"
     cursor_query_param = "cursor"

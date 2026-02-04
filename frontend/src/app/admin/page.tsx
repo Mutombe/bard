@@ -11,6 +11,14 @@ import {
   Clock,
   AlertCircle,
   RefreshCw,
+  BookOpen,
+  Mic,
+  Globe,
+  Tag,
+  Factory,
+  Download,
+  Headphones,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton, Skeleton } from "@/components/ui/loading";
@@ -26,6 +34,42 @@ interface DashboardStats {
   newsletterSubs: number;
   draftCount: number;
 }
+
+// Mock research institute metrics - to be replaced with API calls
+const mockResearchStats = {
+  totalReports: 47,
+  reportsThisMonth: 3,
+  totalDownloads: 12450,
+  avgReadTime: "12 min",
+};
+
+const mockPodcastStats = {
+  totalEpisodes: 368,
+  totalListens: 198000,
+  activeShows: 3,
+  newThisWeek: 5,
+};
+
+const mockCoverageStats = {
+  regions: 5,
+  countries: 54,
+  industries: 12,
+  topics: 24,
+};
+
+// Recent research reports mock data
+const recentReports = [
+  { id: "1", title: "African Banking Sector Outlook 2025", downloads: 1234, status: "published" },
+  { id: "2", title: "Mobile Money Revolution Analysis", downloads: 987, status: "published" },
+  { id: "3", title: "ESG Investment Trends in Africa", downloads: 0, status: "review" },
+];
+
+// Top performing content
+const topContent = [
+  { title: "Central Bank Policy Changes", type: "Article", views: 8934 },
+  { title: "African Banking Outlook 2025", type: "Research", views: 5678 },
+  { title: "JSE Rally Analysis", type: "Podcast", views: 3456 },
+];
 
 function getStatusColor(status: string) {
   switch (status?.toLowerCase()) {
@@ -402,14 +446,186 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Research Institute Metrics */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Research Institute Metrics</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {/* Research Reports */}
+          <Link
+            href="/admin/research"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
+          >
+            <BookOpen className="h-5 w-5 text-blue-400 mb-2" />
+            <div className="text-xl font-bold">{mockResearchStats.totalReports}</div>
+            <div className="text-sm text-muted-foreground">Research Reports</div>
+            <div className="text-xs text-blue-400 mt-1">
+              {mockResearchStats.reportsThisMonth} this month
+            </div>
+          </Link>
+
+          {/* Podcast Episodes */}
+          <Link
+            href="/admin/podcasts"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
+          >
+            <Mic className="h-5 w-5 text-purple-400 mb-2" />
+            <div className="text-xl font-bold">{mockPodcastStats.totalEpisodes}</div>
+            <div className="text-sm text-muted-foreground">Podcast Episodes</div>
+            <div className="text-xs text-purple-400 mt-1">
+              {mockPodcastStats.newThisWeek} new this week
+            </div>
+          </Link>
+
+          {/* Total Downloads */}
+          <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
+            <Download className="h-5 w-5 text-green-400 mb-2" />
+            <div className="text-xl font-bold">{mockResearchStats.totalDownloads.toLocaleString()}</div>
+            <div className="text-sm text-muted-foreground">Report Downloads</div>
+          </div>
+
+          {/* Total Listens */}
+          <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
+            <Headphones className="h-5 w-5 text-amber-400 mb-2" />
+            <div className="text-xl font-bold">{mockPodcastStats.totalListens.toLocaleString()}</div>
+            <div className="text-sm text-muted-foreground">Podcast Listens</div>
+          </div>
+        </div>
+
+        {/* Coverage Stats */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <Link
+            href="/admin/regions"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
+          >
+            <Globe className="h-4 w-4 text-primary mx-auto mb-1" />
+            <div className="text-lg font-bold">{mockCoverageStats.regions}</div>
+            <div className="text-xs text-muted-foreground">Regions</div>
+          </Link>
+          <Link
+            href="/admin/regions"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
+          >
+            <Globe className="h-4 w-4 text-blue-400 mx-auto mb-1" />
+            <div className="text-lg font-bold">{mockCoverageStats.countries}</div>
+            <div className="text-xs text-muted-foreground">Countries</div>
+          </Link>
+          <Link
+            href="/admin/industries"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
+          >
+            <Factory className="h-4 w-4 text-amber-400 mx-auto mb-1" />
+            <div className="text-lg font-bold">{mockCoverageStats.industries}</div>
+            <div className="text-xs text-muted-foreground">Industries</div>
+          </Link>
+          <Link
+            href="/admin/topics"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
+          >
+            <Tag className="h-4 w-4 text-green-400 mx-auto mb-1" />
+            <div className="text-lg font-bold">{mockCoverageStats.topics}</div>
+            <div className="text-xs text-muted-foreground">Topics</div>
+          </Link>
+        </div>
+      </div>
+
+      {/* Recent Research & Top Content */}
+      <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Research Reports */}
+        <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border">
+          <div className="flex items-center justify-between p-4 border-b border-terminal-border">
+            <h2 className="font-semibold flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-blue-400" />
+              Recent Research
+            </h2>
+            <Link
+              href="/admin/research"
+              className="text-sm text-brand-orange hover:text-brand-orange-light"
+            >
+              View All
+            </Link>
+          </div>
+          <div className="divide-y divide-terminal-border">
+            {recentReports.map((report) => (
+              <Link
+                key={report.id}
+                href={`/admin/research/${report.id}`}
+                className="flex items-center justify-between p-4 hover:bg-terminal-bg-elevated transition-colors"
+              >
+                <div className="flex-1 min-w-0 mr-4">
+                  <div className="font-medium truncate text-sm">{report.title}</div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                    <Download className="h-3 w-3" />
+                    {report.downloads.toLocaleString()} downloads
+                  </div>
+                </div>
+                <span
+                  className={cn(
+                    "px-2 py-1 rounded text-xs font-medium capitalize",
+                    getStatusColor(report.status)
+                  )}
+                >
+                  {report.status}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Performing Content */}
+        <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border">
+          <div className="flex items-center justify-between p-4 border-b border-terminal-border">
+            <h2 className="font-semibold flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-green-400" />
+              Top Performing Content
+            </h2>
+          </div>
+          <div className="divide-y divide-terminal-border">
+            {topContent.map((content, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-4"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded bg-terminal-bg flex items-center justify-center text-sm font-medium text-muted-foreground">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <div className="font-medium text-sm">{content.title}</div>
+                    <div className="text-xs text-muted-foreground">{content.type}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <Eye className="h-3 w-3" />
+                  {content.views.toLocaleString()}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Quick Actions */}
-      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="mt-8 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         <Link
           href="/admin/articles/new"
           className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-brand-orange transition-colors text-center"
         >
           <FileText className="h-6 w-6 mx-auto mb-2 text-brand-orange" />
           <span className="text-sm">New Article</span>
+        </Link>
+        <Link
+          href="/admin/research/new"
+          className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-blue-400 transition-colors text-center"
+        >
+          <BookOpen className="h-6 w-6 mx-auto mb-2 text-blue-400" />
+          <span className="text-sm">New Research</span>
+        </Link>
+        <Link
+          href="/admin/podcasts/new"
+          className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-purple-400 transition-colors text-center"
+        >
+          <Mic className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+          <span className="text-sm">New Episode</span>
         </Link>
         <Link
           href="/admin/opinions/new"
@@ -420,17 +636,17 @@ export default function AdminDashboard() {
         </Link>
         <Link
           href="/admin/newsletters/new"
-          className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-brand-orange transition-colors text-center"
+          className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-green-400 transition-colors text-center"
         >
-          <TrendingUp className="h-6 w-6 mx-auto mb-2 text-brand-orange" />
-          <span className="text-sm">Send Newsletter</span>
+          <TrendingUp className="h-6 w-6 mx-auto mb-2 text-green-400" />
+          <span className="text-sm">Newsletter</span>
         </Link>
         <Link
           href="/admin/users"
-          className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-brand-orange transition-colors text-center"
+          className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-amber-400 transition-colors text-center"
         >
-          <Users className="h-6 w-6 mx-auto mb-2 text-brand-orange" />
-          <span className="text-sm">Manage Users</span>
+          <Users className="h-6 w-6 mx-auto mb-2 text-amber-400" />
+          <span className="text-sm">Users</span>
         </Link>
       </div>
     </div>
