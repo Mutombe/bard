@@ -86,6 +86,8 @@ LOCAL_APPS = [
     "apps.realtime",
     "apps.subscriptions",
     "apps.media",
+    "apps.research",
+    "apps.podcasts",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

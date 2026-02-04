@@ -631,21 +631,21 @@ def set_article_images():
         saved = 0
 
         # Fallback images for when API is unavailable or rate limited
-        # Diverse set covering finance, business, markets, technology, Africa
+        # EXPANDED diverse set covering finance, business, markets, technology, Africa
         fallback_images = [
-            "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=450&fit=crop",  # Stock market
+            "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=450&fit=crop",  # Stock market 1
             "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&h=450&fit=crop",  # Trading
             "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&h=450&fit=crop",  # Finance
             "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?w=800&h=450&fit=crop",  # Charts
-            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",  # Business
+            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=450&fit=crop",  # Business 1
             "https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=450&fit=crop",  # News
             "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&h=450&fit=crop",  # Businessman
             "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # Africa business
             "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?w=800&h=450&fit=crop",  # Coins/Money
             "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=450&fit=crop",  # Calculator
-            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop",  # Tech
+            "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=450&fit=crop",  # Tech 1
             "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop",  # Dashboard
-            "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&h=450&fit=crop",  # City skyline
+            "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=800&h=450&fit=crop",  # City skyline 1
             "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=450&fit=crop",  # Office building
             "https://images.unsplash.com/photo-1434626881859-194d67b2b86f?w=800&h=450&fit=crop",  # Growth chart
             "https://images.unsplash.com/photo-1462206092226-f46025ffe607?w=800&h=450&fit=crop",  # World map
@@ -653,6 +653,27 @@ def set_article_images():
             "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=450&fit=crop",  # Mining
             "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&h=450&fit=crop",  # Bank building
             "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=800&h=450&fit=crop",  # Handshake deal
+            # Additional variety images
+            "https://images.unsplash.com/photo-1535320903710-d993d3d77d29?w=800&h=450&fit=crop",  # Stock market 2
+            "https://images.unsplash.com/photo-1642790106117-e829e14a795f?w=800&h=450&fit=crop",  # Trading 2
+            "https://images.unsplash.com/photo-1543286386-2e659306cd6c?w=800&h=450&fit=crop",  # Economy charts
+            "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?w=800&h=450&fit=crop",  # Banking 2
+            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop",  # Banking 3
+            "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&h=450&fit=crop",  # Tech 2
+            "https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=800&h=450&fit=crop",  # Tech 3
+            "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&h=450&fit=crop",  # Africa 2
+            "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=800&h=450&fit=crop",  # Africa 3
+            "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&h=450&fit=crop",  # Energy 2
+            "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=450&fit=crop",  # Solar energy
+            "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&h=450&fit=crop",  # Real estate
+            "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800&h=450&fit=crop",  # Agriculture
+            "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=800&h=450&fit=crop",  # Agriculture 2
+            "https://images.unsplash.com/photo-1593340700225-1f2edae5e84f?w=800&h=450&fit=crop",  # Mining 2
+            "https://images.unsplash.com/photo-1516245834210-c4c142787335?w=800&h=450&fit=crop",  # Crypto
+            "https://images.unsplash.com/photo-1622790698141-94e30457ef12?w=800&h=450&fit=crop",  # Crypto 2
+            "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800&h=450&fit=crop",  # City skyline 2
+            "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=450&fit=crop",  # City business 2
+            "https://images.unsplash.com/photo-1444653614773-995cb1ef9efa?w=800&h=450&fit=crop",  # Business 2
         ]
 
         for article in articles:

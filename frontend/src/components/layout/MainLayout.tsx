@@ -35,7 +35,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Navigation, navigationData } from "./Navigation";
-import { MarketStrip } from "./MarketStrip";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { LiveSearch } from "@/components/search/LiveSearch";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -343,23 +342,23 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       </header>
 
-      {/* Market Strip */}
-      <MarketStrip />
-
       {/* Main Content */}
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
       <footer className="border-t border-terminal-border bg-terminal-bg-secondary">
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
             {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
+            <div className="col-span-2">
               <div className="mb-4">
                 <ThemeLogo width={140} height={38} />
               </div>
+              <p className="text-sm text-muted-foreground mb-2">
+                <span className="font-semibold text-foreground">African Finance Insights</span>
+              </p>
               <p className="text-sm text-muted-foreground mb-4">
-                Your trusted source for African financial intelligence and market data.
+                Reducing information asymmetry in Africa&apos;s financial markets. Research, analysis, and intelligence for informed decision-making.
               </p>
               <div className="flex items-center gap-3">
                 <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
@@ -372,48 +371,50 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4 text-sm">Markets</h3>
+              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Insights</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/markets/jse" className="hover:text-foreground">JSE</Link></li>
-                <li><Link href="/markets/ngx" className="hover:text-foreground">NGX</Link></li>
-                <li><Link href="/markets/egx" className="hover:text-foreground">EGX</Link></li>
-                <li><Link href="/markets/indices" className="hover:text-foreground">Indices</Link></li>
-                <li><Link href="/markets/forex" className="hover:text-foreground">Forex</Link></li>
-                <li><Link href="/markets/commodities" className="hover:text-foreground">Commodities</Link></li>
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="font-semibold mb-4 text-sm">News & Analysis</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/news" className="hover:text-foreground">Latest News</Link></li>
-                <li><Link href="/analysis" className="hover:text-foreground">Analysis</Link></li>
+                <li><Link href="/news" className="hover:text-foreground">Latest Insights</Link></li>
                 <li><Link href="/research" className="hover:text-foreground">Research</Link></li>
+                <li><Link href="/analysis" className="hover:text-foreground">Analysis</Link></li>
                 <li><Link href="/opinions" className="hover:text-foreground">Opinions</Link></li>
-                <li><Link href="/columns" className="hover:text-foreground">Columns</Link></li>
+                <li><Link href="/podcasts" className="hover:text-foreground">Podcasts</Link></li>
+                <li><Link href="/videos" className="hover:text-foreground">Videos</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4 text-sm">Tools</h3>
+              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">By Industry</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/portfolio" className="hover:text-foreground">Portfolio</Link></li>
-                <li><Link href="/watchlist" className="hover:text-foreground">Watchlist</Link></li>
-                <li><Link href="/screener" className="hover:text-foreground">Stock Screener</Link></li>
-                <li><Link href="/alerts" className="hover:text-foreground">Price Alerts</Link></li>
-                <li><Link href="/economics/calendar" className="hover:text-foreground">Economic Calendar</Link></li>
+                <li><Link href="/industries/banking" className="hover:text-foreground">Banking & Finance</Link></li>
+                <li><Link href="/industries/mining" className="hover:text-foreground">Mining & Resources</Link></li>
+                <li><Link href="/industries/technology" className="hover:text-foreground">Technology</Link></li>
+                <li><Link href="/industries/agriculture" className="hover:text-foreground">Agriculture</Link></li>
+                <li><Link href="/industries/infrastructure" className="hover:text-foreground">Infrastructure</Link></li>
+                <li><Link href="/industries/energy" className="hover:text-foreground">Energy</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4 text-sm">Company</h3>
+              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">By Region</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/about" className="hover:text-foreground">About Us</Link></li>
+                <li><Link href="/regions/southern-africa" className="hover:text-foreground">Southern Africa</Link></li>
+                <li><Link href="/regions/east-africa" className="hover:text-foreground">East Africa</Link></li>
+                <li><Link href="/regions/west-africa" className="hover:text-foreground">West Africa</Link></li>
+                <li><Link href="/regions/north-africa" className="hover:text-foreground">North Africa</Link></li>
+                <li><Link href="/regions/central-africa" className="hover:text-foreground">Central Africa</Link></li>
+                <li><Link href="/markets" className="hover:text-foreground">Markets Data</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">About</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li><Link href="/about" className="hover:text-foreground">About BGFI</Link></li>
+                <li><Link href="/about#mission" className="hover:text-foreground">Our Mission</Link></li>
                 <li><Link href="/careers" className="hover:text-foreground">Careers</Link></li>
                 <li><Link href="/contact" className="hover:text-foreground">Contact</Link></li>
-                <li><Link href="/advertise" className="hover:text-foreground">Advertise</Link></li>
-                <li><Link href="/terms" className="hover:text-foreground">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="hover:text-foreground">Privacy Policy</Link></li>
+                <li><Link href="/newsletters" className="hover:text-foreground">Newsletters</Link></li>
+                <li><Link href="/subscribe" className="hover:text-foreground">Subscribe</Link></li>
               </ul>
             </div>
           </div>
@@ -422,9 +423,11 @@ export function MainLayout({ children }: MainLayoutProps) {
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Bard Global Finance Institute. All rights reserved.
             </p>
-            <p className="text-xs text-muted-foreground text-center md:text-right">
-              Your trusted source for African financial news and market data.
-            </p>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <Link href="/terms" className="hover:text-foreground">Terms</Link>
+              <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+              <Link href="/accessibility" className="hover:text-foreground">Accessibility</Link>
+            </div>
           </div>
         </div>
       </footer>

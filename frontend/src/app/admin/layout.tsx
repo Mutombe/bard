@@ -21,6 +21,11 @@ import {
   X,
   Lock,
   ClipboardList,
+  BookOpen,
+  Tag,
+  Factory,
+  Globe,
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -34,8 +39,13 @@ interface AdminLayoutProps {
 const sidebarItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
+  { href: "/admin/research", label: "Research", icon: BookOpen },
+  { href: "/admin/podcasts", label: "Podcasts", icon: Mic },
   { href: "/admin/opinions", label: "Opinions", icon: MessageSquare },
   { href: "/admin/tasks", label: "Tasks", icon: ClipboardList },
+  { href: "/admin/topics", label: "Topics", icon: Tag },
+  { href: "/admin/industries", label: "Industries", icon: Factory },
+  { href: "/admin/regions", label: "Regions", icon: Globe },
   { href: "/admin/newsletters", label: "Newsletters", icon: Mail },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/users", label: "Users", icon: Users },
