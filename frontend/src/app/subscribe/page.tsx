@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 interface PricingPlan {
   id: string;
@@ -163,6 +164,7 @@ function PricingCard({
 
 export default function SubscribePage() {
   const [currency, setCurrency] = useState<Currency>("usd");
+  const { openLogin } = useAuthModal();
 
   return (
     <MainLayout>
@@ -301,12 +303,12 @@ export default function SubscribePage() {
               for their market intelligence needs.
             </p>
             <div className="flex items-center justify-center gap-4">
-              <Link
-                href="/login"
+              <button
+                onClick={openLogin}
                 className="px-6 py-3 border border-terminal-border rounded-md font-medium hover:bg-terminal-bg-elevated transition-colors"
               >
                 Sign In
-              </Link>
+              </button>
               <button className="px-6 py-3 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors">
                 Start Free Trial
               </button>

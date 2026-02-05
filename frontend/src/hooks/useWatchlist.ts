@@ -49,15 +49,7 @@ export function useWatchlist(company: Company) {
    */
   const toggleWatchlist = useCallback(async () => {
     if (!isAuthenticated) {
-      toast.error("Please sign in to manage your watchlist", {
-        action: {
-          label: "Sign In",
-          onClick: () => {
-            // Navigate to login
-            window.location.href = "/login";
-          },
-        },
-      });
+      toast.error("Please sign in to manage your watchlist");
       return;
     }
 

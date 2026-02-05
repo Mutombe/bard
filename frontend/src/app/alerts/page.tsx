@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 interface PriceAlert {
   id: string;
@@ -37,6 +38,7 @@ const mockAlerts: PriceAlert[] = [
 
 export default function AlertsPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { openLogin } = useAuthModal();
   const [alerts, setAlerts] = useState(mockAlerts);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newAlert, setNewAlert] = useState({
@@ -67,12 +69,12 @@ export default function AlertsPage() {
             <p className="text-muted-foreground mb-6">
               Sign in to set up price alerts and get notified when stocks hit your target.
             </p>
-            <Link
-              href="/login"
+            <button
+              onClick={openLogin}
               className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors inline-block"
             >
               Sign In
-            </Link>
+            </button>
           </div>
         </div>
       </MainLayout>

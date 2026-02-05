@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useWatchlist } from "@/hooks/use-watchlist";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 import type { Company } from "@/types";
 
 // Helper function to get currency symbol
@@ -42,6 +43,7 @@ export default function WatchlistPage() {
     isInWatchlist,
     removeCompany,
   } = useWatchlist();
+  const { openLogin } = useAuthModal();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [alerts, setAlerts] = useState<Record<string, boolean>>({});
@@ -110,9 +112,9 @@ export default function WatchlistPage() {
             <div className="flex-1">
               <p className="text-sm">
                 Your watchlist is saved locally.{" "}
-                <Link href="/login" className="text-brand-orange hover:underline font-medium">
+                <button onClick={openLogin} className="text-brand-orange hover:underline font-medium">
                   Sign in
-                </Link>{" "}
+                </button>{" "}
                 to sync across devices and never lose your data.
               </p>
             </div>
@@ -238,13 +240,13 @@ export default function WatchlistPage() {
                 Browse Companies
               </Link>
               {!isAuthenticated && (
-                <Link
-                  href="/login"
+                <button
+                  onClick={openLogin}
                   className="inline-flex items-center gap-2 px-6 py-3 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
                 >
                   <LogIn className="h-4 w-4" />
                   Sign In
-                </Link>
+                </button>
               )}
             </div>
           </div>
