@@ -18,9 +18,11 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 export default function SettingsPage() {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { openLogin } = useAuthModal();
   const [activeTab, setActiveTab] = useState("account");
 
   const tabs = [
@@ -40,12 +42,12 @@ export default function SettingsPage() {
             <p className="text-muted-foreground mb-6">
               Sign in to manage your account settings.
             </p>
-            <Link
-              href="/login"
+            <button
+              onClick={openLogin}
               className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors inline-block"
             >
               Sign In
-            </Link>
+            </button>
           </div>
         </div>
       </MainLayout>

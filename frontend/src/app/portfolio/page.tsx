@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
+import { useAuthModal } from "@/contexts/AuthModalContext";
 
 interface Holding {
   symbol: string;
@@ -41,6 +42,7 @@ const mockHoldings: Holding[] = [
 
 export default function PortfolioPage() {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { openLogin, openRegister } = useAuthModal();
   const [holdings] = useState(mockHoldings);
 
   const totalValue = holdings.reduce((sum, h) => sum + h.value, 0);
@@ -58,18 +60,18 @@ export default function PortfolioPage() {
               Sign in to track your investments and monitor your portfolio performance.
             </p>
             <div className="flex justify-center gap-4">
-              <Link
-                href="/login"
+              <button
+                onClick={openLogin}
                 className="px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
               >
                 Sign In
-              </Link>
-              <Link
-                href="/subscribe"
+              </button>
+              <button
+                onClick={openRegister}
                 className="px-6 py-3 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
               >
                 Create Account
-              </Link>
+              </button>
             </div>
           </div>
         </div>
