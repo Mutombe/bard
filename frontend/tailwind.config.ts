@@ -16,17 +16,17 @@ const config: Config = {
       },
     },
     extend: {
-      // Brand color palette - Navy Blue
+      // Brand color palette - Warm Burgundy (Swiss/HBR Style)
       colors: {
-        // Primary brand colors - Navy Blue
+        // Primary brand colors - Burgundy/Crimson
         brand: {
-          navy: "#1e3a5f",
-          "navy-light": "#2d5a8a",
-          "navy-dark": "#152a47",
-          // Keep orange as secondary for legacy support
-          orange: "#1e3a5f", // Mapped to navy
-          "orange-light": "#2d5a8a",
-          "orange-dark": "#152a47",
+          burgundy: "#9b2335",
+          "burgundy-light": "#b83a4b",
+          "burgundy-dark": "#7a1c2a",
+          // Legacy support - map to burgundy
+          orange: "#9b2335",
+          "orange-light": "#b83a4b",
+          "orange-dark": "#7a1c2a",
         },
         // Terminal theme (adapts via CSS variables)
         terminal: {
