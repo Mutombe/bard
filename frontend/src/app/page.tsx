@@ -144,7 +144,7 @@ const regions = [
 function FeaturedInsightSkeleton() {
   return (
     <div className="animate-pulse">
-      <Skeleton className="aspect-[21/9] mb-6 rounded-lg" />
+      <Skeleton className="aspect-[21/9] mb-6" />
       <Skeleton className="h-4 w-24 mb-3" />
       <Skeleton className="h-10 w-full mb-3" />
       <Skeleton className="h-10 w-4/5 mb-4" />
@@ -158,7 +158,7 @@ function FeaturedInsightSkeleton() {
 function InsightCardSkeleton() {
   return (
     <div className="animate-pulse">
-      <Skeleton className="aspect-[16/10] mb-4 rounded-lg" />
+      <Skeleton className="aspect-[16/10] mb-4" />
       <Skeleton className="h-3 w-20 mb-2" />
       <Skeleton className="h-6 w-full mb-2" />
       <Skeleton className="h-4 w-3/4" />
@@ -168,9 +168,9 @@ function InsightCardSkeleton() {
 
 function SidebarInsightSkeleton() {
   return (
-    <div className="flex gap-4 py-4 animate-pulse">
-      <Skeleton className="w-20 h-20 rounded flex-shrink-0" />
-      <div className="flex-1">
+    <div className="flex mb-3 bg-terminal-bg-secondary border border-terminal-border overflow-hidden animate-pulse">
+      <Skeleton className="w-24 h-20 flex-shrink-0" />
+      <div className="flex-1 p-3">
         <Skeleton className="h-3 w-16 mb-2" />
         <Skeleton className="h-5 w-full mb-1" />
         <Skeleton className="h-4 w-3/4" />
@@ -187,7 +187,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
     <Link href={`/news/${article.slug}`} className="group block">
       <article>
         {imageUrl && (
-          <div className="relative aspect-[21/9] mb-6 overflow-hidden rounded-lg bg-terminal-bg-elevated">
+          <div className="relative aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated">
             <Image
               src={imageUrl}
               alt={article.title}
@@ -198,7 +198,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             {article.is_breaking && (
-              <div className="absolute top-4 left-4 px-3 py-1.5 bg-red-600 text-white text-xs font-semibold tracking-wide uppercase rounded">
+              <div className="absolute top-4 left-4 px-3 py-1.5 bg-red-600 text-white text-xs font-semibold tracking-wide uppercase">
                 Breaking
               </div>
             )}
@@ -243,7 +243,7 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
     <Link href={`/news/${article.slug}`} className="group block h-full">
       <article className={cn("h-full", featured && "")}>
         {imageUrl && (
-          <div className="relative aspect-[16/10] mb-4 overflow-hidden rounded-lg bg-terminal-bg-elevated">
+          <div className="relative aspect-[16/10] mb-4 overflow-hidden bg-terminal-bg-elevated">
             <Image
               src={imageUrl}
               alt={article.title}
@@ -291,7 +291,7 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
 
   return (
     <Link href={`/news/${article.slug}`} className="group block h-full">
-      <article className="h-full bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden hover:border-primary/50 transition-colors">
+      <article className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden hover:border-primary/50 transition-colors">
         {/* Image with overlay - only title and category */}
         <div className={cn("relative overflow-hidden", imageAspect[size])}>
           {imageUrl ? (
@@ -325,12 +325,12 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
 
           {/* Premium/Breaking badges */}
           {article.is_breaking && (
-            <div className="absolute top-3 left-3 px-2 py-1 bg-red-600 text-white text-xs font-semibold uppercase tracking-wide rounded">
+            <div className="absolute top-3 left-3 px-2 py-1 bg-red-600 text-white text-xs font-semibold uppercase tracking-wide">
               Breaking
             </div>
           )}
           {article.is_premium && !article.is_breaking && (
-            <div className="absolute top-3 left-3 px-2 py-1 bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-wide rounded">
+            <div className="absolute top-3 left-3 px-2 py-1 bg-primary text-primary-foreground text-xs font-semibold uppercase tracking-wide">
               Premium
             </div>
           )}
@@ -369,7 +369,7 @@ function FeaturedGridCard({ article }: { article: NewsArticle }) {
 
   return (
     <Link href={`/news/${article.slug}`} className="group block">
-      <article className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-terminal-bg-secondary rounded-lg overflow-hidden border border-terminal-border hover:border-primary/50 transition-colors">
+      <article className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-terminal-bg-secondary overflow-hidden border border-terminal-border hover:border-primary/50 transition-colors">
         <div className="relative aspect-video md:aspect-auto md:min-h-[280px] overflow-hidden">
           {imageUrl && (
             <Image
@@ -417,10 +417,10 @@ function SidebarInsight({ article }: { article: NewsArticle }) {
   return (
     <Link
       href={`/news/${article.slug}`}
-      className="group flex gap-4 py-4 border-b border-terminal-border last:border-0"
+      className="group flex mb-3 bg-terminal-bg-secondary border border-terminal-border hover:border-primary/50 transition-colors overflow-hidden"
     >
       {imageUrl && (
-        <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded bg-terminal-bg-elevated">
+        <div className="relative w-24 flex-shrink-0 overflow-hidden">
           <Image
             src={imageUrl}
             alt={article.title}
@@ -430,7 +430,7 @@ function SidebarInsight({ article }: { article: NewsArticle }) {
           />
         </div>
       )}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 p-3">
         <span className="text-xs font-semibold text-primary uppercase tracking-wider">
           {article.category?.name || "Insight"}
         </span>
@@ -466,7 +466,7 @@ function IndustryNavigation() {
             <Link
               key={industry.slug}
               href={`/industries/${industry.slug}`}
-              className="group flex items-center gap-3 p-4 rounded-lg bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
+              className="group flex items-center gap-3 p-4 bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
             >
               <industry.icon className={cn("h-5 w-5", industry.color)} />
               <span className="font-medium text-sm group-hover:text-primary transition-colors">
@@ -503,7 +503,7 @@ function FeaturedResearchSection() {
             <Link
               key={report.id}
               href={`/research/${report.slug}`}
-              className="group p-6 rounded-lg border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all"
+              className="group p-6 border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all"
             >
               <div className="flex items-center gap-2 mb-3">
                 <span className="px-2 py-1 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary rounded">
@@ -555,7 +555,7 @@ function TopicsRegionsSection() {
                 <Link
                   key={topic.slug}
                   href={`/topics/${topic.slug}`}
-                  className="group p-4 rounded-lg bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
+                  className="group p-4 bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
                 >
                   <h4 className="font-semibold mb-1 group-hover:text-primary transition-colors">
                     {topic.name}
@@ -587,7 +587,7 @@ function TopicsRegionsSection() {
                 <Link
                   key={region.slug}
                   href={`/regions/${region.slug}`}
-                  className="group p-4 rounded-lg bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
+                  className="group p-4 bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
                 >
                   <h4 className="font-semibold mb-1 group-hover:text-primary transition-colors">
                     {region.name}
@@ -627,7 +627,7 @@ function PodcastSection({ video }: { video: any }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           {/* Video/Thumbnail */}
-          <div className="relative aspect-video rounded-lg overflow-hidden">
+          <div className="relative aspect-video overflow-hidden">
             {isPlaying ? (
               <iframe
                 src={`${video.embed_url}?autoplay=1`}
@@ -653,7 +653,7 @@ function PodcastSection({ video }: { video: any }) {
                     <Play className="h-10 w-10 text-white ml-1" fill="white" />
                   </div>
                 </div>
-                <div className="absolute bottom-4 right-4 px-3 py-1 bg-black/80 text-white text-sm rounded">
+                <div className="absolute bottom-4 right-4 px-3 py-1 bg-black/80 text-white text-sm">
                   {video.duration_formatted}
                 </div>
               </div>
@@ -739,12 +739,12 @@ function NewsletterSection() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               disabled={loading}
-              className="flex-1 px-4 py-3 text-base bg-background border border-terminal-border rounded-lg focus:outline-none focus:border-primary disabled:opacity-50"
+              className="flex-1 px-4 py-3 text-base bg-background border border-terminal-border focus:outline-none focus:border-primary disabled:opacity-50"
             />
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {loading ? "..." : "Subscribe"}
               <ArrowRight className="h-4 w-4" />
@@ -761,7 +761,7 @@ function MarketSummaryWidget({ indices }: { indices: MarketIndex[] }) {
   if (!indices || indices.length === 0) return null;
 
   return (
-    <div className="p-5 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
+    <div className="p-5 bg-terminal-bg-secondary border border-terminal-border">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
           Market Summary
@@ -962,10 +962,10 @@ function QuickReads({ articles }: { articles: NewsArticle[] }) {
               <Link
                 key={article.id}
                 href={`/news/${article.slug}`}
-                className="group flex gap-4 p-4 rounded-lg bg-slate-800/50 border border-slate-700 hover:border-primary/50 transition-colors"
+                className="group flex gap-4 p-4 bg-slate-800/50 border border-slate-700 hover:border-primary/50 transition-colors"
               >
                 {imageUrl && (
-                  <div className="relative w-20 h-20 flex-shrink-0 rounded overflow-hidden">
+                  <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
                     <Image
                       src={imageUrl}
                       alt={article.title}
@@ -1181,10 +1181,10 @@ export default function HomePage() {
                     <Link
                       key={article.id}
                       href={`/news/${article.slug}`}
-                      className="group flex gap-4 p-3 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-primary/50 transition-colors"
+                      className="group flex bg-terminal-bg-secondary border border-terminal-border hover:border-primary/50 transition-colors overflow-hidden"
                     >
                       {getArticleImage(article) && (
-                        <div className="relative w-24 h-20 flex-shrink-0 rounded overflow-hidden">
+                        <div className="relative w-28 flex-shrink-0 overflow-hidden">
                           <Image
                             src={getArticleImage(article)!}
                             alt={article.title}
@@ -1194,7 +1194,7 @@ export default function HomePage() {
                           />
                         </div>
                       )}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 p-3">
                         <span className="text-xs text-primary font-semibold uppercase tracking-wider">
                           {article.category?.name || "Insight"}
                         </span>
@@ -1450,7 +1450,7 @@ export default function HomePage() {
                       href={`/news/${article.slug}`}
                       className="group block"
                     >
-                      <div className="relative aspect-square rounded-lg overflow-hidden mb-2">
+                      <div className="relative aspect-square overflow-hidden mb-2">
                         {imageUrl && (
                           <Image
                             src={imageUrl}
