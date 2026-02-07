@@ -44,7 +44,7 @@ export function ThemeLogo({
       alt="Bard Global Finance Institute"
       width={width}
       height={height}
-      className={cn("h-auto max-h-12 w-auto object-contain", className)}
+      className={cn("h-auto max-h-14 w-auto object-contain", className)}
       priority={priority}
     />
   );
