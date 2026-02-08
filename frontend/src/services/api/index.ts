@@ -9,6 +9,7 @@ export { editorialService } from "./editorial";
 export { adminService } from "./admin";
 export { researchService } from "./research";
 export { podcastsService } from "./podcasts";
+export { geographyService } from "./geography";
 
 // Re-export types
 export type {
@@ -25,3 +26,8 @@ export type {
   EpisodeFilters,
   PodcastStats,
 } from "./podcasts";
+export type {
+  Region,
+  Country,
+  CountryFilters,
+} from "./geography";
