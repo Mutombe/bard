@@ -9,7 +9,6 @@ import {
   MessageSquare,
   Mail,
   Users,
-  TrendingUp,
   Image as ImageIcon,
   Settings,
   ChevronLeft,
@@ -49,7 +48,6 @@ const sidebarItems = [
   { href: "/admin/newsletters", label: "Newsletters", icon: Mail },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/markets", label: "Market Data", icon: TrendingUp },
   { href: "/admin/media", label: "Media Library", icon: ImageIcon },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

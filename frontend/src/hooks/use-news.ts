@@ -83,6 +83,7 @@ export function useArticles(params?: UseArticlesParams) {
       // Articles update frequently
       revalidateOnFocus: true,
       dedupingInterval: 5000, // 5 seconds
+      refreshInterval: 3600000, // Auto-refresh every 1 hour for new content
     }
   );
 }
@@ -115,6 +116,7 @@ export function useInfiniteArticles(params?: UseArticlesParams) {
       revalidateFirstPage: false,
       revalidateOnFocus: false,
       dedupingInterval: 5000,
+      refreshInterval: 3600000, // Auto-refresh every 1 hour
     }
   );
 

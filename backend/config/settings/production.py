@@ -78,27 +78,34 @@ DATABASES["default"]["OPTIONS"] = {  # noqa: F405
 }
 
 # =========================
-# Static Files (S3 in production)
+# DigitalOcean Spaces (S3-compatible) Storage
 # =========================
-USE_S3 = env.bool("USE_S3", default=False)  # noqa: F405
+USE_SPACES = env.bool("USE_SPACES", default=True)  # noqa: F405
 
-if USE_S3:
-    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")  # noqa: F405
-    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")  # noqa: F405
-    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")  # noqa: F405
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default="af-south-1")  # noqa: F405
-    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+if USE_SPACES:
+    # DigitalOcean Spaces credentials
+    AWS_ACCESS_KEY_ID = env("DO_SPACES_ACCESS_KEY", default="DO00YXAR8JQNBMUJ2QJJ")  # noqa: F405
+    AWS_SECRET_ACCESS_KEY = env("DO_SPACES_SECRET_KEY", default="")  # noqa: F405
+    AWS_STORAGE_BUCKET_NAME = env("DO_SPACES_BUCKET", default="bgfi")  # noqa: F405
+    AWS_S3_REGION_NAME = env("DO_SPACES_REGION", default="sgp1")  # noqa: F405
+
+    # DigitalOcean Spaces endpoint
+    AWS_S3_ENDPOINT_URL = f"https://{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.digitaloceanspaces.com"
+
+    # S3 settings
     AWS_DEFAULT_ACL = "public-read"
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
+    AWS_S3_OBJECT_PARAMETERS = {
+        "CacheControl": "max-age=86400",  # 1 day cache
+    }
+    AWS_QUERYSTRING_AUTH = False  # Public URLs without query strings
+    AWS_S3_FILE_OVERWRITE = False
 
-    # Static files
-    STATIC_LOCATION = "static"
-    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/"
-    STATICFILES_STORAGE = "apps.core.storage.StaticStorage"
+    # Static files (keep using whitenoise for static, only use Spaces for media)
+    # STATICFILES_STORAGE = "apps.core.storage.StaticStorage"
 
-    # Media files
-    MEDIA_LOCATION = "media"
-    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/"
+    # Media files - use DigitalOcean Spaces
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
     DEFAULT_FILE_STORAGE = "apps.core.storage.MediaStorage"
 
 # =========================
