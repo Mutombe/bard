@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { adminService } from "@/services/api/admin";
-import { UnsplashImagePicker } from "@/components/editor/UnsplashImagePicker";
+import { ImagePicker } from "@/components/editor/ImagePicker";
 import { toast } from "sonner";
 
 const NEWSLETTER_TYPES = [
@@ -45,7 +45,7 @@ export default function NewNewsletterPage() {
     emails_sent: number;
     total_subscribers: number;
   } | null>(null);
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -82,10 +82,10 @@ export default function NewNewsletterPage() {
     toast.info("Test email feature coming soon");
   };
 
-  const handleInsertImage = (image: { url: string; photographer: string; alt: string }) => {
+  const handleInsertImage = (image: { url: string; photographer?: string; alt?: string }) => {
+    const credit = image.photographer ? `\n  <p style="font-size: 12px; color: #888; margin-top: 8px;">Photo by ${image.photographer} on Unsplash</p>` : "";
     const imageHtml = `\n<div style="margin: 20px 0; text-align: center;">
-  <img src="${image.url}" alt="${image.alt}" style="max-width: 100%; height: auto; border-radius: 8px;" />
-  <p style="font-size: 12px; color: #888; margin-top: 8px;">Photo by ${image.photographer} on Unsplash</p>
+  <img src="${image.url}" alt="${image.alt || ""}" style="max-width: 100%; height: auto; border-radius: 8px;" />${credit}
 </div>\n`;
     setContent((prev) => prev + imageHtml);
     toast.success("Image inserted into content");
@@ -232,7 +232,7 @@ export default function NewNewsletterPage() {
               </label>
               <button
                 type="button"
-                onClick={() => setShowUnsplashPicker(true)}
+                onClick={() => setShowImagePicker(true)}
                 className="px-3 py-1.5 text-xs bg-terminal-bg-elevated border border-terminal-border rounded-md hover:bg-terminal-bg flex items-center gap-2"
               >
                 <ImageIcon className="h-3 w-3" />
@@ -343,10 +343,10 @@ export default function NewNewsletterPage() {
         </div>
       </div>
 
-      {/* Unsplash Image Picker Modal */}
-      <UnsplashImagePicker
-        isOpen={showUnsplashPicker}
-        onClose={() => setShowUnsplashPicker(false)}
+      {/* Image Picker Modal */}
+      <ImagePicker
+        isOpen={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
         onSelect={handleInsertImage}
         defaultQuery={subject ? subject.split(" ").slice(0, 2).join(" ") : ""}
       />

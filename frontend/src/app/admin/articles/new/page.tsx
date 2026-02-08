@@ -34,7 +34,7 @@ import {
 import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
-import { UnsplashImagePicker } from "@/components/editor/UnsplashImagePicker";
+import { ImagePicker } from "@/components/editor/ImagePicker";
 import { toast } from "sonner";
 import type { Category } from "@/types";
 
@@ -95,7 +95,7 @@ export default function NewArticlePage() {
   const [featured, setFeatured] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [showUnsplashPicker, setShowUnsplashPicker] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const [imageCredit, setImageCredit] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -905,14 +905,14 @@ Start writing your article..."
               <div className="border-2 border-dashed border-terminal-border rounded-md p-6 text-center">
                 <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground mb-2">
-                  Search Unsplash or paste URL
+                  Select from library, Unsplash, or upload
                 </p>
                 <button
                   type="button"
-                  onClick={() => setShowUnsplashPicker(true)}
+                  onClick={() => setShowImagePicker(true)}
                   className="px-3 py-1 text-sm bg-primary text-white rounded hover:bg-primary/90"
                 >
-                  Search Unsplash
+                  Choose Image
                 </button>
               </div>
             )}
@@ -934,22 +934,22 @@ Start writing your article..."
             {!featuredImage && (
               <button
                 type="button"
-                onClick={() => setShowUnsplashPicker(true)}
+                onClick={() => setShowImagePicker(true)}
                 className="w-full mt-2 px-3 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated text-sm flex items-center justify-center gap-2"
               >
                 <ImageIcon className="h-4 w-4" />
-                Search Unsplash
+                Browse Images
               </button>
             )}
           </div>
 
-          {/* Unsplash Picker Modal */}
-          <UnsplashImagePicker
-            isOpen={showUnsplashPicker}
-            onClose={() => setShowUnsplashPicker(false)}
+          {/* Image Picker Modal */}
+          <ImagePicker
+            isOpen={showImagePicker}
+            onClose={() => setShowImagePicker(false)}
             onSelect={(image) => {
               setFeaturedImage(image.url);
-              setImageCredit(image.photographer);
+              setImageCredit(image.photographer || "");
             }}
             defaultQuery={title ? title.split(" ").slice(0, 2).join(" ") : ""}
           />
