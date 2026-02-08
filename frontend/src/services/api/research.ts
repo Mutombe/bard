@@ -13,7 +13,9 @@ export interface Topic {
   icon?: string;
   color?: string;
   is_featured?: boolean;
+  is_active?: boolean;
   article_count?: number;
+  order?: number;
 }
 
 export interface Industry {
@@ -24,7 +26,10 @@ export interface Industry {
   icon?: string;
   color?: string;
   is_featured?: boolean;
+  is_active?: boolean;
   cover_image?: string;
+  article_count?: number;
+  order?: number;
 }
 
 export interface ResearchAuthor {
