@@ -20,6 +20,10 @@ const nextConfig = {
         hostname: '**.amazonaws.com',
       },
       {
+        protocol: 'https',
+        hostname: '**.digitaloceanspaces.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },

@@ -103,4 +103,35 @@ export const authService = {
     const response = await publicClient.post<LoginResponse>("/auth/google/", { credential });
     return response.data;
   },
+
+  /**
+   * Upload user avatar
+   */
+  async uploadAvatar(file: File): Promise<{ avatar: string }> {
+    const formData = new FormData();
+    formData.append("avatar", file);
+    const response = await apiClient.post<{ avatar: string }>("/users/me/avatar/", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+
+  /**
+   * Update user profile
+   */
+  async updateProfile(data: {
+    first_name?: string;
+    last_name?: string;
+    bio?: string;
+    company?: string;
+    job_title?: string;
+    phone?: string;
+    country?: string;
+    timezone?: string;
+  }): Promise<User> {
+    const response = await apiClient.patch<User>("/users/me/", data);
+    return response.data;
+  },
 };

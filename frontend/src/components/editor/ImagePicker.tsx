@@ -30,8 +30,9 @@ type TabType = "library" | "unsplash" | "upload";
 interface ImagePickerProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelect: (image: { url: string; photographer?: string; alt?: string }) => void;
+  onSelect: (image: { url: string; photographer?: string; alt?: string; file?: File }) => void;
   defaultQuery?: string;
+  uploadOnly?: boolean;
 }
 
 export function ImagePicker({
@@ -39,8 +40,9 @@ export function ImagePicker({
   onClose,
   onSelect,
   defaultQuery = "",
+  uploadOnly = false,
 }: ImagePickerProps) {
-  const [activeTab, setActiveTab] = useState<TabType>("library");
+  const [activeTab, setActiveTab] = useState<TabType>(uploadOnly ? "upload" : "library");
 
   // Library state
   const [libraryImages, setLibraryImages] = useState<MediaFile[]>([]);
@@ -164,6 +166,18 @@ export function ImagePicker({
       setLibraryImages((prev) => [...newFiles, ...prev]);
       toast.success(`Uploaded ${newFiles.length} image${newFiles.length > 1 ? "s" : ""}`);
 
+      // In uploadOnly mode, directly call onSelect with the file
+      if (uploadOnly && newFiles[0]) {
+        const uploadedFile = files[0];
+        onSelect({
+          url: newFiles[0].url,
+          alt: newFiles[0].alt_text || newFiles[0].name,
+          file: uploadedFile,
+        });
+        onClose();
+        return;
+      }
+
       // Auto-select the first uploaded image
       if (newFiles[0]) {
         setSelectedImage({ type: "library", data: newFiles[0] });
@@ -214,7 +228,7 @@ export function ImagePicker({
         <div className="flex items-center justify-between p-4 border-b border-terminal-border">
           <div className="flex items-center gap-2">
             <ImageIcon className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Select Image</h2>
+            <h2 className="text-lg font-semibold">{uploadOnly ? "Upload Profile Picture" : "Select Image"}</h2>
           </div>
           <button
             onClick={onClose}
@@ -225,44 +239,46 @@ export function ImagePicker({
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-terminal-border">
-          <button
-            onClick={() => setActiveTab("library")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
-              activeTab === "library"
-                ? "text-primary border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <FolderOpen className="h-4 w-4" />
-            Media Library
-          </button>
-          <button
-            onClick={() => setActiveTab("unsplash")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
-              activeTab === "unsplash"
-                ? "text-primary border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Camera className="h-4 w-4" />
-            Unsplash
-          </button>
-          <button
-            onClick={() => setActiveTab("upload")}
-            className={cn(
-              "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
-              activeTab === "upload"
-                ? "text-primary border-b-2 border-primary"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Upload className="h-4 w-4" />
-            Upload
-          </button>
-        </div>
+        {!uploadOnly && (
+          <div className="flex border-b border-terminal-border">
+            <button
+              onClick={() => setActiveTab("library")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+                activeTab === "library"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <FolderOpen className="h-4 w-4" />
+              Media Library
+            </button>
+            <button
+              onClick={() => setActiveTab("unsplash")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+                activeTab === "unsplash"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Camera className="h-4 w-4" />
+              Unsplash
+            </button>
+            <button
+              onClick={() => setActiveTab("upload")}
+              className={cn(
+                "flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors",
+                activeTab === "upload"
+                  ? "text-primary border-b-2 border-primary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Upload className="h-4 w-4" />
+              Upload
+            </button>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
@@ -503,42 +519,53 @@ export function ImagePicker({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-terminal-border bg-terminal-bg-secondary">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {activeTab === "unsplash" && (
-              <>
-                <span>Powered by</span>
-                <a
-                  href="https://unsplash.com/?utm_source=bardiq&utm_medium=referral"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline flex items-center gap-1"
-                >
-                  Unsplash
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </>
-            )}
-            {activeTab === "library" && (
-              <span>{libraryImages.length} images in library</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
+        {uploadOnly ? (
+          <div className="flex items-center justify-end p-4 border-t border-terminal-border bg-terminal-bg-secondary">
             <button
               onClick={onClose}
               className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg text-sm"
             >
               Cancel
             </button>
-            <button
-              onClick={handleConfirm}
-              disabled={!selectedImage}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 text-sm disabled:opacity-50"
-            >
-              Use Selected Image
-            </button>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between p-4 border-t border-terminal-border bg-terminal-bg-secondary">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              {activeTab === "unsplash" && (
+                <>
+                  <span>Powered by</span>
+                  <a
+                    href="https://unsplash.com/?utm_source=bardiq&utm_medium=referral"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline flex items-center gap-1"
+                  >
+                    Unsplash
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </>
+              )}
+              {activeTab === "library" && (
+                <span>{libraryImages.length} images in library</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={onClose}
+                className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                disabled={!selectedImage}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 text-sm disabled:opacity-50"
+              >
+                Use Selected Image
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

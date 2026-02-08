@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   User,
   Mail,
@@ -14,16 +15,47 @@ import {
   Bell,
   CreditCard,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useAppSelector } from "@/store";
+import { useAppSelector, useAppDispatch } from "@/store";
 import { useAuthModal } from "@/contexts/AuthModalContext";
+import { ImagePicker } from "@/components/editor/ImagePicker";
+import { authService } from "@/services/api/auth";
+import { setUser } from "@/store/slices/authSlice";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
+  const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const { openLogin } = useAuthModal();
   const [isEditing, setIsEditing] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAvatarSelect = async (image: { url: string; file?: File }) => {
+    if (!image.file) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setShowImagePicker(false);
+
+    try {
+      const result = await authService.uploadAvatar(image.file);
+      // Refresh user data
+      const updatedUser = await authService.getCurrentUser();
+      dispatch(setUser(updatedUser));
+      toast.success("Profile picture updated!");
+    } catch (error: any) {
+      console.error("Failed to upload avatar:", error);
+      toast.error(error.response?.data?.error || "Failed to upload avatar");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -65,13 +97,31 @@ export default function ProfilePage() {
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
               <div className="flex items-start gap-6">
                 <div className="relative">
-                  <div className="h-24 w-24 rounded-full bg-brand-orange/20 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-brand-orange">
-                      {user?.first_name?.[0]}{user?.last_name?.[0]}
-                    </span>
-                  </div>
-                  <button className="absolute bottom-0 right-0 p-2 bg-brand-orange rounded-full text-white hover:bg-brand-orange-dark">
-                    <Camera className="h-4 w-4" />
+                  {user?.profile?.avatar ? (
+                    <Image
+                      src={user.profile.avatar}
+                      alt={user.full_name || "Profile"}
+                      width={96}
+                      height={96}
+                      className="h-24 w-24 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-brand-orange/20 flex items-center justify-center">
+                      <span className="text-2xl font-bold text-brand-orange">
+                        {user?.first_name?.[0]}{user?.last_name?.[0]}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setShowImagePicker(true)}
+                    disabled={isUploadingAvatar}
+                    className="absolute bottom-0 right-0 p-2 bg-brand-orange rounded-full text-white hover:bg-brand-orange-dark disabled:opacity-50"
+                  >
+                    {isUploadingAvatar ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
                 <div className="flex-1">
@@ -279,6 +329,15 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Image Picker Modal */}
+      <ImagePicker
+        isOpen={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleAvatarSelect}
+        defaultQuery="professional portrait"
+        uploadOnly
+      />
     </MainLayout>
   );
 }
