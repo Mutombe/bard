@@ -140,6 +140,41 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response({"preferences": profile.preferences})
 
+    @action(detail=False, methods=["post"], url_path="me/avatar")
+    def upload_avatar(self, request):
+        """Upload a new avatar image."""
+        if "avatar" not in request.FILES:
+            return Response(
+                {"error": "No avatar file provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        avatar_file = request.FILES["avatar"]
+
+        # Validate file type
+        allowed_types = ["image/jpeg", "image/png", "image/gif", "image/webp"]
+        if avatar_file.content_type not in allowed_types:
+            return Response(
+                {"error": "Invalid file type. Allowed: JPG, PNG, GIF, WebP"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Validate file size (max 5MB)
+        max_size = 5 * 1024 * 1024
+        if avatar_file.size > max_size:
+            return Response(
+                {"error": "File too large. Maximum size is 5MB"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        profile = request.user.profile
+        profile.avatar = avatar_file
+        profile.save(update_fields=["avatar"])
+
+        # Return the URL of the uploaded avatar
+        avatar_url = profile.avatar.url if profile.avatar else None
+        return Response({"avatar": avatar_url})
+
     @action(detail=False, methods=["get"])
     def stats(self, request):
         """Get user statistics (admin only)."""
