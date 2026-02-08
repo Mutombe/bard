@@ -266,8 +266,12 @@ export default function TopicPage() {
     const fetchArticles = async () => {
       setLoading(true);
       try {
+        // Fetch articles filtered by topic (tag)
         const response = await apiClient.get("/news/articles/", {
-          params: { limit: 12 },
+          params: {
+            tag: slug, // Filter by topic slug as tag
+            page_size: 12,
+          },
         });
         setArticles(response.data.results || []);
       } catch (error) {

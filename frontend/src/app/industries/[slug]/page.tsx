@@ -194,14 +194,18 @@ export default function IndustryPage() {
   const industry = industryData[slug];
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug || !industry) return;
 
     const fetchArticles = async () => {
       setLoading(true);
       try {
         // Fetch articles matching industry categories
+        // Pass the first category as the main filter, backend will match
         const response = await apiClient.get("/news/articles/", {
-          params: { limit: 12 },
+          params: {
+            category: industry.categories[0], // Primary category filter
+            page_size: 12,
+          },
         });
         setArticles(response.data.results || []);
       } catch (error) {
@@ -212,7 +216,7 @@ export default function IndustryPage() {
     };
 
     fetchArticles();
-  }, [slug]);
+  }, [slug, industry]);
 
   if (!industry) {
     return (
