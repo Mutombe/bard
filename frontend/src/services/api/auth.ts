@@ -134,4 +134,40 @@ export const authService = {
     const response = await apiClient.patch<User>("/users/me/", data);
     return response.data;
   },
+
+  // =========================
+  // Author Following
+  // =========================
+
+  /**
+   * Get list of followed authors
+   */
+  async getFollowedAuthors(): Promise<Array<{ id: string; full_name: string; email: string; avatar: string | null }>> {
+    const response = await apiClient.get("/users/me/following/");
+    return response.data;
+  },
+
+  /**
+   * Check if following an author
+   */
+  async checkFollowing(authorId: string): Promise<{ is_following: boolean; author_id: string; author_name: string }> {
+    const response = await apiClient.get(`/users/me/following/${authorId}/`);
+    return response.data;
+  },
+
+  /**
+   * Follow an author
+   */
+  async followAuthor(authorId: string): Promise<{ is_following: boolean; message: string }> {
+    const response = await apiClient.post(`/users/me/follow/${authorId}/`);
+    return response.data;
+  },
+
+  /**
+   * Unfollow an author
+   */
+  async unfollowAuthor(authorId: string): Promise<{ is_following: boolean; message: string }> {
+    const response = await apiClient.delete(`/users/me/follow/${authorId}/`);
+    return response.data;
+  },
 };
