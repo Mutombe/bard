@@ -154,7 +154,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="min-h-screen bg-terminal-bg flex flex-col">
       {/* Top Bar - Secondary Navigation */}
       <div className="bg-terminal-bg border-b border-terminal-border">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-8 text-xs">
             <div className="flex items-center gap-4">
               <span className="text-muted-foreground">
@@ -188,7 +188,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Main Header */}
       <header className="sticky top-0 z-40 bg-terminal-bg border-b border-terminal-border">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center">
@@ -347,7 +347,7 @@ export function MainLayout({ children }: MainLayoutProps) {
 
       {/* Footer */}
       <footer className="border-t border-terminal-border bg-terminal-bg-secondary">
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
             {/* Brand */}
             <div className="col-span-2">
