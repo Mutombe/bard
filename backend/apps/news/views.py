@@ -63,31 +63,37 @@ class NewsArticleFilter(filters.FilterSet):
         fields = ["category", "content_type", "is_featured", "is_premium"]
 
     def filter_by_author_name(self, queryset, name, value):
-        """Filter articles by author's full name (case-insensitive contains)."""
+        """Filter articles by author's name or email (case-insensitive)."""
         from django.db.models import Q
         # Split slug format (john-doe) into words for matching
         words = value.replace("-", " ").split()
+        slug_joined = value.replace("-", "")  # "adminbardiq" for email matching
+
+        # Build the query conditions
+        q_filter = Q()
 
         if len(words) >= 2:
             # For multi-word names, match first word to first_name AND last word to last_name
-            # Also try the reverse in case name order is different
             first_word = words[0]
             last_word = words[-1]
-            return queryset.filter(
-                Q(author__first_name__iexact=first_word, author__last_name__iexact=last_word) |
-                Q(author__first_name__iexact=last_word, author__last_name__iexact=first_word) |
-                Q(author__first_name__icontains=first_word, author__last_name__icontains=last_word) |
-                Q(author__first_name__icontains=last_word, author__last_name__icontains=first_word)
-            ).distinct()
+            q_filter |= Q(author__first_name__iexact=first_word, author__last_name__iexact=last_word)
+            q_filter |= Q(author__first_name__iexact=last_word, author__last_name__iexact=first_word)
+            q_filter |= Q(author__first_name__icontains=first_word, author__last_name__icontains=last_word)
+            q_filter |= Q(author__first_name__icontains=last_word, author__last_name__icontains=first_word)
         elif len(words) == 1:
             # Single word - search in either first_name or last_name
             word = words[0]
-            return queryset.filter(
-                Q(author__first_name__icontains=word) |
-                Q(author__last_name__icontains=word)
-            ).distinct()
+            q_filter |= Q(author__first_name__icontains=word)
+            q_filter |= Q(author__last_name__icontains=word)
 
-        return queryset.none()
+        # Email fallback - match email username (before @) with the slug
+        # e.g., "admin-bardiq" matches "adminbardiq@example.com" or "admin.bardiq@..."
+        q_filter |= Q(author__email__istartswith=slug_joined)
+        q_filter |= Q(author__email__istartswith=value)  # "admin-bardiq@..."
+        for word in words:
+            q_filter |= Q(author__email__istartswith=word)  # "admin@..." or "bardiq@..."
+
+        return queryset.filter(q_filter).distinct()
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
