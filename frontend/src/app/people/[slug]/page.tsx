@@ -222,9 +222,9 @@ export default function PersonPage() {
       setError(null);
 
       try {
-        // Try to fetch author's articles by searching
+        // Fetch author's articles using author_name filter (matches by slug format)
         const articlesResponse = await apiClient.get(
-          `/news/articles/?search=${slug.replace(/-/g, " ")}&limit=12`
+          `/news/articles/?author_name=${encodeURIComponent(slug)}&page_size=12`
         );
         const results = articlesResponse.data.results || [];
 

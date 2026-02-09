@@ -48,6 +48,7 @@ class NewsArticleFilter(filters.FilterSet):
     content_type = filters.CharFilter()
     company = filters.UUIDFilter(field_name="related_companies__id")
     author = filters.UUIDFilter(field_name="author__id")
+    author_name = filters.CharFilter(method="filter_by_author_name")
     is_featured = filters.BooleanFilter()
     is_premium = filters.BooleanFilter()
     published_after = filters.DateTimeFilter(
@@ -60,6 +61,18 @@ class NewsArticleFilter(filters.FilterSet):
     class Meta:
         model = NewsArticle
         fields = ["category", "content_type", "is_featured", "is_premium"]
+
+    def filter_by_author_name(self, queryset, name, value):
+        """Filter articles by author's full name (case-insensitive contains)."""
+        from django.db.models import Q
+        # Convert slug format (john-doe) to name format for matching
+        name_from_slug = value.replace("-", " ")
+        return queryset.filter(
+            Q(author__first_name__icontains=name_from_slug) |
+            Q(author__last_name__icontains=name_from_slug) |
+            Q(author__first_name__icontains=value) |
+            Q(author__last_name__icontains=value)
+        ).distinct()
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):

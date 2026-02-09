@@ -16,8 +16,21 @@ export interface StoredAuth {
     role: string;
     subscription_tier: string;
     is_active: boolean;
+    is_staff?: boolean;
+    is_superuser?: boolean;
     email_verified?: boolean;
     date_joined?: string;
+    profile?: {
+      avatar: string | null;
+      bio?: string;
+      company?: string;
+      job_title?: string;
+      phone?: string;
+      country?: string;
+      timezone?: string;
+      preferences?: any;
+      watchlist?: any[];
+    };
   };
   tokens: {
     access: string;
