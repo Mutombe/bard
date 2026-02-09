@@ -79,6 +79,8 @@ export const newsService = {
     tag?: string;
     content_type?: string;
     company?: string;
+    author?: string;
+    author_name?: string;
     is_featured?: boolean;
     is_premium?: boolean;
     cursor?: string;

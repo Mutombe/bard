@@ -25,6 +25,7 @@ import { useAuthModal } from "@/contexts/AuthModalContext";
 import { ImagePicker } from "@/components/editor/ImagePicker";
 import { authService } from "@/services/api/auth";
 import { setUser } from "@/store/slices/authSlice";
+import { saveAuthToStorage, getAuthFromStorage } from "@/components/providers/AuthInitializer";
 import { toast } from "sonner";
 
 export default function ProfilePage() {
@@ -49,6 +50,16 @@ export default function ProfilePage() {
       // Refresh user data
       const updatedUser = await authService.getCurrentUser();
       dispatch(setUser(updatedUser));
+
+      // Also update localStorage to persist avatar
+      const storedAuth = getAuthFromStorage();
+      if (storedAuth) {
+        saveAuthToStorage({
+          ...storedAuth,
+          user: updatedUser as any,
+        });
+      }
+
       toast.success("Profile picture updated!");
     } catch (error: any) {
       console.error("Failed to upload avatar:", error);
