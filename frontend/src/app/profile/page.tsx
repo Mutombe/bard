@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { ImagePicker } from "@/components/editor/ImagePicker";
@@ -97,21 +98,12 @@ export default function ProfilePage() {
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
               <div className="flex items-start gap-6">
                 <div className="relative">
-                  {user?.profile?.avatar ? (
-                    <Image
-                      src={user.profile.avatar}
-                      alt={user.full_name || "Profile"}
-                      width={96}
-                      height={96}
-                      className="h-24 w-24 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-24 w-24 rounded-full bg-brand-orange/20 flex items-center justify-center">
-                      <span className="text-2xl font-bold text-brand-orange">
-                        {user?.first_name?.[0]}{user?.last_name?.[0]}
-                      </span>
-                    </div>
-                  )}
+                  <UserAvatar
+                    src={user?.profile?.avatar}
+                    name={user?.full_name}
+                    identifier={user?.id}
+                    size="2xl"
+                  />
                   <button
                     onClick={() => setShowImagePicker(true)}
                     disabled={isUploadingAvatar}
