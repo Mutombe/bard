@@ -143,6 +143,7 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     queryset = NewsArticle.objects.select_related(
         "category",
         "author",
+        "author__profile",  # Needed to access author's avatar in profile
         "editor",
     ).prefetch_related(
         "tags",
@@ -369,7 +370,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     - POST /comments/{id}/like/ - Like/unlike a comment
     """
 
-    queryset = Comment.objects.select_related("author", "parent").prefetch_related("replies", "likes")
+    queryset = Comment.objects.select_related("author", "author__profile", "parent").prefetch_related("replies", "likes")
     serializer_class = CommentSerializer
     permission_classes = [AllowAny]
 
