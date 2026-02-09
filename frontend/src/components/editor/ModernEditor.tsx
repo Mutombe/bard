@@ -50,7 +50,11 @@ import {
   Columns,
   RowsIcon,
   X,
+  Upload,
+  FileUp,
+  Loader2,
 } from "lucide-react";
+import mammoth from "mammoth";
 import { cn } from "@/lib/utils";
 
 interface ModernEditorProps {
@@ -173,9 +177,12 @@ export function ModernEditor({
 }: ModernEditorProps) {
   const [showLinkPopup, setShowLinkPopup] = useState(false);
   const [showImagePopup, setShowImagePopup] = useState(false);
+  const [showDocumentPopup, setShowDocumentPopup] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isImportingDocument, setIsImportingDocument] = useState(false);
 
   const editor = useEditor({
     extensions: [
@@ -314,6 +321,66 @@ export function ModernEditor({
       editor?.chain().focus().setImage({ src: imageUrl }).run();
       setImageUrl("");
       setShowImagePopup(false);
+    }
+  };
+
+  // Handle document import (Word/DOCX)
+  const handleDocumentImport = async (file: File) => {
+    setIsImportingDocument(true);
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+
+      if (file.name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        // Parse Word document using mammoth
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        if (result.value) {
+          // Insert the HTML content at the current cursor position
+          editor?.chain().focus().insertContent(result.value).run();
+        }
+        if (result.messages.length > 0) {
+          console.log('Mammoth conversion messages:', result.messages);
+        }
+      } else if (file.name.endsWith('.txt') || file.type === 'text/plain') {
+        // Handle plain text files
+        const text = await file.text();
+        const paragraphs = text.split('\n\n').filter(p => p.trim());
+        const html = paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+        editor?.chain().focus().insertContent(html).run();
+      } else if (file.name.endsWith('.html') || file.name.endsWith('.htm') || file.type === 'text/html') {
+        // Handle HTML files
+        const html = await file.text();
+        // Extract body content if full HTML document
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+        const content = bodyMatch ? bodyMatch[1] : html;
+        editor?.chain().focus().insertContent(content).run();
+      } else if (file.name.endsWith('.md') || file.type === 'text/markdown') {
+        // Handle Markdown files - basic conversion
+        const text = await file.text();
+        // Convert basic markdown to HTML
+        let html = text
+          .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+          .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+          .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+          .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+          .replace(/\n\n/gim, '</p><p>')
+          .replace(/\n/gim, '<br>');
+        html = '<p>' + html + '</p>';
+        editor?.chain().focus().insertContent(html).run();
+      } else {
+        alert('Unsupported file type. Please use .docx, .txt, .html, or .md files.');
+        return;
+      }
+
+      setShowDocumentPopup(false);
+    } catch (error) {
+      console.error('Failed to import document:', error);
+      alert('Failed to import document. Please try again.');
+    } finally {
+      setIsImportingDocument(false);
+      if (documentInputRef.current) {
+        documentInputRef.current.value = '';
+      }
     }
   };
 
@@ -569,6 +636,75 @@ export function ModernEditor({
         >
           <TableIcon className="h-4 w-4" />
         </ToolbarButton>
+
+        <ToolbarDivider />
+
+        {/* Document Import */}
+        <div className="relative">
+          <ToolbarButton
+            onClick={() => setShowDocumentPopup(!showDocumentPopup)}
+            isActive={showDocumentPopup}
+            title="Import Document"
+          >
+            <FileUp className="h-4 w-4" />
+          </ToolbarButton>
+          {showDocumentPopup && (
+            <div className="absolute top-full left-0 mt-2 z-50 p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-xl w-80">
+              <div className="space-y-3">
+                <div>
+                  <h4 className="font-medium text-sm mb-1">Import Document</h4>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Import content from Word documents, text files, HTML, or Markdown files.
+                  </p>
+                </div>
+                <button
+                  onClick={() => documentInputRef.current?.click()}
+                  disabled={isImportingDocument}
+                  className="w-full py-3 border-2 border-dashed border-terminal-border rounded-lg text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors flex flex-col items-center gap-2"
+                >
+                  {isImportingDocument ? (
+                    <>
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span>Importing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-6 w-6" />
+                      <span>Choose file to import</span>
+                    </>
+                  )}
+                </button>
+                <input
+                  ref={documentInputRef}
+                  type="file"
+                  accept=".docx,.doc,.txt,.html,.htm,.md,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/html,text/markdown"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handleDocumentImport(file);
+                    }
+                  }}
+                />
+                <div className="text-xs text-muted-foreground">
+                  <p className="font-medium mb-1">Supported formats:</p>
+                  <ul className="list-disc list-inside space-y-0.5">
+                    <li>.docx - Microsoft Word</li>
+                    <li>.txt - Plain text</li>
+                    <li>.html - Web pages</li>
+                    <li>.md - Markdown</li>
+                  </ul>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowDocumentPopup(false)}
+                className="absolute top-2 right-2 p-1 hover:bg-terminal-bg-elevated rounded"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Word count */}
         <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground px-2">
