@@ -27,6 +27,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { CommentSection } from "@/components/news";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
@@ -608,14 +609,20 @@ export default function ArticlePage() {
 
               {/* Author & Meta - Journal style */}
               <div className="flex items-start justify-between flex-wrap gap-4 pb-6 border-b border-terminal-border">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-terminal-bg-elevated flex items-center justify-center">
-                    <span className="font-semibold text-primary text-lg">
-                      {(article.author?.full_name || "S").split(" ").map((n) => n[0]).join("").toUpperCase()}
-                    </span>
-                  </div>
+                <Link
+                  href={`/people/${article.author?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'staff'}`}
+                  className="flex items-center gap-4 group"
+                >
+                  <UserAvatar
+                    src={(article.author as any)?.avatar}
+                    name={article.author?.full_name || "Staff Writer"}
+                    identifier={article.author?.id?.toString()}
+                    size="lg"
+                  />
                   <div>
-                    <div className="font-semibold text-foreground">{article.author?.full_name || "Staff Writer"}</div>
+                    <div className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                      {article.author?.full_name || "Staff Writer"}
+                    </div>
                     <div className="text-sm text-muted-foreground">
                       {article.external_source_name ? (
                         <span>via {article.external_source_name}</span>
@@ -624,7 +631,7 @@ export default function ArticlePage() {
                       )}
                     </div>
                   </div>
-                </div>
+                </Link>
 
                 <div className="text-right">
                   <div className="text-sm text-muted-foreground">
@@ -790,21 +797,29 @@ export default function ArticlePage() {
             {/* Author Bio - Enhanced Card */}
             <section className="author-card">
               <h3 className="label-uppercase mb-4">About the Author</h3>
-              <div className="flex items-start gap-4 mb-4">
-                <div className="author-card-avatar flex-shrink-0">
-                  {(article.author?.full_name || "S").split(" ").map((n) => n[0]).join("").toUpperCase()}
-                </div>
+              <Link
+                href={`/people/${article.author?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'staff'}`}
+                className="flex items-start gap-4 mb-4 group"
+              >
+                <UserAvatar
+                  src={(article.author as any)?.avatar}
+                  name={article.author?.full_name || "Staff Writer"}
+                  identifier={article.author?.id?.toString()}
+                  size="xl"
+                />
                 <div>
-                  <div className="font-semibold text-lg">{article.author?.full_name || "Staff Writer"}</div>
+                  <div className="font-semibold text-lg group-hover:text-primary transition-colors">
+                    {article.author?.full_name || "Staff Writer"}
+                  </div>
                   <div className="text-sm text-primary">Senior Analyst</div>
                 </div>
-              </div>
+              </Link>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                 Covering African markets and economics with a focus on emerging market dynamics,
                 policy analysis, and institutional investment trends across the continent.
               </p>
               <Link
-                href={`/authors/${article.author?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'staff'}`}
+                href={`/people/${article.author?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'staff'}`}
                 className="text-sm text-primary hover:underline"
               >
                 View all articles by this author →

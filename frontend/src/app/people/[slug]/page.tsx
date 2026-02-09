@@ -1,9 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  ArrowLeft,
   Briefcase,
   Building2,
   MapPin,
@@ -14,10 +16,15 @@ import {
   ChevronRight,
   TrendingUp,
   FileText,
+  Clock,
+  Loader2,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { Skeleton } from "@/components/ui/loading";
+import apiClient from "@/services/api/client";
 
 interface Person {
   slug: string;
@@ -143,12 +150,257 @@ const peopleData: Record<string, Person> = {
   },
 };
 
+// API Author type
+interface ApiAuthor {
+  id: number;
+  full_name: string;
+  avatar?: string | null;
+  bio?: string;
+  title?: string;
+}
+
+interface ApiArticle {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  featured_image?: string;
+  category?: { name: string; slug: string };
+  published_at?: string;
+  read_time_minutes?: number;
+}
+
+function formatDate(dateString?: string): string {
+  if (!dateString) return "";
+  return new Date(dateString).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function AuthorSkeleton() {
+  return (
+    <div className="animate-pulse max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <Skeleton className="h-4 w-48 mb-6" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+            <div className="flex gap-6">
+              <Skeleton className="h-32 w-32 rounded-lg" />
+              <div className="flex-1">
+                <Skeleton className="h-8 w-48 mb-2" />
+                <Skeleton className="h-5 w-32 mb-4" />
+                <Skeleton className="h-4 w-full max-w-md mb-2" />
+                <Skeleton className="h-4 w-3/4 max-w-sm" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PersonPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const person = peopleData[slug];
+  const staticPerson = peopleData[slug];
 
-  if (!person) {
+  // State for API-fetched author data
+  const [apiAuthor, setApiAuthor] = useState<ApiAuthor | null>(null);
+  const [apiArticles, setApiArticles] = useState<ApiArticle[]>([]);
+  const [loading, setLoading] = useState(!staticPerson);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch author data from API if not found in static data
+  useEffect(() => {
+    if (staticPerson) return; // Skip if we have static data
+
+    const fetchAuthorData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Try to fetch author's articles by searching
+        const articlesResponse = await apiClient.get(
+          `/news/articles/?search=${slug.replace(/-/g, " ")}&limit=12`
+        );
+        const results = articlesResponse.data.results || [];
+
+        if (results.length > 0) {
+          const firstAuthor = results[0]?.author;
+          if (firstAuthor) {
+            setApiAuthor({
+              id: firstAuthor.id,
+              full_name: firstAuthor.full_name || slug.replace(/-/g, " "),
+              avatar: firstAuthor.avatar,
+              bio: firstAuthor.bio,
+              title: firstAuthor.title,
+            });
+          } else {
+            setApiAuthor({
+              id: 0,
+              full_name: slug
+                .split("-")
+                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(" "),
+            });
+          }
+          setApiArticles(results);
+        } else {
+          setApiAuthor({
+            id: 0,
+            full_name: slug
+              .split("-")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" "),
+          });
+          setApiArticles([]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch author data:", err);
+        setError("Author not found");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuthorData();
+  }, [slug, staticPerson]);
+
+  // Show loading state for API fetch
+  if (loading && !staticPerson) {
+    return (
+      <MainLayout>
+        <AuthorSkeleton />
+      </MainLayout>
+    );
+  }
+
+  // If we have static data, render that
+  const person = staticPerson;
+
+  // If no static person and we have API data, render author page
+  if (!person && apiAuthor) {
+    return (
+      <MainLayout>
+        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+          {/* Back link */}
+          <Link
+            href="/news"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 text-sm"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to News
+          </Link>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Profile */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Header Card */}
+              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <UserAvatar
+                    src={apiAuthor.avatar}
+                    name={apiAuthor.full_name}
+                    identifier={apiAuthor.id.toString()}
+                    size="2xl"
+                    className="h-32 w-32 text-3xl"
+                    showRing
+                  />
+                  <div className="flex-1">
+                    <h1 className="text-2xl font-bold mb-1">{apiAuthor.full_name}</h1>
+                    {apiAuthor.title && (
+                      <p className="text-brand-orange mb-2">{apiAuthor.title}</p>
+                    )}
+                    {apiAuthor.bio && (
+                      <p className="text-muted-foreground leading-relaxed">{apiAuthor.bio}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4" />
+                      <span>{apiArticles.length} articles</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Articles by this author */}
+              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+                <h2 className="font-semibold mb-4 flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-brand-orange" />
+                  Articles by {apiAuthor.full_name}
+                </h2>
+                {apiArticles.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    No articles found for this author.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {apiArticles.map((article) => (
+                      <Link
+                        key={article.id}
+                        href={`/news/${article.slug}`}
+                        className="group flex gap-4 p-3 rounded-lg bg-terminal-bg-elevated hover:bg-terminal-bg transition-colors"
+                      >
+                        {article.featured_image ? (
+                          <div className="relative w-24 h-20 rounded overflow-hidden flex-shrink-0">
+                            <Image
+                              src={article.featured_image}
+                              alt={article.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-300"
+                              unoptimized
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-24 h-20 rounded bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0">
+                            <FileText className="h-6 w-6 text-muted-foreground" />
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          {article.category && (
+                            <span className="text-xs font-medium text-primary uppercase">
+                              {article.category.name}
+                            </span>
+                          )}
+                          <h3 className="font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                            {article.title}
+                          </h3>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                            <span>{formatDate(article.published_at)}</span>
+                            {article.read_time_minutes && (
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {article.read_time_minutes} min
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
+                <h3 className="font-semibold mb-3">Follow</h3>
+                <p className="text-sm text-muted-foreground">
+                  Stay updated with the latest articles from this author.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  // No data found
+  if (!person && !apiAuthor) {
     return (
       <MainLayout>
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12 text-center">
@@ -182,14 +434,14 @@ export default function PersonPage() {
             {/* Header Card */}
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
               <div className="flex flex-col sm:flex-row gap-6">
-                <div className="relative h-32 w-32 rounded-lg overflow-hidden flex-shrink-0">
-                  <Image
-                    src={person.image}
-                    alt={person.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+                <UserAvatar
+                  src={person.image}
+                  name={person.name}
+                  identifier={person.slug}
+                  size="2xl"
+                  className="h-32 w-32 rounded-lg text-3xl"
+                  showRing
+                />
                 <div className="flex-1">
                   <h1 className="text-2xl font-bold mb-1">{person.name}</h1>
                   <p className="text-brand-orange mb-2">{person.title}</p>

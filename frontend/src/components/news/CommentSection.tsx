@@ -14,7 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -153,13 +153,12 @@ export function CommentSection({ articleId, className }: CommentSectionProps) {
       {/* New Comment Form - Always show textarea */}
       <form onSubmit={handleSubmitComment} className="mb-8">
         <div className="flex gap-3">
-          <Avatar className="h-10 w-10 flex-shrink-0">
-            <AvatarFallback>
-              {isAuthenticated && user?.full_name
-                ? user.full_name.split(" ").map((n: string) => n[0]).join("")
-                : "?"}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={user?.profile?.avatar}
+            name={isAuthenticated ? user?.full_name : undefined}
+            identifier={user?.id}
+            size="md"
+          />
           <div className="flex-1">
             <Textarea
               value={newComment}
@@ -384,11 +383,12 @@ function CommentItem({
       className={cn(isReply && "ml-12 pl-4 border-l-2 border-border")}
     >
       <div className="flex gap-3">
-        <Avatar className={cn("flex-shrink-0", isReply ? "h-8 w-8" : "h-10 w-10")}>
-          <AvatarFallback className={isReply ? "text-xs" : "text-sm"}>
-            {comment.author.full_name?.split(" ").map((n: string) => n[0]).join("") || "U"}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          src={comment.author.avatar}
+          name={comment.author.full_name}
+          identifier={comment.author.id?.toString()}
+          size={isReply ? "sm" : "md"}
+        />
 
         <div className="flex-1 min-w-0">
           {/* Header */}

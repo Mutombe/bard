@@ -27,6 +27,7 @@ import {
   Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { logout } from "@/store/slices/authSlice";
 import { useAuthModal } from "@/contexts/AuthModalContext";
@@ -195,11 +196,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-terminal-border">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-primary font-medium">
-                  {user?.first_name?.[0]}{user?.last_name?.[0]}
-                </span>
-              </div>
+              <UserAvatar
+                src={user?.profile?.avatar}
+                name={user?.full_name}
+                identifier={user?.id}
+                size="md"
+              />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">{user?.full_name}</div>
                 <div className="text-xs text-muted-foreground truncate">{user?.role}</div>
@@ -212,6 +214,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </button>
             </div>
           ) : (
+            <UserAvatar
+              src={user?.profile?.avatar}
+              name={user?.full_name}
+              identifier={user?.id}
+              size="sm"
+              className="mx-auto mb-2"
+            />
+          )}
+          {sidebarCollapsed && (
             <button
               onClick={handleLogout}
               className="w-full flex justify-center p-2 text-muted-foreground hover:text-foreground"
