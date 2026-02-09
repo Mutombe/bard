@@ -614,7 +614,7 @@ export default function ArticlePage() {
                   className="flex items-center gap-4 group"
                 >
                   <UserAvatar
-                    src={(article.author as any)?.avatar}
+                    src={(article.author as any)?.avatar || (article.author as any)?.profile?.avatar}
                     name={article.author?.full_name || "Staff Writer"}
                     identifier={article.author?.id?.toString()}
                     size="lg"
@@ -802,7 +802,7 @@ export default function ArticlePage() {
                 className="flex items-start gap-4 mb-4 group"
               >
                 <UserAvatar
-                  src={(article.author as any)?.avatar}
+                  src={(article.author as any)?.avatar || (article.author as any)?.profile?.avatar}
                   name={article.author?.full_name || "Staff Writer"}
                   identifier={article.author?.id?.toString()}
                   size="xl"
