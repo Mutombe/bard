@@ -141,6 +141,151 @@ const regions = [
 ];
 
 // Skeleton Components
+
+// Hero Section Skeleton - matches the actual 12-column grid layout
+function HeroSectionSkeleton() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-pulse">
+      {/* Main Featured Article - 7 columns */}
+      <div className="lg:col-span-7">
+        <Skeleton className="aspect-[21/9] mb-6" />
+        <div className="max-w-4xl">
+          <div className="flex items-center gap-3 mb-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-20" />
+          </div>
+          <Skeleton className="h-12 w-full mb-3" />
+          <Skeleton className="h-12 w-4/5 mb-4" />
+          <Skeleton className="h-5 w-full mb-2" />
+          <Skeleton className="h-5 w-3/4 mb-4" />
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-4 w-28" />
+          </div>
+        </div>
+      </div>
+      {/* Side Articles - 5 columns */}
+      <div className="lg:col-span-5 flex flex-col gap-4">
+        <Skeleton className="h-4 w-24" />
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="flex bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
+            <Skeleton className="w-28 h-[88px] flex-shrink-0" />
+            <div className="flex-1 min-w-0 p-3">
+              <Skeleton className="h-3 w-16 mb-2" />
+              <Skeleton className="h-5 w-full mb-1" />
+              <Skeleton className="h-4 w-3/4 mb-2" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Main Content Grid Skeleton - 2x2 overlay cards + regular cards
+function MainContentSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
+      {/* First two as overlay card skeletons */}
+      {[...Array(2)].map((_, i) => (
+        <div key={i} className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
+          <Skeleton className="aspect-[16/10]" />
+          <div className="p-4">
+            <Skeleton className="h-4 w-full mb-2" />
+            <Skeleton className="h-4 w-3/4 mb-3" />
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+        </div>
+      ))}
+      {/* Next two as regular card skeletons */}
+      {[...Array(2)].map((_, i) => (
+        <div key={i + 2}>
+          <Skeleton className="aspect-[16/10] mb-4" />
+          <Skeleton className="h-3 w-20 mb-2" />
+          <Skeleton className="h-6 w-full mb-2" />
+          <Skeleton className="h-4 w-full mb-2" />
+          <Skeleton className="h-4 w-3/4 mb-3" />
+          <Skeleton className="h-3 w-32" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Sidebar Skeleton - Market summary + Most read
+function SidebarSkeleton() {
+  return (
+    <div className="animate-pulse">
+      {/* Market Summary */}
+      <div className="p-5 bg-terminal-bg-secondary border border-terminal-border mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <div className="space-y-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-3 w-24 hidden sm:block" />
+              </div>
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Most Read */}
+      <div>
+        <Skeleton className="h-4 w-20 mb-4" />
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex mb-3 bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
+            <Skeleton className="w-24 h-20 flex-shrink-0" />
+            <div className="flex-1 p-3">
+              <Skeleton className="h-3 w-16 mb-2" />
+              <Skeleton className="h-5 w-full mb-1" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Extended Feed Loading Skeleton
+function ExtendedFeedSkeleton() {
+  return (
+    <section className="py-12 animate-pulse">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+        <Skeleton className="h-8 w-40 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
+              <Skeleton className="aspect-[16/10]" />
+              <div className="p-4">
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-3" />
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Legacy skeletons for backwards compatibility
 function FeaturedInsightSkeleton() {
   return (
     <div className="animate-pulse">
@@ -1165,7 +1310,7 @@ export default function HomePage() {
         <section className="py-8 md:py-12">
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">
             {loading ? (
-              <FeaturedInsightSkeleton />
+              <HeroSectionSkeleton />
             ) : featuredArticle ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Main Featured Article */}
@@ -1237,11 +1382,7 @@ export default function HomePage() {
                 </div>
 
                 {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[...Array(4)].map((_, i) => (
-                      <InsightCardSkeleton key={i} />
-                    ))}
-                  </div>
+                  <MainContentSkeleton />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* First two as large overlay cards */}
@@ -1258,32 +1399,30 @@ export default function HomePage() {
 
               {/* Sidebar */}
               <aside className="lg:col-span-4">
-                {/* Market Summary */}
-                {!indicesLoading && marketIndices.length > 0 && (
-                  <div className="mb-8">
-                    <MarketSummaryWidget indices={marketIndices} />
-                  </div>
-                )}
+                {loading ? (
+                  <SidebarSkeleton />
+                ) : (
+                  <>
+                    {/* Market Summary */}
+                    {marketIndices.length > 0 && (
+                      <div className="mb-8">
+                        <MarketSummaryWidget indices={marketIndices} />
+                      </div>
+                    )}
 
-                {/* Most Read */}
-                <div className="mb-8">
-                  <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-4">
-                    Most Read
-                  </h3>
-                  {loading ? (
-                    <div className="space-y-0">
-                      {[...Array(4)].map((_, i) => (
-                        <SidebarInsightSkeleton key={i} />
-                      ))}
+                    {/* Most Read */}
+                    <div className="mb-8">
+                      <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-4">
+                        Most Read
+                      </h3>
+                      <div>
+                        {sidebarInsights.map((article) => (
+                          <SidebarInsight key={article.id} article={article} />
+                        ))}
+                      </div>
                     </div>
-                  ) : (
-                    <div>
-                      {sidebarInsights.map((article) => (
-                        <SidebarInsight key={article.id} article={article} />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                  </>
+                )}
               </aside>
             </div>
           </div>
@@ -1307,15 +1446,7 @@ export default function HomePage() {
 
         {/* Show loading indicator or content */}
         {loadingMore && !hasLoadedMore && (
-          <section className="py-12">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <InsightCardSkeleton key={i} />
-                ))}
-              </div>
-            </div>
-          </section>
+          <ExtendedFeedSkeleton />
         )}
 
         {/* Extended sections - only render when data is loaded */}
