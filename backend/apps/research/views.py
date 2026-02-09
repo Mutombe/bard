@@ -33,6 +33,7 @@ class TopicViewSet(viewsets.ModelViewSet):
     queryset = Topic.objects.filter(is_active=True)
     serializer_class = TopicSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Topics are typically a small list
     lookup_field = "slug"
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["name", "description"]
@@ -69,6 +70,7 @@ class IndustryViewSet(viewsets.ModelViewSet):
     queryset = Industry.objects.filter(is_active=True)
     serializer_class = IndustrySerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = None  # Industries are typically a small list
     lookup_field = "slug"
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["name", "description"]

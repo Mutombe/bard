@@ -79,12 +79,16 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
         ]
 
     def get_author(self, obj):
-        """Return author data with full_name."""
+        """Return author data with full_name and avatar."""
         if obj.author:
+            avatar_url = None
+            if hasattr(obj.author, 'profile') and obj.author.profile and obj.author.profile.avatar:
+                avatar_url = obj.author.profile.avatar.url
             return {
                 "id": str(obj.author.id),
                 "email": obj.author.email,
                 "full_name": obj.author.full_name or obj.author.email,
+                "avatar": avatar_url,
             }
         return None
 
@@ -371,6 +375,13 @@ class CommentAuthorSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     full_name = serializers.CharField()
     email = serializers.EmailField()
+    avatar = serializers.SerializerMethodField()
+
+    def get_avatar(self, obj):
+        """Get the user's avatar URL."""
+        if hasattr(obj, 'profile') and obj.profile and obj.profile.avatar:
+            return obj.profile.avatar.url
+        return None
 
 
 class CommentSerializer(serializers.ModelSerializer):
