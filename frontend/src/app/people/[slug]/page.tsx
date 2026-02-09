@@ -18,12 +18,19 @@ import {
   FileText,
   Clock,
   Loader2,
+  UserPlus,
+  UserCheck,
+  Bell,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { Skeleton } from "@/components/ui/loading";
+import { useAppSelector } from "@/store";
+import { useAuthModal } from "@/contexts/AuthModalContext";
+import { authService } from "@/services/api/auth";
+import { toast } from "sonner";
 import apiClient from "@/services/api/client";
 
 interface Person {
@@ -206,12 +213,19 @@ export default function PersonPage() {
   const params = useParams();
   const slug = params.slug as string;
   const staticPerson = peopleData[slug];
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { openLogin } = useAuthModal();
 
   // State for API-fetched author data
   const [apiAuthor, setApiAuthor] = useState<ApiAuthor | null>(null);
   const [apiArticles, setApiArticles] = useState<ApiArticle[]>([]);
   const [loading, setLoading] = useState(!staticPerson);
   const [error, setError] = useState<string | null>(null);
+
+  // Follow state
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
+  const [checkingFollow, setCheckingFollow] = useState(false);
 
   // Fetch author data from API if not found in static data
   useEffect(() => {
@@ -268,6 +282,56 @@ export default function PersonPage() {
 
     fetchAuthorData();
   }, [slug, staticPerson]);
+
+  // Check if user is following this author
+  useEffect(() => {
+    if (!isAuthenticated || !apiAuthor?.id || apiAuthor.id === 0) return;
+
+    const checkFollowStatus = async () => {
+      setCheckingFollow(true);
+      try {
+        const result = await authService.checkFollowing(apiAuthor.id.toString());
+        setIsFollowing(result.is_following);
+      } catch (err) {
+        console.error("Failed to check follow status:", err);
+      } finally {
+        setCheckingFollow(false);
+      }
+    };
+
+    checkFollowStatus();
+  }, [isAuthenticated, apiAuthor?.id]);
+
+  // Handle follow/unfollow
+  const handleFollowToggle = async () => {
+    if (!isAuthenticated) {
+      openLogin();
+      return;
+    }
+
+    if (!apiAuthor?.id || apiAuthor.id === 0) {
+      toast.error("Cannot follow this author");
+      return;
+    }
+
+    setIsFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await authService.unfollowAuthor(apiAuthor.id.toString());
+        setIsFollowing(false);
+        toast.success(`Unfollowed ${apiAuthor.full_name}`);
+      } else {
+        await authService.followAuthor(apiAuthor.id.toString());
+        setIsFollowing(true);
+        toast.success(`Now following ${apiAuthor.full_name}`);
+      }
+    } catch (err) {
+      console.error("Failed to toggle follow:", err);
+      toast.error("Failed to update follow status");
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
 
   // Show loading state for API fetch
   if (loading && !staticPerson) {
@@ -387,10 +451,44 @@ export default function PersonPage() {
             {/* Sidebar */}
             <div className="space-y-6">
               <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-                <h3 className="font-semibold mb-3">Follow</h3>
-                <p className="text-sm text-muted-foreground">
+                <h3 className="font-semibold mb-3 flex items-center gap-2">
+                  <Bell className="h-4 w-4 text-brand-orange" />
+                  Follow Author
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
                   Stay updated with the latest articles from this author.
                 </p>
+                {apiAuthor?.id && apiAuthor.id !== 0 ? (
+                  <button
+                    onClick={handleFollowToggle}
+                    disabled={isFollowLoading || checkingFollow}
+                    className={cn(
+                      "w-full py-2.5 px-4 rounded-md font-medium transition-all flex items-center justify-center gap-2",
+                      isFollowing
+                        ? "bg-terminal-bg-elevated border border-terminal-border text-foreground hover:bg-terminal-bg hover:border-brand-orange"
+                        : "bg-brand-orange text-white hover:bg-brand-orange-dark",
+                      (isFollowLoading || checkingFollow) && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    {isFollowLoading || checkingFollow ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isFollowing ? (
+                      <>
+                        <UserCheck className="h-4 w-4" />
+                        Following
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="h-4 w-4" />
+                        Follow
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <p className="text-xs text-muted-foreground text-center">
+                    Follow feature not available for this author.
+                  </p>
+                )}
               </div>
             </div>
           </div>

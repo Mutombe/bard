@@ -140,6 +140,81 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response({"preferences": profile.preferences})
 
+    # =========================
+    # Author Following
+    # =========================
+
+    @action(detail=False, methods=["get"], url_path="me/following")
+    def following(self, request):
+        """Get the list of authors the user is following."""
+        profile = request.user.profile
+        followed_authors = profile.followed_authors.all()
+
+        authors_data = [
+            {
+                "id": str(author.id),
+                "full_name": author.full_name,
+                "email": author.email,
+                "avatar": author.profile.avatar.url if author.profile.avatar else None,
+            }
+            for author in followed_authors
+        ]
+        return Response(authors_data)
+
+    @action(detail=False, methods=["post"], url_path=r"me/follow/(?P<author_id>[^/.]+)")
+    def follow_author(self, request, author_id=None):
+        """Follow an author."""
+        profile = request.user.profile
+        author = get_object_or_404(User, id=author_id)
+
+        if author == request.user:
+            return Response(
+                {"error": "You cannot follow yourself"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if profile.is_following(author):
+            return Response(
+                {"is_following": True, "message": "Already following"},
+                status=status.HTTP_200_OK,
+            )
+
+        profile.follow_author(author)
+        return Response(
+            {"is_following": True, "message": f"Now following {author.full_name}"},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, methods=["delete"], url_path=r"me/follow/(?P<author_id>[^/.]+)")
+    def unfollow_author(self, request, author_id=None):
+        """Unfollow an author."""
+        profile = request.user.profile
+        author = get_object_or_404(User, id=author_id)
+
+        if not profile.is_following(author):
+            return Response(
+                {"is_following": False, "message": "Not following"},
+                status=status.HTTP_200_OK,
+            )
+
+        profile.unfollow_author(author)
+        return Response(
+            {"is_following": False, "message": f"Unfollowed {author.full_name}"},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=["get"], url_path=r"me/following/(?P<author_id>[^/.]+)")
+    def check_following(self, request, author_id=None):
+        """Check if the user is following an author."""
+        profile = request.user.profile
+        author = get_object_or_404(User, id=author_id)
+
+        return Response({
+            "is_following": profile.is_following(author),
+            "author_id": str(author.id),
+            "author_name": author.full_name,
+        })
+
     @action(detail=False, methods=["post"], url_path="me/avatar")
     def upload_avatar(self, request):
         """Upload a new avatar image."""

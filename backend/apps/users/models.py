@@ -239,6 +239,16 @@ class UserProfile(TimeStampedModel):
     )
 
     # =========================
+    # Followed Authors (M2M with User)
+    # =========================
+    followed_authors = models.ManyToManyField(
+        "users.User",
+        related_name="followers",
+        blank=True,
+        help_text="Authors the user is following",
+    )
+
+    # =========================
     # Preferences
     # =========================
     preferences = models.JSONField(
@@ -282,6 +292,18 @@ class UserProfile(TimeStampedModel):
     def is_watching(self, company):
         """Check if the user is watching a company."""
         return self.watchlist.filter(pk=company.pk).exists()
+
+    def follow_author(self, author):
+        """Follow an author."""
+        self.followed_authors.add(author)
+
+    def unfollow_author(self, author):
+        """Unfollow an author."""
+        self.followed_authors.remove(author)
+
+    def is_following(self, author):
+        """Check if the user is following an author."""
+        return self.followed_authors.filter(pk=author.pk).exists()
 
     def get_preference(self, key, default=None):
         """Get a preference value by dot-notation key."""
