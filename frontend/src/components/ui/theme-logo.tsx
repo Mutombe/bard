@@ -34,9 +34,9 @@ export function ThemeLogo({
   // Default to dark logo (for light theme) during SSR
   const logoSrc = mounted
     ? resolvedTheme === "dark"
-      ? "/images/logo-light.png"
-      : "/images/logo-dark.png"
-    : "/images/logo-dark.png";
+      ? "/images/light2.png"
+      : "/images/dark1.png"
+    : "/images/dark1.png";
 
   return (
     <Image
