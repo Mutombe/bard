@@ -20,8 +20,8 @@ interface ThemeLogoProps {
  */
 export function ThemeLogo({
   className,
-  width = 180,
-  height = 50,
+  width = 160,
+  height = 40,
   priority = true,
 }: ThemeLogoProps) {
   const { resolvedTheme } = useTheme();
@@ -44,7 +44,7 @@ export function ThemeLogo({
       alt="Bard Global Finance Institute"
       width={width}
       height={height}
-      className={cn("h-auto max-h-[60px] w-auto object-contain", className)}
+      className={cn("h-auto max-h-[40px] w-auto object-contain", className)}
       priority={priority}
       loading="eager"
     />
