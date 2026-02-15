@@ -729,39 +729,37 @@ def set_article_images():
 @shared_task(name="apps.spider.tasks.set_featured_article")
 def set_featured_article():
     """
-    Ensure there's always a featured article with an image.
+    Rotate the featured article to the most recent published article with an image.
 
-    Picks the most recent published article with an image and marks it as featured.
-    Schedule: Every 2 hours
+    Always promotes the newest article to featured, ensuring the homepage
+    hero section stays fresh with every content refresh cycle.
+    Schedule: Every 2 hours (via --news-only and --images-only cron jobs)
     """
     from apps.news.models import NewsArticle
 
     try:
-        # Check if there's already a featured article with an image
-        current_featured = NewsArticle.objects.filter(
-            is_featured=True,
-            status='published',
-        ).exclude(featured_image='').first()
-
-        if current_featured:
-            return f"Current featured article: {current_featured.title[:50]}"
-
-        # Find the best candidate - recent article with image
+        # Find the most recent published article with an image
         candidate = NewsArticle.objects.filter(
             status='published',
         ).exclude(
             featured_image=''
+        ).exclude(
+            featured_image__isnull=True
         ).order_by('-published_at').first()
 
         if candidate:
+            # Check if this is already the featured article
+            if candidate.is_featured:
+                return f"Already featured: {candidate.title[:50]}"
+
             # Unfeature all other articles
             NewsArticle.objects.filter(is_featured=True).update(is_featured=False)
 
-            # Feature the candidate
+            # Feature the newest article
             candidate.is_featured = True
             candidate.save(update_fields=['is_featured'])
 
-            logger.info(f"Set featured article: {candidate.title}")
+            logger.info(f"Rotated featured article to: {candidate.title}")
             return f"Featured: {candidate.title[:50]}"
 
         # If no article with image, just feature the most recent one
@@ -770,6 +768,9 @@ def set_featured_article():
         ).order_by('-published_at').first()
 
         if recent:
+            if recent.is_featured:
+                return f"Already featured (no image): {recent.title[:50]}"
+
             NewsArticle.objects.filter(is_featured=True).update(is_featured=False)
             recent.is_featured = True
             recent.save(update_fields=['is_featured'])

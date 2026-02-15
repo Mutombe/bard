@@ -74,12 +74,12 @@ class Command(BaseCommand):
         if run_all or videos_only:
             self._fetch_videos()
 
-        # Download article images
-        if run_all or images_only:
+        # Download article images (also run with --news-only so new articles get images)
+        if run_all or images_only or news_only:
             self._download_images()
 
-        # Set featured article
-        if run_all:
+        # Set featured article (always run to keep hero content rotating)
+        if run_all or news_only or images_only:
             self._set_featured()
 
         self.stdout.write('-' * 50)
