@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Playfair_Display, Source_Serif_4 } from "next/font/google";
+import { Inter, JetBrains_Mono, Fraunces, Newsreader } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/index";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,20 +16,21 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-// Premium serif font for headlines - gives authoritative, professional look
-const playfair = Playfair_Display({
+// Premium variable serif for headlines - modern editorial with optical sizing
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-fraunces",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
-// Secondary serif for article body text
-const sourceSerif = Source_Serif_4({
+// Editorial serif for article body text - designed for news/long-form reading
+const newsreader = Newsreader({
   subsets: ["latin"],
-  variable: "--font-source-serif",
+  variable: "--font-newsreader",
   display: "swap",
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -124,7 +125,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${mono.variable} ${playfair.variable} ${sourceSerif.variable} min-h-screen bg-background antialiased`}
+        className={`${inter.variable} ${mono.variable} ${fraunces.variable} ${newsreader.variable} min-h-screen bg-background antialiased`}
       >
         <Providers>
           {children}
