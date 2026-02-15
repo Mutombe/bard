@@ -192,7 +192,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center">
-              <ThemeLogo width={240} height={60} className="max-h-[60px]" />
+              <ThemeLogo width={160} height={40} className="max-h-[40px]" />
             </Link>
 
             {/* Desktop Navigation */}
