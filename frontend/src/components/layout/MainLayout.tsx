@@ -17,6 +17,7 @@ import {
   Bookmark,
   Mail,
   Linkedin,
+  Facebook,
   LayoutDashboard,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
@@ -364,8 +365,11 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                   <FaXTwitter className="h-4 w-4" />
                 </a>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                <a href="https://www.linkedin.com/company/bgif" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                   <Linkedin className="h-4 w-4" />
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61588487751160" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                  <Facebook className="h-4 w-4" />
                 </a>
               </div>
             </div>
