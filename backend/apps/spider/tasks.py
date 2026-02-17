@@ -51,8 +51,9 @@ def fetch_polygon_news():
                 status='published',
                 published_at=timezone.now(),
                 source='polygon',
-                external_url=item.get('article_url', ''),
-                external_source_name=item.get('publisher', {}).get('name', 'Polygon.io'),
+                external_url=item.get('article_url', '') or item.get('url', ''),
+                external_source_name=item.get('publisher', {}).get('name', 'Polygon.io') if isinstance(item.get('publisher'), dict) else item.get('source', 'Polygon.io'),
+                featured_image_url=item.get('image_url', ''),
             )
             saved += 1
 
@@ -110,6 +111,7 @@ def fetch_newsapi_headlines():
                 source='newsapi',
                 external_url=item.get('url', ''),
                 external_source_name=item.get('source', {}).get('name', 'NewsAPI') if isinstance(item.get('source'), dict) else str(item.get('source', 'NewsAPI')),
+                featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
             )
             saved += 1
 
@@ -161,6 +163,7 @@ def fetch_african_news():
                 source='newsapi',
                 external_url=item.get('url', ''),
                 external_source_name=item.get('source', {}).get('name', 'African News') if isinstance(item.get('source'), dict) else str(item.get('source', 'African News')),
+                featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
             )
             saved += 1
 
@@ -738,46 +741,40 @@ def set_featured_article():
     from apps.news.models import NewsArticle
 
     try:
+        from django.db.models import Q
+
         # Find the most recent published article with an image
+        # Check BOTH local featured_image AND external featured_image_url
         candidate = NewsArticle.objects.filter(
             status='published',
-        ).exclude(
-            featured_image=''
-        ).exclude(
-            featured_image__isnull=True
+        ).filter(
+            Q(~Q(featured_image=''), featured_image__isnull=False) |
+            Q(~Q(featured_image_url=''), featured_image_url__isnull=False)
         ).order_by('-published_at').first()
 
-        if candidate:
-            # Check if this is already the featured article
-            if candidate.is_featured:
-                return f"Already featured: {candidate.title[:50]}"
+        if not candidate:
+            # Fallback: any published article
+            candidate = NewsArticle.objects.filter(
+                status='published'
+            ).order_by('-published_at').first()
 
-            # Unfeature all other articles
-            NewsArticle.objects.filter(is_featured=True).update(is_featured=False)
+        if not candidate:
+            return "No articles to feature"
 
-            # Feature the newest article
-            candidate.is_featured = True
-            candidate.save(update_fields=['is_featured'])
+        # Check if this is already the featured article
+        if candidate.is_featured:
+            return f"Already featured: {candidate.title[:50]}"
 
-            logger.info(f"Rotated featured article to: {candidate.title}")
-            return f"Featured: {candidate.title[:50]}"
+        # Unfeature all other articles
+        NewsArticle.objects.filter(is_featured=True).update(is_featured=False)
 
-        # If no article with image, just feature the most recent one
-        recent = NewsArticle.objects.filter(
-            status='published'
-        ).order_by('-published_at').first()
+        # Feature the newest article
+        candidate.is_featured = True
+        candidate.save(update_fields=['is_featured'])
 
-        if recent:
-            if recent.is_featured:
-                return f"Already featured (no image): {recent.title[:50]}"
-
-            NewsArticle.objects.filter(is_featured=True).update(is_featured=False)
-            recent.is_featured = True
-            recent.save(update_fields=['is_featured'])
-            logger.info(f"Set featured article (no image): {recent.title}")
-            return f"Featured (no image): {recent.title[:50]}"
-
-        return "No articles to feature"
+        has_image = bool(candidate.featured_image or candidate.featured_image_url)
+        logger.info(f"Rotated featured article to: {candidate.title} (has_image={has_image})")
+        return f"Featured: {candidate.title[:50]}"
 
     except Exception as e:
         logger.error(f"Set featured article failed: {e}")
