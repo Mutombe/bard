@@ -17,48 +17,108 @@ def fetch_polygon_news():
     """
     Fetch financial news from Polygon.io API.
 
+    Fetches general news + ticker-specific news for African-relevant tickers
+    to get a diverse set of articles each cycle.
+
     Schedule: Every 30 minutes
     """
     from .providers import PolygonDataProvider
     from apps.news.models import NewsArticle, Category
 
+    # African and emerging market relevant tickers for diverse news
+    TICKER_QUERIES = [
+        None,           # General market news
+        'AAPL',         # Tech bellwether
+        'JPM',          # Banking
+        'XOM',          # Energy
+        'GOLD',         # Gold/mining
+        'BHP',          # Mining/resources
+        'VALE',         # Commodities
+        'BABA',         # Emerging markets
+    ]
+
     try:
         provider = PolygonDataProvider()
-        news_items = provider.get_ticker_news(limit=20)
 
-        # Get or create business category
-        category, _ = Category.objects.get_or_create(
-            slug='business',
-            defaults={'name': 'Business', 'description': 'Business news'}
-        )
+        # Category mapping for ticker-based news
+        category_map = {}
+        for slug, name, desc in [
+            ('business', 'Business', 'Business news'),
+            ('markets', 'Markets', 'Market news and analysis'),
+            ('technology', 'Technology', 'Technology news'),
+            ('commodities', 'Commodities', 'Commodities and resources'),
+            ('banking', 'Banking', 'Banking and finance'),
+        ]:
+            cat, _ = Category.objects.get_or_create(
+                slug=slug, defaults={'name': name, 'description': desc}
+            )
+            category_map[slug] = cat
+
+        default_category = category_map['business']
+
+        # Map tickers to categories
+        ticker_categories = {
+            'AAPL': 'technology', 'JPM': 'banking', 'XOM': 'commodities',
+            'GOLD': 'commodities', 'BHP': 'commodities', 'VALE': 'commodities',
+        }
 
         saved = 0
-        for item in news_items:
-            if not item.get('title'):
+        seen_titles = set()
+
+        # Rotate through tickers - pick 2-3 per cycle to avoid rate limits
+        import hashlib
+        hour_hash = int(hashlib.md5(
+            timezone.now().strftime('%Y-%m-%d-%H').encode()
+        ).hexdigest(), 16)
+        # Always include general (None) + 2 rotated tickers
+        rotated = [None] + [
+            TICKER_QUERIES[1 + (hour_hash + i) % (len(TICKER_QUERIES) - 1)]
+            for i in range(2)
+        ]
+
+        for ticker in rotated:
+            try:
+                news_items = provider.get_ticker_news(ticker=ticker, limit=10)
+            except Exception as e:
+                logger.warning(f"Polygon fetch for ticker={ticker} failed: {e}")
                 continue
 
-            # Check if article already exists
-            if NewsArticle.objects.filter(
-                title=item['title'][:500]
-            ).exists():
-                continue
+            cat_slug = ticker_categories.get(ticker, 'business') if ticker else 'business'
+            category = category_map.get(cat_slug, default_category)
 
-            NewsArticle.objects.create(
-                title=item['title'][:500],
-                excerpt=item.get('description', '')[:500],
-                content=item.get('description', ''),
-                category=category,
-                status='published',
-                published_at=timezone.now(),
-                source='polygon',
-                external_url=item.get('article_url', '') or item.get('url', ''),
-                external_source_name=item.get('publisher', {}).get('name', 'Polygon.io') if isinstance(item.get('publisher'), dict) else item.get('source', 'Polygon.io'),
-                featured_image_url=item.get('image_url', ''),
-            )
-            saved += 1
+            for item in news_items:
+                title = (item.get('title') or '').strip()
+                if not title:
+                    continue
 
-        logger.info(f"Polygon news: Fetched {len(news_items)}, saved {saved}")
-        return f"Polygon: Fetched {len(news_items)}, saved {saved} articles"
+                # Deduplicate within this batch
+                if title[:500] in seen_titles:
+                    continue
+                seen_titles.add(title[:500])
+
+                # Check DB for existing article by title OR external URL
+                ext_url = item.get('article_url', '') or item.get('url', '')
+                if NewsArticle.objects.filter(title=title[:500]).exists():
+                    continue
+                if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
+                    continue
+
+                NewsArticle.objects.create(
+                    title=title[:500],
+                    excerpt=item.get('description', '')[:500],
+                    content=item.get('description', ''),
+                    category=category,
+                    status='published',
+                    published_at=timezone.now(),
+                    source='polygon',
+                    external_url=ext_url,
+                    external_source_name=item.get('publisher', {}).get('name', 'Polygon.io') if isinstance(item.get('publisher'), dict) else item.get('source', 'Polygon.io'),
+                    featured_image_url=item.get('image_url', ''),
+                )
+                saved += 1
+
+        logger.info(f"Polygon news: saved {saved} new articles")
+        return f"Polygon: saved {saved} articles"
 
     except Exception as e:
         logger.error(f"Polygon news fetch failed: {e}")
@@ -70,53 +130,109 @@ def fetch_newsapi_headlines():
     """
     Fetch business headlines from NewsAPI.org.
 
+    Fetches from multiple countries and categories to get diverse content.
+    Free tier only supports get_top_headlines (not get_everything).
+
     Schedule: Every 30 minutes
     """
     from .providers import NewsAPIProvider
     from apps.news.models import NewsArticle, Category
+    import hashlib
+
+    # Multiple country/category combos to rotate through
+    # NewsAPI free tier: top_headlines only, limited to one country per request
+    HEADLINE_QUERIES = [
+        {'category': 'business', 'country': 'us'},
+        {'category': 'business', 'country': 'gb'},
+        {'category': 'business', 'country': 'za'},    # South Africa
+        {'category': 'technology', 'country': 'us'},
+        {'category': 'business', 'country': 'ng'},    # Nigeria
+        {'category': 'business', 'country': 'ae'},    # UAE (African finance hub)
+        {'category': 'general', 'country': 'za'},
+        {'category': 'technology', 'country': 'gb'},
+    ]
+
+    # Category mapping
+    cat_map = {
+        'business': ('business', 'Business', 'Business news'),
+        'technology': ('technology', 'Technology', 'Technology news'),
+        'general': ('markets', 'Markets', 'Market news and analysis'),
+    }
 
     try:
         provider = NewsAPIProvider()
-        articles = provider.get_top_headlines(category='business', page_size=20)
 
-        # Get or create business category
-        category, _ = Category.objects.get_or_create(
-            slug='business',
-            defaults={'name': 'Business', 'description': 'Business news'}
-        )
+        categories = {}
+        for slug, name, desc in cat_map.values():
+            cat, _ = Category.objects.get_or_create(
+                slug=slug, defaults={'name': name, 'description': desc}
+            )
+            categories[slug] = cat
+
+        # Rotate: pick 3 queries per cycle to stay within rate limits
+        hour_hash = int(hashlib.md5(
+            timezone.now().strftime('%Y-%m-%d-%H').encode()
+        ).hexdigest(), 16)
+
+        selected = []
+        for i in range(3):
+            idx = (hour_hash + i) % len(HEADLINE_QUERIES)
+            if HEADLINE_QUERIES[idx] not in selected:
+                selected.append(HEADLINE_QUERIES[idx])
 
         saved = 0
-        for item in articles:
-            if not item.get('title') or item.get('title') == '[Removed]':
+        seen_titles = set()
+
+        for query in selected:
+            try:
+                articles = provider.get_top_headlines(
+                    category=query['category'],
+                    country=query['country'],
+                    page_size=20,
+                )
+            except Exception as e:
+                logger.warning(f"NewsAPI headlines failed for {query}: {e}")
                 continue
 
-            # Check if article already exists
-            if NewsArticle.objects.filter(
-                title=item['title'][:500]
-            ).exists():
-                continue
+            cat_slug = cat_map.get(query['category'], ('business',))[0]
+            category = categories.get(cat_slug, categories['business'])
 
-            # Ensure we have content
-            content = item.get('content', '') or item.get('description', '') or item.get('title', '')
-            if not content:
-                continue
+            for item in articles:
+                title = (item.get('title') or '').strip()
+                if not title or title == '[Removed]':
+                    continue
 
-            NewsArticle.objects.create(
-                title=item['title'][:500],
-                excerpt=item.get('description', '')[:500] if item.get('description') else item['title'][:500],
-                content=content,
-                category=category,
-                status='published',
-                published_at=timezone.now(),
-                source='newsapi',
-                external_url=item.get('url', ''),
-                external_source_name=item.get('source', {}).get('name', 'NewsAPI') if isinstance(item.get('source'), dict) else str(item.get('source', 'NewsAPI')),
-                featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
-            )
-            saved += 1
+                if title[:500] in seen_titles:
+                    continue
+                seen_titles.add(title[:500])
 
-        logger.info(f"NewsAPI: Fetched {len(articles)}, saved {saved}")
-        return f"NewsAPI: Fetched {len(articles)}, saved {saved} articles"
+                # Deduplicate by title or URL
+                ext_url = item.get('url', '')
+                if NewsArticle.objects.filter(title=title[:500]).exists():
+                    continue
+                if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
+                    continue
+
+                content = item.get('content', '') or item.get('description', '') or title
+                if not content:
+                    continue
+
+                NewsArticle.objects.create(
+                    title=title[:500],
+                    excerpt=item.get('description', '')[:500] if item.get('description') else title[:500],
+                    content=content,
+                    category=category,
+                    status='published',
+                    published_at=timezone.now(),
+                    source='newsapi',
+                    external_url=ext_url,
+                    external_source_name=item.get('source', {}).get('name', 'NewsAPI') if isinstance(item.get('source'), dict) else str(item.get('source', 'NewsAPI')),
+                    featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
+                )
+                saved += 1
+
+        logger.info(f"NewsAPI: saved {saved} new articles")
+        return f"NewsAPI: saved {saved} articles"
 
     except Exception as e:
         logger.error(f"NewsAPI fetch failed: {e}")
@@ -128,47 +244,98 @@ def fetch_african_news():
     """
     Fetch African market-specific news from NewsAPI.
 
+    Uses get_top_headlines with African countries (free tier compatible)
+    instead of get_everything which requires a paid plan.
+
     Schedule: Every hour
     """
     from .providers import NewsAPIProvider
     from apps.news.models import NewsArticle, Category
+    import hashlib
+
+    # African countries supported by NewsAPI top_headlines
+    AFRICAN_QUERIES = [
+        {'country': 'za', 'category': 'business'},   # South Africa
+        {'country': 'za', 'category': 'general'},
+        {'country': 'ng', 'category': 'business'},   # Nigeria
+        {'country': 'ng', 'category': 'general'},
+        {'country': 'eg', 'category': 'business'},   # Egypt
+        {'country': 'ma', 'category': 'business'},   # Morocco
+        {'country': 'ke', 'category': 'business'},   # Kenya (if supported)
+        {'country': 'ae', 'category': 'business'},   # UAE (Africa-linked finance)
+    ]
 
     try:
         provider = NewsAPIProvider()
-        articles = provider.get_african_market_news(page_size=20)
 
-        # Get or create markets category
-        category, _ = Category.objects.get_or_create(
+        # Category for African news
+        africa_cat, _ = Category.objects.get_or_create(
+            slug='africa',
+            defaults={'name': 'Africa', 'description': 'Pan-African news'}
+        )
+        markets_cat, _ = Category.objects.get_or_create(
             slug='markets',
             defaults={'name': 'Markets', 'description': 'Market news and analysis'}
         )
 
+        # Rotate: pick 3 per cycle
+        hour_hash = int(hashlib.md5(
+            timezone.now().strftime('%Y-%m-%d-%H').encode()
+        ).hexdigest(), 16)
+
+        selected = []
+        for i in range(3):
+            idx = (hour_hash + i) % len(AFRICAN_QUERIES)
+            if AFRICAN_QUERIES[idx] not in selected:
+                selected.append(AFRICAN_QUERIES[idx])
+
         saved = 0
-        for item in articles:
-            if not item.get('title') or item.get('title') == '[Removed]':
+        seen_titles = set()
+
+        for query in selected:
+            try:
+                articles = provider.get_top_headlines(
+                    category=query['category'],
+                    country=query['country'],
+                    page_size=20,
+                )
+            except Exception as e:
+                logger.warning(f"African news failed for {query}: {e}")
                 continue
 
-            if NewsArticle.objects.filter(
-                title=item['title'][:500]
-            ).exists():
-                continue
+            category = africa_cat if query['category'] == 'general' else markets_cat
 
-            NewsArticle.objects.create(
-                title=item['title'][:500],
-                excerpt=item.get('description', '')[:500] if item.get('description') else '',
-                content=item.get('content', '') or item.get('description', ''),
-                category=category,
-                status='published',
-                published_at=timezone.now(),
-                source='newsapi',
-                external_url=item.get('url', ''),
-                external_source_name=item.get('source', {}).get('name', 'African News') if isinstance(item.get('source'), dict) else str(item.get('source', 'African News')),
-                featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
-            )
-            saved += 1
+            for item in articles:
+                title = (item.get('title') or '').strip()
+                if not title or title == '[Removed]':
+                    continue
 
-        logger.info(f"African news: Fetched {len(articles)}, saved {saved}")
-        return f"African news: Fetched {len(articles)}, saved {saved} articles"
+                if title[:500] in seen_titles:
+                    continue
+                seen_titles.add(title[:500])
+
+                ext_url = item.get('url', '')
+                if NewsArticle.objects.filter(title=title[:500]).exists():
+                    continue
+                if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
+                    continue
+
+                NewsArticle.objects.create(
+                    title=title[:500],
+                    excerpt=item.get('description', '')[:500] if item.get('description') else '',
+                    content=item.get('content', '') or item.get('description', '') or title,
+                    category=category,
+                    status='published',
+                    published_at=timezone.now(),
+                    source='newsapi',
+                    external_url=ext_url,
+                    external_source_name=item.get('source', {}).get('name', 'African News') if isinstance(item.get('source'), dict) else str(item.get('source', 'African News')),
+                    featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
+                )
+                saved += 1
+
+        logger.info(f"African news: saved {saved} new articles")
+        return f"African news: saved {saved} articles"
 
     except Exception as e:
         logger.error(f"African news fetch failed: {e}")
