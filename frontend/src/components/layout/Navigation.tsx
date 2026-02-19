@@ -35,6 +35,7 @@ import {
   Wheat,
   BookOpen,
   Video,
+  Lightbulb,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSavedCounts } from "@/hooks/use-saved-counts";
@@ -168,33 +169,14 @@ const navigationData: NavDropdown[] = [
     ],
   },
   {
-    label: "Economics",
+    label: "Publications",
     sections: [
       {
-        title: "Data & Indicators",
+        title: "Our Publications",
         items: [
-          { label: "GDP Data", href: "/economics/gdp", icon: BarChart3, description: "Economic output" },
-          { label: "Inflation", href: "/economics/inflation", icon: TrendingUp, description: "CPI & PPI data" },
-          { label: "Interest Rates", href: "/economics/rates", icon: Calculator, description: "Policy rates" },
-          { label: "Employment", href: "/economics/employment", icon: Users, description: "Jobs data" },
-          { label: "Trade Balance", href: "/economics/trade", icon: Globe, description: "Imports & exports" },
-        ],
-      },
-      {
-        title: "Central Banks",
-        items: [
-          { label: "SARB", href: "/economics/sarb", icon: Landmark, description: "South African Reserve Bank" },
-          { label: "CBN", href: "/economics/cbn", icon: Landmark, description: "Central Bank of Nigeria" },
-          { label: "Fed Watch", href: "/economics/fed", icon: Landmark, description: "US Federal Reserve" },
-          { label: "ECB", href: "/economics/ecb", icon: Landmark, description: "European Central Bank" },
-        ],
-      },
-      {
-        title: "Calendar",
-        items: [
-          { label: "Economic Calendar", href: "/economics/calendar", icon: FileText, description: "Upcoming events" },
-          { label: "Earnings Calendar", href: "/economics/earnings", icon: Calculator, description: "Company reports" },
-          { label: "IPO Calendar", href: "/economics/ipo", icon: Award, description: "New listings" },
+          { label: "Finance Africa Quarterly", href: "/publications/finance-africa-quarterly", icon: BookOpen, description: "Flagship quarterly journal" },
+          { label: "Finance Africa Insights", href: "/publications/finance-africa-insights", icon: Lightbulb, description: "Weekly editorial & analysis" },
+          { label: "AfriFin Analytics", href: "/publications/afrifin-analytics", icon: BarChart3, description: "Daily data intelligence" },
         ],
       },
     ],
