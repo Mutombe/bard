@@ -399,13 +399,12 @@ export function MainLayout({ children }: MainLayoutProps) {
             </div>
 
             <div>
-              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">By Region</h3>
+              <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Publications</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/regions/southern-africa" className="hover:text-foreground">Southern Africa</Link></li>
-                <li><Link href="/regions/east-africa" className="hover:text-foreground">East Africa</Link></li>
-                <li><Link href="/regions/west-africa" className="hover:text-foreground">West Africa</Link></li>
-                <li><Link href="/regions/north-africa" className="hover:text-foreground">North Africa</Link></li>
-                <li><Link href="/regions/central-africa" className="hover:text-foreground">Central Africa</Link></li>
+                <li><Link href="/publications/finance-africa-quarterly" className="hover:text-foreground">Finance Africa Quarterly</Link></li>
+                <li><Link href="/publications/finance-africa-insights" className="hover:text-foreground">Finance Africa Insights</Link></li>
+                <li><Link href="/publications/afrifin-analytics" className="hover:text-foreground">AfriFin Analytics</Link></li>
+                <li><Link href="/newsletters" className="hover:text-foreground">Newsletters</Link></li>
                 <li><Link href="/markets" className="hover:text-foreground">Markets Data</Link></li>
               </ul>
             </div>
