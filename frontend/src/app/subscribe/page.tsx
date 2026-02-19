@@ -11,6 +11,10 @@ import {
   FileText,
   Users,
   Zap,
+  BookOpen,
+  Lightbulb,
+  BarChart3,
+  ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -204,6 +208,87 @@ export default function SubscribePage() {
             <PricingCard key={plan.id} plan={plan} currency={currency} />
           ))}
         </div>
+
+        {/* Our Publications */}
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold text-center mb-3">
+            Our Publications
+          </h2>
+          <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
+            Three distinct publications delivering African market intelligence
+            in the format that suits you best.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Finance Africa Quarterly */}
+            <div className="p-6 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors">
+              <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-4">
+                <BookOpen className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">
+                Finance Africa Quarterly
+              </h3>
+              <span className="inline-block px-2 py-0.5 bg-brand-orange/10 text-brand-orange text-xs font-medium rounded mb-3">
+                Quarterly
+              </span>
+              <p className="text-sm text-muted-foreground mb-4">
+                Flagship journal with comprehensive deep-dive reports on African
+                financial markets, original research, and macro analysis.
+              </p>
+              <Link
+                href="/publications/finance-africa-quarterly"
+                className="inline-flex items-center gap-1 text-sm text-brand-orange font-medium hover:underline"
+              >
+                Learn More <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            {/* Finance Africa Insights */}
+            <div className="p-6 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors">
+              <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-4">
+                <Lightbulb className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">
+                Finance Africa Insights
+              </h3>
+              <span className="inline-block px-2 py-0.5 bg-brand-orange/10 text-brand-orange text-xs font-medium rounded mb-3">
+                Weekly
+              </span>
+              <p className="text-sm text-muted-foreground mb-4">
+                Curated analysis and editorial commentary from Africa&apos;s sharpest
+                financial minds. The signal that matters for your portfolio.
+              </p>
+              <Link
+                href="/publications/finance-africa-insights"
+                className="inline-flex items-center gap-1 text-sm text-brand-orange font-medium hover:underline"
+              >
+                Learn More <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            {/* AfriFin Analytics */}
+            <div className="p-6 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors">
+              <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-4">
+                <BarChart3 className="h-5 w-5" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">
+                AfriFin Analytics
+              </h3>
+              <span className="inline-block px-2 py-0.5 bg-brand-orange/10 text-brand-orange text-xs font-medium rounded mb-3">
+                Daily
+              </span>
+              <p className="text-sm text-muted-foreground mb-4">
+                Data-driven market intelligence with charts, metrics, and
+                quantitative screens. Numbers, not narratives.
+              </p>
+              <Link
+                href="/publications/afrifin-analytics"
+                className="inline-flex items-center gap-1 text-sm text-brand-orange font-medium hover:underline"
+              >
+                Learn More <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* Features Grid */}
         <section className="mb-16">
