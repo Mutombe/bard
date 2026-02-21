@@ -94,24 +94,66 @@ export default function FinanceAfricaQuarterlyPage() {
           <span className="text-foreground">Finance Africa Quarterly</span>
         </nav>
 
-        {/* Hero */}
-        <section className="bg-slate-900 text-white rounded-lg p-8 md:p-12 mb-12">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-12 w-12 rounded-lg bg-brand-orange/20 flex items-center justify-center">
-              <BookOpen className="h-6 w-6 text-brand-orange" />
-            </div>
-            <span className="px-3 py-1 bg-brand-orange/20 text-brand-orange text-xs font-semibold rounded-full uppercase tracking-wider">
-              Quarterly
-            </span>
+        {/* Hero with image strip grid */}
+        <section className="relative overflow-hidden rounded-lg mb-12" style={{ height: '420px' }}>
+          {/* Image strips */}
+          <div className="absolute inset-0 flex items-start gap-[3px]">
+            {[
+              { flex: 0.7, height: '68%', bg: '#0f172a', img: 'photo-1486406146926-c627a92ad1ab' },
+              { flex: 1.1, height: '88%', bg: '#1e293b', img: 'photo-1449824913935-59a10b8d2000' },
+              { flex: 0.8, height: '62%', bg: '#14243d', img: 'photo-1462899006636-339e08d1844e' },
+              { flex: 1.4, height: '100%', bg: '#0c1a2e', img: 'photo-1480714378408-67cf0d13bc1b' },
+              { flex: 1.0, height: '78%', bg: '#1a1a2e', img: 'photo-1526304640581-d334cdbbf45e' },
+              { flex: 0.6, height: '58%', bg: '#162032', img: 'photo-1444628838545-ac4016a5418a' },
+              { flex: 1.2, height: '92%', bg: '#0f172a', img: 'photo-1497366216548-37526070297c' },
+              { flex: 0.9, height: '72%', bg: '#1e293b', img: 'photo-1454165804606-c3d57bc86b40' },
+              { flex: 0.7, height: '65%', bg: '#14243d', img: 'photo-1497366811353-6870744d04b2' },
+              { flex: 1.0, height: '85%', bg: '#0c1a2e', img: 'photo-1560472354-b33ff0c44a43' },
+            ].map((strip, i) => (
+              <div
+                key={i}
+                className="relative overflow-hidden"
+                style={{ flex: strip.flex, height: strip.height }}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundColor: strip.bg,
+                    backgroundImage: `url(https://images.unsplash.com/${strip.img}?auto=format&fit=crop&w=400&q=80)`,
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/15" />
+              </div>
+            ))}
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 font-serif">
-            Finance Africa Quarterly
-          </h1>
-          <p className="text-lg text-slate-300 max-w-2xl">
-            Our flagship journal delivering comprehensive, quarterly deep-dive
-            reports on African financial markets. Rigorous analysis, original
-            research, and actionable intelligence for serious investors.
-          </p>
+
+          {/* Bottom fade overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 12%, hsl(var(--background) / 0.92) 24%, hsl(var(--background) / 0.6) 42%, hsl(var(--background) / 0.2) 65%, transparent 100%)`,
+            }}
+          />
+
+          {/* Content */}
+          <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-12 w-12 rounded-lg bg-brand-orange/20 backdrop-blur-sm flex items-center justify-center">
+                <BookOpen className="h-6 w-6 text-brand-orange" />
+              </div>
+              <span className="px-3 py-1 bg-brand-orange/20 backdrop-blur-sm text-brand-orange text-xs font-semibold rounded-full uppercase tracking-wider">
+                Quarterly
+              </span>
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 font-serif">
+              Finance Africa Quarterly
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Our flagship journal delivering comprehensive, quarterly deep-dive
+              reports on African financial markets. Rigorous analysis, original
+              research, and actionable intelligence for serious investors.
+            </p>
+          </div>
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
