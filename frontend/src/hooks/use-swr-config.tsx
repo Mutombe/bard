@@ -42,8 +42,8 @@ const swrConfig = {
     }
     return true;
   },
-  // Disable automatic revalidation if stale to reduce re-fetching
-  revalidateIfStale: false,
+  // Revalidate stale data to keep content fresh
+  revalidateIfStale: true,
   // Loading timeout (show loading state if request takes longer)
   loadingTimeout: 10000,
   // Focus throttle (prevent too many requests on rapid focus changes)

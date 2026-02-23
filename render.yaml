@@ -88,7 +88,7 @@ services:
     region: frankfurt
     plan: starter
     rootDir: backend
-    schedule: "0 */2 * * *"  # Every 2 hours
+    schedule: "0 * * * *"  # Every hour
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py populate_data --news-only
     envVars:
