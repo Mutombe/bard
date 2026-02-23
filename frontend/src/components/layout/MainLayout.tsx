@@ -353,7 +353,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* Brand */}
             <div className="col-span-2">
               <div className="mb-4">
-                <ThemeLogo width={140} height={38} />
+                <ThemeLogo width={220} height={56} />
               </div>
               <p className="text-sm text-muted-foreground mb-2">
                 <span className="font-semibold text-foreground">African Finance Insights</span>
