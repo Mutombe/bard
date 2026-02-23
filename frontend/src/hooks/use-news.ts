@@ -80,10 +80,11 @@ export function useArticles(params?: UseArticlesParams) {
     key,
     () => newsService.getArticles(params),
     {
-      // Articles update frequently
+      // Articles update frequently - keep feed fresh
       revalidateOnFocus: true,
+      revalidateIfStale: true,
       dedupingInterval: 5000, // 5 seconds
-      refreshInterval: 3600000, // Auto-refresh every 1 hour for new content
+      refreshInterval: 300000, // Auto-refresh every 5 minutes for new content
     }
   );
 }
@@ -116,7 +117,7 @@ export function useInfiniteArticles(params?: UseArticlesParams) {
       revalidateFirstPage: false,
       revalidateOnFocus: false,
       dedupingInterval: 5000,
-      refreshInterval: 3600000, // Auto-refresh every 1 hour
+      refreshInterval: 300000, // Auto-refresh every 5 minutes
     }
   );
 
