@@ -311,6 +311,7 @@ class SpiderDashboardView(APIView):
 class TriggerSpiderView(APIView):
     """
     Manually trigger a spider run.
+    Runs tasks synchronously (no Celery worker required).
     """
 
     permission_classes = [IsAuthenticated, IsAdmin]
@@ -335,28 +336,52 @@ class TriggerSpiderView(APIView):
             triggered_by="manual",
         )
 
-        # Trigger the task
         from . import tasks
 
+        # Map spider types to their task functions
         task_map = {
-            "jse": tasks.scrape_jse_data,
-            "zse": tasks.scrape_zse_data,
-            "bse": tasks.scrape_bse_data,
+            "jse": [tasks.scrape_jse_data],
+            "zse": [tasks.scrape_zse_data],
+            "bse": [tasks.scrape_bse_data],
+            "news": [
+                tasks.fetch_polygon_news,
+                tasks.fetch_newsapi_headlines,
+                tasks.fetch_african_news,
+                tasks.scrape_african_news_websites,
+                tasks.set_article_images,
+                tasks.set_featured_article,
+            ],
+            "indices": [tasks.fetch_polygon_indices],
         }
 
-        task_func = task_map.get(spider_type)
-        if task_func:
-            result = task_func.delay()
-            job.celery_task_id = result.id
-            job.save()
+        task_funcs = task_map.get(spider_type)
+        if not task_funcs:
+            return Response(
+                {"error": f"No task found for {spider_type}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            return Response({
-                "message": f"Spider {spider_type} triggered",
-                "job_id": job.id,
-                "task_id": result.id,
-            })
+        # Run tasks synchronously (no Celery worker on Render)
+        results = []
+        job.status = "running"
+        job.started_at = timezone.now()
+        job.save()
 
-        return Response(
-            {"error": f"No task found for {spider_type}"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+        for task_func in task_funcs:
+            try:
+                result = task_func()
+                results.append({"task": task_func.__name__, "result": str(result)})
+            except Exception as e:
+                results.append({"task": task_func.__name__, "error": str(e)})
+
+        job.status = "success"
+        job.completed_at = timezone.now()
+        if job.started_at:
+            job.duration_seconds = (job.completed_at - job.started_at).total_seconds()
+        job.save()
+
+        return Response({
+            "message": f"Spider {spider_type} completed",
+            "job_id": job.id,
+            "results": results,
+        })
