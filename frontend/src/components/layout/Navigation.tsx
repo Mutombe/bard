@@ -136,39 +136,6 @@ const navigationData: NavDropdown[] = [
     },
   },
   {
-    label: "Markets",
-    sections: [
-      {
-        title: "African Exchanges",
-        items: [
-          { label: "JSE (South Africa)", href: "/markets/jse", icon: TrendingUp, description: "Johannesburg Stock Exchange" },
-          { label: "NGX (Nigeria)", href: "/markets/ngx", icon: BarChart3, description: "Nigerian Exchange" },
-          { label: "EGX (Egypt)", href: "/markets/egx", icon: LineChart, description: "Egyptian Exchange" },
-          { label: "NSE (Kenya)", href: "/markets/nse", icon: TrendingUp, description: "Nairobi Securities" },
-          { label: "All Exchanges", href: "/markets", icon: Globe, description: "View all markets" },
-        ],
-      },
-      {
-        title: "Market Data",
-        items: [
-          { label: "Indices", href: "/markets/indices", icon: LineChart, description: "Track major indices" },
-          { label: "Top Gainers", href: "/markets/gainers", icon: TrendingUp, description: "Best performers" },
-          { label: "Top Losers", href: "/markets/losers", icon: TrendingDown, description: "Biggest decliners" },
-          { label: "Most Active", href: "/markets/active", icon: Zap, description: "Highest volume" },
-          { label: "Sectors", href: "/markets/sectors", icon: PieChart, description: "Sector performance" },
-        ],
-      },
-      {
-        title: "Global & FX",
-        items: [
-          { label: "Forex", href: "/markets/forex", icon: DollarSign, description: "Currency pairs" },
-          { label: "Commodities", href: "/markets/commodities", icon: Target, description: "Gold, Oil, Metals" },
-          { label: "US & Europe", href: "/markets/us", icon: Globe, description: "International markets" },
-        ],
-      },
-    ],
-  },
-  {
     label: "Publications",
     sections: [
       {
@@ -182,37 +149,16 @@ const navigationData: NavDropdown[] = [
     ],
   },
   {
-    label: "Media",
+    label: "Global Media",
     sections: [
       {
         title: "Audio & Video",
         items: [
           { label: "Podcasts", href: "/podcasts", icon: Mic, description: "Expert discussions" },
           { label: "Videos", href: "/videos", icon: Video, description: "Market coverage" },
-          { label: "Webinars", href: "/webinars", icon: Users, description: "Live sessions" },
-        ],
-      },
-      {
-        title: "Newsletters",
-        items: [
-          { label: "Morning Brief", href: "/newsletters/daily", icon: Mail, description: "Daily market wrap" },
-          { label: "Weekly Digest", href: "/newsletters/weekly", icon: Mail, description: "Week in review" },
-          { label: "Research Alerts", href: "/newsletters/research", icon: FileText, description: "New publications" },
-          { label: "All Newsletters", href: "/newsletters", icon: Mail, description: "Browse all" },
-        ],
-      },
-      {
-        title: "Events",
-        items: [
-          { label: "Upcoming Events", href: "/events", icon: Users, description: "Conferences & summits" },
         ],
       },
     ],
-    featured: {
-      title: "The BGFI Podcast",
-      description: "Weekly analysis and interviews with African market experts",
-      href: "/podcasts",
-    },
   },
   {
     label: "My Library",
@@ -222,14 +168,6 @@ const navigationData: NavDropdown[] = [
         items: [
           { label: "Saved Articles", href: "/saved", icon: Bookmark, description: "Bookmarked content" },
           { label: "Liked Articles", href: "/saved?tab=liked", icon: Heart, description: "Articles you liked" },
-          { label: "Watchlist", href: "/watchlist", icon: Star, description: "Stocks you follow" },
-        ],
-      },
-      {
-        title: "Portfolio",
-        items: [
-          { label: "My Portfolio", href: "/portfolio", icon: PieChart, description: "Track investments" },
-          { label: "Price Alerts", href: "/alerts", icon: Bell, description: "Custom notifications" },
         ],
       },
       {
