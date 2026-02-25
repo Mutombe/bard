@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
-  MessageSquare,
   Mail,
   Users,
   Image as ImageIcon,
@@ -24,7 +23,7 @@ import {
   Tag,
   Factory,
   Globe,
-  Mic,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -40,8 +39,7 @@ const sidebarItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/research", label: "Research", icon: BookOpen },
-  { href: "/admin/podcasts", label: "Podcasts", icon: Mic },
-  { href: "/admin/opinions", label: "Opinions", icon: MessageSquare },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/admin/topics", label: "Topics", icon: Tag },
   { href: "/admin/industries", label: "Industries", icon: Factory },
