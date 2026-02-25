@@ -190,10 +190,10 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Main Header */}
       <header className="sticky top-0 z-40 bg-terminal-bg border-b border-terminal-border">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20">
             {/* Logo - bigger on desktop */}
             <Link href="/" className="flex items-center shrink-0 mr-6">
-              <ThemeLogo width={280} height={70} className="max-h-[56px] md:max-h-[70px]" />
+              <ThemeLogo width={360} height={90} className="max-h-[70px] md:max-h-[90px]" />
             </Link>
 
             {/* Desktop Navigation */}
