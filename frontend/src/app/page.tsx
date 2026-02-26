@@ -735,7 +735,7 @@ function PodcastSection({ video }: { video: any }) {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
             <Mic className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-serif font-bold text-white">The BGFI Podcast</h2>
+            <h2 className="text-2xl font-serif font-bold text-white">Global Media</h2>
           </div>
           <Link
             href="/podcasts"
