@@ -92,7 +92,7 @@ function MobileNavigation({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 <div className="mt-1 ml-3 border-l border-terminal-border">
                   {dropdown.sections.map((section) => (
                     <div key={section.title} className="py-2">
-                      <div className="px-3 py-1 text-xs font-semibold text-muted-foreground uppercase">
+                      <div className="px-3 py-1 text-xs font-bold text-muted-foreground uppercase">
                         {section.title}
                       </div>
                       {section.items.map((item) => (

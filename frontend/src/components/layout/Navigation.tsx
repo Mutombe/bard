@@ -194,7 +194,7 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
 
   return (
     <div className="py-2">
-      <h4 className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <h4 className="px-3 mb-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
         {section.title}
       </h4>
       <ul className="space-y-0.5">
