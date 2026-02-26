@@ -5,7 +5,8 @@ Admin dashboard and analytics endpoints.
 """
 from datetime import timedelta
 
-from django.db.models import Sum, Avg, Count, F
+from django.db.models import Sum, Avg, Count, F, Q
+from django.db.models.functions import TruncDate
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -14,7 +15,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.core.permissions import IsAdmin, IsEditor
-from apps.news.models import NewsArticle
+from apps.news.models import NewsArticle, ArticleView, Comment, CommentLike
+from apps.users.models import User
+from apps.engagement.models import NewsletterSubscription
+from apps.subscriptions.models import Subscription, Payment
 
 from .models import (
     ArticleAnalytics,
@@ -474,3 +478,249 @@ class TrackEventView(APIView):
         if x_forwarded_for:
             return x_forwarded_for.split(",")[0]
         return request.META.get("REMOTE_ADDR")
+
+
+class ComprehensiveAnalyticsView(APIView):
+    """
+    Live analytics from real models — no Celery dependency.
+    GET ?range=7d|30d|90d|all
+    """
+
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    RANGE_DAYS = {"7d": 7, "30d": 30, "90d": 90, "all": None}
+
+    def get(self, request):
+        range_key = request.query_params.get("range", "30d")
+        days = self.RANGE_DAYS.get(range_key)
+        now = timezone.now()
+        start = now - timedelta(days=days) if days else None
+
+        def in_period(qs, field):
+            if start is not None:
+                return qs.filter(**{f"{field}__gte": start})
+            return qs
+
+        data = {
+            "period": range_key,
+            "generated_at": now.isoformat(),
+            "users": self._users(in_period),
+            "content": self._content(in_period),
+            "engagement": self._engagement(in_period),
+            "newsletters": self._newsletters(in_period),
+            "subscriptions": self._subscriptions(in_period),
+        }
+        return Response(data)
+
+    # ------------------------------------------------------------------
+    # Users
+    # ------------------------------------------------------------------
+    def _users(self, in_period):
+        total = User.objects.count()
+        active = in_period(User.objects, "last_login").exclude(last_login=None).count()
+        new = in_period(User.objects, "date_joined").count()
+
+        role_breakdown = list(
+            User.objects.values("role")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        tier_breakdown = list(
+            User.objects.values("subscription_tier")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        registration_trend = list(
+            in_period(User.objects, "date_joined")
+            .annotate(date=TruncDate("date_joined"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+
+        return {
+            "total_users": total,
+            "active_in_period": active,
+            "new_users_in_period": new,
+            "role_breakdown": role_breakdown,
+            "tier_breakdown": tier_breakdown,
+            "registration_trend": registration_trend,
+        }
+
+    # ------------------------------------------------------------------
+    # Content
+    # ------------------------------------------------------------------
+    def _content(self, in_period):
+        articles_by_status = list(
+            NewsArticle.all_objects.values("status")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        published = NewsArticle.objects.filter(status=NewsArticle.Status.PUBLISHED)
+        total_published = published.count()
+        published_in_period = in_period(published, "published_at").count()
+        total_view_count = published.aggregate(total=Sum("view_count"))["total"] or 0
+
+        top_articles = list(
+            published.order_by("-view_count")
+            .values(
+                "id", "title", "slug", "view_count",
+                "category__name", "author__first_name",
+                "author__last_name", "published_at", "is_premium",
+            )[:10]
+        )
+        publishing_trend = list(
+            in_period(published, "published_at")
+            .annotate(date=TruncDate("published_at"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+
+        return {
+            "articles_by_status": articles_by_status,
+            "total_published": total_published,
+            "published_in_period": published_in_period,
+            "total_view_count": total_view_count,
+            "top_articles_by_views": top_articles,
+            "publishing_trend": publishing_trend,
+        }
+
+    # ------------------------------------------------------------------
+    # Engagement
+    # ------------------------------------------------------------------
+    def _engagement(self, in_period):
+        approved = Comment.objects.filter(is_approved=True)
+        total_comments = approved.count()
+        new_comments = in_period(approved, "created_at").count()
+
+        published_count = NewsArticle.objects.filter(
+            status=NewsArticle.Status.PUBLISHED
+        ).count()
+        avg_comments = round(total_comments / published_count, 1) if published_count else 0
+
+        top_commented = list(
+            NewsArticle.objects.filter(status=NewsArticle.Status.PUBLISHED)
+            .annotate(
+                comment_count=Count(
+                    "comments",
+                    filter=Q(comments__is_approved=True),
+                )
+            )
+            .order_by("-comment_count")
+            .values("id", "title", "slug", "comment_count", "view_count")[:5]
+        )
+        top_commenters = list(
+            approved.values("author__email", "author__first_name", "author__last_name")
+            .annotate(comment_count=Count("id"))
+            .order_by("-comment_count")[:5]
+        )
+
+        total_views_raw = ArticleView.objects.count()
+        views_in_period = in_period(ArticleView.objects, "created_at").count()
+        unique_viewers = (
+            in_period(ArticleView.objects, "created_at")
+            .exclude(user=None)
+            .values("user")
+            .distinct()
+            .count()
+        )
+        total_likes = CommentLike.objects.count()
+
+        return {
+            "total_comments": total_comments,
+            "new_comments_in_period": new_comments,
+            "avg_comments_per_article": avg_comments,
+            "top_commented_articles": top_commented,
+            "top_commenters": top_commenters,
+            "total_article_views_raw": total_views_raw,
+            "article_views_in_period": views_in_period,
+            "unique_viewers_in_period": unique_viewers,
+            "total_comment_likes": total_likes,
+        }
+
+    # ------------------------------------------------------------------
+    # Newsletters
+    # ------------------------------------------------------------------
+    def _newsletters(self, in_period):
+        total = NewsletterSubscription.objects.count()
+        active = NewsletterSubscription.objects.filter(is_active=True).count()
+        new = in_period(NewsletterSubscription.objects, "created_at").count()
+
+        by_type = list(
+            NewsletterSubscription.objects.filter(is_active=True)
+            .values("newsletter_type")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        trend = list(
+            in_period(NewsletterSubscription.objects, "created_at")
+            .annotate(date=TruncDate("created_at"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+
+        return {
+            "total_subscribers": total,
+            "active_subscribers": active,
+            "new_in_period": new,
+            "by_type": by_type,
+            "trend": trend,
+        }
+
+    # ------------------------------------------------------------------
+    # Subscriptions & Revenue
+    # ------------------------------------------------------------------
+    def _subscriptions(self, in_period):
+        active_by_plan = list(
+            Subscription.objects.filter(status="active")
+            .values("plan__plan_type", "plan__name")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+        status_breakdown = list(
+            Subscription.objects.values("status")
+            .annotate(count=Count("id"))
+            .order_by("-count")
+        )
+
+        completed = Payment.objects.filter(status=Payment.Status.COMPLETED)
+        all_time_cents = completed.aggregate(total=Sum("amount"))["total"] or 0
+        period_payments = in_period(completed, "paid_at")
+        period_cents = period_payments.aggregate(total=Sum("amount"))["total"] or 0
+
+        revenue_by_currency = list(
+            completed.values("currency")
+            .annotate(total=Sum("amount"), count=Count("id"))
+            .order_by("-total")
+        )
+        # Convert cents → dollars for display
+        for entry in revenue_by_currency:
+            entry["total"] = round(entry["total"] / 100, 2)
+
+        mrr_cents = (
+            Subscription.objects.filter(status="active")
+            .aggregate(total=Sum("plan__price_usd"))["total"]
+            or 0
+        )
+
+        revenue_trend = list(
+            in_period(completed, "paid_at")
+            .annotate(date=TruncDate("paid_at"))
+            .values("date", "currency")
+            .annotate(total=Sum("amount"), count=Count("id"))
+            .order_by("date")
+        )
+        for entry in revenue_trend:
+            entry["total"] = round(entry["total"] / 100, 2)
+
+        return {
+            "active_by_plan": active_by_plan,
+            "status_breakdown": status_breakdown,
+            "total_revenue_all_time_usd": round(all_time_cents / 100, 2),
+            "revenue_in_period_usd": round(period_cents / 100, 2),
+            "revenue_by_currency": revenue_by_currency,
+            "mrr_usd": round(mrr_cents / 100, 2),
+            "revenue_trend": revenue_trend,
+        }
