@@ -88,35 +88,129 @@ function getArticleImage(article: NewsArticle): string | null {
 /** Consistent tag color for all topic tags (Finimize-style teal) */
 const TAG_COLOR = "text-teal-600 dark:text-teal-400";
 
-/** Derive exactly 2 topic keyword tags from article category */
+/**
+ * Smart keyword extraction: scans article title + excerpt for real
+ * contextual tags. Returns exactly 2 tags that feel editorially curated.
+ */
+const KEYWORD_BANK: Record<string, string> = {
+  // Macro & policy
+  "central bank": "central banks", "interest rate": "interest rates",
+  "monetary policy": "monetary policy", "fiscal policy": "fiscal policy",
+  "inflation": "inflation", "gdp": "gdp", "recession": "recession",
+  "debt": "sovereign debt", "bond": "bonds", "treasury": "bonds",
+  "imf": "imf", "world bank": "world bank", "afcfta": "afcfta",
+  "trade war": "trade war", "tariff": "tariffs", "sanctions": "sanctions",
+  "budget": "budget", "stimulus": "stimulus", "austerity": "austerity",
+  "currency": "currency", "forex": "forex", "exchange rate": "forex",
+  "devaluation": "currency", "dollar": "dollar", "euro": "euro",
+  "yuan": "yuan", "rand": "rand", "naira": "naira", "cedi": "cedi",
+  "shilling": "shilling", "kwacha": "kwacha",
+
+  // Markets & investing
+  "stock": "equities", "equity": "equities", "ipo": "ipo",
+  "listing": "ipo", "dividend": "dividends", "earnings": "earnings",
+  "profit": "earnings", "revenue": "earnings", "bull": "bull market",
+  "bear": "bear market", "rally": "rally", "crash": "sell-off",
+  "sell-off": "sell-off", "market cap": "valuation",
+  "private equity": "private equity", "venture capital": "venture capital",
+  "hedge fund": "hedge funds", "etf": "etfs", "mutual fund": "funds",
+  "commodit": "commodities", "gold": "gold", "oil": "oil",
+  "crude": "oil", "copper": "copper", "lithium": "lithium",
+  "platinum": "platinum", "diamond": "diamonds", "coal": "coal",
+
+  // Sectors
+  "bank": "banking", "fintech": "fintech", "mobile money": "mobile money",
+  "m-pesa": "mobile money", "crypto": "crypto", "bitcoin": "crypto",
+  "blockchain": "blockchain", "digital payment": "digital payments",
+  "insurtech": "insurtech", "neobank": "neobanks", "lending": "lending",
+  "microfinance": "microfinance",
+  "mining": "mining", "agricult": "agriculture", "farm": "agriculture",
+  "food": "food security", "grain": "agriculture",
+  "tech": "technology", "ai": "ai", "artificial intelligence": "ai",
+  "startup": "startups", "unicorn": "startups",
+  "telecom": "telecoms", "5g": "telecoms", "data center": "data centers",
+  "cloud": "cloud", "semiconductor": "chips",
+  "renewable": "renewables", "solar": "solar", "wind energy": "wind",
+  "green bond": "green bonds", "esg": "esg", "climate": "climate",
+  "carbon": "carbon", "electric vehicle": "evs", "ev ": "evs",
+  "hydrogen": "hydrogen", "battery": "batteries",
+  "real estate": "real estate", "property": "real estate",
+  "construction": "construction", "infrastructure": "infrastructure",
+  "rail": "infrastructure", "port": "infrastructure", "airport": "infrastructure",
+  "oil and gas": "oil & gas", "pipeline": "oil & gas",
+  "pharmaceutical": "pharma", "health": "healthcare", "hospital": "healthcare",
+
+  // Africa-specific
+  "nigeria": "nigeria", "kenya": "kenya", "south africa": "south africa",
+  "ghana": "ghana", "egypt": "egypt", "morocco": "morocco",
+  "tanzania": "tanzania", "uganda": "uganda", "rwanda": "rwanda",
+  "ethiopia": "ethiopia", "côte d'ivoire": "ivory coast",
+  "senegal": "senegal", "drc": "drc", "congo": "drc",
+  "mozambique": "mozambique", "angola": "angola", "botswana": "botswana",
+  "namibia": "namibia", "zambia": "zambia", "zimbabwe": "zimbabwe",
+  "tunisia": "tunisia", "cameroon": "cameroon",
+  "jse": "jse", "ngx": "ngx", "nse": "nse", "gse": "gse",
+  "safaricom": "safaricom", "dangote": "dangote", "mtn": "mtn",
+  "naspers": "naspers", "shoprite": "shoprite",
+
+  // Corporate actions & themes
+  "merger": "m&a", "acquisition": "m&a", "takeover": "m&a",
+  "buyout": "m&a", "deal": "deals", "partnership": "partnerships",
+  "regulation": "regulation", "compliance": "regulation",
+  "corruption": "governance", "governance": "governance",
+  "privatization": "privatization", "subsidy": "subsidies",
+  "remittance": "remittances", "diaspora": "diaspora",
+  "employment": "jobs", "unemployment": "jobs", "labor": "labor",
+  "strike": "labor", "wage": "wages",
+  "tourism": "tourism", "aviation": "aviation", "airline": "aviation",
+  "shipping": "logistics", "supply chain": "supply chain",
+  "e-commerce": "e-commerce", "retail": "retail",
+};
+
+// Category fallbacks when keyword extraction finds < 2 matches
+const CATEGORY_FALLBACKS: Record<string, string> = {
+  "banking": "banking", "banking-finance": "banking", "finance": "finance",
+  "mining": "mining", "mining-resources": "mining",
+  "technology": "tech", "tech": "tech",
+  "agriculture": "agriculture", "infrastructure": "infrastructure",
+  "global": "global markets", "global-markets": "global markets",
+  "fintech": "fintech", "energy": "energy",
+  "trade-policy": "trade", "sustainability": "esg",
+};
+
 function getArticleTopics(article: NewsArticle): [string, string] {
-  const slug = article.category?.slug || "";
-  const name = article.category?.name || "Insight";
+  const text = `${article.title} ${article.excerpt}`.toLowerCase();
+  const found: string[] = [];
+  const seen = new Set<string>();
 
-  const topicMap: Record<string, [string, string]> = {
-    "banking": ["banking", "finance"],
-    "banking-finance": ["banking", "finance"],
-    "finance": ["finance", "markets"],
-    "mining": ["mining", "resources"],
-    "mining-resources": ["mining", "commodities"],
-    "technology": ["tech", "innovation"],
-    "tech": ["tech", "digital"],
-    "agriculture": ["agriculture", "commodities"],
-    "infrastructure": ["infrastructure", "development"],
-    "global": ["global", "markets"],
-    "global-markets": ["global", "macro"],
-    "fintech": ["fintech", "digital"],
-    "energy": ["energy", "resources"],
-    "trade-policy": ["trade", "policy"],
-    "sustainability": ["esg", "climate"],
-  };
+  // Scan for keyword matches — longer phrases first for accuracy
+  const sortedKeys = Object.keys(KEYWORD_BANK).sort((a, b) => b.length - a.length);
+  for (const key of sortedKeys) {
+    if (found.length >= 2) break;
+    if (text.includes(key)) {
+      const tag = KEYWORD_BANK[key];
+      if (!seen.has(tag)) {
+        seen.add(tag);
+        found.push(tag);
+      }
+    }
+  }
 
-  if (topicMap[slug]) return topicMap[slug];
+  // Fill remaining slots with category fallback
+  if (found.length < 2) {
+    const catSlug = article.category?.slug || "";
+    const catTag = CATEGORY_FALLBACKS[catSlug];
+    if (catTag && !seen.has(catTag)) {
+      seen.add(catTag);
+      found.push(catTag);
+    }
+  }
 
-  // Fallback: split the category name or derive two tags
-  const words = name.toLowerCase().replace(/&/g, "").split(/\s+/).filter(Boolean);
-  if (words.length >= 2) return [words[0], words[1]] as [string, string];
-  return [words[0] || "insight", "analysis"];
+  // Last resort: generic
+  if (found.length < 1) found.push("markets");
+  if (found.length < 2) found.push("analysis");
+
+  return [found[0], found[1]] as [string, string];
 }
 
 /** useFadeIn - IntersectionObserver callback ref for scroll-triggered fade-in */
