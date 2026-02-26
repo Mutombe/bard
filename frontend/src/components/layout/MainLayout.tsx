@@ -385,7 +385,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <li><Link href="/publications/finance-africa-insights" className="hover:text-foreground">Finance Africa Insights</Link></li>
                 <li><Link href="/publications/afrifin-analytics" className="hover:text-foreground">AfriFin Analytics</Link></li>
                 <li><Link href="/newsletters" className="hover:text-foreground">Newsletters</Link></li>
-                <li><Link href="/markets" className="hover:text-foreground">Markets Data</Link></li>
               </ul>
             </div>
 

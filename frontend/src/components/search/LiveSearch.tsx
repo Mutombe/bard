@@ -36,7 +36,6 @@ interface LiveSearchProps {
 
 // Mock search data - Articles
 const articleResults: SearchResult[] = [
-  { id: "ar1", type: "article", title: "JSE All Share Index Hits Record High", subtitle: "Markets • 2 hours ago", url: "/news/jse-record-high" },
   { id: "ar2", type: "article", title: "Central Bank of Nigeria Holds Rates", subtitle: "Economics • 4 hours ago", url: "/news/cbn-rates-decision" },
   { id: "ar3", type: "article", title: "Naspers Share Buyback Programme", subtitle: "Corporate • 5 hours ago", url: "/news/naspers-buyback" },
   { id: "ar4", type: "article", title: "MTN Q3 Revenue Growth Report", subtitle: "Corporate • 6 hours ago", url: "/news/mtn-q3-results" },
@@ -91,7 +90,6 @@ const topicResults: SearchResult[] = [
   { id: "to6", type: "topic", title: "Private Equity & Venture Capital", subtitle: "Topic • VC funding, PE deals", url: "/topics/private-equity" },
   { id: "to7", type: "topic", title: "Foreign Direct Investment", subtitle: "Topic • FDI flows, Investment treaties", url: "/topics/fdi" },
   { id: "to8", type: "topic", title: "Cryptocurrency & Blockchain", subtitle: "Topic • Digital assets, DeFi", url: "/topics/crypto" },
-  { id: "to9", type: "topic", title: "Currency & Forex Markets", subtitle: "Topic • ZAR, NGN, KES, EGP analysis", url: "/topics/forex" },
 ];
 
 // Mock search data - Research & Publications
@@ -106,7 +104,6 @@ const researchResults: SearchResult[] = [
 
 // Mock search data - Podcasts
 const podcastResults: SearchResult[] = [
-  { id: "po1", type: "podcast", title: "African Markets Today", subtitle: "Podcast • Daily market analysis", url: "/podcasts/african-markets-today" },
   { id: "po2", type: "podcast", title: "BGFI Economic Briefing", subtitle: "Podcast • Weekly economics", url: "/podcasts/economic-briefing" },
   { id: "po3", type: "podcast", title: "Fintech Frontiers", subtitle: "Podcast • Technology interviews", url: "/podcasts/fintech-frontiers" },
   { id: "po4", type: "podcast", title: "Commodity Corner", subtitle: "Podcast • Resources & Mining", url: "/podcasts/commodity-corner" },
