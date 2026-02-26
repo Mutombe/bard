@@ -36,7 +36,6 @@ function getNotificationLink(notification: Notification): string | undefined {
 
   if (data?.link) return data.link;
   if (data?.article_slug) return `/news/${data.article_slug}`;
-  if (data?.company_slug) return `/companies/${data.company_slug}`;
 
   return undefined;
 }
