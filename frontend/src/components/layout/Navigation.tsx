@@ -187,9 +187,6 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
   const getItemBadge = (href: string | undefined) => {
     if (!savedCounts || !href) return null;
 
-    if (href === "/watchlist" && savedCounts.watchlistCount > 0) {
-      return savedCounts.watchlistCount;
-    }
     if (href === "/saved" && savedCounts.savedArticlesCount > 0) {
       return savedCounts.savedArticlesCount;
     }

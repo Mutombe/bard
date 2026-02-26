@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Bell,
-  TrendingUp,
   Newspaper,
   AlertCircle,
   Check,
@@ -12,8 +11,6 @@ import {
   Settings,
   CheckCheck,
   Loader2,
-  BarChart3,
-  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -25,14 +22,8 @@ import { toast } from "sonner";
 
 function getNotificationIcon(type: NotificationType) {
   switch (type) {
-    case "price_alert":
-      return <TrendingUp className="h-5 w-5 text-market-up" />;
     case "breaking_news":
       return <Newspaper className="h-5 w-5 text-brand-orange" />;
-    case "earnings":
-      return <BarChart3 className="h-5 w-5 text-blue-400" />;
-    case "watchlist":
-      return <Star className="h-5 w-5 text-yellow-400" />;
     case "system":
       return <AlertCircle className="h-5 w-5 text-purple-400" />;
     default:
@@ -186,7 +177,7 @@ export default function NotificationsPage() {
               )}
             </h1>
             <p className="text-muted-foreground">
-              Stay updated with price alerts, news, and more.
+              Stay updated with breaking news and system updates.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -218,10 +209,8 @@ export default function NotificationsPage() {
           {[
             { id: "all", label: "All" },
             { id: "unread", label: `Unread (${unreadCount})` },
-            { id: "price_alert", label: "Price Alerts" },
             { id: "breaking_news", label: "Breaking News" },
-            { id: "earnings", label: "Earnings" },
-            { id: "watchlist", label: "Watchlist" },
+            { id: "system", label: "System" },
           ].map((f) => (
             <button
               key={f.id}
