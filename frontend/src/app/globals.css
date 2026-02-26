@@ -217,13 +217,12 @@
   .card-terminal {
     background-color: hsl(var(--terminal-bg-secondary));
     border: 1px solid hsl(var(--terminal-border));
-    @apply rounded-md;
   }
 
   .card-elevated {
     background-color: hsl(var(--terminal-bg-elevated));
     border: 1px solid hsl(var(--terminal-border));
-    @apply rounded-md shadow-lg;
+    @apply shadow-lg;
   }
 
   /* Data grid styles */
@@ -638,16 +637,14 @@
     color: hsl(var(--primary));
   }
 
-  /* Topics & Regions tags */
+  /* Topics & Regions tags - flat lowercase colored text (Finimize-style) */
   .topic-tag {
-    @apply inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-full transition-colors;
-    background-color: hsl(var(--terminal-bg-elevated));
-    color: hsl(var(--foreground));
+    @apply inline-flex items-center text-sm font-medium lowercase tracking-wide transition-colors;
+    color: hsl(var(--muted-foreground));
   }
 
   .topic-tag:hover {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    color: hsl(var(--primary));
   }
 
   /* Sticky article header */
@@ -689,6 +686,104 @@
 
   .keyword-link[data-type="company"] {
     color: hsl(30 80% 50%);
+  }
+
+  /* =========================
+     FINIMIZE / HBR UTILITIES
+     ========================= */
+
+  /* Hero headline - Fraunces weight 800, fluid size */
+  .headline-hero {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  /* Meta line - Inter, tiny muted */
+  .meta-line {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    @apply text-xs text-muted-foreground;
+    letter-spacing: 0.01em;
+  }
+
+  /* Card hover lift */
+  .card-hover {
+    @apply transition-all duration-300;
+  }
+
+  .card-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  }
+
+  .dark .card-hover:hover {
+    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+  }
+
+  /* Headline underline-from-left on hover */
+  .headline-hover {
+    background-image: linear-gradient(hsl(var(--primary)), hsl(var(--primary)));
+    background-size: 0% 2px;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s ease;
+  }
+
+  .headline-hover:hover {
+    background-size: 100% 2px;
+  }
+
+  /* CTA arrow nudge on group hover */
+  .cta-arrow {
+    @apply transition-transform duration-200;
+  }
+
+  .group:hover .cta-arrow {
+    transform: translateX(2px);
+  }
+
+  /* Breaking badge pulse */
+  .badge-breaking {
+    @apply px-3 py-1.5 bg-red-600 text-white text-xs font-semibold tracking-wide uppercase;
+    animation: pulse-break 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-break {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+
+  /* Section dark - theme-aware */
+  .section-dark {
+    @apply bg-foreground/[0.03];
+  }
+
+  .dark .section-dark {
+    background-color: hsl(0 0% 3%);
+  }
+
+  /* Section media - dark background for podcast/video */
+  .section-media {
+    background-color: hsl(0 0% 8%);
+  }
+
+  .dark .section-media {
+    background-color: hsl(0 0% 4%);
+  }
+
+  /* Fade-in animation for scroll-triggered sections */
+  .fade-in-section {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .fade-in-section.is-visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 
   /* Print-friendly styles */
