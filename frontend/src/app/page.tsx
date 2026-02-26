@@ -85,23 +85,38 @@ function getArticleImage(article: NewsArticle): string | null {
   return article.featured_image || article.featured_image_url || null;
 }
 
-/** Finimize-style category color map */
-function getCategoryColor(slug?: string): string {
-  if (!slug) return "text-primary";
-  const map: Record<string, string> = {
-    banking: "text-blue-500",
-    "banking-finance": "text-blue-500",
-    finance: "text-blue-500",
-    mining: "text-amber-500",
-    "mining-resources": "text-amber-500",
-    technology: "text-violet-500",
-    tech: "text-violet-500",
-    agriculture: "text-emerald-500",
-    infrastructure: "text-slate-500",
-    global: "text-cyan-500",
-    "global-markets": "text-cyan-500",
+/** Consistent tag color for all topic tags (Finimize-style teal) */
+const TAG_COLOR = "text-teal-600 dark:text-teal-400";
+
+/** Derive exactly 2 topic keyword tags from article category */
+function getArticleTopics(article: NewsArticle): [string, string] {
+  const slug = article.category?.slug || "";
+  const name = article.category?.name || "Insight";
+
+  const topicMap: Record<string, [string, string]> = {
+    "banking": ["banking", "finance"],
+    "banking-finance": ["banking", "finance"],
+    "finance": ["finance", "markets"],
+    "mining": ["mining", "resources"],
+    "mining-resources": ["mining", "commodities"],
+    "technology": ["tech", "innovation"],
+    "tech": ["tech", "digital"],
+    "agriculture": ["agriculture", "commodities"],
+    "infrastructure": ["infrastructure", "development"],
+    "global": ["global", "markets"],
+    "global-markets": ["global", "macro"],
+    "fintech": ["fintech", "digital"],
+    "energy": ["energy", "resources"],
+    "trade-policy": ["trade", "policy"],
+    "sustainability": ["esg", "climate"],
   };
-  return map[slug] || "text-primary";
+
+  if (topicMap[slug]) return topicMap[slug];
+
+  // Fallback: split the category name or derive two tags
+  const words = name.toLowerCase().replace(/&/g, "").split(/\s+/).filter(Boolean);
+  if (words.length >= 2) return [words[0], words[1]] as [string, string];
+  return [words[0] || "insight", "analysis"];
 }
 
 /** useFadeIn - IntersectionObserver callback ref for scroll-triggered fade-in */
@@ -172,21 +187,15 @@ const regions = [
 // SHARED COMPONENTS
 // =====================
 
-/** Finimize-style lowercase topic tags with · separators */
+/** Finimize-style: exactly 2 lowercase topic tags, same color, separated by · */
 function TopicTags({ article }: { article: NewsArticle }) {
-  const tags: string[] = [];
-  if (article.category?.name) tags.push(article.category.name);
-  if (article.read_time_minutes) tags.push(`${article.read_time_minutes} min read`);
-  if (tags.length === 0) return null;
+  const [tag1, tag2] = getArticleTopics(article);
 
   return (
-    <div className="meta-line flex items-center gap-1.5 flex-wrap">
-      {tags.map((tag, i) => (
-        <span key={tag} className="flex items-center gap-1.5">
-          {i > 0 && <span className="text-muted-foreground/50">·</span>}
-          <span className="lowercase">{tag}</span>
-        </span>
-      ))}
+    <div className="flex items-center gap-1.5">
+      <span className={cn("text-xs lowercase", TAG_COLOR)}>{tag1}</span>
+      <span className={cn("text-xs", TAG_COLOR)}>·</span>
+      <span className={cn("text-xs lowercase", TAG_COLOR)}>{tag2}</span>
     </div>
   );
 }
@@ -218,14 +227,12 @@ function SectionHeader({
 
 /** Text-only card — Finimize-inspired, no image, no background box */
 function TextCard({ article }: { article: NewsArticle }) {
-  const catColor = getCategoryColor(article.category?.slug);
-
   return (
     <Link href={`/news/${article.slug}`} className="group block py-5 border-b border-border">
       <article>
         {/* Top row: category + time */}
         <div className="flex items-center gap-2 mb-2">
-          <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+          <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
             {article.category?.name || "insight"}
           </span>
           <span className="text-muted-foreground/50 text-xs">·</span>
@@ -353,7 +360,6 @@ function ExtendedFeedSkeleton() {
 /** FeaturedInsight - Hero article with burgundy rule, headline-hero class */
 function FeaturedInsight({ article }: { article: NewsArticle }) {
   const imageUrl = getArticleImage(article);
-  const catColor = getCategoryColor(article.category?.slug);
 
   return (
     <Link href={`/news/${article.slug}`} className="group block">
@@ -382,7 +388,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
           <div className="w-8 h-0.5 bg-primary mb-4" />
 
           <div className="flex items-center gap-3 mb-3">
-            <span className={cn("text-sm font-medium lowercase tracking-wide", catColor)}>
+            <span className={cn("text-sm font-medium lowercase tracking-wide", TAG_COLOR)}>
               {article.category?.name || "insight"}
             </span>
             {article.read_time_minutes && (
@@ -415,7 +421,6 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
 /** InsightCard - Clean card with image, colored category, topic tags */
 function InsightCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
   const imageUrl = getArticleImage(article);
-  const catColor = getCategoryColor(article.category?.slug);
 
   return (
     <Link href={`/news/${article.slug}`} className="group block h-full card-hover">
@@ -433,7 +438,7 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
         )}
 
         <div className="flex items-center gap-2 mb-2">
-          <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+          <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
             {article.category?.name || "insight"}
           </span>
         </div>
@@ -493,7 +498,7 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
           <div className="absolute inset-0 flex flex-col justify-end p-4">
-            <span className="text-xs font-medium text-primary lowercase tracking-wide mb-2">
+            <span className={cn("text-xs font-medium lowercase tracking-wide mb-2", TAG_COLOR)}>
               {article.category?.name || "insight"}
             </span>
 
@@ -545,8 +550,6 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
 
 /** SidebarInsight - Rank number + category + title + time (no image) */
 function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number }) {
-  const catColor = getCategoryColor(article.category?.slug);
-
   return (
     <Link
       href={`/news/${article.slug}`}
@@ -558,7 +561,7 @@ function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number 
       </span>
 
       <div className="flex-1 min-w-0">
-        <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+        <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
           {article.category?.name || "insight"}
         </span>
         <h4 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2 mt-0.5">
@@ -912,9 +915,7 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
         <SectionHeader title="Trending Now" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {articles.map((article, index) => {
-            const catColor = getCategoryColor(article.category?.slug);
-            return (
+          {articles.map((article, index) => (
               <Link
                 key={article.id}
                 href={`/news/${article.slug}`}
@@ -924,7 +925,7 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
                   {(index + 1).toString().padStart(2, "0")}
                 </span>
                 <div className="flex-1">
-                  <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+                  <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
                     {article.category?.name}
                   </span>
                   <h3 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors mt-1 line-clamp-3">
@@ -935,8 +936,7 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
                   </span>
                 </div>
               </Link>
-            );
-          })}
+          ))}
         </div>
       </div>
     </section>
