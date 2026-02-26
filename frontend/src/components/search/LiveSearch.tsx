@@ -5,9 +5,7 @@ import Link from "next/link";
 import {
   Search,
   X,
-  TrendingUp,
   Newspaper,
-  Building2,
   User,
   Clock,
   ArrowRight,
@@ -23,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 interface SearchResult {
   id: string;
-  type: "stock" | "article" | "company" | "person" | "suggestion" | "industry" | "region" | "topic" | "research" | "podcast" | "economics";
+  type: "article" | "person" | "suggestion" | "industry" | "region" | "topic" | "research" | "podcast" | "economics";
   title: string;
   subtitle?: string;
   url: string;
@@ -36,40 +34,16 @@ interface LiveSearchProps {
   onClose: () => void;
 }
 
-// Mock search data - Stocks
-const stockResults: SearchResult[] = [
-  { id: "st1", type: "stock", title: "NPN", subtitle: "Naspers Ltd • JSE", url: "/companies/npn", badge: "+2.83%" },
-  { id: "st2", type: "stock", title: "MTN", subtitle: "MTN Group Ltd • JSE", url: "/companies/mtn", badge: "+6.41%" },
-  { id: "st3", type: "stock", title: "AGL", subtitle: "Anglo American Plc • JSE", url: "/companies/agl", badge: "+8.75%" },
-  { id: "st4", type: "stock", title: "SBK", subtitle: "Standard Bank Group • JSE", url: "/companies/sbk", badge: "+4.80%" },
-  { id: "st5", type: "stock", title: "DANGCEM", subtitle: "Dangote Cement • NGX", url: "/companies/dangcem", badge: "+1.58%" },
-  { id: "st6", type: "stock", title: "SBISP", subtitle: "Stanbic IBTC • NGX", url: "/companies/sbisp", badge: "+3.21%" },
-  { id: "st7", type: "stock", title: "SOL", subtitle: "Sasol Limited • JSE", url: "/companies/sol", badge: "-1.45%" },
-  { id: "st8", type: "stock", title: "VOD", subtitle: "Vodacom Group • JSE", url: "/companies/vod", badge: "+0.92%" },
-];
-
 // Mock search data - Articles
 const articleResults: SearchResult[] = [
   { id: "ar1", type: "article", title: "JSE All Share Index Hits Record High", subtitle: "Markets • 2 hours ago", url: "/news/jse-record-high" },
   { id: "ar2", type: "article", title: "Central Bank of Nigeria Holds Rates", subtitle: "Economics • 4 hours ago", url: "/news/cbn-rates-decision" },
   { id: "ar3", type: "article", title: "Naspers Share Buyback Programme", subtitle: "Corporate • 5 hours ago", url: "/news/naspers-buyback" },
-  { id: "ar4", type: "article", title: "MTN Q3 Revenue Growth Report", subtitle: "Earnings • 6 hours ago", url: "/news/mtn-q3-results" },
+  { id: "ar4", type: "article", title: "MTN Q3 Revenue Growth Report", subtitle: "Corporate • 6 hours ago", url: "/news/mtn-q3-results" },
   { id: "ar5", type: "article", title: "SARB Inflation Outlook 2025", subtitle: "Economics • 8 hours ago", url: "/news/sarb-inflation-outlook" },
   { id: "ar6", type: "article", title: "Gold Mining Sector Analysis", subtitle: "Industries • 1 day ago", url: "/news/gold-mining-analysis" },
   { id: "ar7", type: "article", title: "AfCFTA Trade Agreement Progress", subtitle: "Trade Policy • 2 days ago", url: "/news/afcfta-progress" },
   { id: "ar8", type: "article", title: "Kenya Fintech Ecosystem Growth", subtitle: "Technology • 3 days ago", url: "/news/kenya-fintech-growth" },
-];
-
-// Mock search data - Companies
-const companyResults: SearchResult[] = [
-  { id: "co1", type: "company", title: "Naspers Ltd", subtitle: "Technology • JSE", url: "/companies/npn" },
-  { id: "co2", type: "company", title: "MTN Group Ltd", subtitle: "Telecommunications • JSE", url: "/companies/mtn" },
-  { id: "co3", type: "company", title: "Standard Bank Group", subtitle: "Banking • JSE", url: "/companies/sbk" },
-  { id: "co4", type: "company", title: "Dangote Cement Plc", subtitle: "Industrial • NGX", url: "/companies/dangcem" },
-  { id: "co5", type: "company", title: "Safaricom Plc", subtitle: "Telecommunications • NSE", url: "/companies/scom" },
-  { id: "co6", type: "company", title: "FirstRand Limited", subtitle: "Banking • JSE", url: "/companies/fsr" },
-  { id: "co7", type: "company", title: "Anglo American Platinum", subtitle: "Mining • JSE", url: "/companies/ams" },
-  { id: "co8", type: "company", title: "Equity Group Holdings", subtitle: "Banking • NSE", url: "/companies/eqty" },
 ];
 
 // Mock search data - People
@@ -153,12 +127,12 @@ const economicsResults: SearchResult[] = [
 
 // Suggestions shown when search is empty
 const suggestions: SearchResult[] = [
-  { id: "s1", type: "suggestion", title: "JSE Top 40", url: "/markets/indices/j200" },
-  { id: "s2", type: "suggestion", title: "NGX All Share Index", url: "/markets/indices/ngxasi" },
-  { id: "s3", type: "suggestion", title: "Banking sector analysis", url: "/industries/banking" },
-  { id: "s4", type: "suggestion", title: "Central Banks", url: "/topics/central-banks" },
-  { id: "s5", type: "suggestion", title: "Latest Research", url: "/research" },
-  { id: "s6", type: "suggestion", title: "East Africa Markets", url: "/regions/east-africa" },
+  { id: "s1", type: "suggestion", title: "Banking sector analysis", url: "/industries/banking" },
+  { id: "s2", type: "suggestion", title: "Central Banks", url: "/topics/central-banks" },
+  { id: "s3", type: "suggestion", title: "Latest Research", url: "/research" },
+  { id: "s4", type: "suggestion", title: "East Africa", url: "/regions/east-africa" },
+  { id: "s5", type: "suggestion", title: "Fintech & Digital Finance", url: "/topics/fintech" },
+  { id: "s6", type: "suggestion", title: "Mining & Resources", url: "/industries/mining" },
 ];
 
 const recentSearches = [
@@ -171,12 +145,8 @@ const recentSearches = [
 
 function getIcon(type: SearchResult["type"]) {
   switch (type) {
-    case "stock":
-      return <TrendingUp className="h-4 w-4 text-market-up" />;
     case "article":
       return <Newspaper className="h-4 w-4 text-brand-orange" />;
-    case "company":
-      return <Building2 className="h-4 w-4 text-blue-400" />;
     case "person":
       return <User className="h-4 w-4 text-purple-400" />;
     case "industry":
@@ -202,9 +172,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [results, setResults] = useState<{
-    stocks: SearchResult[];
     articles: SearchResult[];
-    companies: SearchResult[];
     people: SearchResult[];
     industries: SearchResult[];
     regions: SearchResult[];
@@ -214,9 +182,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
     economics: SearchResult[];
     suggestions: SearchResult[];
   }>({
-    stocks: [],
     articles: [],
-    companies: [],
     people: [],
     industries: [],
     regions: [],
@@ -266,9 +232,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
   const performSearch = useCallback((searchQuery: string) => {
     if (!searchQuery.trim()) {
       setResults({
-        stocks: [],
         articles: [],
-        companies: [],
         people: [],
         industries: [],
         regions: [],
@@ -288,9 +252,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
       const q = searchQuery.toLowerCase();
 
       setResults({
-        stocks: filterResults(stockResults, q),
         articles: filterResults(articleResults, q),
-        companies: filterResults(companyResults, q),
         people: filterResults(personResults, q),
         industries: filterResults(industryResults, q),
         regions: filterResults(regionResults, q),
@@ -314,8 +276,8 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
   }, [query, performSearch]);
 
   // Calculate total count excluding suggestions
-  const totalCount = results.stocks.length + results.articles.length +
-    results.companies.length + results.people.length + results.industries.length +
+  const totalCount = results.articles.length +
+    results.people.length + results.industries.length +
     results.regions.length + results.topics.length + results.research.length +
     results.podcasts.length + results.economics.length;
 
@@ -326,8 +288,6 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
     { id: "topics", label: "Topics", count: results.topics.length },
     { id: "regions", label: "Regions", count: results.regions.length },
     { id: "research", label: "Research", count: results.research.length },
-    { id: "companies", label: "Companies", count: results.companies.length },
-    { id: "stocks", label: "Stocks", count: results.stocks.length },
     { id: "economics", label: "Economics", count: results.economics.length },
     { id: "podcasts", label: "Podcasts", count: results.podcasts.length },
     { id: "people", label: "People", count: results.people.length },
@@ -347,8 +307,6 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
         ...results.topics.slice(0, 2),
         ...results.regions.slice(0, 2),
         ...results.research.slice(0, 2),
-        ...results.companies.slice(0, 2),
-        ...results.stocks.slice(0, 2),
         ...results.economics.slice(0, 2),
         ...results.podcasts.slice(0, 2),
         ...results.people.slice(0, 2),
@@ -490,14 +448,6 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
                     >
                       <Mic className="h-4 w-4 text-rose-400" />
                       Podcasts
-                    </Link>
-                    <Link
-                      href="/markets"
-                      onClick={onClose}
-                      className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated text-sm transition-colors"
-                    >
-                      <TrendingUp className="h-4 w-4 text-market-up" />
-                      Markets
                     </Link>
                   </div>
                 </div>

@@ -237,10 +237,7 @@ export interface NewsArticle {
 // =========================
 
 export type NotificationType =
-  | "price_alert"
   | "breaking_news"
-  | "earnings"
-  | "watchlist"
   | "system";
 
 export interface Notification {

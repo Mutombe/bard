@@ -8,7 +8,6 @@ import {
   User,
   Menu,
   X,
-  Star,
   Bell,
   Settings,
   LogOut,
@@ -216,13 +215,6 @@ export function MainLayout({ children }: MainLayoutProps) {
 
               {isAuthenticated ? (
                 <>
-                  {/* Watchlist */}
-                  <Link href="/watchlist">
-                    <Button variant="ghost" size="icon">
-                      <Star className="h-5 w-5" />
-                    </Button>
-                  </Link>
-
                   {/* Notifications */}
                   <Link href="/notifications" className="relative">
                     <Button variant="ghost" size="icon">
@@ -259,21 +251,9 @@ export function MainLayout({ children }: MainLayoutProps) {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/watchlist">
-                          <Star className="h-4 w-4 mr-2" />
-                          Watchlist
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
                         <Link href="/saved">
                           <Bookmark className="h-4 w-4 mr-2" />
                           Saved Articles
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/alerts">
-                          <Bell className="h-4 w-4 mr-2" />
-                          Price Alerts
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
