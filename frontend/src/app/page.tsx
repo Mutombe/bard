@@ -9,8 +9,6 @@ import {
   Play,
   Mic,
   ArrowRight,
-  TrendingUp,
-  TrendingDown,
   Globe,
   Building2,
   Pickaxe,
@@ -28,7 +26,7 @@ import apiClient from "@/services/api/client";
 import { toast } from "sonner";
 import {
   useArticles,
-  useIndices,
+
   useCNBCAfricaVideo,
 } from "@/hooks";
 
@@ -55,15 +53,6 @@ interface NewsArticle {
   is_breaking?: boolean;
   is_premium?: boolean;
   read_time_minutes?: number;
-}
-
-interface MarketIndex {
-  code: string;
-  name: string;
-  current_value: number;
-  previous_close: number;
-  change?: number;
-  change_percent?: number;
 }
 
 // =====================
@@ -323,32 +312,16 @@ function MainContentSkeleton() {
 function SidebarSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="p-5 bg-terminal-bg-secondary border border-terminal-border mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <Skeleton className="h-4 w-28" />
-          <Skeleton className="h-3 w-16" />
-        </div>
-        <div className="space-y-3">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between py-2">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-20" />
-            </div>
-          ))}
-        </div>
-      </div>
-      <div>
-        <Skeleton className="h-4 w-20 mb-4" />
-        {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex gap-4 mb-4">
-            <Skeleton className="w-8 h-8 flex-shrink-0" />
-            <div className="flex-1">
-              <Skeleton className="h-3 w-16 mb-2" />
-              <Skeleton className="h-5 w-full" />
-            </div>
+      <Skeleton className="h-4 w-20 mb-4" />
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex gap-4 mb-4">
+          <Skeleton className="w-8 h-8 flex-shrink-0" />
+          <div className="flex-1">
+            <Skeleton className="h-3 w-16 mb-2" />
+            <Skeleton className="h-5 w-full" />
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -908,57 +881,6 @@ function NewsletterSection() {
   );
 }
 
-/** Market Summary Widget */
-function MarketSummaryWidget({ indices }: { indices: MarketIndex[] }) {
-  if (!indices || indices.length === 0) return null;
-
-  return (
-    <div className="p-5 bg-terminal-bg-secondary border border-terminal-border">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
-          Market Summary
-        </h3>
-        <Link href="/markets" className="text-xs text-primary hover:text-primary/80">
-          Full Data →
-        </Link>
-      </div>
-
-      <div className="space-y-3">
-        {indices.slice(0, 4).map((index) => {
-          const currentValue = Number(index.current_value) || 0;
-          const previousClose = Number(index.previous_close) || 1;
-          const change = Number(index.change) || (currentValue - previousClose);
-          const changePercent = Number(index.change_percent) || ((change / previousClose) * 100);
-          const isUp = change >= 0;
-
-          return (
-            <Link
-              key={index.code}
-              href={`/markets/indices/${index.code}`}
-              className="flex items-center justify-between py-2 hover:bg-terminal-bg-elevated -mx-2 px-2 transition-colors"
-            >
-              <div>
-                <span className="font-mono font-semibold text-sm">{index.code}</span>
-                <span className="text-xs text-muted-foreground ml-2 hidden sm:inline">{index.name}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="font-mono text-sm">{currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
-                <span className={cn(
-                  "flex items-center gap-1 text-xs font-medium",
-                  isUp ? "text-green-500" : "text-red-500"
-                )}>
-                  {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {isUp ? "+" : ""}{changePercent.toFixed(2)}%
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 /** Editor's Picks — 3 OverlayCards (the ONLY overlay section) */
 function EditorsPicks({ articles }: { articles: NewsArticle[] }) {
   const fadeRef = useFadeIn();
@@ -1053,7 +975,7 @@ export default function HomePage() {
 
   // FAST initial load - only 15 articles for above-the-fold content
   const { data: articlesData, isLoading: articlesLoading } = useArticles({ page_size: 15 });
-  const { data: indicesData, isLoading: indicesLoading } = useIndices();
+
   const { data: cnbcVideoData, isLoading: videosLoading } = useCNBCAfricaVideo();
 
   useEffect(() => {
@@ -1102,7 +1024,6 @@ export default function HomePage() {
   const trendingArticles = allArticles.slice(17, 22);
   const moreStoriesArticles = allArticles.slice(22, 38); // 12-16 TextCards
 
-  const marketIndices = indicesData || [];
   const featuredVideo = cnbcVideoData || null;
 
   const loading = articlesLoading;
@@ -1176,12 +1097,6 @@ export default function HomePage() {
                   <SidebarSkeleton />
                 ) : (
                   <>
-                    {marketIndices.length > 0 && (
-                      <div className="mb-8">
-                        <MarketSummaryWidget indices={marketIndices} />
-                      </div>
-                    )}
-
                     <div className="mb-8">
                       <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2 pb-2 border-b border-border">
                         Most Read
