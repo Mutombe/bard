@@ -9,7 +9,6 @@ import {
   Play,
   Mic,
   ArrowRight,
-  BookOpen,
   TrendingUp,
   TrendingDown,
   Globe,
@@ -67,7 +66,10 @@ interface MarketIndex {
   change_percent?: number;
 }
 
-// Helper functions
+// =====================
+// HELPERS
+// =====================
+
 function timeAgo(dateString?: string): string {
   if (!dateString) return "Recently";
   const date = new Date(dateString);
@@ -78,14 +80,14 @@ function timeAgo(dateString?: string): string {
   if (seconds < 3600) return `${Math.floor(seconds / 60)} min ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
   if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
 function formatDate(dateString?: string): string {
   if (!dateString) return "";
-  return new Date(dateString).toLocaleDateString("en-US", {
-    month: "long",
+  return new Date(dateString).toLocaleDateString("en-GB", {
     day: "numeric",
+    month: "short",
     year: "numeric",
   });
 }
@@ -94,17 +96,56 @@ function getArticleImage(article: NewsArticle): string | null {
   return article.featured_image || article.featured_image_url || null;
 }
 
-// Industry/Sector data for navigation
+/** Finimize-style category color map */
+function getCategoryColor(slug?: string): string {
+  if (!slug) return "text-primary";
+  const map: Record<string, string> = {
+    banking: "text-blue-500",
+    "banking-finance": "text-blue-500",
+    finance: "text-blue-500",
+    mining: "text-amber-500",
+    "mining-resources": "text-amber-500",
+    technology: "text-violet-500",
+    tech: "text-violet-500",
+    agriculture: "text-emerald-500",
+    infrastructure: "text-slate-500",
+    global: "text-cyan-500",
+    "global-markets": "text-cyan-500",
+  };
+  return map[slug] || "text-primary";
+}
+
+/** useFadeIn - IntersectionObserver callback ref for scroll-triggered fade-in */
+function useFadeIn() {
+  const ref = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add("is-visible");
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+  }, []);
+  return ref;
+}
+
+// =====================
+// STATIC DATA
+// =====================
+
 const industries = [
   { name: "Banking & Finance", slug: "banking", icon: Landmark, color: "text-blue-500" },
   { name: "Mining & Resources", slug: "mining", icon: Pickaxe, color: "text-amber-500" },
-  { name: "Technology", slug: "technology", icon: Cpu, color: "text-purple-500" },
-  { name: "Agriculture", slug: "agriculture", icon: Wheat, color: "text-green-500" },
+  { name: "Technology", slug: "technology", icon: Cpu, color: "text-violet-500" },
+  { name: "Agriculture", slug: "agriculture", icon: Wheat, color: "text-emerald-500" },
   { name: "Infrastructure", slug: "infrastructure", icon: Building2, color: "text-slate-500" },
   { name: "Global Markets", slug: "global", icon: Globe, color: "text-cyan-500" },
 ];
 
-// Topics for quick navigation
 const featuredTopics = [
   { name: "Central Banks", slug: "central-banks", description: "Monetary policy across Africa" },
   { name: "Fintech", slug: "fintech", description: "Digital finance innovation" },
@@ -112,7 +153,6 @@ const featuredTopics = [
   { name: "ESG & Sustainability", slug: "sustainability", description: "Climate finance & green bonds" },
 ];
 
-// Featured research reports (mock data)
 const featuredResearch = [
   {
     id: "1",
@@ -132,7 +172,6 @@ const featuredResearch = [
   },
 ];
 
-// Regional quick links
 const regions = [
   { name: "Southern Africa", slug: "southern-africa", countries: "South Africa, Botswana, Namibia" },
   { name: "East Africa", slug: "east-africa", countries: "Kenya, Tanzania, Uganda, Rwanda" },
@@ -140,13 +179,98 @@ const regions = [
   { name: "North Africa", slug: "north-africa", countries: "Egypt, Morocco, Tunisia" },
 ];
 
-// Skeleton Components
+// =====================
+// SHARED COMPONENTS
+// =====================
 
-// Hero Section Skeleton - matches the actual 12-column grid layout
+/** Finimize-style lowercase topic tags with · separators */
+function TopicTags({ article }: { article: NewsArticle }) {
+  const tags: string[] = [];
+  if (article.category?.name) tags.push(article.category.name);
+  if (article.read_time_minutes) tags.push(`${article.read_time_minutes} min read`);
+  if (tags.length === 0) return null;
+
+  return (
+    <div className="meta-line flex items-center gap-1.5 flex-wrap">
+      {tags.map((tag, i) => (
+        <span key={tag} className="flex items-center gap-1.5">
+          {i > 0 && <span className="text-muted-foreground/50">·</span>}
+          <span className="lowercase">{tag}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/** Section header with optional action link */
+function SectionHeader({
+  title,
+  href,
+  label,
+}: {
+  title: string;
+  href?: string;
+  label?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between mb-8 border-b border-border pb-3">
+      <h2 className="font-serif text-xl font-bold">{title}</h2>
+      {href && (
+        <Link
+          href={href}
+          className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
+        >
+          {label || "Read More"} <ArrowRight className="h-3.5 w-3.5 cta-arrow" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
+/** Text-only card — Finimize-inspired, no image, no background box */
+function TextCard({ article }: { article: NewsArticle }) {
+  const catColor = getCategoryColor(article.category?.slug);
+
+  return (
+    <Link href={`/news/${article.slug}`} className="group block py-5 border-b border-border">
+      <article>
+        {/* Top row: category + time */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+            {article.category?.name || "insight"}
+          </span>
+          <span className="text-muted-foreground/50 text-xs">·</span>
+          <span className="meta-line">{timeAgo(article.published_at)}</span>
+        </div>
+
+        {/* Serif title */}
+        <h3 className="font-serif text-lg font-bold leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
+          {article.title}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+          {article.excerpt}
+        </p>
+
+        {/* Author + topic tags */}
+        <div className="flex items-center gap-2 meta-line">
+          <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
+          <span className="text-muted-foreground/50">·</span>
+          <TopicTags article={article} />
+        </div>
+      </article>
+    </Link>
+  );
+}
+
+// =====================
+// SKELETON COMPONENTS
+// =====================
+
 function HeroSectionSkeleton() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-pulse">
-      {/* Main Featured Article - 7 columns */}
       <div className="lg:col-span-7">
         <Skeleton className="aspect-[21/9] mb-6" />
         <div className="max-w-4xl">
@@ -164,16 +288,14 @@ function HeroSectionSkeleton() {
           </div>
         </div>
       </div>
-      {/* Side Articles - 5 columns */}
-      <div className="lg:col-span-5 flex flex-col gap-4">
+      <div className="lg:col-span-5 flex flex-col gap-5">
         <Skeleton className="h-4 w-24" />
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-            <Skeleton className="w-28 h-[88px] flex-shrink-0" />
-            <div className="flex-1 min-w-0 p-3">
+          <div key={i} className="flex gap-4">
+            <Skeleton className="w-8 h-8 flex-shrink-0" />
+            <div className="flex-1">
               <Skeleton className="h-3 w-16 mb-2" />
               <Skeleton className="h-5 w-full mb-1" />
-              <Skeleton className="h-4 w-3/4 mb-2" />
               <Skeleton className="h-3 w-20" />
             </div>
           </div>
@@ -183,31 +305,13 @@ function HeroSectionSkeleton() {
   );
 }
 
-// Main Content Grid Skeleton - 2x2 overlay cards + regular cards
 function MainContentSkeleton() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-      {/* First two as overlay card skeletons */}
-      {[...Array(2)].map((_, i) => (
-        <div key={i} className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-          <Skeleton className="aspect-[16/10]" />
-          <div className="p-4">
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4 mb-3" />
-            <div className="flex items-center justify-between">
-              <Skeleton className="h-3 w-24" />
-              <Skeleton className="h-3 w-20" />
-            </div>
-          </div>
-        </div>
-      ))}
-      {/* Next two as regular card skeletons */}
-      {[...Array(2)].map((_, i) => (
-        <div key={i + 2}>
-          <Skeleton className="aspect-[16/10] mb-4" />
+    <div className="space-y-0 animate-pulse">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="py-5 border-b border-border">
           <Skeleton className="h-3 w-20 mb-2" />
           <Skeleton className="h-6 w-full mb-2" />
-          <Skeleton className="h-4 w-full mb-2" />
           <Skeleton className="h-4 w-3/4 mb-3" />
           <Skeleton className="h-3 w-32" />
         </div>
@@ -216,11 +320,9 @@ function MainContentSkeleton() {
   );
 }
 
-// Sidebar Skeleton - Market summary + Most read
 function SidebarSkeleton() {
   return (
     <div className="animate-pulse">
-      {/* Market Summary */}
       <div className="p-5 bg-terminal-bg-secondary border border-terminal-border mb-8">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-4 w-28" />
@@ -229,28 +331,20 @@ function SidebarSkeleton() {
         <div className="space-y-3">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-3 w-24 hidden sm:block" />
-              </div>
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-16" />
-              </div>
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-20" />
             </div>
           ))}
         </div>
       </div>
-      {/* Most Read */}
       <div>
         <Skeleton className="h-4 w-20 mb-4" />
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="flex mb-3 bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-            <Skeleton className="w-24 h-20 flex-shrink-0" />
-            <div className="flex-1 p-3">
+          <div key={i} className="flex gap-4 mb-4">
+            <Skeleton className="w-8 h-8 flex-shrink-0" />
+            <div className="flex-1">
               <Skeleton className="h-3 w-16 mb-2" />
-              <Skeleton className="h-5 w-full mb-1" />
-              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-5 w-full" />
             </div>
           </div>
         ))}
@@ -259,24 +353,18 @@ function SidebarSkeleton() {
   );
 }
 
-// Extended Feed Loading Skeleton
 function ExtendedFeedSkeleton() {
   return (
-    <section className="py-12 animate-pulse">
+    <section className="py-10 md:py-14 animate-pulse">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
         <Skeleton className="h-8 w-40 mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="space-y-0">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <Skeleton className="aspect-[16/10]" />
-              <div className="p-4">
-                <Skeleton className="h-4 w-full mb-2" />
-                <Skeleton className="h-4 w-3/4 mb-3" />
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-3 w-24" />
-                  <Skeleton className="h-3 w-20" />
-                </div>
-              </div>
+            <div key={i} className="py-5 border-b border-border">
+              <Skeleton className="h-3 w-20 mb-2" />
+              <Skeleton className="h-6 w-full mb-2" />
+              <Skeleton className="h-4 w-3/4 mb-3" />
+              <Skeleton className="h-3 w-32" />
             </div>
           ))}
         </div>
@@ -285,48 +373,14 @@ function ExtendedFeedSkeleton() {
   );
 }
 
-// Legacy skeletons for backwards compatibility
-function FeaturedInsightSkeleton() {
-  return (
-    <div className="animate-pulse">
-      <Skeleton className="aspect-[21/9] mb-6" />
-      <Skeleton className="h-4 w-24 mb-3" />
-      <Skeleton className="h-10 w-full mb-3" />
-      <Skeleton className="h-10 w-4/5 mb-4" />
-      <Skeleton className="h-5 w-full mb-2" />
-      <Skeleton className="h-5 w-3/4 mb-4" />
-      <Skeleton className="h-4 w-48" />
-    </div>
-  );
-}
+// =====================
+// ARTICLE COMPONENTS
+// =====================
 
-function InsightCardSkeleton() {
-  return (
-    <div className="animate-pulse">
-      <Skeleton className="aspect-[16/10] mb-4" />
-      <Skeleton className="h-3 w-20 mb-2" />
-      <Skeleton className="h-6 w-full mb-2" />
-      <Skeleton className="h-4 w-3/4" />
-    </div>
-  );
-}
-
-function SidebarInsightSkeleton() {
-  return (
-    <div className="flex mb-3 bg-terminal-bg-secondary border border-terminal-border overflow-hidden animate-pulse">
-      <Skeleton className="w-24 h-20 flex-shrink-0" />
-      <div className="flex-1 p-3">
-        <Skeleton className="h-3 w-16 mb-2" />
-        <Skeleton className="h-5 w-full mb-1" />
-        <Skeleton className="h-4 w-3/4" />
-      </div>
-    </div>
-  );
-}
-
-// Featured Insight - Hero Section
+/** FeaturedInsight - Hero article with burgundy rule, headline-hero class */
 function FeaturedInsight({ article }: { article: NewsArticle }) {
   const imageUrl = getArticleImage(article);
+  const catColor = getCategoryColor(article.category?.slug);
 
   return (
     <Link href={`/news/${article.slug}`} className="group block">
@@ -337,13 +391,13 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
               src={imageUrl}
               alt={article.title}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               unoptimized
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             {article.is_breaking && (
-              <div className="absolute top-4 left-4 px-3 py-1.5 bg-red-600 text-white text-xs font-semibold tracking-wide uppercase">
+              <div className="absolute top-4 left-4 badge-breaking">
                 Breaking
               </div>
             )}
@@ -351,18 +405,22 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
         )}
 
         <div className="max-w-4xl">
+          {/* Burgundy rule */}
+          <div className="w-8 h-0.5 bg-primary mb-4" />
+
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-sm font-semibold text-primary uppercase tracking-wider">
-              {article.category?.name || "Insight"}
+            <span className={cn("text-sm font-medium lowercase tracking-wide", catColor)}>
+              {article.category?.name || "insight"}
             </span>
             {article.read_time_minutes && (
-              <span className="text-sm text-muted-foreground">
-                {article.read_time_minutes} min read
-              </span>
+              <>
+                <span className="text-muted-foreground/50">·</span>
+                <span className="meta-line">{article.read_time_minutes} min read</span>
+              </>
             )}
           </div>
 
-          <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight group-hover:text-primary transition-colors">
+          <h1 className="headline-hero mb-4 group-hover:text-primary transition-colors">
             {article.title}
           </h1>
 
@@ -370,9 +428,10 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
             {article.excerpt}
           </p>
 
-          <div className="flex items-center gap-4 text-sm">
-            <span className="font-medium">{article.author?.full_name || "BGFI Research"}</span>
-            <span className="text-muted-foreground">{formatDate(article.published_at)}</span>
+          <div className="flex items-center gap-3 meta-line">
+            <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
+            <span className="text-muted-foreground/50">·</span>
+            <span>{formatDate(article.published_at)}</span>
           </div>
         </div>
       </article>
@@ -380,28 +439,29 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
   );
 }
 
-// Insight Card - Grid Item
+/** InsightCard - Clean card with image, colored category, topic tags */
 function InsightCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
   const imageUrl = getArticleImage(article);
+  const catColor = getCategoryColor(article.category?.slug);
 
   return (
-    <Link href={`/news/${article.slug}`} className="group block h-full">
-      <article className={cn("h-full", featured && "")}>
+    <Link href={`/news/${article.slug}`} className="group block h-full card-hover">
+      <article className="h-full">
         {imageUrl && (
           <div className="relative aspect-[16/10] mb-4 overflow-hidden bg-terminal-bg-elevated">
             <Image
               src={imageUrl}
               alt={article.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               unoptimized
             />
           </div>
         )}
 
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-            {article.category?.name || "Insight"}
+          <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+            {article.category?.name || "insight"}
           </span>
         </div>
 
@@ -416,15 +476,21 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
           {article.excerpt}
         </p>
 
-        <div className="text-xs text-muted-foreground">
-          {article.author?.full_name || "BGFI Research"} · {timeAgo(article.published_at)}
+        <div className="flex items-center gap-2 meta-line">
+          <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
+          <span className="text-muted-foreground/50">·</span>
+          <span>{timeAgo(article.published_at)}</span>
+        </div>
+
+        <div className="mt-2">
+          <TopicTags article={article} />
         </div>
       </article>
     </Link>
   );
 }
 
-// Overlay Card - Title & Category on image, other info below
+/** OverlayCard - Only used in Editor's Picks (max 3 cards) */
 function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?: "small" | "medium" | "large" }) {
   const imageUrl = getArticleImage(article);
 
@@ -437,27 +503,25 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
   return (
     <Link href={`/news/${article.slug}`} className="group block h-full">
       <article className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden hover:border-primary/50 transition-colors">
-        {/* Image with overlay - only title and category */}
         <div className={cn("relative overflow-hidden", imageAspect[size])}>
           {imageUrl ? (
             <Image
               src={imageUrl}
               alt={article.title}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
               unoptimized
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
           )}
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+          {/* Lighter gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-          {/* Only title and category on image */}
           <div className="absolute inset-0 flex flex-col justify-end p-4">
-            <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">
-              {article.category?.name || "Insight"}
+            <span className="text-xs font-medium text-primary lowercase tracking-wide mb-2">
+              {article.category?.name || "insight"}
             </span>
 
             <h3 className={cn(
@@ -468,9 +532,8 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
             </h3>
           </div>
 
-          {/* Premium/Breaking badges */}
           {article.is_breaking && (
-            <div className="absolute top-3 left-3 px-2 py-1 bg-red-600 text-white text-xs font-semibold uppercase tracking-wide">
+            <div className="absolute top-3 left-3 badge-breaking">
               Breaking
             </div>
           )}
@@ -481,7 +544,6 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
           )}
         </div>
 
-        {/* Card info section below image */}
         <div className="p-4">
           <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
             {article.excerpt}
@@ -508,81 +570,28 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
   );
 }
 
-// Featured Grid Card - Large with side info
-function FeaturedGridCard({ article }: { article: NewsArticle }) {
-  const imageUrl = getArticleImage(article);
-
-  return (
-    <Link href={`/news/${article.slug}`} className="group block">
-      <article className="grid grid-cols-1 md:grid-cols-2 gap-0 bg-terminal-bg-secondary overflow-hidden border border-terminal-border hover:border-primary/50 transition-colors">
-        <div className="relative aspect-video md:aspect-auto md:min-h-[280px] overflow-hidden">
-          {imageUrl && (
-            <Image
-              src={imageUrl}
-              alt={article.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              unoptimized
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/20 md:bg-gradient-to-l md:from-terminal-bg-secondary/50 md:to-transparent" />
-        </div>
-
-        <div className="flex flex-col justify-center p-6 md:p-8">
-          <span className="text-xs font-semibold text-primary uppercase tracking-wider mb-3">
-            {article.category?.name || "Featured"}
-          </span>
-
-          <h3 className="font-serif text-2xl font-bold leading-tight group-hover:text-primary transition-colors mb-4">
-            {article.title}
-          </h3>
-
-          <p className="text-muted-foreground line-clamp-3 mb-4">
-            {article.excerpt}
-          </p>
-
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="font-medium">{article.author?.full_name || "BGFI Research"}</span>
-            <span>{formatDate(article.published_at)}</span>
-          </div>
-
-          <div className="mt-4 flex items-center text-sm text-primary font-medium">
-            Read Article <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </div>
-        </div>
-      </article>
-    </Link>
-  );
-}
-
-// Sidebar Insight - Compact List Item
-function SidebarInsight({ article }: { article: NewsArticle }) {
-  const imageUrl = getArticleImage(article);
+/** SidebarInsight - Rank number + category + title + time (no image) */
+function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number }) {
+  const catColor = getCategoryColor(article.category?.slug);
 
   return (
     <Link
       href={`/news/${article.slug}`}
-      className="group flex mb-3 bg-terminal-bg-secondary border border-terminal-border hover:border-primary/50 transition-colors overflow-hidden"
+      className="group flex gap-4 py-3 border-b border-border last:border-0"
     >
-      {imageUrl && (
-        <div className="relative w-24 flex-shrink-0 overflow-hidden">
-          <Image
-            src={imageUrl}
-            alt={article.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            unoptimized
-          />
-        </div>
-      )}
-      <div className="flex-1 min-w-0 p-3">
-        <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-          {article.category?.name || "Insight"}
+      {/* Large rank number */}
+      <span className="text-2xl font-serif font-bold text-muted-foreground/20 flex-shrink-0 w-8 text-right leading-none pt-1">
+        {rank.toString().padStart(2, "0")}
+      </span>
+
+      <div className="flex-1 min-w-0">
+        <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
+          {article.category?.name || "insight"}
         </span>
-        <h4 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2 mt-1">
+        <h4 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2 mt-0.5">
           {article.title}
         </h4>
-        <span className="text-xs text-muted-foreground mt-1 block">
+        <span className="meta-line mt-1 block">
           {timeAgo(article.published_at)}
         </span>
       </div>
@@ -590,12 +599,16 @@ function SidebarInsight({ article }: { article: NewsArticle }) {
   );
 }
 
-// Industry Navigation Section
+// =====================
+// SECTION COMPONENTS
+// =====================
+
+/** Industry chips with left-color accent on hover */
 function IndustryNavigation() {
   return (
-    <section className="py-8 border-y border-terminal-border bg-terminal-bg-secondary/50">
+    <section className="py-6 border-y border-terminal-border bg-terminal-bg-secondary/50">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Explore by Industry
           </h2>
@@ -611,7 +624,7 @@ function IndustryNavigation() {
             <Link
               key={industry.slug}
               href={`/industries/${industry.slug}`}
-              className="group flex items-center gap-3 p-4 bg-terminal-bg border border-terminal-border hover:border-primary/50 transition-all"
+              className="group flex items-center gap-3 p-4 bg-terminal-bg border border-terminal-border hover:border-l-2 hover:border-l-current transition-all"
             >
               <industry.icon className={cn("h-5 w-5", industry.color)} />
               <span className="font-medium text-sm group-hover:text-primary transition-colors">
@@ -625,36 +638,25 @@ function IndustryNavigation() {
   );
 }
 
-// Featured Research Section
+/** Featured Research with left burgundy border treatment */
 function FeaturedResearchSection() {
   return (
-    <section className="py-12 border-b border-terminal-border">
+    <section className="py-10 md:py-14 border-b border-terminal-border">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <FileText className="h-6 w-6 text-primary" />
-            <h2 className="font-serif text-2xl font-bold">Featured Research</h2>
-          </div>
-          <Link
-            href="/research"
-            className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-          >
-            All Publications <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
+        <SectionHeader title="Featured Research" href="/research" label="All Publications" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {featuredResearch.map((report) => (
             <Link
               key={report.id}
               href={`/research/${report.slug}`}
-              className="group p-6 border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all"
+              className="group p-6 border-l-2 border-l-primary border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all card-hover"
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-1 text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary rounded">
+                <span className="px-2 py-1 text-xs font-medium lowercase tracking-wide bg-primary/10 text-primary">
                   {report.category}
                 </span>
-                <span className="text-xs text-muted-foreground">{report.date}</span>
+                <span className="meta-line">{report.date}</span>
               </div>
               <h3 className="font-serif text-xl font-bold mb-2 group-hover:text-primary transition-colors">
                 {report.title}
@@ -663,7 +665,7 @@ function FeaturedResearchSection() {
                 {report.description}
               </p>
               <div className="mt-4 flex items-center text-sm text-primary font-medium">
-                Read Report <ArrowRight className="ml-1 h-4 w-4" />
+                Read Report <ArrowRight className="ml-1 h-4 w-4 cta-arrow" />
               </div>
             </Link>
           ))}
@@ -673,10 +675,10 @@ function FeaturedResearchSection() {
   );
 }
 
-// Topics & Regions Section
+/** Topics & Regions */
 function TopicsRegionsSection() {
   return (
-    <section className="py-12 bg-terminal-bg-secondary/30">
+    <section className="py-10 md:py-14 bg-terminal-bg-secondary/30">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Topics */}
@@ -748,14 +750,14 @@ function TopicsRegionsSection() {
   );
 }
 
-// Podcast Section
+/** Podcast section with section-media class */
 function PodcastSection({ video }: { video: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   if (!video) return null;
 
   return (
-    <section className="py-12 bg-slate-900">
+    <section className="py-12 md:py-16 section-media">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
@@ -771,7 +773,6 @@ function PodcastSection({ video }: { video: any }) {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          {/* Video/Thumbnail */}
           <div className="relative aspect-video overflow-hidden">
             {isPlaying ? (
               <iframe
@@ -805,9 +806,8 @@ function PodcastSection({ video }: { video: any }) {
             )}
           </div>
 
-          {/* Info */}
           <div className="text-white">
-            <span className="text-sm text-primary font-semibold uppercase tracking-wider">
+            <span className="text-sm text-primary font-medium lowercase tracking-wide">
               Latest Episode
             </span>
             <h3 className="font-serif text-2xl md:text-3xl font-bold mt-2 mb-4 leading-tight">
@@ -816,9 +816,9 @@ function PodcastSection({ video }: { video: any }) {
             <p className="text-slate-300 mb-6 line-clamp-3 leading-relaxed">
               {video.description}
             </p>
-            <div className="flex items-center gap-4 text-sm text-slate-400">
+            <div className="flex items-center gap-3 text-sm text-slate-400">
               <span>{video.channel_title}</span>
-              <span>·</span>
+              <span className="text-slate-600">·</span>
               <span>{video.view_count?.toLocaleString()} views</span>
             </div>
           </div>
@@ -828,7 +828,7 @@ function PodcastSection({ video }: { video: any }) {
   );
 }
 
-// Newsletter CTA Section
+/** Newsletter CTA - Redesigned: narrower, burgundy rule, shorter copy */
 function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -862,14 +862,16 @@ function NewsletterSection() {
   };
 
   return (
-    <section className="py-16 bg-primary/5 border-y border-primary/20">
-      <div className="max-w-[800px] mx-auto px-4 md:px-6 text-center">
-        <BookOpen className="h-10 w-10 mx-auto mb-4 text-primary" />
-        <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-          Stay Informed
+    <section className="py-14 md:py-20 border-y border-border">
+      <div className="max-w-[600px] mx-auto px-4 md:px-6 text-center">
+        {/* Burgundy rule */}
+        <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
+
+        <h2 className="font-serif text-2xl md:text-3xl font-bold mb-3">
+          African markets, explained.
         </h2>
-        <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-          Subscribe to African Finance Insights for the latest research, analysis, and market intelligence delivered to your inbox.
+        <p className="text-muted-foreground mb-8">
+          Every weekday morning.
         </p>
 
         {subscribed ? (
@@ -877,31 +879,36 @@ function NewsletterSection() {
             <span className="text-lg font-medium">Thank you for subscribing!</span>
           </div>
         ) : (
-          <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              disabled={loading}
-              className="flex-1 px-4 py-3 text-base bg-background border border-terminal-border focus:outline-none focus:border-primary disabled:opacity-50"
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {loading ? "..." : "Subscribe"}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </form>
+          <>
+            <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                disabled={loading}
+                className="flex-1 px-4 py-3 text-base bg-background border border-terminal-border focus:outline-none focus:border-primary disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? "..." : "Subscribe"}
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            </form>
+            <p className="meta-line mt-4">
+              Free. No spam. Unsubscribe anytime.
+            </p>
+          </>
         )}
       </div>
     </section>
   );
 }
 
-// Market Summary Widget (Subtle)
+/** Market Summary Widget */
 function MarketSummaryWidget({ indices }: { indices: MarketIndex[] }) {
   if (!indices || indices.length === 0) return null;
 
@@ -928,7 +935,7 @@ function MarketSummaryWidget({ indices }: { indices: MarketIndex[] }) {
             <Link
               key={index.code}
               href={`/markets/indices/${index.code}`}
-              className="flex items-center justify-between py-2 hover:bg-terminal-bg-elevated -mx-2 px-2 rounded transition-colors"
+              className="flex items-center justify-between py-2 hover:bg-terminal-bg-elevated -mx-2 px-2 transition-colors"
             >
               <div>
                 <span className="font-mono font-semibold text-sm">{index.code}</span>
@@ -952,22 +959,15 @@ function MarketSummaryWidget({ indices }: { indices: MarketIndex[] }) {
   );
 }
 
-// Editors' Picks Section with Overlay Cards - Balanced 3-column grid
+/** Editor's Picks — 3 OverlayCards (the ONLY overlay section) */
 function EditorsPicks({ articles }: { articles: NewsArticle[] }) {
+  const fadeRef = useFadeIn();
   if (articles.length < 3) return null;
 
   return (
-    <section className="py-12 bg-terminal-bg-secondary/30">
+    <section ref={fadeRef} className="py-10 md:py-14 bg-terminal-bg-secondary/30 fade-in-section">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="font-serif text-2xl font-bold">Editor's Picks</h2>
-          <Link
-            href="/news?featured=true"
-            className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-          >
-            All Featured <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
+        <SectionHeader title="Editor's Picks" href="/news?featured=true" label="All Featured" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {articles.slice(0, 3).map((article) => (
@@ -979,156 +979,37 @@ function EditorsPicks({ articles }: { articles: NewsArticle[] }) {
   );
 }
 
-// Trending Section with numbered list
+/** Trending Section - keep numbered layout (already great) */
 function TrendingSection({ articles }: { articles: NewsArticle[] }) {
+  const fadeRef = useFadeIn();
   if (articles.length < 5) return null;
 
   return (
-    <section className="py-12 border-y border-terminal-border">
+    <section ref={fadeRef} className="py-10 md:py-14 border-y border-terminal-border fade-in-section">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center gap-3 mb-8">
-          <TrendingUp className="h-6 w-6 text-primary" />
-          <h2 className="font-serif text-2xl font-bold">Trending Now</h2>
-        </div>
+        <SectionHeader title="Trending Now" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {articles.map((article, index) => (
-            <Link
-              key={article.id}
-              href={`/news/${article.slug}`}
-              className="group flex gap-4"
-            >
-              <span className="text-4xl font-serif font-bold text-primary/30 group-hover:text-primary transition-colors">
-                {(index + 1).toString().padStart(2, "0")}
-              </span>
-              <div className="flex-1">
-                <span className="text-xs text-primary uppercase tracking-wider">
-                  {article.category?.name}
-                </span>
-                <h3 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors mt-1 line-clamp-3">
-                  {article.title}
-                </h3>
-                <span className="text-xs text-muted-foreground mt-2 block">
-                  {timeAgo(article.published_at)}
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Deep Dives Section - Clean grid layout
-function DeepDivesSection({ articles }: { articles: NewsArticle[] }) {
-  if (articles.length < 2) return null;
-
-  return (
-    <section className="py-12">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <h2 className="font-serif text-2xl font-bold">Deep Dives</h2>
-          </div>
-          <Link
-            href="/news?type=analysis"
-            className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-          >
-            All Analysis <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {articles.slice(0, 2).map((article) => (
-            <OverlayCard key={article.id} article={article} size="medium" />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Mixed Content Grid - Varied layouts
-function MixedContentGrid({ articles, title }: { articles: NewsArticle[]; title: string }) {
-  if (articles.length < 4) return null;
-
-  return (
-    <section className="py-12">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="font-serif text-2xl font-bold">{title}</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* First two as overlay cards */}
-          <div className="md:col-span-2">
-            <OverlayCard article={articles[0]} size="medium" />
-          </div>
-          {/* Next two as regular cards */}
-          {articles.slice(1, 3).map((article) => (
-            <InsightCard key={article.id} article={article} />
-          ))}
-        </div>
-
-        {/* Bottom row - 4 regular cards */}
-        {articles.length >= 7 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {articles.slice(3, 7).map((article) => (
-              <InsightCard key={article.id} article={article} />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-// Quick Reads - Compact horizontal cards
-function QuickReads({ articles }: { articles: NewsArticle[] }) {
-  if (articles.length < 4) return null;
-
-  return (
-    <section className="py-12 bg-slate-900">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Clock className="h-6 w-6 text-primary" />
-            <h2 className="font-serif text-2xl font-bold text-white">Quick Reads</h2>
-          </div>
-          <span className="text-sm text-slate-400">Under 5 minutes</span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {articles.slice(0, 4).map((article) => {
-            const imageUrl = getArticleImage(article);
+          {articles.map((article, index) => {
+            const catColor = getCategoryColor(article.category?.slug);
             return (
               <Link
                 key={article.id}
                 href={`/news/${article.slug}`}
-                className="group flex gap-4 p-4 bg-slate-800/50 border border-slate-700 hover:border-primary/50 transition-colors"
+                className="group flex gap-4"
               >
-                {imageUrl && (
-                  <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden">
-                    <Image
-                      src={imageUrl}
-                      alt={article.title}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <span className="text-xs text-primary uppercase tracking-wider">
+                <span className="text-4xl font-serif font-bold text-primary/20 group-hover:text-primary transition-colors leading-none pt-1">
+                  {(index + 1).toString().padStart(2, "0")}
+                </span>
+                <div className="flex-1">
+                  <span className={cn("text-xs font-medium lowercase tracking-wide", catColor)}>
                     {article.category?.name}
                   </span>
-                  <h4 className="font-semibold text-white leading-snug group-hover:text-primary transition-colors mt-1 line-clamp-2">
+                  <h3 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors mt-1 line-clamp-3">
                     {article.title}
-                  </h4>
-                  <span className="text-xs text-slate-400 mt-2 block">
-                    {article.read_time_minutes || 3} min read
+                  </h3>
+                  <span className="meta-line mt-2 block">
+                    {timeAgo(article.published_at)}
                   </span>
                 </div>
               </Link>
@@ -1140,55 +1021,19 @@ function QuickReads({ articles }: { articles: NewsArticle[] }) {
   );
 }
 
-// Overlay Grid Section - All cards with text on images
-function OverlayGridSection({ articles, title }: { articles: NewsArticle[]; title: string }) {
-  if (articles.length < 4) return null;
+/** More Stories - Simple list of TextCards with border-b separators */
+function MoreStories({ articles }: { articles: NewsArticle[] }) {
+  const fadeRef = useFadeIn();
+  if (articles.length < 2) return null;
 
   return (
-    <section className="py-12">
+    <section ref={fadeRef} className="py-10 md:py-14 fade-in-section">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <h2 className="font-serif text-2xl font-bold mb-8">{title}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {articles.slice(0, 4).map((article) => (
-            <OverlayCard key={article.id} article={article} size="medium" />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+        <SectionHeader title="More Stories" href="/news" label="Browse Archive" />
 
-// Large Feature Grid - 3 equal cards in a row
-function LargeFeatureGrid({ articles, title }: { articles: NewsArticle[]; title: string }) {
-  if (articles.length < 3) return null;
-
-  return (
-    <section className="py-12 bg-terminal-bg-secondary/50">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <h2 className="font-serif text-2xl font-bold mb-8">{title}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {articles.slice(0, 3).map((article) => (
-            <OverlayCard key={article.id} article={article} size="medium" />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Horizontal Scroll Section
-function HorizontalScrollSection({ articles, title }: { articles: NewsArticle[]; title: string }) {
-  if (articles.length < 4) return null;
-
-  return (
-    <section className="py-12">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <h2 className="font-serif text-2xl font-bold mb-8">{title}</h2>
-        <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
           {articles.map((article) => (
-            <div key={article.id} className="flex-shrink-0 w-72">
-              <OverlayCard article={article} size="small" />
-            </div>
+            <TextCard key={article.id} article={article} />
           ))}
         </div>
       </div>
@@ -1196,31 +1041,10 @@ function HorizontalScrollSection({ articles, title }: { articles: NewsArticle[];
   );
 }
 
-// Alternating Layout Section - Balanced grid
-function AlternatingSection({ articles, title }: { articles: NewsArticle[]; title: string }) {
-  if (articles.length < 6) return null;
+// =====================
+// MAIN PAGE
+// =====================
 
-  return (
-    <section className="py-12 border-y border-terminal-border">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <h2 className="font-serif text-2xl font-bold mb-8">{title}</h2>
-        {/* Top row - 2 medium cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <OverlayCard article={articles[0]} size="medium" />
-          <OverlayCard article={articles[1]} size="medium" />
-        </div>
-        {/* Bottom row - 4 smaller cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {articles.slice(2, 6).map((article) => (
-            <OverlayCard key={article.id} article={article} size="small" />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// Main Page Component
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   const [extendedArticles, setExtendedArticles] = useState<NewsArticle[]>([]);
@@ -1232,12 +1056,11 @@ export default function HomePage() {
   const { data: indicesData, isLoading: indicesLoading } = useIndices();
   const { data: cnbcVideoData, isLoading: videosLoading } = useCNBCAfricaVideo();
 
-
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Load more articles when user scrolls down
+  // Load more articles when initial load completes
   const loadMoreArticles = useCallback(async () => {
     if (loadingMore || hasLoadedMore) return;
     setLoadingMore(true);
@@ -1254,15 +1077,12 @@ export default function HomePage() {
     }
   }, [loadingMore, hasLoadedMore]);
 
-  // Combine initial and extended articles
   const initialArticles = articlesData?.results || [];
   const allArticles = [...initialArticles, ...extendedArticles];
 
-  // Load more articles automatically after initial load completes
-  // This ensures content appears quickly while still prioritizing above-the-fold
+  // Auto-load extended articles after initial render
   useEffect(() => {
     if (!articlesLoading && initialArticles.length > 0 && !hasLoadedMore && !loadingMore) {
-      // Small delay to let initial content render first
       const timer = setTimeout(() => {
         loadMoreArticles();
       }, 100);
@@ -1270,32 +1090,18 @@ export default function HomePage() {
     }
   }, [articlesLoading, initialArticles.length, hasLoadedMore, loadingMore, loadMoreArticles]);
 
-  // Hero section: 1 featured + 4 side articles (from initial fast load)
+  // ---- Article slicing ----
+  // Above the fold (initial 15)
   const featuredArticle = initialArticles[0];
   const heroSideArticles = initialArticles.slice(1, 5);
-  // Main grid (from initial load)
-  const mainInsights = initialArticles.slice(5, 9);
-  const sidebarInsights = initialArticles.slice(9, 14);
+  const mainInsights = initialArticles.slice(5, 9);   // 2 InsightCard + 2 TextCard
+  const sidebarInsights = initialArticles.slice(9, 14); // 5 Most Read with ranks
 
-  // Extended sections (from lazy load) - only render when loaded
+  // Below the fold (extended)
   const editorsPicksArticles = allArticles.slice(14, 17);
   const trendingArticles = allArticles.slice(17, 22);
-  const deepDiveArticles = allArticles.slice(22, 24);
-  const moreSectionOne = allArticles.slice(24, 31);
-  const quickReadArticles = allArticles.slice(31, 35);
-  const moreSectionTwo = allArticles.slice(35, 42);
-  const finalSection = allArticles.slice(42, 48);
-  // Additional sections for longer feed
-  const overlayGridOne = allArticles.slice(48, 52);
-  const largeFeatureOne = allArticles.slice(52, 55);
-  const horizontalScroll = allArticles.slice(55, 63);
-  const alternatingSection = allArticles.slice(63, 70);
-  const overlayGridTwo = allArticles.slice(70, 74);
-  const largeFeatureTwo = allArticles.slice(74, 77);
-  const bottomOverlay = allArticles.slice(77, 85);
-  const finalOverlay = allArticles.slice(85, 93);
-  // Even more sections
-  const commoditiesSection = allArticles.slice(93, 100);
+  const moreStoriesArticles = allArticles.slice(22, 38); // 12-16 TextCards
+
   const marketIndices = indicesData || [];
   const featuredVideo = cnbcVideoData || null;
 
@@ -1306,51 +1112,24 @@ export default function HomePage() {
   return (
     <MainLayout>
       <div className="min-h-screen">
-        {/* Hero Section - Featured + Side Articles */}
+        {/* ===== 1. HERO ===== */}
         <section className="py-8 md:py-12">
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">
             {loading ? (
               <HeroSectionSkeleton />
             ) : featuredArticle ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Main Featured Article */}
+                {/* Main Featured Article — 7 cols */}
                 <div className="lg:col-span-7">
                   <FeaturedInsight article={featuredArticle} />
                 </div>
-                {/* Side Articles - Spread attention */}
-                <div className="lg:col-span-5 flex flex-col gap-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                {/* Side Articles with ranks — 5 cols */}
+                <div className="lg:col-span-5">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                     Top Stories
                   </h3>
                   {heroSideArticles.map((article, index) => (
-                    <Link
-                      key={article.id}
-                      href={`/news/${article.slug}`}
-                      className="group flex bg-terminal-bg-secondary border border-terminal-border hover:border-primary/50 transition-colors overflow-hidden"
-                    >
-                      {getArticleImage(article) && (
-                        <div className="relative w-28 flex-shrink-0 overflow-hidden">
-                          <Image
-                            src={getArticleImage(article)!}
-                            alt={article.title}
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0 p-3">
-                        <span className="text-xs text-primary font-semibold uppercase tracking-wider">
-                          {article.category?.name || "Insight"}
-                        </span>
-                        <h4 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors mt-1 line-clamp-2">
-                          {article.title}
-                        </h4>
-                        <span className="text-xs text-muted-foreground mt-1 block">
-                          {timeAgo(article.published_at)}
-                        </span>
-                      </div>
-                    </Link>
+                    <SidebarInsight key={article.id} article={article} rank={index + 1} />
                   ))}
                 </div>
               </div>
@@ -1362,38 +1141,32 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Industry Navigation */}
+        {/* ===== 2. INDUSTRY CHIPS ===== */}
         <IndustryNavigation />
 
-        {/* Main Content Grid */}
-        <section className="py-12">
+        {/* ===== 3. LATEST INSIGHTS + SIDEBAR ===== */}
+        <section className="py-10 md:py-14">
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
               {/* Main Content */}
               <div className="lg:col-span-8">
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="font-serif text-2xl font-bold">Latest Insights</h2>
-                  <Link
-                    href="/news"
-                    className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-                  >
-                    View All <ChevronRight className="h-4 w-4" />
-                  </Link>
-                </div>
+                <SectionHeader title="Latest Insights" href="/news" label="View All" />
 
                 {loading ? (
                   <MainContentSkeleton />
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* First two as large overlay cards */}
-                    {mainInsights.slice(0, 2).map((article) => (
-                      <OverlayCard key={article.id} article={article} size="medium" />
-                    ))}
-                    {/* Next two as regular cards */}
+                  <>
+                    {/* First 2 as InsightCards with images */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
+                      {mainInsights.slice(0, 2).map((article) => (
+                        <InsightCard key={article.id} article={article} />
+                      ))}
+                    </div>
+                    {/* Next 2 as TextCards */}
                     {mainInsights.slice(2, 4).map((article) => (
-                      <InsightCard key={article.id} article={article} />
+                      <TextCard key={article.id} article={article} />
                     ))}
-                  </div>
+                  </>
                 )}
               </div>
 
@@ -1403,23 +1176,19 @@ export default function HomePage() {
                   <SidebarSkeleton />
                 ) : (
                   <>
-                    {/* Market Summary */}
                     {marketIndices.length > 0 && (
                       <div className="mb-8">
                         <MarketSummaryWidget indices={marketIndices} />
                       </div>
                     )}
 
-                    {/* Most Read */}
                     <div className="mb-8">
-                      <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-4">
+                      <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2 pb-2 border-b border-border">
                         Most Read
                       </h3>
-                      <div>
-                        {sidebarInsights.map((article) => (
-                          <SidebarInsight key={article.id} article={article} />
-                        ))}
-                      </div>
+                      {sidebarInsights.map((article, index) => (
+                        <SidebarInsight key={article.id} article={article} rank={index + 1} />
+                      ))}
                     </div>
                   </>
                 )}
@@ -1428,195 +1197,48 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Featured Research */}
+        {/* ===== 4. FEATURED RESEARCH ===== */}
         <FeaturedResearchSection />
 
-        {/* Podcast Section */}
+        {/* ===== 5. PODCAST ===== */}
         {!videosLoading && featuredVideo && (
           <PodcastSection video={featuredVideo} />
         )}
 
-        {/* Topics & Regions */}
+        {/* ===== 6. TOPICS & REGIONS ===== */}
         <TopicsRegionsSection />
 
-        {/* Newsletter CTA */}
+        {/* ===== 7. NEWSLETTER CTA ===== */}
         <NewsletterSection />
 
-        {/* ====== EXTENDED FEED (loads automatically after initial content) ====== */}
+        {/* ====== EXTENDED FEED ====== */}
 
-        {/* Show loading indicator or content */}
         {loadingMore && !hasLoadedMore && (
           <ExtendedFeedSkeleton />
         )}
 
-        {/* Extended sections - only render when data is loaded */}
         {hasLoadedMore && (
           <>
-            {/* Editors' Picks with Overlay Cards */}
+            {/* ===== 8. EDITOR'S PICKS (only overlay section) ===== */}
             <EditorsPicks articles={editorsPicksArticles} />
 
-            {/* Trending Section */}
+            {/* ===== 9. TRENDING ===== */}
             <TrendingSection articles={trendingArticles} />
 
-            {/* Deep Dives */}
-            <DeepDivesSection articles={deepDiveArticles} />
-
-            {/* More Insights Section 1 */}
-            <MixedContentGrid articles={moreSectionOne} title="Markets & Economy" />
-
-            {/* Quick Reads - Dark Section */}
-            <QuickReads articles={quickReadArticles} />
-
-            {/* More Insights Section 2 */}
-            <MixedContentGrid articles={moreSectionTwo} title="Industry Spotlight" />
-
-            {/* Final Grid Section */}
-            {finalSection.length > 0 && (
-              <section className="py-12 bg-terminal-bg-secondary/30">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                  <div className="flex items-center justify-between mb-8">
-                    <h2 className="font-serif text-2xl font-bold">More from African Finance Insights</h2>
-                    <Link
-                      href="/news"
-                      className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
-                    >
-                      Browse Archive <ChevronRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {finalSection.map((article) => (
-                      <OverlayCard key={article.id} article={article} size="medium" />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* ====== ADDITIONAL SECTIONS FOR LONGER FEED ====== */}
-
-            {/* Overlay Grid 1 */}
-            <OverlayGridSection articles={overlayGridOne} title="Banking & Finance" />
-
-            {/* Large Feature 1 */}
-            <LargeFeatureGrid articles={largeFeatureOne} title="Featured Analysis" />
-
-            {/* Horizontal Scroll Section */}
-            <HorizontalScrollSection articles={horizontalScroll} title="Quick Browse" />
-
-            {/* Alternating Layout */}
-            <AlternatingSection articles={alternatingSection} title="Regional Focus" />
-
-            {/* Overlay Grid 2 */}
-            <OverlayGridSection articles={overlayGridTwo} title="Technology & Innovation" />
-
-            {/* Large Feature 2 */}
-            <LargeFeatureGrid articles={largeFeatureTwo} title="In-Depth Reports" />
-
-            {/* Bottom Overlay Grid */}
-            {bottomOverlay.length >= 4 && (
-              <section className="py-12">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                  <h2 className="font-serif text-2xl font-bold mb-8">Latest Updates</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {bottomOverlay.slice(0, 8).map((article) => (
-                      <OverlayCard key={article.id} article={article} size="small" />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Final Large Overlay Section */}
-            {finalOverlay.length >= 4 && (
-              <section className="py-12 bg-slate-900">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                  <h2 className="font-serif text-2xl font-bold text-white mb-8">Don't Miss</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {finalOverlay.slice(0, 8).map((article) => (
-                      <OverlayCard key={article.id} article={article} size="medium" />
-                    ))}
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Commodities & Resources Section */}
-            {commoditiesSection.length >= 4 && (
-              <section className="py-12">
-                <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-                  <div className="flex items-center gap-3 mb-8">
-                    <Pickaxe className="h-6 w-6 text-primary" />
-                    <h2 className="font-serif text-2xl font-bold">Commodities & Resources</h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {commoditiesSection.slice(0, 4).map((article) => (
-                      <OverlayCard key={article.id} article={article} size="small" />
-                    ))}
-                  </div>
-                  {commoditiesSection.length > 4 && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                      {commoditiesSection.slice(4, 7).map((article) => (
-                        <InsightCard key={article.id} article={article} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
+            {/* ===== 10. MORE STORIES (TextCard list) ===== */}
+            <MoreStories articles={moreStoriesArticles} />
           </>
         )}
 
-        {/* Final Mosaic Grid */}
-        {hasLoadedMore && allArticles.length > 93 && (
-          <section className="py-12 bg-terminal-bg-secondary/50">
-            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-              <h2 className="font-serif text-2xl font-bold mb-8">More Stories</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {allArticles.slice(93, 99).map((article) => {
-                  const imageUrl = getArticleImage(article);
-                  return (
-                    <Link
-                      key={article.id}
-                      href={`/news/${article.slug}`}
-                      className="group block"
-                    >
-                      <div className="relative aspect-square overflow-hidden mb-2">
-                        {imageUrl && (
-                          <Image
-                            src={imageUrl}
-                            alt={article.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform"
-                            unoptimized
-                          />
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                        <div className="absolute bottom-2 left-2 right-2">
-                          <span className="text-[10px] text-primary uppercase tracking-wider font-semibold">
-                            {article.category?.name}
-                          </span>
-                        </div>
-                      </div>
-                      <h4 className="text-sm font-medium leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                        {article.title}
-                      </h4>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-        )}
-
         {/* Bottom CTA */}
-        <section className="py-16 text-center">
-          <div className="max-w-[800px] mx-auto px-4 md:px-6">
-            <h2 className="font-serif text-3xl font-bold mb-4">
+        <section className="py-14 md:py-20 text-center">
+          <div className="max-w-[600px] mx-auto px-4 md:px-6">
+            <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
+            <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4">
               Explore All Content
             </h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Discover in-depth analysis, research reports, and expert commentary on African markets.
+            <p className="text-muted-foreground mb-8">
+              In-depth analysis, research reports, and expert commentary on African markets.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Link href="/news" className="btn-primary flex items-center gap-2">
