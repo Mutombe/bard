@@ -19,6 +19,7 @@ router.register(r"geographic", views.GeographicAnalyticsViewSet, basename="geogr
 
 urlpatterns = [
     path("dashboard/", views.AdminDashboardView.as_view(), name="dashboard"),
+    path("comprehensive/", views.ComprehensiveAnalyticsView.as_view(), name="comprehensive"),
     path("track/", views.TrackEventView.as_view(), name="track"),
     path("", include(router.urls)),
 ]
