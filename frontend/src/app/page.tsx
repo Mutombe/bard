@@ -85,8 +85,8 @@ function getArticleImage(article: NewsArticle): string | null {
   return article.featured_image || article.featured_image_url || null;
 }
 
-/** Consistent tag color for all topic tags (Finimize-style teal) */
-const TAG_COLOR = "text-teal-600 dark:text-teal-400";
+/** Consistent tag color for all topic tags — burgundy brand color */
+const TAG_COLOR = "text-primary";
 
 /**
  * Smart keyword extraction: scans article title + excerpt for real

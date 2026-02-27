@@ -77,7 +77,7 @@ function MobileNavigation({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
             <div key={dropdown.label} className="mb-2">
               <button
                 onClick={() => setExpandedSection(expandedSection === dropdown.label ? null : dropdown.label)}
-                className="flex items-center justify-between w-full px-3 py-3 text-left font-medium hover:bg-terminal-bg-elevated rounded-md"
+                className="flex items-center justify-between w-full px-3 py-3 text-left font-bold hover:bg-terminal-bg-elevated rounded-md"
               >
                 {dropdown.label}
                 <ChevronDown
