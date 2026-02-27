@@ -361,7 +361,7 @@ export function Navigation() {
             >
               <button
                 className={cn(
-                  "flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors rounded-md",
+                  "flex items-center gap-1 px-3 py-2 text-sm font-bold transition-colors rounded-md",
                   openDropdown === dropdown.label
                     ? "text-primary bg-terminal-bg-elevated"
                     : "text-foreground/80 hover:text-foreground hover:bg-terminal-bg-elevated"
