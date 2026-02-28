@@ -219,9 +219,9 @@ export default function AfriFinAnalyticsPage() {
               <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
                 <Zap className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">Want the full platform?</p>
-                <p className="text-xs text-muted-foreground mb-4">Get real-time data, analytics, and all three publications with a BGFI subscription.</p>
+                <p className="text-xs text-muted-foreground mb-4">Get all three publications plus breaking news alerts and weekly digests — free.</p>
                 <Link href="/subscribe" className={`inline-block w-full py-2 border border-[#0D7377] dark:border-[#2DD4BF] ${ACCENT} text-sm font-medium hover:bg-[#0D7377] hover:text-white dark:hover:bg-[#2DD4BF] dark:hover:text-black transition-colors`}>
-                  View Plans
+                  Subscribe Free
                 </Link>
               </div>
             </div>

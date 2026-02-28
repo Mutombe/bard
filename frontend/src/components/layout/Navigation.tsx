@@ -174,7 +174,7 @@ const navigationData: NavDropdown[] = [
         items: [
           { label: "Profile", href: "/profile", icon: CircleUserRound, description: "Your account" },
           { label: "Settings", href: "/settings", icon: Settings, description: "Preferences" },
-          { label: "Subscription", href: "/subscribe", icon: Crown, description: "Manage plan" },
+          { label: "Newsletters", href: "/subscribe", icon: Crown, description: "Manage subscriptions" },
         ],
       },
     ],

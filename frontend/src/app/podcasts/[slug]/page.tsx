@@ -83,7 +83,7 @@ Our panel of experts breaks down the key market movements and provides actionabl
 
 [01:02] JAMES: Absolutely. The momentum we're seeing in the financials space is particularly noteworthy...
 
-[Full transcript available to premium subscribers]`,
+[Full transcript available to subscribers]`,
     relatedEpisodes: [
       { title: "Banking Earnings Preview: What to Expect", slug: "banking-earnings-preview", episodeNumber: 244 },
       { title: "Central Bank Watch: SARB Decision Analysis", slug: "sarb-decision-analysis", episodeNumber: 243 },
@@ -122,7 +122,7 @@ Our panel of experts breaks down the key market movements and provides actionabl
       },
     ],
     guests: [],
-    transcript: `[Full transcript available to premium subscribers]`,
+    transcript: `[Full transcript available to subscribers]`,
     relatedEpisodes: [],
     platforms: {
       spotify: "https://open.spotify.com/episode/...",
