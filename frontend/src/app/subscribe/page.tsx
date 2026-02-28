@@ -5,401 +5,403 @@ import Link from "next/link";
 import {
   Check,
   ChevronRight,
-  Star,
-  TrendingUp,
+  Mail,
   Bell,
   FileText,
-  Users,
-  Zap,
-  BookOpen,
-  Lightbulb,
-  BarChart3,
   ArrowRight,
+  Library,
+  Feather,
+  DatabaseZap,
+  Loader2,
+  Newspaper,
+  TrendingUp,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
-import { useAuthModal } from "@/contexts/AuthModalContext";
+import apiClient from "@/services/api/client";
+import { toast } from "sonner";
 
-interface PricingPlan {
-  id: string;
-  name: string;
-  description: string;
-  price: {
-    usd: number;
-    zar: number;
-    ngn: number;
-  };
-  period: string;
-  features: string[];
-  highlighted?: boolean;
-  cta: string;
-}
-
-const plans: PricingPlan[] = [
+const newsletters = [
   {
-    id: "free",
-    name: "Free",
-    description: "Essential market data and news",
-    price: { usd: 0, zar: 0, ngn: 0 },
-    period: "forever",
-    features: [
-      "Basic market data (15 min delay)",
-      "10 articles per month",
-      "Daily market summary email",
-      "Basic stock screener",
-      "Community access",
-    ],
-    cta: "Get Started",
+    id: "morning_brief",
+    name: "Morning Brief",
+    description: "Daily market summary and top stories delivered before the opening bell.",
+    frequency: "Daily",
+    icon: <Mail className="h-5 w-5" />,
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+    borderColor: "border-primary/20",
   },
   {
-    id: "premium",
-    name: "Premium",
-    description: "For active investors",
-    price: { usd: 19.99, zar: 349, ngn: 15000 },
-    period: "month",
-    features: [
-      "Real-time market data",
-      "Unlimited article access",
-      "Advanced stock screener",
-      "Price alerts (up to 50)",
-      "Portfolio tracking",
-      "Earnings calendar",
-      "Research reports",
-      "Priority email support",
-    ],
-    highlighted: true,
-    cta: "Start Free Trial",
+    id: "finance_africa_quarterly",
+    name: "Finance Africa Quarterly",
+    description: "Flagship journal with deep-dive reports on African financial markets.",
+    frequency: "Quarterly",
+    icon: <Library className="h-5 w-5" />,
+    color: "text-[#2D3A8C] dark:text-[#6272C1]",
+    bgColor: "bg-[#2D3A8C]/10 dark:bg-[#6272C1]/10",
+    borderColor: "border-[#2D3A8C]/20 dark:border-[#6272C1]/20",
+    href: "/publications/finance-africa-quarterly",
   },
   {
-    id: "professional",
-    name: "Professional",
-    description: "For financial professionals",
-    price: { usd: 49.99, zar: 899, ngn: 45000 },
-    period: "month",
-    features: [
-      "Everything in Premium",
-      "API access",
-      "Advanced analytics",
-      "Unlimited price alerts",
-      "Custom watchlists",
-      "Historical data export",
-      "Dedicated account manager",
-      "Phone support",
-    ],
-    cta: "Contact Sales",
+    id: "finance_africa_insights",
+    name: "Finance Africa Insights",
+    description: "Curated editorial commentary and expert analysis every week.",
+    frequency: "Weekly",
+    icon: <Feather className="h-5 w-5" />,
+    color: "text-[#B45309] dark:text-[#F59E0B]",
+    bgColor: "bg-[#B45309]/10 dark:bg-[#F59E0B]/10",
+    borderColor: "border-[#B45309]/20 dark:border-[#F59E0B]/20",
+    href: "/publications/finance-africa-insights",
+  },
+  {
+    id: "afrifin_analytics",
+    name: "AfriFin Analytics",
+    description: "Data-driven market intelligence with charts, metrics, and quant screens.",
+    frequency: "Daily",
+    icon: <DatabaseZap className="h-5 w-5" />,
+    color: "text-[#0D7377] dark:text-[#2DD4BF]",
+    bgColor: "bg-[#0D7377]/10 dark:bg-[#2DD4BF]/10",
+    borderColor: "border-[#0D7377]/20 dark:border-[#2DD4BF]/20",
+    href: "/publications/afrifin-analytics",
+  },
+  {
+    id: "breaking_news",
+    name: "Breaking News Alerts",
+    description: "Instant notifications when major market events or breaking news occur.",
+    frequency: "As it happens",
+    icon: <Bell className="h-5 w-5" />,
+    color: "text-red-500 dark:text-red-400",
+    bgColor: "bg-red-500/10",
+    borderColor: "border-red-500/20",
+  },
+  {
+    id: "weekly_digest",
+    name: "Weekly Digest",
+    description: "A comprehensive roundup of the week's most important stories and data.",
+    frequency: "Weekly",
+    icon: <Newspaper className="h-5 w-5" />,
+    color: "text-violet-600 dark:text-violet-400",
+    bgColor: "bg-violet-500/10",
+    borderColor: "border-violet-500/20",
   },
 ];
 
-const currencies = [
-  { id: "usd", symbol: "$", label: "USD" },
-  { id: "zar", symbol: "R", label: "ZAR" },
-  { id: "ngn", symbol: "₦", label: "NGN" },
-] as const;
-
-type Currency = (typeof currencies)[number]["id"];
-
-function PricingCard({
-  plan,
-  currency,
-}: {
-  plan: PricingPlan;
-  currency: Currency;
-}) {
-  const currencyConfig = currencies.find((c) => c.id === currency)!;
-  const price = plan.price[currency];
-
-  return (
-    <div
-      className={cn(
-        "relative p-6 rounded-lg border transition-all",
-        plan.highlighted
-          ? "border-brand-orange bg-terminal-bg-elevated scale-105 shadow-lg shadow-brand-orange/10"
-          : "border-terminal-border bg-terminal-bg-secondary hover:border-brand-orange/50"
-      )}
-    >
-      {plan.highlighted && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-brand-orange text-white text-xs font-semibold rounded-full">
-          Most Popular
-        </div>
-      )}
-
-      <div className="mb-4">
-        <h3 className="text-xl font-bold">{plan.name}</h3>
-        <p className="text-sm text-muted-foreground">{plan.description}</p>
-      </div>
-
-      <div className="mb-6">
-        <div className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold">
-            {currencyConfig.symbol}
-            {price.toLocaleString()}
-          </span>
-          {plan.period !== "forever" && (
-            <span className="text-muted-foreground">/{plan.period}</span>
-          )}
-        </div>
-        {plan.period === "forever" && (
-          <span className="text-sm text-muted-foreground">Free forever</span>
-        )}
-      </div>
-
-      <ul className="space-y-3 mb-6">
-        {plan.features.map((feature) => (
-          <li key={feature} className="flex items-start gap-2 text-sm">
-            <Check className="h-4 w-4 text-market-up flex-shrink-0 mt-0.5" />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        className={cn(
-          "w-full py-3 rounded-md font-medium transition-colors",
-          plan.highlighted
-            ? "bg-brand-orange text-white hover:bg-brand-orange-dark"
-            : "bg-terminal-bg-elevated border border-terminal-border hover:border-brand-orange"
-        )}
-      >
-        {plan.cta}
-      </button>
-    </div>
-  );
-}
+const benefits = [
+  { icon: <TrendingUp className="h-6 w-6 text-primary" />, title: "Market Intelligence", description: "Stay ahead with real-time African market analysis and insights delivered to your inbox." },
+  { icon: <Globe className="h-6 w-6 text-primary" />, title: "Pan-African Coverage", description: "15+ economies covered across Southern, East, West, and North Africa." },
+  { icon: <FileText className="h-6 w-6 text-primary" />, title: "Expert Research", description: "Original research reports, sector deep-dives, and macro analysis from our team." },
+  { icon: <Bell className="h-6 w-6 text-primary" />, title: "Never Miss a Beat", description: "Custom alerts and breaking news notifications for the events that matter most." },
+];
 
 export default function SubscribePage() {
-  const [currency, setCurrency] = useState<Currency>("usd");
-  const { openLogin } = useAuthModal();
+  const [email, setEmail] = useState("");
+  const [selectedNewsletters, setSelectedNewsletters] = useState<string[]>(["morning_brief"]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  const toggleNewsletter = (id: string) => {
+    setSelectedNewsletters((prev) =>
+      prev.includes(id) ? prev.filter((n) => n !== id) : [...prev, id]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes("@")) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    if (selectedNewsletters.length === 0) {
+      toast.error("Please select at least one newsletter");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Subscribe to each selected newsletter
+      await Promise.all(
+        selectedNewsletters.map((type) =>
+          apiClient.post("/engagement/newsletters/", {
+            email,
+            newsletter_type: type,
+          })
+        )
+      );
+      setShowSuccess(true);
+      toast.success(`Subscribed to ${selectedNewsletters.length} newsletter${selectedNewsletters.length > 1 ? "s" : ""}!`);
+    } catch (error: any) {
+      if (error.response?.status === 400 && error.response?.data?.email) {
+        toast.error("This email is already subscribed");
+      } else {
+        toast.error("Failed to subscribe. Please try again.");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <MainLayout>
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Choose Your Plan
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            Get access to real-time African market data, premium research, and
-            powerful tools to make better investment decisions.
-          </p>
-
-          {/* Currency Selector */}
-          <div className="inline-flex items-center gap-1 p-1 bg-terminal-bg-elevated rounded-lg border border-terminal-border">
-            {currencies.map((curr) => (
-              <button
-                key={curr.id}
-                onClick={() => setCurrency(curr.id)}
-                className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-md transition-colors",
-                  currency === curr.id
-                    ? "bg-brand-orange text-white"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {curr.label}
-              </button>
-            ))}
+        {/* Hero */}
+        <div className="relative text-center mb-16">
+          {/* Grid pattern background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none -mx-4 md:-mx-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.08] dark:opacity-[0.10]">
+              <defs>
+                <pattern id="sub-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#sub-grid)" />
+            </svg>
           </div>
-        </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-          {plans.map((plan) => (
-            <PricingCard key={plan.id} plan={plan} currency={currency} />
-          ))}
-        </div>
-
-        {/* Our Publications */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold text-center mb-3">
-            Our Publications
-          </h2>
-          <p className="text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-            Three distinct publications delivering African market intelligence
-            in the format that suits you best.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Finance Africa Quarterly */}
-            <div className="p-6 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors">
-              <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-4">
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-lg mb-1">
-                Finance Africa Quarterly
-              </h3>
-              <span className="inline-block px-2 py-0.5 bg-brand-orange/10 text-brand-orange text-xs font-medium rounded mb-3">
-                Quarterly
-              </span>
-              <p className="text-sm text-muted-foreground mb-4">
-                Flagship journal with comprehensive deep-dive reports on African
-                financial markets, original research, and macro analysis.
-              </p>
-              <Link
-                href="/publications/finance-africa-quarterly"
-                className="inline-flex items-center gap-1 text-sm text-brand-orange font-medium hover:underline"
-              >
-                Learn More <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-
-            {/* Finance Africa Insights */}
-            <div className="p-6 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors">
-              <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-4">
-                <Lightbulb className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-lg mb-1">
-                Finance Africa Insights
-              </h3>
-              <span className="inline-block px-2 py-0.5 bg-brand-orange/10 text-brand-orange text-xs font-medium rounded mb-3">
-                Weekly
-              </span>
-              <p className="text-sm text-muted-foreground mb-4">
-                Curated analysis and editorial commentary from Africa&apos;s sharpest
-                financial minds. The signal that matters for your portfolio.
-              </p>
-              <Link
-                href="/publications/finance-africa-insights"
-                className="inline-flex items-center gap-1 text-sm text-brand-orange font-medium hover:underline"
-              >
-                Learn More <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-
-            {/* AfriFin Analytics */}
-            <div className="p-6 rounded-lg bg-terminal-bg-secondary border border-terminal-border hover:border-brand-orange/50 transition-colors">
-              <div className="h-10 w-10 rounded-lg bg-brand-orange/20 text-brand-orange flex items-center justify-center mb-4">
-                <BarChart3 className="h-5 w-5" />
-              </div>
-              <h3 className="font-semibold text-lg mb-1">
-                AfriFin Analytics
-              </h3>
-              <span className="inline-block px-2 py-0.5 bg-brand-orange/10 text-brand-orange text-xs font-medium rounded mb-3">
-                Daily
-              </span>
-              <p className="text-sm text-muted-foreground mb-4">
-                Data-driven market intelligence with charts, metrics, and
-                quantitative screens. Numbers, not narratives.
-              </p>
-              <Link
-                href="/publications/afrifin-analytics"
-                className="inline-flex items-center gap-1 text-sm text-brand-orange font-medium hover:underline"
-              >
-                Learn More <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Grid */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            Everything You Need
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <TrendingUp className="h-8 w-8 text-brand-orange mb-3" />
-              <h3 className="font-semibold mb-2">Real-Time Data</h3>
-              <p className="text-sm text-muted-foreground">
-                Live market data from JSE, NGX, and other African exchanges.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <Bell className="h-8 w-8 text-brand-orange mb-3" />
-              <h3 className="font-semibold mb-2">Price Alerts</h3>
-              <p className="text-sm text-muted-foreground">
-                Set custom alerts and never miss a trading opportunity.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <FileText className="h-8 w-8 text-brand-orange mb-3" />
-              <h3 className="font-semibold mb-2">Research Reports</h3>
-              <p className="text-sm text-muted-foreground">
-                In-depth analysis from our team of financial experts.
-              </p>
-            </div>
-            <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <Users className="h-8 w-8 text-brand-orange mb-3" />
-              <h3 className="font-semibold mb-2">Expert Community</h3>
-              <p className="text-sm text-muted-foreground">
-                Connect with investors and analysts across Africa.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ */}
-        <section className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">
-            Frequently Asked Questions
-          </h2>
-          <div className="space-y-4">
-            <details className="group p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <summary className="flex items-center justify-between cursor-pointer font-medium">
-                Can I cancel my subscription anytime?
-                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
-              </summary>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Yes, you can cancel your subscription at any time. Your access
-                will continue until the end of your current billing period.
-              </p>
-            </details>
-            <details className="group p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <summary className="flex items-center justify-between cursor-pointer font-medium">
-                What payment methods do you accept?
-                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
-              </summary>
-              <p className="mt-3 text-sm text-muted-foreground">
-                We accept all major credit cards (Visa, Mastercard, Amex) as
-                well as PayPal. For African users, we also support mobile money
-                and local bank transfers through Paystack.
-              </p>
-            </details>
-            <details className="group p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <summary className="flex items-center justify-between cursor-pointer font-medium">
-                Is there a free trial?
-                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
-              </summary>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Yes! Premium plans come with a 14-day free trial. No credit card
-                required to start.
-              </p>
-            </details>
-            <details className="group p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-              <summary className="flex items-center justify-between cursor-pointer font-medium">
-                Do you offer team or enterprise plans?
-                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
-              </summary>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Yes, we offer custom enterprise plans for teams and
-                organizations. Contact our sales team for a personalized quote.
-              </p>
-            </details>
-          </div>
-        </section>
-
-        {/* CTA */}
-        <section className="mt-16 text-center">
-          <div className="p-8 rounded-lg bg-terminal-bg-elevated border border-brand-orange/30">
-            <h2 className="text-2xl font-bold mb-4">
-              Ready to Start Investing Smarter?
-            </h2>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Join thousands of investors across Africa who trust Bard Global Finance Institute
-              for their market intelligence needs.
+          <div className="relative py-8">
+            <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 font-serif">
+              Stay Informed. Stay Ahead.
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-2">
+              Subscribe to our free newsletters and get African market intelligence,
+              expert analysis, and breaking news delivered straight to your inbox.
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <button
-                onClick={openLogin}
-                className="px-6 py-3 border border-terminal-border rounded-md font-medium hover:bg-terminal-bg-elevated transition-colors"
-              >
-                Sign In
-              </button>
-              <button className="px-6 py-3 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors">
-                Start Free Trial
-              </button>
+            <p className="text-sm text-primary font-medium">
+              100% free. No credit card required. Unsubscribe anytime.
+            </p>
+          </div>
+        </div>
+
+        {showSuccess ? (
+          <div className="max-w-lg mx-auto text-center py-12">
+            <div className="bg-terminal-bg-secondary border border-terminal-border p-8">
+              <div className="w-16 h-16 bg-market-up/20 flex items-center justify-center mx-auto mb-4">
+                <Check className="h-8 w-8 text-market-up" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2 font-serif">You&apos;re All Set!</h2>
+              <p className="text-muted-foreground mb-6">
+                You&apos;ve been subscribed to {selectedNewsletters.length} newsletter{selectedNewsletters.length > 1 ? "s" : ""}.
+                Check your inbox for a confirmation email.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <Link href="/" className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+                  Explore Content <ArrowRight className="h-4 w-4" />
+                </Link>
+                <button
+                  onClick={() => {
+                    setShowSuccess(false);
+                    setEmail("");
+                    setSelectedNewsletters(["morning_brief"]);
+                  }}
+                  className="px-6 py-3 border border-terminal-border font-medium hover:bg-terminal-bg-elevated transition-colors"
+                >
+                  Subscribe Another Email
+                </button>
+              </div>
             </div>
           </div>
-        </section>
+        ) : (
+          <>
+            {/* Main subscribe form + newsletter selection */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mb-16">
+              {/* Newsletter Selection */}
+              <div className="lg:col-span-7">
+                <h2 className="text-xl font-bold mb-2">Choose Your Newsletters</h2>
+                <p className="text-sm text-muted-foreground mb-6">Select the publications you want to receive. You can change these anytime.</p>
+
+                <div className="space-y-3">
+                  {newsletters.map((nl) => (
+                    <button
+                      key={nl.id}
+                      type="button"
+                      onClick={() => toggleNewsletter(nl.id)}
+                      className={cn(
+                        "w-full text-left p-4 border transition-all",
+                        selectedNewsletters.includes(nl.id)
+                          ? `bg-terminal-bg-secondary ${nl.borderColor} border-2`
+                          : "bg-terminal-bg border-terminal-border hover:border-muted-foreground/30"
+                      )}
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={cn("h-10 w-10 flex items-center justify-center flex-shrink-0", nl.bgColor, nl.color)}>
+                          {nl.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{nl.name}</h3>
+                            <span className={cn("text-xs font-medium px-2 py-0.5", nl.bgColor, nl.color)}>
+                              {nl.frequency}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{nl.description}</p>
+                          {nl.href && (
+                            <Link
+                              href={nl.href}
+                              onClick={(e) => e.stopPropagation()}
+                              className={cn("inline-flex items-center gap-1 text-xs font-medium mt-1 hover:underline", nl.color)}
+                            >
+                              Learn more <ChevronRight className="h-3 w-3" />
+                            </Link>
+                          )}
+                        </div>
+                        <div className={cn(
+                          "h-5 w-5 border-2 flex items-center justify-center flex-shrink-0 mt-1 transition-colors",
+                          selectedNewsletters.includes(nl.id)
+                            ? "bg-primary border-primary"
+                            : "border-muted-foreground/30"
+                        )}>
+                          {selectedNewsletters.includes(nl.id) && (
+                            <Check className="h-3 w-3 text-white" />
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Subscribe Form (sticky sidebar) */}
+              <div className="lg:col-span-5">
+                <div className="sticky top-24">
+                  <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="h-10 w-10 bg-primary/10 flex items-center justify-center">
+                        <Mail className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Subscribe for Free</h3>
+                        <p className="text-xs text-muted-foreground">No payment required</p>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleSubmit}>
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">Email Address</label>
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="you@example.com"
+                          required
+                          className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border focus:outline-none focus:border-primary text-base"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || selectedNewsletters.length === 0}
+                        className="w-full py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 btn-press"
+                      >
+                        {isSubmitting ? (
+                          <><Loader2 className="h-4 w-4 animate-spin" /> Subscribing...</>
+                        ) : (
+                          <>
+                            Subscribe to {selectedNewsletters.length} Newsletter{selectedNewsletters.length !== 1 ? "s" : ""}
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
+
+                      <div className="mt-4 space-y-2">
+                        <p className="text-xs text-muted-foreground text-center">
+                          Free forever. No spam. Unsubscribe with one click.
+                        </p>
+                        <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Check className="h-3 w-3 text-market-up" /> No credit card
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Check className="h-3 w-3 text-market-up" /> Instant delivery
+                          </span>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Selected summary */}
+                  {selectedNewsletters.length > 0 && (
+                    <div className="mt-4 p-4 bg-terminal-bg-elevated border border-terminal-border">
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Selected</p>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedNewsletters.map((id) => {
+                          const nl = newsletters.find((n) => n.id === id);
+                          if (!nl) return null;
+                          return (
+                            <span key={id} className={cn("text-xs px-2 py-1 font-medium", nl.bgColor, nl.color)}>
+                              {nl.name}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Why Subscribe */}
+            <section className="mb-16">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl font-bold font-serif">Why Subscribe?</h2>
+                <p className="text-muted-foreground mt-2">Everything you need to navigate African financial markets.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {benefits.map((benefit) => (
+                  <div key={benefit.title} className="p-5 bg-terminal-bg-secondary border border-terminal-border">
+                    <div className="mb-3">{benefit.icon}</div>
+                    <h3 className="font-semibold mb-2">{benefit.title}</h3>
+                    <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* FAQ */}
+            <section className="max-w-3xl mx-auto">
+              <h2 className="text-2xl font-bold text-center mb-8 font-serif">Frequently Asked Questions</h2>
+              <div className="space-y-4">
+                <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
+                  <summary className="flex items-center justify-between cursor-pointer font-medium">
+                    Is this really free?
+                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                  </summary>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Yes, all our email newsletters are completely free. We believe in making African market intelligence accessible to everyone.
+                  </p>
+                </details>
+                <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
+                  <summary className="flex items-center justify-between cursor-pointer font-medium">
+                    How often will I receive emails?
+                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                  </summary>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    It depends on which newsletters you subscribe to. The Morning Brief and AfriFin Analytics are daily, Finance Africa Insights is weekly, and Finance Africa Quarterly is once per quarter. Breaking news alerts are sent as events occur.
+                  </p>
+                </details>
+                <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
+                  <summary className="flex items-center justify-between cursor-pointer font-medium">
+                    Can I unsubscribe anytime?
+                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                  </summary>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Absolutely. Every email includes a one-click unsubscribe link. You can also manage your preferences from your profile settings.
+                  </p>
+                </details>
+                <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
+                  <summary className="flex items-center justify-between cursor-pointer font-medium">
+                    Can I subscribe to multiple newsletters?
+                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                  </summary>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Yes! Select as many newsletters as you like. Each one covers different aspects of African markets, so subscribing to multiple gives you the most comprehensive coverage.
+                  </p>
+                </details>
+              </div>
+            </section>
+          </>
+        )}
       </div>
     </MainLayout>
   );

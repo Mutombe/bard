@@ -21,7 +21,6 @@ import { toast } from "sonner";
 const ACCENT = "text-[#2D3A8C] dark:text-[#6272C1]";
 const ACCENT_BG = "bg-[#2D3A8C]/15 dark:bg-[#6272C1]/15";
 const ACCENT_BORDER = "border-[#2D3A8C]/20 dark:border-[#6272C1]/20";
-const ACCENT_SOLID = "bg-[#2D3A8C] dark:bg-[#6272C1]";
 
 const highlights = [
   "In-depth quarterly analysis of African equity, fixed income, and commodity markets",
@@ -50,6 +49,16 @@ const pastIssues = [
     description:
       "New sovereign funds, shifting allocations, and the race for domestic capital markets.",
   },
+];
+
+// Real Unsplash images — African cities & institutions
+const heroImages = [
+  { flex: 1.2, height: '85%', bg: '#0D0F24', url: 'https://images.unsplash.com/photo-1735837836882-559fd3ab1a8e?auto=format&fit=crop&w=500&q=80' },
+  { flex: 1.6, height: '100%', bg: '#131738', url: 'https://images.unsplash.com/photo-1577948000111-9c970dfe3743?auto=format&fit=crop&w=500&q=80' },
+  { flex: 1.0, height: '72%', bg: '#0A0D1F', url: 'https://images.unsplash.com/photo-1648023195395-5df442315442?auto=format&fit=crop&w=500&q=80' },
+  { flex: 1.8, height: '95%', bg: '#181E4A', url: 'https://images.unsplash.com/photo-1523963288448-9a82c7c9049f?auto=format&fit=crop&w=500&q=80' },
+  { flex: 1.1, height: '80%', bg: '#10133B', url: 'https://images.unsplash.com/photo-1596005554384-d293674c91d7?auto=format&fit=crop&w=500&q=80' },
+  { flex: 1.4, height: '90%', bg: '#0D0F24', url: 'https://images.unsplash.com/photo-1654575998971-4f467c8a89c1?auto=format&fit=crop&w=500&q=80' },
 ];
 
 export default function FinanceAfricaQuarterlyPage() {
@@ -102,16 +111,9 @@ export default function FinanceAfricaQuarterlyPage() {
 
         {/* Hero — The Monograph: 6 wider strips, indigo tint, diagonal lines */}
         <section className="relative overflow-hidden mb-12" style={{ height: '480px' }}>
-          {/* Image strips — African cities & institutions */}
+          {/* Image strips */}
           <div className="absolute inset-0 flex items-start gap-[3px]">
-            {[
-              { flex: 1.2, height: '85%', bg: '#0D0F24', id: 'nVkLxUyBKI4' },
-              { flex: 1.6, height: '100%', bg: '#131738', id: 'Kse7hn70RLE' },
-              { flex: 1.0, height: '72%', bg: '#0A0D1F', id: 'EMjpo0YjHPw' },
-              { flex: 1.8, height: '95%', bg: '#181E4A', id: 'V3IssFR02qE' },
-              { flex: 1.1, height: '80%', bg: '#10133B', id: 'Zkao_QBEjk8' },
-              { flex: 1.4, height: '90%', bg: '#0D0F24', id: 'TUOfmxrEEwQ' },
-            ].map((strip, i) => (
+            {heroImages.map((strip, i) => (
               <div
                 key={i}
                 className="relative overflow-hidden"
@@ -121,17 +123,16 @@ export default function FinanceAfricaQuarterlyPage() {
                   className="absolute inset-0 bg-cover bg-center"
                   style={{
                     backgroundColor: strip.bg,
-                    backgroundImage: `url(https://images.unsplash.com/${strip.id}?auto=format&fit=crop&w=500&q=80)`,
+                    backgroundImage: `url(${strip.url})`,
                   }}
                 />
-                {/* Indigo color overlay */}
                 <div className="absolute inset-0 bg-[#2D3A8C]/20 mix-blend-overlay" />
                 <div className="absolute inset-0 bg-black/15" />
               </div>
             ))}
           </div>
 
-          {/* Diagonal lines overlay — engraved/print feel */}
+          {/* Diagonal lines overlay */}
           <div
             className="absolute inset-0 pointer-events-none opacity-[0.04] dark:opacity-[0.06]"
             style={{
@@ -169,13 +170,9 @@ export default function FinanceAfricaQuarterlyPage() {
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
-            {/* What You'll Get */}
             <section>
-              <h2 className="text-2xl font-bold mb-6">
-                What You&apos;ll Get
-              </h2>
+              <h2 className="text-2xl font-bold mb-6">What You&apos;ll Get</h2>
               <ul className="space-y-3">
                 {highlights.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm">
@@ -186,7 +183,6 @@ export default function FinanceAfricaQuarterlyPage() {
               </ul>
             </section>
 
-            {/* Past Issues — book spine left border */}
             <section>
               <h2 className="text-2xl font-bold mb-6">Recent Issues</h2>
               <div className="space-y-4">
@@ -199,9 +195,7 @@ export default function FinanceAfricaQuarterlyPage() {
                       <ScrollText className={`h-5 w-5 ${ACCENT} flex-shrink-0 mt-0.5`} />
                       <div>
                         <h3 className="font-semibold mb-1">{issue.title}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          {issue.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground">{issue.description}</p>
                       </div>
                     </div>
                   </div>
@@ -209,7 +203,6 @@ export default function FinanceAfricaQuarterlyPage() {
               </div>
             </section>
 
-            {/* At a Glance — number-first stat cards */}
             <section>
               <h2 className="text-2xl font-bold mb-6">At a Glance</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -229,33 +222,22 @@ export default function FinanceAfricaQuarterlyPage() {
             </section>
           </div>
 
-          {/* Sidebar - Subscribe Form */}
           <div>
             <div className="sticky top-24 space-y-6">
               <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
-                <h3 className="text-lg font-semibold mb-2">
-                  Subscribe to Finance Africa Quarterly
-                </h3>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Get each issue delivered to your inbox the day it publishes.
-                </p>
+                <h3 className="text-lg font-semibold mb-2">Subscribe to Finance Africa Quarterly</h3>
+                <p className="text-sm text-muted-foreground mb-6">Get each issue delivered to your inbox the day it publishes.</p>
 
                 {showSuccess ? (
                   <div className="bg-market-up/10 border border-market-up/30 p-5 text-center">
                     <Check className="h-8 w-8 text-market-up mx-auto mb-2" />
-                    <p className="text-market-up font-semibold">
-                      You&apos;re subscribed!
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Look out for the next issue in your inbox.
-                    </p>
+                    <p className="text-market-up font-semibold">You&apos;re subscribed!</p>
+                    <p className="text-xs text-muted-foreground mt-1">Look out for the next issue in your inbox.</p>
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit}>
                     <div className="mb-4">
-                      <label className="block text-sm font-medium mb-2">
-                        Email Address
-                      </label>
+                      <label className="block text-sm font-medium mb-2">Email Address</label>
                       <input
                         type="email"
                         value={email}
@@ -265,45 +247,25 @@ export default function FinanceAfricaQuarterlyPage() {
                         className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border focus:outline-none focus:border-[#2D3A8C] dark:focus:border-[#6272C1]"
                       />
                     </div>
-
                     {error && (
-                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">
-                        {error}
-                      </div>
+                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">{error}</div>
                     )}
-
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       className="w-full py-3 bg-[#2D3A8C] dark:bg-[#6272C1] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Subscribing...
-                        </>
-                      ) : (
-                        "Subscribe Free"
-                      )}
+                      {isSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
                     </button>
-
-                    <p className="text-xs text-muted-foreground text-center mt-3">
-                      Free email delivery. Unsubscribe anytime.
-                    </p>
+                    <p className="text-xs text-muted-foreground text-center mt-3">Free email delivery. Unsubscribe anytime.</p>
                   </form>
                 )}
               </div>
 
-              {/* CTA to full platform */}
               <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
                 <Landmark className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
-                <p className="text-sm font-semibold mb-2">
-                  Want the full platform?
-                </p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Get real-time data, analytics, and all three publications with
-                  a BGFI subscription.
-                </p>
+                <p className="text-sm font-semibold mb-2">Want the full platform?</p>
+                <p className="text-xs text-muted-foreground mb-4">Get real-time data, analytics, and all three publications with a BGFI subscription.</p>
                 <Link
                   href="/subscribe"
                   className={`inline-block w-full py-2 border border-[#2D3A8C] dark:border-[#6272C1] ${ACCENT} text-sm font-medium hover:bg-[#2D3A8C] hover:text-white dark:hover:bg-[#6272C1] transition-colors`}
