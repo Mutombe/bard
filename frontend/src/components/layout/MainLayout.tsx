@@ -221,8 +221,10 @@ export function MainLayout({ children }: MainLayoutProps) {
               <ThemeLogo width={360} height={90} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[50px]" : "max-h-[70px] md:max-h-[90px]")} />
             </Link>
 
-            {/* Desktop Navigation */}
-            <Navigation />
+            {/* Desktop Navigation — pushed toward right actions */}
+            <div className="ml-auto mr-4">
+              <Navigation />
+            </div>
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-1">
