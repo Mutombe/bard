@@ -48,7 +48,6 @@ interface MainLayoutProps {
 // Secondary nav links
 const secondaryLinks = [
   { href: "/podcasts", label: "Podcasts" },
-  { href: "/newsletters", label: "Newsletters" },
   { href: "/events", label: "Events" },
   { href: "/subscribe", label: "Subscribe", highlight: true },
 ];
@@ -285,7 +284,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/newsletters">
+                        <Link href="/subscribe">
                           <Mail className="h-4 w-4 mr-2" />
                           Newsletters
                         </Link>
@@ -415,7 +414,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <li><Link href="/publications/finance-africa-quarterly" className="hover:text-foreground">Finance Africa Quarterly</Link></li>
                 <li><Link href="/publications/finance-africa-insights" className="hover:text-foreground">Finance Africa Insights</Link></li>
                 <li><Link href="/publications/afrifin-analytics" className="hover:text-foreground">AfriFin Analytics</Link></li>
-                <li><Link href="/newsletters" className="hover:text-foreground">Newsletters</Link></li>
+                <li><Link href="/subscribe" className="hover:text-foreground">Newsletters</Link></li>
               </ul>
             </div>
 
@@ -426,7 +425,6 @@ export function MainLayout({ children }: MainLayoutProps) {
                 <li><Link href="/about#mission" className="hover:text-foreground">Our Mission</Link></li>
                 <li><Link href="/careers" className="hover:text-foreground">Careers</Link></li>
                 <li><Link href="/contact" className="hover:text-foreground">Contact</Link></li>
-                <li><Link href="/newsletters" className="hover:text-foreground">Newsletters</Link></li>
                 <li><Link href="/subscribe" className="hover:text-foreground">Subscribe</Link></li>
               </ul>
             </div>
