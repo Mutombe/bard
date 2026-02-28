@@ -1130,39 +1130,64 @@ export default function HomePage() {
   return (
     <MainLayout>
       <div className="min-h-screen">
-        {/* ===== 1. HERO ===== */}
-        <section className="py-8 md:py-12">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-            {loading ? (
-              <HeroSectionSkeleton />
-            ) : featuredArticle ? (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Main Featured Article — 7 cols */}
-                <div className="lg:col-span-7">
-                  <FeaturedInsight article={featuredArticle} />
-                </div>
-                {/* Side Articles with ranks — 5 cols */}
-                <div className="lg:col-span-5">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-                    Top Stories
-                  </h3>
-                  {heroSideArticles.map((article, index) => (
-                    <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
-                      <SidebarInsight article={article} rank={index + 1} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-16 text-muted-foreground">
-                <p>No featured insights available</p>
-              </div>
-            )}
+        {/* ===== HERO + TOP STORIES with grid pattern ===== */}
+        <div className="relative">
+          {/* Grid pattern background — variable burgundy */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.04] dark:opacity-[0.06]">
+              <defs>
+                <pattern
+                  id="hero-grid"
+                  width="40"
+                  height="40"
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d="M 40 0 L 0 0 0 40"
+                    fill="none"
+                    stroke="hsl(355, 70%, 38%)"
+                    strokeWidth="1"
+                  />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#hero-grid)" />
+            </svg>
           </div>
-        </section>
 
-        {/* ===== 2. INDUSTRY CHIPS ===== */}
-        <IndustryNavigation />
+          {/* ===== 1. HERO ===== */}
+          <section className="relative py-8 md:py-12">
+            <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+              {loading ? (
+                <HeroSectionSkeleton />
+              ) : featuredArticle ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Main Featured Article — 7 cols */}
+                  <div className="lg:col-span-7">
+                    <FeaturedInsight article={featuredArticle} />
+                  </div>
+                  {/* Side Articles with ranks — 5 cols */}
+                  <div className="lg:col-span-5">
+                    <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
+                      Top Stories
+                    </h3>
+                    {heroSideArticles.map((article, index) => (
+                      <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
+                        <SidebarInsight article={article} rank={index + 1} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-16 text-muted-foreground">
+                  <p>No featured insights available</p>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* ===== 2. INDUSTRY CHIPS ===== */}
+          <IndustryNavigation />
+        </div>
 
         {/* ===== 3. LATEST INSIGHTS + SIDEBAR ===== */}
         <section className="py-10 md:py-14">
