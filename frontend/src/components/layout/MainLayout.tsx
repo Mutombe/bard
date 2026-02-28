@@ -17,6 +17,7 @@ import {
   Mail,
   Linkedin,
   Facebook,
+  Instagram,
   LayoutDashboard,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
@@ -367,8 +368,11 @@ export function MainLayout({ children }: MainLayoutProps) {
                 Reducing information asymmetry in Africa&apos;s financial markets. Research, analysis, and intelligence for informed decision-making.
               </p>
               <div className="flex items-center gap-3">
-                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                <a href="https://x.com/BardGlobal" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                   <FaXTwitter className="h-4 w-4" />
+                </a>
+                <a href="https://www.instagram.com/bgfi.global/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                  <Instagram className="h-4 w-4" />
                 </a>
                 <a href="https://www.linkedin.com/company/bgif" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
                   <Linkedin className="h-4 w-4" />
