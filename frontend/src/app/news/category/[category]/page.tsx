@@ -8,7 +8,7 @@ import {
   Newspaper,
   Search,
   Clock,
-  User,
+  CircleUserRound,
   Zap,
   BarChart3,
   Building2,
@@ -186,7 +186,7 @@ export default function NewsCategoryPage() {
                   </p>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
+                      <CircleUserRound className="h-3 w-3" />
                       {article.author}
                     </span>
                     <span className="flex items-center gap-1">

@@ -8,7 +8,7 @@ import {
   Edit,
   Trash2,
   Shield,
-  User,
+  CircleUserRound,
   Mail,
   CheckCircle,
   XCircle,
@@ -303,7 +303,7 @@ export default function UsersPage() {
           </div>
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
             <div className="flex items-center gap-2 mb-2">
-              <User className="h-5 w-5 text-brand-orange" />
+              <CircleUserRound className="h-5 w-5 text-brand-orange" />
               <span className="text-sm text-muted-foreground">New Today</span>
             </div>
             <div className="text-2xl font-bold">
@@ -415,7 +415,7 @@ export default function UsersPage() {
       ) : users.length === 0 ? (
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
           <div className="text-muted-foreground mb-4">
-            <User className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <CircleUserRound className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-medium mb-2">No users found</h3>
             <p className="text-sm">
               {searchQuery || selectedRole !== "all" || selectedTier !== "all"

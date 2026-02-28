@@ -6,7 +6,7 @@ import {
   Plus,
   Search,
   Clock,
-  User,
+  CircleUserRound,
   FileText,
   CheckCircle2,
   AlertCircle,
@@ -462,7 +462,7 @@ export default function TasksPage() {
 
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
+                          <CircleUserRound className="h-3 w-3" />
                           {assignment.assignee?.full_name || "Unassigned"}
                         </span>
                         {assignment.deadline && (

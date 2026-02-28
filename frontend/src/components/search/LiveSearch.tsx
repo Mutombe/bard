@@ -6,7 +6,7 @@ import {
   Search,
   X,
   Newspaper,
-  User,
+  CircleUserRound,
   Clock,
   ArrowRight,
   Sparkles,
@@ -145,7 +145,7 @@ function getIcon(type: SearchResult["type"]) {
     case "article":
       return <Newspaper className="h-4 w-4 text-brand-orange" />;
     case "person":
-      return <User className="h-4 w-4 text-purple-400" />;
+      return <CircleUserRound className="h-4 w-4 text-purple-400" />;
     case "industry":
       return <Factory className="h-4 w-4 text-amber-400" />;
     case "region":

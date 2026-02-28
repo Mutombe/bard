@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ChevronRight, Clock, User, Zap } from "lucide-react";
+import { ChevronRight, Clock, CircleUserRound, Zap } from "lucide-react";
 import { newsService } from "@/services/api/news";
 import { cn, formatRelativeTime, truncate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -157,7 +157,7 @@ export function LatestNews() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="h-4 w-4" />
+                    <CircleUserRound className="h-4 w-4" />
                     {mainArticle.author?.full_name || "Editorial Team"}
                   </div>
                   <span className="text-sm text-muted-foreground">

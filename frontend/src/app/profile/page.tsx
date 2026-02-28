@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  User,
+  CircleUserRound,
   Mail,
   Phone,
   MapPin,
@@ -74,7 +74,7 @@ export default function ProfilePage() {
       <MainLayout>
         <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12">
           <div className="max-w-md mx-auto text-center">
-            <User className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+            <CircleUserRound className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
             <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
             <p className="text-muted-foreground mb-6">
               Sign in to view and manage your profile.
