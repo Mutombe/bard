@@ -51,8 +51,9 @@ export default function DailyNewsletterPage() {
           </div>
 
           <div>
-            <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
-              <h3 className="font-semibold mb-4">Subscribe to Daily Briefing</h3>
+            <div className="relative overflow-hidden bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="daily-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#daily-sub-grid)"/></svg></div>
+              <h3 className="relative font-semibold mb-4">Subscribe to Daily Briefing</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Get the most important market news delivered to your inbox every morning before the markets open.
               </p>

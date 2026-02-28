@@ -297,8 +297,9 @@ export default function WebinarsPage() {
         )}
 
         {/* CTA Section */}
-        <div className="mt-10 bg-gradient-to-r from-brand-orange/20 to-brand-orange/5 rounded-lg border border-brand-orange/30 p-6 text-center">
-          <Video className="h-10 w-10 text-brand-orange mx-auto mb-3" />
+        <div className="relative overflow-hidden mt-10 bg-gradient-to-r from-brand-orange/20 to-brand-orange/5 rounded-lg border border-brand-orange/30 p-6 text-center">
+          <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="webinar-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#webinar-sub-grid)"/></svg></div>
+          <Video className="relative h-10 w-10 text-brand-orange mx-auto mb-3" />
           <h2 className="text-xl font-bold mb-2">Learn More About African Markets</h2>
           <p className="text-muted-foreground mb-4 max-w-xl mx-auto">
             Subscribe to our partner channels for the latest webinars, tutorials, and market analysis.

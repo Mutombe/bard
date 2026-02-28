@@ -827,8 +827,9 @@ export default function ArticlePage() {
             </section>
 
             {/* Newsletter - Journal style */}
-            <section className="p-6 rounded-lg bg-primary/5 border border-primary/20">
-              <h3 className="headline text-lg mb-2">African Finance Insights</h3>
+            <section className="relative overflow-hidden p-6 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="article-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#article-sub-grid)"/></svg></div>
+              <h3 className="relative headline text-lg mb-2">African Finance Insights</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Weekly analysis and research on African markets, delivered to your inbox.
               </p>

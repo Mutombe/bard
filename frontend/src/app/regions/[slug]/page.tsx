@@ -226,14 +226,15 @@ export default function RegionPage() {
           {/* Sidebar */}
           <aside className="space-y-8">
             {/* Newsletter */}
-            <div className="p-6 rounded-lg bg-primary/5 border border-primary/20">
-              <h3 className="headline text-lg mb-2">{region.name} Brief</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="relative overflow-hidden p-6 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="region-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#region-sub-grid)"/></svg></div>
+              <h3 className="relative headline text-lg mb-2">{region.name} Brief</h3>
+              <p className="relative text-sm text-muted-foreground mb-4">
                 Weekly insights on {region.name.toLowerCase()} markets and economies.
               </p>
               <Link
                 href="/subscribe"
-                className="btn-primary w-full text-center block"
+                className="relative btn-primary w-full text-center block"
               >
                 Subscribe
               </Link>
