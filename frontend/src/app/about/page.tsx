@@ -403,7 +403,7 @@ export default function AboutPage() {
                 Subscribe to African Finance Insights for our latest research, analysis, and market intelligence.
               </p>
               <Link
-                href="/newsletters"
+                href="/subscribe"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 Subscribe Now

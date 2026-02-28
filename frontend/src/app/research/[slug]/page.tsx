@@ -442,7 +442,7 @@ export default function ResearchDetailPage() {
               Subscribe to receive our latest research reports, market analysis, and insights directly in your inbox.
             </p>
             <Link
-              href="/newsletters"
+              href="/subscribe"
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium"
             >
               Subscribe to Research Updates
