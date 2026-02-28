@@ -246,7 +246,7 @@ function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdow
 
   return (
     <div
-      className="fixed inset-x-0 bg-terminal-bg-secondary border-t-2 border-t-primary/50 border-b border-terminal-border shadow-2xl z-[100]"
+      className="fixed inset-x-0 bg-terminal-bg-secondary border-t-2 border-t-primary/50 border-b border-terminal-border shadow-2xl z-[100] dropdown-enter"
       style={{ top: `${topOffset}px` }}
     >
       <div className="max-w-7xl mx-auto px-6 py-6">
