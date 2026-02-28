@@ -265,12 +265,12 @@ export default function FinanceAfricaQuarterlyPage() {
               <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
                 <Landmark className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">Want the full platform?</p>
-                <p className="text-xs text-muted-foreground mb-4">Get real-time data, analytics, and all three publications with a BGFI subscription.</p>
+                <p className="text-xs text-muted-foreground mb-4">Get all three publications plus breaking news alerts and weekly digests — free.</p>
                 <Link
                   href="/subscribe"
                   className={`inline-block w-full py-2 border border-[#2D3A8C] dark:border-[#6272C1] ${ACCENT} text-sm font-medium hover:bg-[#2D3A8C] hover:text-white dark:hover:bg-[#6272C1] transition-colors`}
                 >
-                  View Plans
+                  Subscribe Free
                 </Link>
               </div>
             </div>

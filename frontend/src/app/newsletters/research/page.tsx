@@ -72,7 +72,7 @@ export default function ResearchNewsletterPage() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <Mail className="h-4 w-4 text-brand-orange" />
-                  <span>Premium subscribers only</span>
+                  <span>Free for all subscribers</span>
                 </div>
               </div>
               <Link

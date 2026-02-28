@@ -479,24 +479,24 @@ export default function ResearchPage() {
         {/* Subscribe CTA */}
         <section className="mt-12 p-8 rounded-lg bg-primary/5 border border-primary/20 text-center">
           <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
-          <h2 className="headline text-2xl mb-4">Research Subscription</h2>
+          <h2 className="headline text-2xl mb-4">Stay Updated on Research</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-            Get unlimited access to all research reports, real-time alerts for new publications,
-            and exclusive analyst webinars.
+            Get free alerts for new research reports, weekly digests, and analyst commentary
+            delivered straight to your inbox.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
               href="/subscribe"
               className="btn-primary flex items-center gap-2"
             >
-              View Plans
+              Subscribe Free
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/newsletters/research"
               className="btn-secondary"
             >
-              Get Free Alerts
+              Research Alerts
             </Link>
           </div>
         </section>

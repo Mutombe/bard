@@ -28,7 +28,7 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside text-muted-foreground space-y-2">
               <li>Name and email address</li>
               <li>Phone number</li>
-              <li>Billing information and payment details</li>
+              <li>Newsletter and subscription preferences</li>
               <li>Profile information and preferences</li>
               <li>Communications you send to us</li>
             </ul>

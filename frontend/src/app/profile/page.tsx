@@ -13,7 +13,7 @@ import {
   Camera,
   Shield,
   Bell,
-  CreditCard,
+  Newspaper,
   ChevronRight,
   Loader2,
 } from "lucide-react";
@@ -131,15 +131,8 @@ export default function ProfilePage() {
                   <h2 className="text-xl font-bold">{user?.full_name}</h2>
                   <p className="text-muted-foreground">{user?.email}</p>
                   <div className="flex items-center gap-4 mt-3">
-                    <span className={cn(
-                      "px-3 py-1 rounded-full text-xs font-medium capitalize",
-                      user?.subscription_tier === "enterprise"
-                        ? "bg-brand-orange/20 text-brand-orange"
-                        : user?.subscription_tier === "professional"
-                        ? "bg-market-up/20 text-market-up"
-                        : "bg-terminal-bg-elevated text-muted-foreground"
-                    )}>
-                      {user?.subscription_tier} Plan
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-brand-orange/20 text-brand-orange">
+                      Free Subscriber
                     </span>
                     {user?.email_verified && (
                       <span className="flex items-center gap-1 text-xs text-market-up">
@@ -279,36 +272,30 @@ export default function ProfilePage() {
                   className="flex items-center justify-between p-4 hover:bg-terminal-bg-elevated transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <CreditCard className="h-5 w-5 text-muted-foreground" />
-                    <span>Subscription & Billing</span>
+                    <Newspaper className="h-5 w-5 text-muted-foreground" />
+                    <span>Newsletter Subscriptions</span>
                   </div>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
               </div>
             </div>
 
-            {/* Subscription Info */}
+            {/* Newsletter Info */}
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-              <h3 className="font-semibold mb-4">Your Subscription</h3>
+              <h3 className="font-semibold mb-4">Your Newsletters</h3>
               <div className="p-4 bg-brand-orange/10 border border-brand-orange/30 rounded-lg">
-                <div className="text-lg font-bold text-brand-orange capitalize mb-1">
-                  {user?.subscription_tier} Plan
+                <div className="text-lg font-bold text-brand-orange mb-1">
+                  Free Subscriber
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {user?.subscription_tier === "enterprise"
-                    ? "Full access to all features"
-                    : user?.subscription_tier === "professional"
-                    ? "Access to professional content"
-                    : "Upgrade for more features"}
+                  Manage your newsletter preferences and choose which updates you receive.
                 </p>
-                {user?.subscription_tier !== "enterprise" && (
-                  <Link
-                    href="/subscribe"
-                    className="block text-center py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors text-sm"
-                  >
-                    Upgrade Plan
-                  </Link>
-                )}
+                <Link
+                  href="/subscribe"
+                  className="block text-center py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors text-sm"
+                >
+                  Manage Newsletters
+                </Link>
               </div>
             </div>
 

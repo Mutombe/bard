@@ -413,14 +413,14 @@ function PremiumPaywall() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
             <Bookmark className="h-8 w-8 text-amber-500" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">Premium Content</h3>
+          <h3 className="text-xl font-semibold mb-2">Subscriber Content</h3>
           <p className="text-muted-foreground mb-6">
-            This article is available exclusively to Bard Global Finance Institute subscribers.
-            Get unlimited access to all premium content.
+            This article is available to BGFI newsletter subscribers.
+            Sign up for free to unlock all content.
           </p>
           <div className="space-y-3">
             <Button className="w-full" size="lg">
-              Subscribe Now
+              Subscribe Free
             </Button>
             <Button variant="ghost" className="w-full">
               Sign in if you&apos;re already a subscriber
