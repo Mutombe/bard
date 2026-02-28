@@ -1134,7 +1134,7 @@ export default function HomePage() {
         <div className="relative">
           {/* Grid pattern background — variable burgundy */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.04] dark:opacity-[0.06]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.12] dark:opacity-[0.15]">
               <defs>
                 <pattern
                   id="hero-grid"
