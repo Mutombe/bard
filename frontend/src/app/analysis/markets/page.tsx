@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LineChart, ArrowLeft, TrendingUp, TrendingDown, Calendar, User } from "lucide-react";
+import { LineChart, ArrowLeft, TrendingUp, TrendingDown, Calendar, CircleUserRound } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -107,7 +107,7 @@ export default function MarketAnalysisPage() {
                     <p className="text-sm text-muted-foreground mb-3">{analysis.preview}</p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <User className="h-3 w-3" />
+                        <CircleUserRound className="h-3 w-3" />
                         {analysis.author}
                       </span>
                       <span className="flex items-center gap-1">

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Search,
-  User,
+  CircleUserRound,
   Menu,
   X,
   Bell,
@@ -256,7 +256,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
-                        <User className="h-5 w-5" />
+                        <CircleUserRound className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
@@ -271,7 +271,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link href="/profile">
-                          <User className="h-4 w-4 mr-2" />
+                          <CircleUserRound className="h-4 w-4 mr-2" />
                           Profile
                         </Link>
                       </DropdownMenuItem>

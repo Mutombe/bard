@@ -11,7 +11,7 @@ import {
   TrendingDown,
   Newspaper,
   Building2,
-  User,
+  CircleUserRound,
   X,
   Factory,
   Globe,
@@ -296,7 +296,7 @@ function getTypeIcon(type: SearchResult["type"]) {
     case "company":
       return <Building2 className="h-4 w-4 text-blue-400" />;
     case "person":
-      return <User className="h-4 w-4 text-purple-400" />;
+      return <CircleUserRound className="h-4 w-4 text-purple-400" />;
     case "index":
       return <TrendingUp className="h-4 w-4 text-market-up" />;
     case "industry":

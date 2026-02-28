@@ -85,7 +85,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        sans: ["var(--font-bricolage)", "system-ui", "sans-serif"],
         serif: ["var(--font-fraunces)", "Georgia", "Times New Roman", "serif"],
         "serif-body": ["var(--font-newsreader)", "Georgia", "serif"],
         mono: ["var(--font-mono)", "Consolas", "Monaco", "monospace"],

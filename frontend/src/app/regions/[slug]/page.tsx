@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronRight, MapPin, TrendingUp, TrendingDown } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -15,7 +15,6 @@ const regionData: Record<string, {
   name: string;
   description: string;
   countries: { name: string; code: string; exchange?: string }[];
-  keyIndicators: { label: string; value: string; change?: string }[];
 }> = {
   "southern-africa": {
     name: "Southern Africa",
@@ -29,11 +28,6 @@ const regionData: Record<string, {
       { name: "Mozambique", code: "MZ", exchange: "BVM" },
       { name: "Mauritius", code: "MU", exchange: "SEM" },
     ],
-    keyIndicators: [
-      { label: "Regional GDP", value: "$720B", change: "+2.1%" },
-      { label: "JSE All Share", value: "78,234", change: "+0.8%" },
-      { label: "ZAR/USD", value: "18.42", change: "-0.3%" },
-    ],
   },
   "east-africa": {
     name: "East Africa",
@@ -44,11 +38,6 @@ const regionData: Record<string, {
       { name: "Uganda", code: "UG", exchange: "USE" },
       { name: "Rwanda", code: "RW", exchange: "RSE" },
       { name: "Ethiopia", code: "ET" },
-    ],
-    keyIndicators: [
-      { label: "Regional GDP", value: "$310B", change: "+5.2%" },
-      { label: "NSE 20", value: "1,842", change: "+1.2%" },
-      { label: "KES/USD", value: "154.20", change: "-0.5%" },
     ],
   },
   "west-africa": {
@@ -61,11 +50,6 @@ const regionData: Record<string, {
       { name: "Senegal", code: "SN", exchange: "BRVM" },
       { name: "Cameroon", code: "CM", exchange: "DSX" },
     ],
-    keyIndicators: [
-      { label: "Regional GDP", value: "$680B", change: "+3.4%" },
-      { label: "NGX All Share", value: "97,432", change: "+2.1%" },
-      { label: "NGN/USD", value: "1,520", change: "-1.2%" },
-    ],
   },
   "north-africa": {
     name: "North Africa",
@@ -75,11 +59,6 @@ const regionData: Record<string, {
       { name: "Morocco", code: "MA", exchange: "CSE" },
       { name: "Tunisia", code: "TN", exchange: "BVMT" },
       { name: "Algeria", code: "DZ", exchange: "SGBV" },
-    ],
-    keyIndicators: [
-      { label: "Regional GDP", value: "$540B", change: "+3.8%" },
-      { label: "EGX 30", value: "24,892", change: "+0.4%" },
-      { label: "EGP/USD", value: "48.75", change: "-0.2%" },
     ],
   },
 };
@@ -209,30 +188,6 @@ export default function RegionPage() {
             {region.description}
           </p>
         </header>
-
-        {/* Key Indicators */}
-        <div className="grid grid-cols-3 gap-4 mb-10 p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
-          {region.keyIndicators.map((indicator) => {
-            const isPositive = indicator.change?.startsWith("+");
-            return (
-              <div key={indicator.label} className="text-center p-3">
-                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">
-                  {indicator.label}
-                </div>
-                <div className="text-xl font-mono font-semibold">{indicator.value}</div>
-                {indicator.change && (
-                  <div className={cn(
-                    "text-sm flex items-center justify-center gap-1",
-                    isPositive ? "text-up" : "text-down"
-                  )}>
-                    {isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {indicator.change}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
 
         {/* Countries */}
         <div className="flex flex-wrap gap-2 mb-10">

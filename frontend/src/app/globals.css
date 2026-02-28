@@ -447,7 +447,7 @@
   /* Subtle uppercase labels like Bloomberg/FT style */
   .label-uppercase {
     @apply text-xs font-medium uppercase tracking-wider text-muted-foreground;
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-bricolage), system-ui, sans-serif;
   }
 
   /* Financial data display */
@@ -458,7 +458,7 @@
   /* Byline/metadata styling */
   .byline {
     @apply text-sm text-muted-foreground;
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-bricolage), system-ui, sans-serif;
   }
 
   /* Hide scrollbar but allow scrolling */
@@ -704,25 +704,26 @@
 
   /* Meta line - Inter, tiny muted */
   .meta-line {
-    font-family: var(--font-inter), system-ui, sans-serif;
+    font-family: var(--font-bricolage), system-ui, sans-serif;
     @apply text-xs text-muted-foreground;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.02em;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
   }
 
-  /* Card hover lift with burgundy left accent */
+  /* Card hover lift with burgundy left accent (inset shadow — zero layout shift) */
   .card-hover {
     @apply transition-all duration-300;
-    border-left: 3px solid transparent;
+    box-shadow: inset 3px 0 0 0 transparent;
   }
 
   .card-hover:hover {
     transform: translateY(-2px);
-    border-left-color: hsl(var(--primary));
-    box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
+    box-shadow: inset 3px 0 0 0 hsl(var(--primary)), 0 8px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
   }
 
   .dark .card-hover:hover {
-    box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.3);
+    box-shadow: inset 3px 0 0 0 hsl(var(--primary)), 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.3);
   }
 
   /* Headline underline-from-left on hover */

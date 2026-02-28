@@ -6,7 +6,7 @@ import Link from "next/link";
 import {
   ArrowLeft,
   Save,
-  User,
+  CircleUserRound,
   Mail,
   Lock,
   Shield,
@@ -135,7 +135,7 @@ export default function NewUserPage() {
         {/* Basic Info */}
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <User className="h-4 w-4" />
+            <CircleUserRound className="h-4 w-4" />
             Basic Information
           </h3>
           <div className="space-y-4">

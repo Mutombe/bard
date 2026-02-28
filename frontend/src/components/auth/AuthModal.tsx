@@ -9,7 +9,7 @@ import {
   EyeOff,
   Mail,
   Lock,
-  User,
+  CircleUserRound,
   ArrowRight,
   Check,
   AlertCircle,
@@ -470,7 +470,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                 <div>
                   <label className="block text-sm font-medium mb-2">First Name</label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <CircleUserRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                       type="text"
                       value={firstName}

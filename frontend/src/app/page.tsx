@@ -497,7 +497,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
             {article.title}
           </h1>
 
-          <p className="text-lg text-muted-foreground mb-4 leading-relaxed line-clamp-3 drop-cap">
+          <p className="text-lg text-muted-foreground/90 mb-4 leading-relaxed line-clamp-3">
             {article.excerpt}
           </p>
 

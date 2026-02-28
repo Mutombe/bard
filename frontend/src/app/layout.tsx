@@ -1,13 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono, Fraunces, Newsreader } from "next/font/google";
+import { Bricolage_Grotesque, JetBrains_Mono, Fraunces, Newsreader } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/index";
 import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-bricolage",
   display: "swap",
+  weight: ["400", "500", "600", "700"],
 });
 
 const mono = JetBrains_Mono({
@@ -125,7 +126,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${mono.variable} ${fraunces.variable} ${newsreader.variable} min-h-screen bg-background antialiased`}
+        className={`${bricolage.variable} ${mono.variable} ${fraunces.variable} ${newsreader.variable} min-h-screen bg-background antialiased`}
       >
         <Providers>
           {children}
