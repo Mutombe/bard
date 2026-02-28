@@ -41,7 +41,7 @@ function getIndexCurrency(exchangeCode?: string): string {
 function IndexPageSkeleton() {
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Breadcrumb skeleton */}
         <div className="flex items-center gap-2 mb-6">
           <Skeleton className="h-4 w-16" />
@@ -143,7 +143,7 @@ export default function IndexDetailPage() {
   if (error || !indexData) {
     return (
       <MainLayout>
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12 text-center">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
           <AlertCircle className="h-16 w-16 text-market-down mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Index Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -165,7 +165,7 @@ export default function IndexDetailPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/markets" className="hover:text-foreground">Markets</Link>
