@@ -879,7 +879,7 @@ function PodcastSection({ video }: { video: any }) {
           </div>
 
           <div className="text-white">
-            <span className="text-sm text-primary font-medium lowercase tracking-wide">
+            <span className="text-sm text-primary font-medium tracking-wide">
               Latest Video
             </span>
             <h3 className="font-serif text-2xl md:text-3xl font-bold mt-2 mb-4 leading-tight">
