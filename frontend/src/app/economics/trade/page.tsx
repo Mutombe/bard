@@ -19,7 +19,7 @@ const tradeData = [
 export default function TradePage() {
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         <div className="flex items-center gap-4 mb-6">
           <Link href="/economics" className="p-2 hover:bg-terminal-bg-secondary rounded-md">
             <ArrowLeft className="h-5 w-5" />

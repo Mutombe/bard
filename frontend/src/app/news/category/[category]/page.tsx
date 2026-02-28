@@ -110,7 +110,7 @@ export default function NewsCategoryPage() {
   if (!category) {
     return (
       <MainLayout>
-        <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-12 text-center">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
           <Newspaper className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
           <h1 className="text-2xl font-bold mb-4">Category Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -136,7 +136,7 @@ export default function NewsCategoryPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>

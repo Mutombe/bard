@@ -189,7 +189,7 @@ function StickyArticleHeader({
 }) {
   return (
     <div className={cn("sticky-article-header", visible && "visible")}>
-      <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4">
         <h2 className="text-sm font-medium truncate flex-1">{title}</h2>
         <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
@@ -277,7 +277,7 @@ function ArticleToolbar({
 // Loading skeleton
 function ArticleSkeleton() {
   return (
-    <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-8 animate-pulse">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 animate-pulse">
       <Skeleton className="h-4 w-48 mb-6" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -555,7 +555,7 @@ export default function ArticlePage() {
         bookmarked={bookmarked}
       />
 
-      <article ref={articleRef} className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
+      <article ref={articleRef} className="max-w-[1400px] mx-auto px-4 md:px-6 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>

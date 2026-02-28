@@ -163,7 +163,7 @@ export default function NewslettersPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <Mail className="h-12 w-12 text-brand-orange mx-auto mb-4" />

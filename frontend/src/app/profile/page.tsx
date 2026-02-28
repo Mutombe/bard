@@ -72,7 +72,7 @@ export default function ProfilePage() {
   if (!isAuthenticated) {
     return (
       <MainLayout>
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
           <div className="max-w-md mx-auto text-center">
             <CircleUserRound className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
             <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
@@ -93,7 +93,7 @@ export default function ProfilePage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-2">Profile</h1>

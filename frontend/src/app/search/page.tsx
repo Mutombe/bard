@@ -397,7 +397,7 @@ function SearchContent() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link href="/" className="hover:text-foreground">Home</Link>
@@ -674,7 +674,7 @@ function SearchContent() {
 
 function SearchLoading() {
   return (
-    <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-8">
+    <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-8">
       <div className="mb-8">
         <div className="h-8 w-32 bg-terminal-bg-secondary rounded animate-pulse mb-4" />
         <div className="flex gap-4">

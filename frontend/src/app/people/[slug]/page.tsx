@@ -188,7 +188,7 @@ function formatDate(dateString?: string): string {
 
 function AuthorSkeleton() {
   return (
-    <div className="animate-pulse max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+    <div className="animate-pulse max-w-[1400px] mx-auto px-4 md:px-6 py-6">
       <Skeleton className="h-4 w-48 mb-6" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
@@ -349,7 +349,7 @@ export default function PersonPage() {
   if (!person && apiAuthor) {
     return (
       <MainLayout>
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
           {/* Back link */}
           <Link
             href="/news"
@@ -501,7 +501,7 @@ export default function PersonPage() {
   if (!person && !apiAuthor) {
     return (
       <MainLayout>
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12 text-center">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Person Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The profile you&apos;re looking for doesn&apos;t exist.
@@ -516,7 +516,7 @@ export default function PersonPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>

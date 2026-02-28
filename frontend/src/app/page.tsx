@@ -512,15 +512,15 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
   );
 }
 
-/** InsightCard - Clean card with image, colored category, topic tags */
+/** InsightCard - Card with image, colored category, topic tags */
 function InsightCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
   const imageUrl = getArticleImage(article);
 
   return (
-    <Link href={`/news/${article.slug}`} className="group block h-full card-hover">
-      <article className="h-full">
+    <Link href={`/news/${article.slug}`} className="group block h-full">
+      <article className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden card-hover">
         {imageUrl && (
-          <div className="relative aspect-[16/10] mb-4 overflow-hidden bg-terminal-bg-elevated">
+          <div className="relative aspect-[16/10] overflow-hidden bg-terminal-bg-elevated">
             <Image
               src={imageUrl}
               alt={article.title}
@@ -531,31 +531,33 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
           </div>
         )}
 
-        <div className="flex items-center gap-2 mb-2">
-          <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
-            {article.category?.name || "insight"}
-          </span>
-        </div>
+        <div className="p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
+              {article.category?.name || "insight"}
+            </span>
+          </div>
 
-        <h3 className={cn(
-          "font-serif font-bold mb-2 leading-snug group-hover:text-primary transition-colors",
-          featured ? "text-xl" : "text-lg"
-        )}>
-          {article.title}
-        </h3>
+          <h3 className={cn(
+            "font-serif font-bold mb-2 leading-snug group-hover:text-primary transition-colors",
+            featured ? "text-xl" : "text-lg"
+          )}>
+            {article.title}
+          </h3>
 
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {article.excerpt}
-        </p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+            {article.excerpt}
+          </p>
 
-        <div className="flex items-center gap-2 meta-line">
-          <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
-          <span className="text-muted-foreground/50">·</span>
-          <span>{timeAgo(article.published_at)}</span>
-        </div>
+          <div className="flex items-center gap-2 meta-line">
+            <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
+            <span className="text-muted-foreground/50">·</span>
+            <span>{timeAgo(article.published_at)}</span>
+          </div>
 
-        <div className="mt-2">
-          <TopicTags article={article} />
+          <div className="mt-2">
+            <TopicTags article={article} />
+          </div>
         </div>
       </article>
     </Link>

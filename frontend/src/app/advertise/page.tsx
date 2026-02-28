@@ -105,7 +105,7 @@ export default function AdvertisePage() {
     <MainLayout>
       {/* Hero Section */}
       <div className="bg-terminal-bg-secondary border-b border-terminal-border">
-        <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-16">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-16">
           <div className="max-w-3xl">
             <h1 className="text-3xl md:text-4xl font-bold mb-4">
               Reach Africa's <span className="text-brand-orange">Financial Elite</span>
@@ -132,7 +132,7 @@ export default function AdvertisePage() {
         </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-12">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
           {stats.map((stat) => (

@@ -109,7 +109,7 @@ export default function OpinionsPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>

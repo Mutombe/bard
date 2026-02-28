@@ -74,7 +74,7 @@ export default function WebinarsPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1200px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Video Modal */}
         {selectedWebinar && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80" onClick={() => setSelectedWebinar(null)}>

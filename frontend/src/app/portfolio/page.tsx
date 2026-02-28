@@ -52,7 +52,7 @@ export default function PortfolioPage() {
   if (!isAuthenticated) {
     return (
       <MainLayout>
-        <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-12">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
           <div className="max-w-md mx-auto text-center">
             <Briefcase className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
             <h1 className="text-2xl font-bold mb-4">Portfolio Tracker</h1>
@@ -81,7 +81,7 @@ export default function PortfolioPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>

@@ -177,7 +177,7 @@ export default function NewNewsletterPage() {
     <div className="min-h-screen bg-terminal-bg">
       {/* Header */}
       <div className="sticky top-0 z-40 bg-terminal-bg/95 backdrop-blur-sm border-b border-terminal-border">
-        <div className="max-w-[1600px] mx-auto px-6 py-3 flex items-center justify-between">
+        <div className="max-w-[1400px] mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/admin/newsletters"
@@ -230,7 +230,7 @@ export default function NewNewsletterPage() {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto flex">
+      <div className="max-w-[1400px] mx-auto flex">
         {/* Main Editor */}
         <div className={cn(
           "flex-1 transition-all duration-300",

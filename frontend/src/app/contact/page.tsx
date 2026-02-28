@@ -79,7 +79,7 @@ export default function ContactPage() {
 
   return (
     <MainLayout>
-      <div className="max-w-[1600px] mx-auto px-4 md:px-6 py-6">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
