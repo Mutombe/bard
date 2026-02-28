@@ -768,13 +768,13 @@
     background-color: hsl(0 0% 3%);
   }
 
-  /* Section media - dark background for podcast/video */
+  /* Section media - CNBC navy blue for video section */
   .section-media {
-    background-color: hsl(0 0% 8%);
+    background-color: hsl(215 60% 14%);
   }
 
   .dark .section-media {
-    background-color: hsl(0 0% 4%);
+    background-color: hsl(215 65% 10%);
   }
 
   /* Fade-in animation for scroll-triggered sections */

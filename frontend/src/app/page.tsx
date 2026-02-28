@@ -840,7 +840,7 @@ function PodcastSection({ video }: { video: any }) {
             href="/podcasts"
             className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
           >
-            All Episodes <ChevronRight className="h-4 w-4" />
+            All Videos <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -880,7 +880,7 @@ function PodcastSection({ video }: { video: any }) {
 
           <div className="text-white">
             <span className="text-sm text-primary font-medium lowercase tracking-wide">
-              Latest Episode
+              Latest Video
             </span>
             <h3 className="font-serif text-2xl md:text-3xl font-bold mt-2 mb-4 leading-tight">
               {video.title}
@@ -934,8 +934,20 @@ function NewsletterSection() {
   };
 
   return (
-    <section className="py-14 md:py-20 border-y border-border">
-      <div className="max-w-[600px] mx-auto px-4 md:px-6 text-center">
+    <section className="relative py-14 md:py-20 border-y border-border">
+      {/* Grid pattern */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.12] dark:opacity-[0.15]">
+          <defs>
+            <pattern id="newsletter-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#newsletter-grid)" />
+        </svg>
+      </div>
+
+      <div className="relative max-w-[600px] mx-auto px-4 md:px-6 text-center">
         {/* Burgundy rule */}
         <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
 
@@ -1185,9 +1197,10 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* ===== 2. INDUSTRY CHIPS ===== */}
-          <IndustryNavigation />
         </div>
+
+        {/* ===== 2. INDUSTRY CHIPS ===== */}
+        <IndustryNavigation />
 
         {/* ===== 3. LATEST INSIGHTS + SIDEBAR ===== */}
         <section className="py-10 md:py-14">
@@ -1276,8 +1289,20 @@ export default function HomePage() {
         )}
 
         {/* Bottom CTA */}
-        <section className="py-14 md:py-20 text-center">
-          <div className="max-w-[600px] mx-auto px-4 md:px-6">
+        <section className="relative py-14 md:py-20 text-center">
+          {/* Grid pattern */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.12] dark:opacity-[0.15]">
+              <defs>
+                <pattern id="cta-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#cta-grid)" />
+            </svg>
+          </div>
+
+          <div className="relative max-w-[600px] mx-auto px-4 md:px-6">
             <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
             <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4">
               Explore All Content
