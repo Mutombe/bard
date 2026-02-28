@@ -3,18 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Lightbulb,
+  Feather,
   Check,
   ChevronRight,
   Loader2,
-  TrendingUp,
-  PenLine,
-  Globe,
-  Users,
+  Quote,
+  Scale,
+  Compass,
+  MessageCircle,
+  Sparkles,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
+
+// Warm Amber accent: #B45309 light, #F59E0B dark
+const ACCENT = "text-[#B45309] dark:text-[#F59E0B]";
+const ACCENT_BG = "bg-[#B45309]/15 dark:bg-[#F59E0B]/15";
+const ACCENT_BORDER = "border-[#B45309]/20 dark:border-[#F59E0B]/20";
 
 const highlights = [
   "Curated editorial commentary on Africa's most important market developments",
@@ -28,25 +34,25 @@ const highlights = [
 
 const focusAreas = [
   {
-    icon: <PenLine className="h-5 w-5 text-brand-orange" />,
+    icon: <Quote className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Editorial Commentary",
     description:
       "Sharp, opinionated analysis that goes beyond the headlines to explain why markets are moving.",
   },
   {
-    icon: <Globe className="h-5 w-5 text-brand-orange" />,
+    icon: <Scale className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Macro & Policy",
     description:
       "Central bank decisions, fiscal policy shifts, and their impact on African asset classes.",
   },
   {
-    icon: <TrendingUp className="h-5 w-5 text-brand-orange" />,
+    icon: <Compass className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Market Strategy",
     description:
       "Tactical insights on sector rotation, valuation opportunities, and risk management.",
   },
   {
-    icon: <Users className="h-5 w-5 text-brand-orange" />,
+    icon: <MessageCircle className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Expert Voices",
     description:
       "Perspectives from Africa's leading investors, regulators, and corporate leaders.",
@@ -101,21 +107,19 @@ export default function FinanceAfricaInsightsPage() {
           <span className="text-foreground">Finance Africa Insights</span>
         </nav>
 
-        {/* Hero with image strip grid */}
-        <section className="relative overflow-hidden rounded-lg mb-12" style={{ height: '420px' }}>
-          {/* Image strips */}
+        {/* Hero — The Letterpress: alternating wide/narrow strips, warm amber wash */}
+        <section className="relative overflow-hidden mb-12" style={{ height: '420px' }}>
+          {/* Image strips — editorial, people, African cities */}
           <div className="absolute inset-0 flex items-start gap-[3px]">
             {[
-              { flex: 0.9, height: '78%', bg: '#1a1a2e', img: 'photo-1507003211169-0a1dd7228f2d' },
-              { flex: 0.7, height: '62%', bg: '#16213e', img: 'photo-1553877522-43269d4ea984' },
-              { flex: 1.2, height: '95%', bg: '#0f172a', img: 'photo-1504384308090-c894fdcc538d' },
-              { flex: 0.8, height: '70%', bg: '#1e293b', img: 'photo-1486406146926-c627a92ad1ab' },
-              { flex: 1.4, height: '100%', bg: '#14243d', img: 'photo-1444628838545-ac4016a5418a' },
-              { flex: 0.6, height: '58%', bg: '#0c1a2e', img: 'photo-1497366811353-6870744d04b2' },
-              { flex: 1.0, height: '85%', bg: '#162032', img: 'photo-1454165804606-c3d57bc86b40' },
-              { flex: 1.1, height: '73%', bg: '#1a1a2e', img: 'photo-1462899006636-339e08d1844e' },
-              { flex: 0.8, height: '90%', bg: '#0f172a', img: 'photo-1526304640581-d334cdbbf45e' },
-              { flex: 0.7, height: '66%', bg: '#1e293b', img: 'photo-1560472354-b33ff0c44a43' },
+              { flex: 1.6, height: '90%', bg: '#1A1008', id: 'rg1y72eKw6o' },
+              { flex: 0.3, height: '50%', bg: '#241709', id: '5YdLNHzwux4' },
+              { flex: 1.4, height: '100%', bg: '#2D1D0A', id: 'AzVexpHvuKY' },
+              { flex: 0.4, height: '55%', bg: '#1F1407', id: '-CgUhaShACE' },
+              { flex: 1.8, height: '85%', bg: '#33220E', id: 'e6wu8EiFUB0' },
+              { flex: 0.3, height: '48%', bg: '#1A1008', id: 'fTJHa8jYcis' },
+              { flex: 1.2, height: '95%', bg: '#241709', id: 'gNn09nVzmnI' },
+              { flex: 0.4, height: '60%', bg: '#2D1D0A', id: 'zoGrMNxosXI' },
             ].map((strip, i) => (
               <div
                 key={i}
@@ -126,7 +130,7 @@ export default function FinanceAfricaInsightsPage() {
                   className="absolute inset-0 bg-cover bg-center"
                   style={{
                     backgroundColor: strip.bg,
-                    backgroundImage: `url(https://images.unsplash.com/${strip.img}?auto=format&fit=crop&w=400&q=80)`,
+                    backgroundImage: `url(https://images.unsplash.com/${strip.id}?auto=format&fit=crop&w=400&q=80)`,
                   }}
                 />
                 <div className="absolute inset-0 bg-black/15" />
@@ -134,7 +138,10 @@ export default function FinanceAfricaInsightsPage() {
             ))}
           </div>
 
-          {/* Bottom fade overlay */}
+          {/* Warm amber wash overlay */}
+          <div className="absolute inset-0 bg-[#B45309]/[0.07] dark:bg-[#F59E0B]/[0.05] pointer-events-none" />
+
+          {/* Bottom fade */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -145,10 +152,10 @@ export default function FinanceAfricaInsightsPage() {
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-lg bg-brand-orange/20 backdrop-blur-sm flex items-center justify-center">
-                <Lightbulb className="h-6 w-6 text-brand-orange" />
+              <div className={`h-12 w-12 ${ACCENT_BG} backdrop-blur-sm flex items-center justify-center`}>
+                <Feather className={`h-6 w-6 ${ACCENT}`} />
               </div>
-              <span className="px-3 py-1 bg-brand-orange/20 backdrop-blur-sm text-brand-orange text-xs font-semibold rounded-full uppercase tracking-wider">
+              <span className={`px-3 py-1 ${ACCENT_BG} backdrop-blur-sm ${ACCENT} text-xs font-semibold uppercase tracking-wider border ${ACCENT_BORDER}`}>
                 Weekly
               </span>
             </div>
@@ -166,20 +173,22 @@ export default function FinanceAfricaInsightsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
-            {/* Content Focus Areas */}
+            {/* Content Focus Areas — top accent bar cards */}
             <section>
               <h2 className="text-2xl font-bold mb-6">Content Focus Areas</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {focusAreas.map((area) => (
                   <div
                     key={area.title}
-                    className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border"
+                    className="p-5 bg-terminal-bg-secondary border border-terminal-border relative overflow-hidden"
                   >
-                    <div className="flex items-center gap-3 mb-2">
+                    {/* Top accent bar */}
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#B45309] dark:bg-[#F59E0B]" />
+                    <div className="flex items-center gap-3 mb-3">
                       {area.icon}
                       <h3 className="font-semibold">{area.title}</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {area.description}
                     </p>
                   </div>
@@ -187,7 +196,7 @@ export default function FinanceAfricaInsightsPage() {
               </div>
             </section>
 
-            {/* What You'll Get */}
+            {/* What You'll Get — amber chevron markers */}
             <section>
               <h2 className="text-2xl font-bold mb-6">
                 What You&apos;ll Get
@@ -195,7 +204,7 @@ export default function FinanceAfricaInsightsPage() {
               <ul className="space-y-3">
                 {highlights.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm">
-                    <Check className="h-4 w-4 text-market-up flex-shrink-0 mt-0.5" />
+                    <ChevronRight className={`h-4 w-4 ${ACCENT} flex-shrink-0 mt-0.5`} />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -206,7 +215,7 @@ export default function FinanceAfricaInsightsPage() {
           {/* Sidebar - Subscribe Form */}
           <div>
             <div className="sticky top-24 space-y-6">
-              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+              <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
                 <h3 className="text-lg font-semibold mb-2">
                   Subscribe to Finance Africa Insights
                 </h3>
@@ -215,7 +224,7 @@ export default function FinanceAfricaInsightsPage() {
                 </p>
 
                 {showSuccess ? (
-                  <div className="bg-market-up/10 border border-market-up/30 rounded-lg p-5 text-center">
+                  <div className="bg-market-up/10 border border-market-up/30 p-5 text-center">
                     <Check className="h-8 w-8 text-market-up mx-auto mb-2" />
                     <p className="text-market-up font-semibold">
                       You&apos;re subscribed!
@@ -236,12 +245,12 @@ export default function FinanceAfricaInsightsPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
                         required
-                        className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                        className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border focus:outline-none focus:border-[#B45309] dark:focus:border-[#F59E0B]"
                       />
                     </div>
 
                     {error && (
-                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 rounded-md text-market-down text-sm">
+                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">
                         {error}
                       </div>
                     )}
@@ -249,7 +258,7 @@ export default function FinanceAfricaInsightsPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-3 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-[#B45309] dark:bg-[#F59E0B] text-white dark:text-black font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -269,8 +278,8 @@ export default function FinanceAfricaInsightsPage() {
               </div>
 
               {/* CTA to full platform */}
-              <div className="bg-terminal-bg-elevated rounded-lg border border-brand-orange/30 p-6 text-center">
-                <TrendingUp className="h-6 w-6 text-brand-orange mx-auto mb-3" />
+              <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
+                <Sparkles className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">
                   Want the full platform?
                 </p>
@@ -280,7 +289,7 @@ export default function FinanceAfricaInsightsPage() {
                 </p>
                 <Link
                   href="/subscribe"
-                  className="inline-block w-full py-2 border border-brand-orange text-brand-orange text-sm font-medium rounded-md hover:bg-brand-orange hover:text-white transition-colors"
+                  className={`inline-block w-full py-2 border border-[#B45309] dark:border-[#F59E0B] ${ACCENT} text-sm font-medium hover:bg-[#B45309] hover:text-white dark:hover:bg-[#F59E0B] dark:hover:text-black transition-colors`}
                 >
                   View Plans
                 </Link>

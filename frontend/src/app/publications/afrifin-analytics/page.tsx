@@ -3,18 +3,24 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BarChart3,
+  DatabaseZap,
   Check,
   ChevronRight,
   Loader2,
-  TrendingUp,
-  LineChart,
-  PieChart,
-  Activity,
+  ArrowUpDown,
+  Layers,
+  Gauge,
+  SlidersHorizontal,
+  Zap,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
+
+// Teal/Cyan accent: #0D7377 light, #2DD4BF dark
+const ACCENT = "text-[#0D7377] dark:text-[#2DD4BF]";
+const ACCENT_BG = "bg-[#0D7377]/15 dark:bg-[#2DD4BF]/15";
+const ACCENT_BORDER = "border-[#0D7377]/20 dark:border-[#2DD4BF]/20";
 
 const highlights = [
   "Daily data snapshots covering equity indices, FX, and bond yields across Africa",
@@ -29,25 +35,25 @@ const highlights = [
 
 const dataProducts = [
   {
-    icon: <LineChart className="h-5 w-5 text-brand-orange" />,
+    icon: <ArrowUpDown className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
     title: "Market Dashboards",
     description:
       "Real-time and historical charts across all major African indices, currencies, and benchmarks.",
   },
   {
-    icon: <PieChart className="h-5 w-5 text-brand-orange" />,
+    icon: <Layers className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
     title: "Sector Analytics",
     description:
       "Breakdown of sector performance, capital flows, and relative valuation metrics.",
   },
   {
-    icon: <Activity className="h-5 w-5 text-brand-orange" />,
+    icon: <Gauge className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
     title: "Volatility Tracker",
     description:
       "Proprietary volatility and risk indices for frontier and emerging African markets.",
   },
   {
-    icon: <BarChart3 className="h-5 w-5 text-brand-orange" />,
+    icon: <SlidersHorizontal className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
     title: "Quant Screens",
     description:
       "Systematic screens for momentum, value, and quality factors across listed equities.",
@@ -102,40 +108,45 @@ export default function AfriFinAnalyticsPage() {
           <span className="text-foreground">AfriFin Analytics</span>
         </nav>
 
-        {/* Hero with image strip grid */}
-        <section className="relative overflow-hidden rounded-lg mb-12" style={{ height: '420px' }}>
-          {/* Image strips */}
-          <div className="absolute inset-0 flex items-start gap-[3px]">
+        {/* Hero — The Terminal: rigid 8-column grid, dot-grid overlay, compact */}
+        <section className="relative overflow-hidden mb-12" style={{ height: '360px' }}>
+          {/* 8-column grid of images — data, tech, fintech */}
+          <div className="absolute inset-0 grid grid-cols-8 gap-[2px]">
             {[
-              { flex: 0.8, height: '72%', bg: '#0f172a', img: 'photo-1504384308090-c894fdcc538d' },
-              { flex: 1.1, height: '92%', bg: '#14243d', img: 'photo-1460925895917-afdab827c52f' },
-              { flex: 0.7, height: '60%', bg: '#1e293b', img: 'photo-1518770660439-4636190af475' },
-              { flex: 1.0, height: '100%', bg: '#0c1a2e', img: 'photo-1551288049-bebda4e38f71' },
-              { flex: 0.9, height: '68%', bg: '#162032', img: 'photo-1526304640581-d334cdbbf45e' },
-              { flex: 1.3, height: '88%', bg: '#0f172a', img: 'photo-1497366216548-37526070297c' },
-              { flex: 0.6, height: '63%', bg: '#1a1a2e', img: 'photo-1486406146926-c627a92ad1ab' },
-              { flex: 1.2, height: '95%', bg: '#14243d', img: 'photo-1444628838545-ac4016a5418a' },
-              { flex: 0.8, height: '70%', bg: '#1e293b', img: 'photo-1480714378408-67cf0d13bc1b' },
-              { flex: 1.0, height: '82%', bg: '#0c1a2e', img: 'photo-1449824913935-59a10b8d2000' },
-            ].map((strip, i) => (
-              <div
-                key={i}
-                className="relative overflow-hidden"
-                style={{ flex: strip.flex, height: strip.height }}
-              >
+              { bg: '#041E1E', id: 'vWkwul5Bpbs' },
+              { bg: '#062828', id: 'r3WlSS57plg' },
+              { bg: '#083232', id: 'MU8w72PzRow' },
+              { bg: '#0A1F1F', id: 'lGB8j50arHk' },
+              { bg: '#052525', id: 'Ciba8rvHYng' },
+              { bg: '#041E1E', id: '1FzEg5g7vt0' },
+              { bg: '#062828', id: 'yhJVLxwquEY' },
+              { bg: '#083232', id: '9LzgklNLTBo' },
+            ].map((img, i) => (
+              <div key={i} className="relative overflow-hidden">
                 <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{
-                    backgroundColor: strip.bg,
-                    backgroundImage: `url(https://images.unsplash.com/${strip.img}?auto=format&fit=crop&w=400&q=80)`,
+                    backgroundColor: img.bg,
+                    backgroundImage: `url(https://images.unsplash.com/${img.id}?auto=format&fit=crop&w=400&q=80)`,
                   }}
                 />
-                <div className="absolute inset-0 bg-black/15" />
+                {/* Teal color filter */}
+                <div className="absolute inset-0 bg-[#0D7377]/20 mix-blend-overlay" />
+                <div className="absolute inset-0 bg-black/20" />
               </div>
             ))}
           </div>
 
-          {/* Bottom fade overlay */}
+          {/* Dot-grid overlay — graph paper / data grid feel */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.06] dark:opacity-[0.08]"
+            style={{
+              backgroundImage: `radial-gradient(circle, currentColor 1px, transparent 1px)`,
+              backgroundSize: '16px 16px',
+            }}
+          />
+
+          {/* Bottom fade */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -146,10 +157,10 @@ export default function AfriFinAnalyticsPage() {
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-lg bg-brand-orange/20 backdrop-blur-sm flex items-center justify-center">
-                <BarChart3 className="h-6 w-6 text-brand-orange" />
+              <div className={`h-12 w-12 ${ACCENT_BG} backdrop-blur-sm flex items-center justify-center`}>
+                <DatabaseZap className={`h-6 w-6 ${ACCENT}`} />
               </div>
-              <span className="px-3 py-1 bg-brand-orange/20 backdrop-blur-sm text-brand-orange text-xs font-semibold rounded-full uppercase tracking-wider">
+              <span className={`px-3 py-1 ${ACCENT_BG} backdrop-blur-sm ${ACCENT} text-xs font-semibold uppercase tracking-wider border ${ACCENT_BORDER}`}>
                 Daily
               </span>
             </div>
@@ -167,17 +178,21 @@ export default function AfriFinAnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-10">
-            {/* Data Products */}
+            {/* Data Products — indexed cards */}
             <section>
               <h2 className="text-2xl font-bold mb-6">
                 What Subscribers Get
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {dataProducts.map((product) => (
+                {dataProducts.map((product, index) => (
                   <div
                     key={product.title}
-                    className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border"
+                    className="p-4 bg-terminal-bg-secondary border border-terminal-border relative"
                   >
+                    {/* Index number */}
+                    <span className="absolute top-3 right-3 text-xs font-mono text-[#0D7377]/40 dark:text-[#2DD4BF]/30">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
                     <div className="flex items-center gap-3 mb-2">
                       {product.icon}
                       <h3 className="font-semibold">{product.title}</h3>
@@ -190,7 +205,7 @@ export default function AfriFinAnalyticsPage() {
               </div>
             </section>
 
-            {/* Highlights */}
+            {/* Highlights — teal dot markers */}
             <section>
               <h2 className="text-2xl font-bold mb-6">
                 What You&apos;ll Get
@@ -198,7 +213,7 @@ export default function AfriFinAnalyticsPage() {
               <ul className="space-y-3">
                 {highlights.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm">
-                    <Check className="h-4 w-4 text-market-up flex-shrink-0 mt-0.5" />
+                    <span className="mt-2 h-1.5 w-1.5 bg-[#0D7377] dark:bg-[#2DD4BF] flex-shrink-0" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -209,7 +224,7 @@ export default function AfriFinAnalyticsPage() {
           {/* Sidebar - Subscribe Form */}
           <div>
             <div className="sticky top-24 space-y-6">
-              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+              <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
                 <h3 className="text-lg font-semibold mb-2">
                   Subscribe to AfriFin Analytics
                 </h3>
@@ -219,7 +234,7 @@ export default function AfriFinAnalyticsPage() {
                 </p>
 
                 {showSuccess ? (
-                  <div className="bg-market-up/10 border border-market-up/30 rounded-lg p-5 text-center">
+                  <div className="bg-market-up/10 border border-market-up/30 p-5 text-center">
                     <Check className="h-8 w-8 text-market-up mx-auto mb-2" />
                     <p className="text-market-up font-semibold">
                       You&apos;re subscribed!
@@ -240,12 +255,12 @@ export default function AfriFinAnalyticsPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
                         required
-                        className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                        className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border focus:outline-none focus:border-[#0D7377] dark:focus:border-[#2DD4BF]"
                       />
                     </div>
 
                     {error && (
-                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 rounded-md text-market-down text-sm">
+                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">
                         {error}
                       </div>
                     )}
@@ -253,7 +268,7 @@ export default function AfriFinAnalyticsPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-3 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-[#0D7377] dark:bg-[#2DD4BF] text-white dark:text-black font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -273,8 +288,8 @@ export default function AfriFinAnalyticsPage() {
               </div>
 
               {/* CTA to full platform */}
-              <div className="bg-terminal-bg-elevated rounded-lg border border-brand-orange/30 p-6 text-center">
-                <TrendingUp className="h-6 w-6 text-brand-orange mx-auto mb-3" />
+              <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
+                <Zap className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">
                   Want the full platform?
                 </p>
@@ -284,7 +299,7 @@ export default function AfriFinAnalyticsPage() {
                 </p>
                 <Link
                   href="/subscribe"
-                  className="inline-block w-full py-2 border border-brand-orange text-brand-orange text-sm font-medium rounded-md hover:bg-brand-orange hover:text-white transition-colors"
+                  className={`inline-block w-full py-2 border border-[#0D7377] dark:border-[#2DD4BF] ${ACCENT} text-sm font-medium hover:bg-[#0D7377] hover:text-white dark:hover:bg-[#2DD4BF] dark:hover:text-black transition-colors`}
                 >
                   View Plans
                 </Link>

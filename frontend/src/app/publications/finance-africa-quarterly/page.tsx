@@ -3,19 +3,25 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BookOpen,
+  Library,
   Check,
   ChevronRight,
   Loader2,
-  Calendar,
-  Globe,
-  TrendingUp,
-  FileText,
-  BarChart3,
+  CalendarRange,
+  MapPin,
+  BookMarked,
+  ScrollText,
+  Landmark,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import apiClient from "@/services/api/client";
 import { toast } from "sonner";
+
+// Deep Indigo accent: #2D3A8C light, #6272C1 dark
+const ACCENT = "text-[#2D3A8C] dark:text-[#6272C1]";
+const ACCENT_BG = "bg-[#2D3A8C]/15 dark:bg-[#6272C1]/15";
+const ACCENT_BORDER = "border-[#2D3A8C]/20 dark:border-[#6272C1]/20";
+const ACCENT_SOLID = "bg-[#2D3A8C] dark:bg-[#6272C1]";
 
 const highlights = [
   "In-depth quarterly analysis of African equity, fixed income, and commodity markets",
@@ -94,21 +100,17 @@ export default function FinanceAfricaQuarterlyPage() {
           <span className="text-foreground">Finance Africa Quarterly</span>
         </nav>
 
-        {/* Hero with image strip grid */}
-        <section className="relative overflow-hidden rounded-lg mb-12" style={{ height: '420px' }}>
-          {/* Image strips */}
+        {/* Hero — The Monograph: 6 wider strips, indigo tint, diagonal lines */}
+        <section className="relative overflow-hidden mb-12" style={{ height: '480px' }}>
+          {/* Image strips — African cities & institutions */}
           <div className="absolute inset-0 flex items-start gap-[3px]">
             {[
-              { flex: 0.7, height: '68%', bg: '#0f172a', img: 'photo-1486406146926-c627a92ad1ab' },
-              { flex: 1.1, height: '88%', bg: '#1e293b', img: 'photo-1449824913935-59a10b8d2000' },
-              { flex: 0.8, height: '62%', bg: '#14243d', img: 'photo-1462899006636-339e08d1844e' },
-              { flex: 1.4, height: '100%', bg: '#0c1a2e', img: 'photo-1480714378408-67cf0d13bc1b' },
-              { flex: 1.0, height: '78%', bg: '#1a1a2e', img: 'photo-1526304640581-d334cdbbf45e' },
-              { flex: 0.6, height: '58%', bg: '#162032', img: 'photo-1444628838545-ac4016a5418a' },
-              { flex: 1.2, height: '92%', bg: '#0f172a', img: 'photo-1497366216548-37526070297c' },
-              { flex: 0.9, height: '72%', bg: '#1e293b', img: 'photo-1454165804606-c3d57bc86b40' },
-              { flex: 0.7, height: '65%', bg: '#14243d', img: 'photo-1497366811353-6870744d04b2' },
-              { flex: 1.0, height: '85%', bg: '#0c1a2e', img: 'photo-1560472354-b33ff0c44a43' },
+              { flex: 1.2, height: '85%', bg: '#0D0F24', id: 'nVkLxUyBKI4' },
+              { flex: 1.6, height: '100%', bg: '#131738', id: 'Kse7hn70RLE' },
+              { flex: 1.0, height: '72%', bg: '#0A0D1F', id: 'EMjpo0YjHPw' },
+              { flex: 1.8, height: '95%', bg: '#181E4A', id: 'V3IssFR02qE' },
+              { flex: 1.1, height: '80%', bg: '#10133B', id: 'Zkao_QBEjk8' },
+              { flex: 1.4, height: '90%', bg: '#0D0F24', id: 'TUOfmxrEEwQ' },
             ].map((strip, i) => (
               <div
                 key={i}
@@ -119,29 +121,39 @@ export default function FinanceAfricaQuarterlyPage() {
                   className="absolute inset-0 bg-cover bg-center"
                   style={{
                     backgroundColor: strip.bg,
-                    backgroundImage: `url(https://images.unsplash.com/${strip.img}?auto=format&fit=crop&w=400&q=80)`,
+                    backgroundImage: `url(https://images.unsplash.com/${strip.id}?auto=format&fit=crop&w=500&q=80)`,
                   }}
                 />
+                {/* Indigo color overlay */}
+                <div className="absolute inset-0 bg-[#2D3A8C]/20 mix-blend-overlay" />
                 <div className="absolute inset-0 bg-black/15" />
               </div>
             ))}
           </div>
 
-          {/* Bottom fade overlay */}
+          {/* Diagonal lines overlay — engraved/print feel */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.04] dark:opacity-[0.06]"
+            style={{
+              backgroundImage: `repeating-linear-gradient(-45deg, transparent, transparent 4px, currentColor 4px, currentColor 5px)`,
+            }}
+          />
+
+          {/* Bottom fade with indigo tint */}
           <div
             className="absolute inset-0 pointer-events-none"
             style={{
-              background: `linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 12%, hsl(var(--background) / 0.92) 24%, hsl(var(--background) / 0.6) 42%, hsl(var(--background) / 0.2) 65%, transparent 100%)`,
+              background: `linear-gradient(to top, hsl(var(--background)) 0%, hsl(var(--background)) 15%, hsl(var(--background) / 0.9) 30%, hsl(232 52% 36% / 0.15) 60%, hsl(232 52% 36% / 0.08) 80%, transparent 100%)`,
             }}
           />
 
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-12 w-12 rounded-lg bg-brand-orange/20 backdrop-blur-sm flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-brand-orange" />
+              <div className={`h-12 w-12 ${ACCENT_BG} backdrop-blur-sm flex items-center justify-center`}>
+                <Library className={`h-6 w-6 ${ACCENT}`} />
               </div>
-              <span className="px-3 py-1 bg-brand-orange/20 backdrop-blur-sm text-brand-orange text-xs font-semibold rounded-full uppercase tracking-wider">
+              <span className={`px-3 py-1 ${ACCENT_BG} backdrop-blur-sm ${ACCENT} text-xs font-semibold uppercase tracking-wider border ${ACCENT_BORDER}`}>
                 Quarterly
               </span>
             </div>
@@ -167,24 +179,24 @@ export default function FinanceAfricaQuarterlyPage() {
               <ul className="space-y-3">
                 {highlights.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm">
-                    <Check className="h-4 w-4 text-market-up flex-shrink-0 mt-0.5" />
+                    <Check className={`h-4 w-4 ${ACCENT} flex-shrink-0 mt-0.5`} />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </section>
 
-            {/* Past Issues */}
+            {/* Past Issues — book spine left border */}
             <section>
               <h2 className="text-2xl font-bold mb-6">Recent Issues</h2>
               <div className="space-y-4">
                 {pastIssues.map((issue) => (
                   <div
                     key={issue.title}
-                    className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border"
+                    className="p-4 bg-terminal-bg-secondary border border-terminal-border border-l-[3px] border-l-[#2D3A8C] dark:border-l-[#6272C1]"
                   >
                     <div className="flex items-start gap-3">
-                      <FileText className="h-5 w-5 text-brand-orange flex-shrink-0 mt-0.5" />
+                      <ScrollText className={`h-5 w-5 ${ACCENT} flex-shrink-0 mt-0.5`} />
                       <div>
                         <h3 className="font-semibold mb-1">{issue.title}</h3>
                         <p className="text-sm text-muted-foreground">
@@ -197,30 +209,21 @@ export default function FinanceAfricaQuarterlyPage() {
               </div>
             </section>
 
-            {/* At a Glance */}
+            {/* At a Glance — number-first stat cards */}
             <section>
               <h2 className="text-2xl font-bold mb-6">At a Glance</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border text-center">
-                  <Calendar className="h-6 w-6 text-brand-orange mx-auto mb-2" />
-                  <div className="text-sm font-semibold">Quarterly</div>
-                  <div className="text-xs text-muted-foreground">
-                    4 issues per year
-                  </div>
+                <div className="p-5 bg-terminal-bg-secondary border border-terminal-border text-center">
+                  <div className={`text-3xl font-mono font-bold ${ACCENT} mb-1`}>4</div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Issues Per Year</div>
                 </div>
-                <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border text-center">
-                  <Globe className="h-6 w-6 text-brand-orange mx-auto mb-2" />
-                  <div className="text-sm font-semibold">Pan-African</div>
-                  <div className="text-xs text-muted-foreground">
-                    15+ economies covered
-                  </div>
+                <div className="p-5 bg-terminal-bg-secondary border border-terminal-border text-center">
+                  <div className={`text-3xl font-mono font-bold ${ACCENT} mb-1`}>15+</div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Economies Covered</div>
                 </div>
-                <div className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border text-center">
-                  <BarChart3 className="h-6 w-6 text-brand-orange mx-auto mb-2" />
-                  <div className="text-sm font-semibold">100+ Pages</div>
-                  <div className="text-xs text-muted-foreground">
-                    Per issue, data-rich
-                  </div>
+                <div className="p-5 bg-terminal-bg-secondary border border-terminal-border text-center">
+                  <div className={`text-3xl font-mono font-bold ${ACCENT} mb-1`}>100+</div>
+                  <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Pages Per Issue</div>
                 </div>
               </div>
             </section>
@@ -229,7 +232,7 @@ export default function FinanceAfricaQuarterlyPage() {
           {/* Sidebar - Subscribe Form */}
           <div>
             <div className="sticky top-24 space-y-6">
-              <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
+              <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
                 <h3 className="text-lg font-semibold mb-2">
                   Subscribe to Finance Africa Quarterly
                 </h3>
@@ -238,7 +241,7 @@ export default function FinanceAfricaQuarterlyPage() {
                 </p>
 
                 {showSuccess ? (
-                  <div className="bg-market-up/10 border border-market-up/30 rounded-lg p-5 text-center">
+                  <div className="bg-market-up/10 border border-market-up/30 p-5 text-center">
                     <Check className="h-8 w-8 text-market-up mx-auto mb-2" />
                     <p className="text-market-up font-semibold">
                       You&apos;re subscribed!
@@ -259,12 +262,12 @@ export default function FinanceAfricaQuarterlyPage() {
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
                         required
-                        className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
+                        className="w-full px-4 py-3 bg-terminal-bg-elevated border border-terminal-border focus:outline-none focus:border-[#2D3A8C] dark:focus:border-[#6272C1]"
                       />
                     </div>
 
                     {error && (
-                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 rounded-md text-market-down text-sm">
+                      <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">
                         {error}
                       </div>
                     )}
@@ -272,7 +275,7 @@ export default function FinanceAfricaQuarterlyPage() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-3 bg-brand-orange text-white font-medium rounded-md hover:bg-brand-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      className="w-full py-3 bg-[#2D3A8C] dark:bg-[#6272C1] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -292,8 +295,8 @@ export default function FinanceAfricaQuarterlyPage() {
               </div>
 
               {/* CTA to full platform */}
-              <div className="bg-terminal-bg-elevated rounded-lg border border-brand-orange/30 p-6 text-center">
-                <TrendingUp className="h-6 w-6 text-brand-orange mx-auto mb-3" />
+              <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
+                <Landmark className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">
                   Want the full platform?
                 </p>
@@ -303,7 +306,7 @@ export default function FinanceAfricaQuarterlyPage() {
                 </p>
                 <Link
                   href="/subscribe"
-                  className="inline-block w-full py-2 border border-brand-orange text-brand-orange text-sm font-medium rounded-md hover:bg-brand-orange hover:text-white transition-colors"
+                  className={`inline-block w-full py-2 border border-[#2D3A8C] dark:border-[#6272C1] ${ACCENT} text-sm font-medium hover:bg-[#2D3A8C] hover:text-white dark:hover:bg-[#6272C1] transition-colors`}
                 >
                   View Plans
                 </Link>
