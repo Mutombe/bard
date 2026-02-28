@@ -360,33 +360,33 @@ function TextCard({ article }: { article: NewsArticle }) {
 
 function HeroSectionSkeleton() {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-pulse">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-7">
-        <Skeleton className="aspect-[21/9] mb-6" />
+        <div className="skeleton-enhanced aspect-[21/9] mb-6" />
         <div className="max-w-4xl">
           <div className="flex items-center gap-3 mb-3">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-20" />
+            <div className="skeleton-enhanced h-4 w-24" />
+            <div className="skeleton-enhanced h-4 w-20" />
           </div>
-          <Skeleton className="h-12 w-full mb-3" />
-          <Skeleton className="h-12 w-4/5 mb-4" />
-          <Skeleton className="h-5 w-full mb-2" />
-          <Skeleton className="h-5 w-3/4 mb-4" />
+          <div className="skeleton-enhanced h-12 w-full mb-3" />
+          <div className="skeleton-enhanced h-12 w-4/5 mb-4" />
+          <div className="skeleton-enhanced h-5 w-full mb-2" />
+          <div className="skeleton-enhanced h-5 w-3/4 mb-4" />
           <div className="flex items-center gap-4">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-4 w-28" />
+            <div className="skeleton-enhanced h-4 w-32" />
+            <div className="skeleton-enhanced h-4 w-28" />
           </div>
         </div>
       </div>
       <div className="lg:col-span-5 flex flex-col gap-5">
-        <Skeleton className="h-4 w-24" />
+        <div className="skeleton-enhanced h-4 w-24" />
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="flex gap-4">
-            <Skeleton className="w-8 h-8 flex-shrink-0" />
+          <div key={i} className="flex gap-4 stagger-item" style={{ animationDelay: `${i * 100}ms` }}>
+            <div className="skeleton-enhanced w-8 h-8 flex-shrink-0" />
             <div className="flex-1">
-              <Skeleton className="h-3 w-16 mb-2" />
-              <Skeleton className="h-5 w-full mb-1" />
-              <Skeleton className="h-3 w-20" />
+              <div className="skeleton-enhanced h-3 w-16 mb-2" />
+              <div className="skeleton-enhanced h-5 w-full mb-1" />
+              <div className="skeleton-enhanced h-3 w-20" />
             </div>
           </div>
         ))}
@@ -497,7 +497,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
             {article.title}
           </h1>
 
-          <p className="text-lg text-muted-foreground mb-4 leading-relaxed line-clamp-3">
+          <p className="text-lg text-muted-foreground mb-4 leading-relaxed line-clamp-3 drop-cap">
             {article.excerpt}
           </p>
 
@@ -962,7 +962,7 @@ function NewsletterSection() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 btn-press"
               >
                 {loading ? "..." : "Subscribe"}
                 <ArrowRight className="h-4 w-4" />
@@ -1010,8 +1010,8 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {articles.map((article, index) => (
+            <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
               <Link
-                key={article.id}
                 href={`/news/${article.slug}`}
                 className="group flex gap-4"
               >
@@ -1030,6 +1030,7 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
                   </span>
                 </div>
               </Link>
+            </div>
           ))}
         </div>
       </div>
@@ -1144,7 +1145,9 @@ export default function HomePage() {
                     Top Stories
                   </h3>
                   {heroSideArticles.map((article, index) => (
-                    <SidebarInsight key={article.id} article={article} rank={index + 1} />
+                    <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
+                      <SidebarInsight article={article} rank={index + 1} />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1173,13 +1176,17 @@ export default function HomePage() {
                   <>
                     {/* First 2 as InsightCards with images */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-                      {mainInsights.slice(0, 2).map((article) => (
-                        <InsightCard key={article.id} article={article} />
+                      {mainInsights.slice(0, 2).map((article, index) => (
+                        <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 100}ms` }}>
+                          <InsightCard article={article} />
+                        </div>
                       ))}
                     </div>
                     {/* Next 2 as TextCards */}
-                    {mainInsights.slice(2, 4).map((article) => (
-                      <TextCard key={article.id} article={article} />
+                    {mainInsights.slice(2, 4).map((article, index) => (
+                      <div key={article.id} className="stagger-item" style={{ animationDelay: `${(index + 2) * 100}ms` }}>
+                        <TextCard article={article} />
+                      </div>
                     ))}
                   </>
                 )}
@@ -1196,7 +1203,9 @@ export default function HomePage() {
                         Most Read
                       </h3>
                       {sidebarInsights.map((article, index) => (
-                        <SidebarInsight key={article.id} article={article} rank={index + 1} />
+                        <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
+                          <SidebarInsight article={article} rank={index + 1} />
+                        </div>
                       ))}
                     </div>
                   </>
@@ -1250,13 +1259,13 @@ export default function HomePage() {
               In-depth analysis, research reports, and expert commentary on African markets.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Link href="/news" className="btn-primary flex items-center gap-2">
+              <Link href="/news" className="btn-primary btn-press flex items-center gap-2">
                 All Articles <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/research" className="btn-secondary flex items-center gap-2">
+              <Link href="/research" className="btn-secondary btn-press flex items-center gap-2">
                 Research Reports <FileText className="h-4 w-4" />
               </Link>
-              <Link href="/podcasts" className="btn-secondary flex items-center gap-2">
+              <Link href="/podcasts" className="btn-secondary btn-press flex items-center gap-2">
                 Podcasts <Mic className="h-4 w-4" />
               </Link>
             </div>

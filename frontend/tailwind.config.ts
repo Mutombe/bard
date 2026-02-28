@@ -126,6 +126,14 @@ const config: Config = {
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
+        "stagger-in": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "dropdown-enter": {
+          "0%": { opacity: "0", transform: "translateY(-8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -136,6 +144,8 @@ const config: Config = {
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "fade-in": "fade-in 0.2s ease-out",
         shimmer: "shimmer 2s infinite",
+        "stagger-in": "stagger-in 0.4s ease-out forwards",
+        "dropdown-enter": "dropdown-enter 0.2s ease-out",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

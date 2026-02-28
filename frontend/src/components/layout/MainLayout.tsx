@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -145,6 +145,23 @@ export function MainLayout({ children }: MainLayoutProps) {
   const { unreadCount } = useAppSelector((state) => state.notifications);
   const { openLogin, openRegister } = useAuthModal();
 
+  // Sticky header shrink + reading progress
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (docHeight > 0) {
+        setScrollProgress(Math.min((window.scrollY / docHeight) * 100, 100));
+      }
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleLogout = () => {
     dispatch(clearAuth());
     clearAuthFromStorage();
@@ -186,13 +203,21 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       </div>
 
+      {/* Reading Progress Bar */}
+      <div className="reading-progress-track">
+        <div className="reading-progress-fill" style={{ width: `${scrollProgress}%` }} />
+      </div>
+
       {/* Main Header */}
-      <header className="sticky top-0 z-40 bg-terminal-bg border-b border-terminal-border">
+      <header className={cn(
+        "sticky top-0 z-40 bg-terminal-bg border-b border-terminal-border header-compact",
+        isScrolled && "is-scrolled"
+      )}>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-20">
-            {/* Logo - bigger on desktop */}
+          <div className={cn("flex items-center justify-between header-inner", isScrolled ? "h-14" : "h-20")}>
+            {/* Logo - shrinks on scroll */}
             <Link href="/" className="flex items-center shrink-0 mr-6">
-              <ThemeLogo width={360} height={90} className="max-h-[70px] md:max-h-[90px]" />
+              <ThemeLogo width={360} height={90} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[50px]" : "max-h-[70px] md:max-h-[90px]")} />
             </Link>
 
             {/* Desktop Navigation */}
@@ -294,14 +319,14 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="hidden sm:inline-flex"
+                    className="hidden sm:inline-flex btn-press"
                     onClick={openLogin}
                   >
                     Sign In
                   </Button>
                   <Button
                     size="sm"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground btn-press"
                     onClick={openRegister}
                   >
                     Subscribe

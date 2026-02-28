@@ -709,18 +709,20 @@
     letter-spacing: 0.01em;
   }
 
-  /* Card hover lift */
+  /* Card hover lift with burgundy left accent */
   .card-hover {
     @apply transition-all duration-300;
+    border-left: 3px solid transparent;
   }
 
   .card-hover:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+    transform: translateY(-2px);
+    border-left-color: hsl(var(--primary));
+    box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
   }
 
   .dark .card-hover:hover {
-    box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
+    box-shadow: 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.3);
   }
 
   /* Headline underline-from-left on hover */
@@ -784,6 +786,117 @@
   .fade-in-section.is-visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /* =========================
+     UI DELIGHT ENHANCEMENTS
+     ========================= */
+
+  /* Dropdown entrance animation */
+  .dropdown-enter {
+    animation: dropdown-slide-in 0.2s ease-out;
+  }
+
+  @keyframes dropdown-slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered fade-in for article lists */
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: stagger-in 0.4s ease-out forwards;
+  }
+
+  @keyframes stagger-in {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Button press feedback */
+  .btn-press {
+    @apply transition-transform duration-100;
+  }
+
+  .btn-press:active {
+    transform: scale(0.95);
+  }
+
+  /* Sticky header compact mode */
+  .header-compact {
+    @apply transition-all duration-300;
+  }
+
+  .header-compact.is-scrolled {
+    box-shadow: 0 2px 12px -2px rgb(0 0 0 / 0.1);
+  }
+
+  .dark .header-compact.is-scrolled {
+    box-shadow: 0 2px 12px -2px rgb(0 0 0 / 0.4);
+  }
+
+  .header-compact.is-scrolled .header-logo {
+    max-height: 50px !important;
+    transition: max-height 0.3s ease;
+  }
+
+  .header-compact .header-logo {
+    transition: max-height 0.3s ease;
+  }
+
+  .header-compact.is-scrolled .header-inner {
+    height: 3.5rem;
+    transition: height 0.3s ease;
+  }
+
+  .header-compact .header-inner {
+    transition: height 0.3s ease;
+  }
+
+  /* Reading progress bar */
+  .reading-progress-track {
+    @apply fixed top-0 left-0 w-full z-[60];
+    height: 3px;
+    background: transparent;
+  }
+
+  .reading-progress-fill {
+    height: 100%;
+    background: hsl(var(--primary));
+    transition: width 0.1s linear;
+    will-change: width;
+  }
+
+  /* Enhanced skeleton shimmer */
+  .skeleton-enhanced {
+    @apply relative overflow-hidden;
+    background-color: hsl(var(--terminal-border));
+  }
+
+  .skeleton-enhanced::after {
+    @apply absolute inset-0 -translate-x-full;
+    content: "";
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(var(--muted-foreground) / 0.15) 50%,
+      transparent 100%
+    );
+    animation: shimmer-enhanced 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmer-enhanced {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
 
   /* Print-friendly styles */
