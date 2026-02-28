@@ -477,8 +477,9 @@ export default function ResearchPage() {
         </section>
 
         {/* Subscribe CTA */}
-        <section className="mt-12 p-8 rounded-lg bg-primary/5 border border-primary/20 text-center">
-          <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
+        <section className="relative overflow-hidden mt-12 p-8 rounded-lg bg-primary/5 border border-primary/20 text-center">
+          <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="research-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#research-sub-grid)"/></svg></div>
+          <BookOpen className="relative h-12 w-12 text-primary mx-auto mb-4" />
           <h2 className="headline text-2xl mb-4">Stay Updated on Research</h2>
           <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
             Get free alerts for new research reports, weekly digests, and analyst commentary

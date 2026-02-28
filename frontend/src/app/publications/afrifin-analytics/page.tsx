@@ -191,8 +191,9 @@ export default function AfriFinAnalyticsPage() {
 
           <div>
             <div className="sticky top-24 space-y-6">
-              <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
-                <h3 className="text-lg font-semibold mb-2">Subscribe to AfriFin Analytics</h3>
+              <div className="relative overflow-hidden bg-terminal-bg-secondary border border-terminal-border p-6">
+                <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="afa-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#afa-sub-grid)"/></svg></div>
+                <h3 className="relative text-lg font-semibold mb-2">Subscribe to AfriFin Analytics</h3>
                 <p className="text-sm text-muted-foreground mb-6">Daily data snapshots and weekly statistical digests, straight to your inbox.</p>
 
                 {showSuccess ? (
@@ -216,8 +217,9 @@ export default function AfriFinAnalyticsPage() {
                 )}
               </div>
 
-              <div className={`bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
-                <Zap className={`h-6 w-6 ${ACCENT} mx-auto mb-3`} />
+              <div className={`relative overflow-hidden bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
+                <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="afa-cta-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#afa-cta-grid)"/></svg></div>
+                <Zap className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">Want the full platform?</p>
                 <p className="text-xs text-muted-foreground mb-4">Get all three publications plus breaking news alerts and weekly digests — free.</p>
                 <Link href="/subscribe" className={`inline-block w-full py-2 border border-[#0D7377] dark:border-[#2DD4BF] ${ACCENT} text-sm font-medium hover:bg-[#0D7377] hover:text-white dark:hover:bg-[#2DD4BF] dark:hover:text-black transition-colors`}>
