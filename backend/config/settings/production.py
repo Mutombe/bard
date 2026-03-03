@@ -38,8 +38,8 @@ CORS_ALLOWED_ORIGINS = env.list(  # noqa: F405
     "CORS_ALLOWED_ORIGINS",
     default=[
         "https://bardiq-frontend.onrender.com",
-        "https://bardiqjournal.com",
-        "https://www.bardiqjournal.com",
+        "https://bgfi.global",
+        "https://www.bgfi.global",
     ]
 )
 CORS_ALLOW_CREDENTIALS = True

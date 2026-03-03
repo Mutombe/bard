@@ -340,7 +340,7 @@ export default function SettingsPage() {
                 </label>
                 <input
                   type="email"
-                  defaultValue="noreply@bardglobal.com"
+                  defaultValue="publish@bgfi.global"
                   className="w-full px-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-brand-orange"
                 />
               </div>
