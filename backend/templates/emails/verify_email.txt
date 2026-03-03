@@ -1,0 +1,25 @@
+BARD GLOBAL FINANCE INSTITUTE
+========================================
+
+VERIFY YOUR EMAIL
+
+Thank you for subscribing to {{ newsletter_type_display }}.
+
+To complete your subscription and begin receiving our market intelligence,
+please confirm your email address by visiting the link below:
+
+{{ verify_url }}
+
+YOUR SUBSCRIPTION
+{{ newsletter_type_display }} delivers curated African market intelligence
+directly to your inbox.
+
+This verification link will expire in 48 hours. If you did not subscribe
+to this newsletter, you can safely ignore this email.
+
+----------------------------------------
+Bard Global Finance Institute
+Premium African Financial Intelligence
+bgfi.global
+
+Unsubscribe: {{ unsubscribe_url }}

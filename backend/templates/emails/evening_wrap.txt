@@ -1,0 +1,29 @@
+BGFI - EVENING WRAP
+{{ date }} | MARKETS CLOSED
+========================================
+
+Here is how African markets performed today.
+
+MARKET CLOSE
+----------------------------------------
+{% for index in indices %}{{ index.code }}    {{ index.current_value|floatformat:2 }}    {% if index.change_percent >= 0 %}+{% endif %}{{ index.change_percent|floatformat:2 }}%    YTD: {% if index.ytd_change >= 0 %}+{% endif %}{{ index.ytd_change|floatformat:2 }}%
+{% endfor %}
+
+MOST ACTIVE BY VOLUME
+----------------------------------------
+{% for stock in most_active %}{{ stock.symbol }}    Vol: {{ stock.volume|floatformat:0 }}    {% if stock.price_change_percent >= 0 %}+{% endif %}{{ stock.price_change_percent|floatformat:2 }}%
+{% endfor %}
+{% if top_stories %}
+TODAY'S TOP STORIES
+----------------------------------------
+{% for story in top_stories %}{{ forloop.counter }}. {{ story.title }}
+   https://bgfi.global/article/{{ story.slug }}
+{% endfor %}{% endif %}
+
+View full market data: https://bgfi.global/markets
+
+----------------------------------------
+Market data is for informational purposes only and does not constitute investment advice.
+
+Bard Global Finance Institute | bgfi.global
+Unsubscribe: {{ unsubscribe_url }}
