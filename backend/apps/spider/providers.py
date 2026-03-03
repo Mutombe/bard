@@ -403,9 +403,14 @@ class SerpAPIProvider:
     def extract_full_article(url: str) -> Optional[str]:
         """Extract full article text from a URL using trafilatura."""
         import trafilatura
+        from trafilatura.settings import use_config
 
         try:
-            downloaded = trafilatura.fetch_url(url)
+            # Use shorter timeout to avoid hanging on slow/blocking sites
+            config = use_config()
+            config.set("DEFAULT", "DOWNLOAD_TIMEOUT", "15")
+
+            downloaded = trafilatura.fetch_url(url, config=config)
             if not downloaded:
                 return None
             text = trafilatura.extract(
@@ -437,20 +442,19 @@ class SerpAPIProvider:
         gl: str = 'us',
         hl: str = 'en',
         extract_content: bool = True,
-        min_content_length: int = 200,
     ) -> list[dict]:
         """
         Search Google News and extract full article content.
 
-        Extracts content for ALL articles (no cap). Articles that fail
-        extraction or have content shorter than min_content_length are skipped.
+        Tries to extract full content for every article. If extraction fails
+        (site blocks scraping), the article is still saved with its snippet.
+        Only truly empty articles (no title) are skipped.
 
         Args:
             query: Search query
             gl: Country code for localization
             hl: Language code
             extract_content: Whether to fetch full article bodies
-            min_content_length: Minimum content length to accept an article
         """
         raw_results = self._search_google_news(query, gl=gl, hl=hl)
         articles = []
@@ -468,18 +472,13 @@ class SerpAPIProvider:
             # Parse date
             date_str = item.get('date', '')
 
-            # Extract full content for EVERY article
+            # Try to extract full content
             full_content = None
             if extract_content and link:
                 full_content = self.extract_full_article(link)
 
-            # Use full content or snippet
-            content = full_content or snippet or ''
-
-            # Skip articles without enough content
-            if len(content) < min_content_length:
-                logger.debug(f"Skipping article with short content ({len(content)} chars): {title[:60]}")
-                continue
+            # Use full content if available, otherwise keep snippet
+            content = full_content or snippet or title
 
             # Filter bad image URLs — leave empty so Unsplash fills in
             image_url = thumbnail or ''
