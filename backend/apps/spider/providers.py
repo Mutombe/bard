@@ -418,27 +418,42 @@ class SerpAPIProvider:
             logger.warning(f"Article extraction failed for {url}: {e}")
             return None
 
+    @staticmethod
+    def _is_bad_image_url(url: str) -> bool:
+        """Check if an image URL is a low-quality Google News proxy or broken."""
+        if not url:
+            return True
+        bad_patterns = [
+            'news.google.com',
+            'encrypted-tbn',
+            'gstatic.com/images',
+            '/s16383/',  # Google News tiny thumbnails
+        ]
+        return any(p in url for p in bad_patterns)
+
     def search_news(
         self,
         query: str,
         gl: str = 'us',
         hl: str = 'en',
         extract_content: bool = True,
-        max_extract: int = 10,
+        min_content_length: int = 200,
     ) -> list[dict]:
         """
-        Search Google News and optionally extract full article content.
+        Search Google News and extract full article content.
+
+        Extracts content for ALL articles (no cap). Articles that fail
+        extraction or have content shorter than min_content_length are skipped.
 
         Args:
             query: Search query
             gl: Country code for localization
             hl: Language code
             extract_content: Whether to fetch full article bodies
-            max_extract: Max articles to extract full content for
+            min_content_length: Minimum content length to accept an article
         """
         raw_results = self._search_google_news(query, gl=gl, hl=hl)
         articles = []
-        extracted = 0
 
         for item in raw_results:
             title = (item.get('title') or '').strip()
@@ -453,19 +468,30 @@ class SerpAPIProvider:
             # Parse date
             date_str = item.get('date', '')
 
-            # Extract full content if enabled and under limit
+            # Extract full content for EVERY article
             full_content = None
-            if extract_content and link and extracted < max_extract:
+            if extract_content and link:
                 full_content = self.extract_full_article(link)
-                if full_content:
-                    extracted += 1
+
+            # Use full content or snippet
+            content = full_content or snippet or ''
+
+            # Skip articles without enough content
+            if len(content) < min_content_length:
+                logger.debug(f"Skipping article with short content ({len(content)} chars): {title[:60]}")
+                continue
+
+            # Filter bad image URLs — leave empty so Unsplash fills in
+            image_url = thumbnail or ''
+            if self._is_bad_image_url(image_url):
+                image_url = ''
 
             articles.append({
                 'title': title,
                 'description': snippet or '',
-                'content': full_content or snippet or '',
+                'content': content,
                 'url': link,
-                'image_url': thumbnail or '',
+                'image_url': image_url,
                 'published_at': date_str,
                 'source': source_info.get('name', 'Google News') if isinstance(source_info, dict) else str(source_info),
                 'author': source_info.get('authors', [''])[0] if isinstance(source_info, dict) and source_info.get('authors') else '',
@@ -474,15 +500,14 @@ class SerpAPIProvider:
 
         return articles
 
-    def get_business_news(self, gl: str = 'us', max_extract: int = 10) -> list[dict]:
+    def get_business_news(self, gl: str = 'us') -> list[dict]:
         """Get business/finance news headlines with full content."""
         return self.search_news(
             'finance business stock market',
             gl=gl,
-            max_extract=max_extract,
         )
 
-    def get_african_market_news(self, max_extract: int = 10) -> list[dict]:
+    def get_african_market_news(self) -> list[dict]:
         """Get African market and finance news with full content."""
         queries = [
             'Africa finance stock market economy',
@@ -492,14 +517,12 @@ class SerpAPIProvider:
         ]
 
         all_articles = []
-        per_query = max(max_extract // len(queries), 2)
 
         for query in queries:
             articles = self.search_news(
                 query,
                 gl='us',
                 extract_content=True,
-                max_extract=per_query,
             )
             all_articles.extend(articles)
 
@@ -525,13 +548,13 @@ def fetch_polygon_market_data(symbol: str) -> Optional[dict]:
 def fetch_business_news(limit: int = 20) -> list[dict]:
     """Fetch business news from SerpAPI (Google News)."""
     provider = SerpAPIProvider()
-    return provider.get_business_news(max_extract=limit)
+    return provider.get_business_news()
 
 
 def fetch_african_news(limit: int = 20) -> list[dict]:
     """Fetch African market news from SerpAPI."""
     provider = SerpAPIProvider()
-    return provider.get_african_market_news(max_extract=limit)
+    return provider.get_african_market_news()
 
 
 def fetch_polygon_news(ticker: str = None, limit: int = 20) -> list[dict]:
