@@ -31,7 +31,7 @@ def send_verification_email(subscription_id: str):
     if subscription.is_verified:
         return "Already verified"
 
-    frontend_url = getattr(settings, "FRONTEND_URL", "https://bardiqjournal.com")
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://bgfi.global")
     verify_url = f"{frontend_url}/newsletter/verify?token={subscription.verification_token}"
 
     html_content = f"""

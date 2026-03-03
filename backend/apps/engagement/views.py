@@ -197,7 +197,7 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
         for email, unsubscribe_token in subscribers:
             try:
                 # Build unsubscribe URL
-                unsubscribe_url = f"{getattr(settings, 'FRONTEND_URL', 'https://bardiqjournal.com')}/unsubscribe?token={unsubscribe_token}"
+                unsubscribe_url = f"{getattr(settings, 'FRONTEND_URL', 'https://bgfi.global')}/unsubscribe?token={unsubscribe_token}"
 
                 # Create email content with unsubscribe link
                 html_content = f"""

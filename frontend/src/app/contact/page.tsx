@@ -17,8 +17,8 @@ const contactInfo = [
   {
     icon: <Mail className="h-5 w-5" />,
     label: "Email",
-    value: "info@bardsantner.com",
-    href: "mailto:info@bardsantner.com",
+    value: "info@bgfi.global",
+    href: "mailto:info@bgfi.global",
   },
   {
     icon: <Phone className="h-5 w-5" />,
@@ -38,19 +38,19 @@ const departments = [
   {
     icon: <MessageSquare className="h-6 w-6" />,
     title: "Editorial",
-    email: "editorial@bardsantner.com",
+    email: "editorial@bgfi.global",
     description: "For news tips, corrections, or editorial inquiries.",
   },
   {
     icon: <Headphones className="h-6 w-6" />,
     title: "Customer Support",
-    email: "support@bardsantner.com",
+    email: "support@bgfi.global",
     description: "For subscription issues or technical support.",
   },
   {
     icon: <Building2 className="h-6 w-6" />,
     title: "Advertising",
-    email: "advertising@bardsantner.com",
+    email: "advertising@bgfi.global",
     description: "For advertising and sponsorship opportunities.",
   },
 ];

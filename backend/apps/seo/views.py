@@ -96,7 +96,7 @@ class ArticleSEOView(APIView):
             object_id=article.id,
         )
 
-        base_url = getattr(settings, "SITE_URL", "https://bardsantner.com")
+        base_url = getattr(settings, "SITE_URL", "https://bgfi.global")
         article_url = f"{base_url}/article/{article.slug}"
 
         # Build meta tags
@@ -144,7 +144,7 @@ class ArticleSEOView(APIView):
             "title": seo.get_twitter_title() or title,
             "description": seo.twitter_description or description[:200],
             "image": twitter_image,
-            "site": "@bardsantner",
+            "site": "@BardGlobal",
         }
 
         # Schema.org structured data
@@ -239,7 +239,7 @@ class SitemapView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        base_url = getattr(settings, "SITE_URL", "https://bardsantner.com")
+        base_url = getattr(settings, "SITE_URL", "https://bgfi.global")
 
         # Build sitemap entries
         entries = []
@@ -325,7 +325,7 @@ class SitemapIndexView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        base_url = getattr(settings, "SITE_URL", "https://bardsantner.com")
+        base_url = getattr(settings, "SITE_URL", "https://bgfi.global")
         today = timezone.now().strftime("%Y-%m-%d")
 
         xml = f"""<?xml version="1.0" encoding="UTF-8"?>
@@ -351,7 +351,7 @@ class NewsSitemapView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        base_url = getattr(settings, "SITE_URL", "https://bardsantner.com")
+        base_url = getattr(settings, "SITE_URL", "https://bgfi.global")
 
         # Get articles from last 48 hours (Google News requirement)
         from datetime import timedelta
@@ -401,7 +401,7 @@ class RobotsTxtView(APIView):
             robots = RobotsTxt.objects.get(site="default", is_active=True)
             content = robots.content
         except RobotsTxt.DoesNotExist:
-            base_url = getattr(settings, "SITE_URL", "https://bardsantner.com")
+            base_url = getattr(settings, "SITE_URL", "https://bgfi.global")
             content = f"""User-agent: *
 Allow: /
 
