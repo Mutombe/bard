@@ -214,19 +214,19 @@ export function MainLayout({ children }: MainLayoutProps) {
         isScrolled && "is-scrolled"
       )}>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className={cn("flex items-center justify-between header-inner", isScrolled ? "h-14" : "h-20")}>
+          <div className={cn("flex items-center header-inner", isScrolled ? "h-14" : "h-20")}>
             {/* Logo - shrinks on scroll */}
-            <Link href="/" className="flex items-center shrink-0 mr-6">
+            <Link href="/" className="flex items-center shrink-0">
               <ThemeLogo width={360} height={90} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[50px]" : "max-h-[70px] md:max-h-[90px]")} />
             </Link>
 
-            {/* Desktop Navigation — pushed toward right actions */}
-            <div className="ml-auto mr-4">
+            {/* Desktop Navigation — evenly spaced between logo and actions */}
+            <div className="flex-1 flex justify-end lg:justify-center px-2">
               <Navigation />
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               {/* Theme Toggle */}
               <ThemeToggle />
 

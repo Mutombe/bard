@@ -352,7 +352,7 @@ export function Navigation() {
 
   return (
     <>
-      <nav ref={navRef} className="hidden lg:flex items-center gap-1 relative">
+      <nav ref={navRef} className="hidden lg:flex items-center gap-2 relative">
         {navigationData.map((dropdown) => {
           const showBadge = dropdown.label === "My Library" && hasLibraryItems;
           return (
