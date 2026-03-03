@@ -362,7 +362,7 @@ export default function ArticlePage() {
     try {
       await apiClient.post("/engagement/newsletters/", {
         email: subscribeEmail.trim(),
-        newsletter_type: "daily_digest",
+        newsletter_type: "morning_brief",
       });
       toast.success("Subscribed! Check your email for confirmation.");
       setSubscribeEmail("");

@@ -46,9 +46,11 @@ DEBUG_TOOLBAR_CONFIG = {
 CORS_ALLOW_ALL_ORIGINS = True
 
 # =========================
-# Email (Console backend for development)
+# Email (Use SMTP from .env, fall back to console)
 # =========================
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# Uses Google Workspace SMTP if configured in .env, otherwise console
+if not env("EMAIL_HOST_USER", default=""):  # noqa: F405
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # =========================
 # Database (Use production DB if DATABASE_URL is set, otherwise SQLite)

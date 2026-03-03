@@ -22,6 +22,10 @@ class NewsletterSubscription(BaseModel):
     - evening_wrap: End of day market summary
     - weekly_digest: Weekly analysis and picks
     - breaking_news: Breaking news alerts
+    - earnings: Earnings season alerts
+    - finance_africa_quarterly: Quarterly deep-dive reports
+    - finance_africa_insights: Weekly editorial commentary
+    - afrifin_analytics: Daily data-driven market intelligence
     """
 
     class NewsletterType(models.TextChoices):
@@ -30,6 +34,9 @@ class NewsletterSubscription(BaseModel):
         WEEKLY_DIGEST = "weekly_digest", "Weekly Digest"
         BREAKING_NEWS = "breaking_news", "Breaking News"
         EARNINGS_ALERTS = "earnings", "Earnings Alerts"
+        FINANCE_AFRICA_QUARTERLY = "finance_africa_quarterly", "Finance Africa Quarterly"
+        FINANCE_AFRICA_INSIGHTS = "finance_africa_insights", "Finance Africa Insights"
+        AFRIFIN_ANALYTICS = "afrifin_analytics", "AfriFin Analytics"
 
     user = models.ForeignKey(
         "users.User",
@@ -46,7 +53,7 @@ class NewsletterSubscription(BaseModel):
     )
     newsletter_type = models.CharField(
         "Newsletter Type",
-        max_length=20,
+        max_length=30,
         choices=NewsletterType.choices,
         default=NewsletterType.MORNING_BRIEF,
     )
