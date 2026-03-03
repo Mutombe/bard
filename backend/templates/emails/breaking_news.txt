@@ -1,0 +1,25 @@
+BARD GLOBAL FINANCE INSTITUTE
+========================================
+
+*** BREAKING NEWS ***
+
+{{ article.title }}
+
+{{ article.published_at|date:"H:i e" }} | {{ article.published_at|date:"l, F j, Y" }}
+
+{{ article.excerpt }}
+{% if article.related_companies.all %}
+RELATED TICKERS: {% for company in article.related_companies.all %}{{ company.symbol }}{% if not forloop.last %} | {% endif %}{% endfor %}
+{% endif %}
+
+Read the full article: {{ article_url }}
+
+----------------------------------------
+You are receiving this alert because you subscribed to
+Breaking News Alerts from BGFI.
+
+Bard Global Finance Institute
+Premium African Financial Intelligence
+bgfi.global
+
+Unsubscribe: {{ unsubscribe_url }}

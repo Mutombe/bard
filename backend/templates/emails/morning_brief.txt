@@ -1,0 +1,28 @@
+BGFI - MORNING BRIEF
+{{ date }}
+========================================
+
+Good morning. Here is your daily briefing on African markets.
+
+MARKET INDICES
+----------------------------------------
+{% for index in indices %}{{ index.code }}    {{ index.current_value|floatformat:2 }}    {% if index.change >= 0 %}+{% endif %}{{ index.change|floatformat:2 }}    {% if index.change_percent >= 0 %}+{% endif %}{{ index.change_percent|floatformat:2 }}%
+{% endfor %}
+
+TOP GAINERS
+----------------------------------------
+{% for stock in top_gainers %}{{ stock.symbol }}    {{ stock.current_price|floatformat:2 }}    +{{ stock.price_change_percent|floatformat:2 }}%
+{% endfor %}
+
+TOP LOSERS
+----------------------------------------
+{% for stock in top_losers %}{{ stock.symbol }}    {{ stock.current_price|floatformat:2 }}    {{ stock.price_change_percent|floatformat:2 }}%
+{% endfor %}
+
+View full market dashboard: https://bgfi.global/markets
+
+----------------------------------------
+Market data is for informational purposes only and does not constitute investment advice.
+
+Bard Global Finance Institute | bgfi.global
+Unsubscribe: {{ unsubscribe_url }}

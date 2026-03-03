@@ -20,6 +20,7 @@ def send_verification_email(subscription_id: str):
     Send verification email for newsletter subscription.
 
     Called when a new subscription is created.
+    Uses branded HTML template: templates/emails/verify_email.html
     """
     from .models import NewsletterSubscription
 
@@ -33,45 +34,16 @@ def send_verification_email(subscription_id: str):
 
     frontend_url = getattr(settings, "FRONTEND_URL", "https://bgfi.global")
     verify_url = f"{frontend_url}/newsletter/verify?token={subscription.verification_token}"
+    unsubscribe_url = f"{frontend_url}/newsletter/unsubscribe?token={subscription.unsubscribe_token}"
 
-    html_content = f"""
-    <html>
-    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #f97316;">Bard Global Finance Institute</h1>
-        </div>
-        <div style="background-color: #1a1a2e; color: #ffffff; padding: 30px; border-radius: 8px;">
-            <h2 style="color: #f97316; margin-top: 0;">Verify Your Subscription</h2>
-            <p>Thank you for subscribing to our {subscription.get_newsletter_type_display()} newsletter!</p>
-            <p>Please click the button below to verify your email address:</p>
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="{verify_url}"
-                   style="background-color: #f97316; color: #ffffff; padding: 12px 30px;
-                          text-decoration: none; border-radius: 4px; font-weight: bold;">
-                    Verify Email
-                </a>
-            </div>
-            <p style="color: #888; font-size: 12px;">
-                If you didn't subscribe to this newsletter, you can safely ignore this email.
-            </p>
-        </div>
-        <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
-            <p>&copy; Bard Global Finance Institute</p>
-        </div>
-    </body>
-    </html>
-    """
+    context = {
+        "verify_url": verify_url,
+        "unsubscribe_url": unsubscribe_url,
+        "newsletter_type_display": subscription.get_newsletter_type_display(),
+    }
 
-    text_content = f"""
-    Bard Global Finance Institute - Verify Your Subscription
-
-    Thank you for subscribing to our {subscription.get_newsletter_type_display()} newsletter!
-
-    Please click the link below to verify your email address:
-    {verify_url}
-
-    If you didn't subscribe to this newsletter, you can safely ignore this email.
-    """
+    html_content = render_to_string("emails/verify_email.html", context)
+    text_content = render_to_string("emails/verify_email.txt", context)
 
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "BGFI <publish@bgfi.global>")
 
@@ -126,8 +98,12 @@ def send_morning_brief():
         "top_losers": top_losers,
     }
 
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://bgfi.global")
+
     for subscription in subscriptions:
-        context["unsubscribe_token"] = subscription.unsubscribe_token
+        context["unsubscribe_url"] = (
+            f"{frontend_url}/newsletter/unsubscribe?token={subscription.unsubscribe_token}"
+        )
 
         html_content = render_to_string("emails/morning_brief.html", context)
         text_content = render_to_string("emails/morning_brief.txt", context)
@@ -176,8 +152,12 @@ def send_evening_wrap():
         "top_stories": top_stories,
     }
 
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://bgfi.global")
+
     for subscription in subscriptions:
-        context["unsubscribe_token"] = subscription.unsubscribe_token
+        context["unsubscribe_url"] = (
+            f"{frontend_url}/newsletter/unsubscribe?token={subscription.unsubscribe_token}"
+        )
 
         html_content = render_to_string("emails/evening_wrap.html", context)
         text_content = render_to_string("emails/evening_wrap.txt", context)
@@ -274,11 +254,27 @@ def send_breaking_news_alert(article_id: str):
     )
 
     from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "BGFI <publish@bgfi.global>")
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://bgfi.global")
+    article_url = f"{frontend_url}/article/{article.slug}"
 
     for subscription in subscriptions:
+        unsubscribe_url = (
+            f"{frontend_url}/newsletter/unsubscribe?token={subscription.unsubscribe_token}"
+        )
+
+        context = {
+            "article": article,
+            "article_url": article_url,
+            "unsubscribe_url": unsubscribe_url,
+        }
+
+        html_content = render_to_string("emails/breaking_news.html", context)
+        text_content = render_to_string("emails/breaking_news.txt", context)
+
         send_mail(
             subject=f"BREAKING: {article.title}",
-            message=article.excerpt,
+            message=text_content,
+            html_message=html_content,
             from_email=from_email,
             recipient_list=[subscription.email],
             fail_silently=True,
