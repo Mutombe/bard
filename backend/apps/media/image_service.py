@@ -179,24 +179,113 @@ class ArticleImageService:
     by analyzing article content and category.
     """
 
-    # Category-specific search queries for better relevance
+    # Category-specific visual search terms for Unsplash
     CATEGORY_QUERIES = {
-        "markets": "stock market trading finance",
-        "economy": "economy business growth charts",
-        "banking": "banking finance business",
-        "technology": "fintech technology digital",
-        "commodities": "gold oil commodities trading",
-        "crypto": "cryptocurrency bitcoin blockchain",
-        "real-estate": "real estate property investment",
-        "energy": "energy oil gas renewable",
-        "mining": "mining minerals resources",
-        "agriculture": "agriculture farming commodities",
-        "politics": "politics government policy",
-        "world": "global business international",
-        "africa": "africa business economy",
-        "opinion": "business analysis discussion",
-        "analysis": "financial analysis charts data",
-        "research": "research data analytics",
+        "markets": "stock exchange trading floor",
+        "economy": "city skyline economic growth",
+        "banking": "modern bank building finance",
+        "technology": "technology digital innovation",
+        "commodities": "gold bars commodity trading",
+        "crypto": "cryptocurrency digital finance",
+        "real-estate": "modern building real estate",
+        "energy": "energy power plant industrial",
+        "mining": "mining mineral resources industrial",
+        "agriculture": "agriculture farming harvest",
+        "politics": "government parliament building",
+        "world": "global business international city",
+        "africa": "african city skyline modern",
+        "opinion": "business meeting discussion",
+        "analysis": "financial data analytics dashboard",
+        "research": "research laboratory data science",
+        "business": "corporate office business",
+    }
+
+    # Maps abstract financial/news terms to concrete visual concepts for Unsplash
+    VISUAL_CONCEPT_MAP = {
+        # Countries → landmarks / cityscapes
+        'nigeria': 'Lagos Nigeria skyline',
+        'kenya': 'Nairobi Kenya city',
+        'south africa': 'Johannesburg South Africa skyline',
+        'ethiopia': 'Addis Ababa Ethiopia modern',
+        'ghana': 'Accra Ghana city',
+        'egypt': 'Cairo Egypt modern city',
+        'morocco': 'Casablanca Morocco city',
+        'tanzania': 'Dar es Salaam Tanzania',
+        'uganda': 'Kampala Uganda city',
+        'zimbabwe': 'Harare Zimbabwe city',
+        'botswana': 'Gaborone Botswana',
+        'rwanda': 'Kigali Rwanda modern city',
+        'ivory coast': 'Abidjan Ivory Coast skyline',
+        'china': 'Shanghai China skyline',
+        'india': 'Mumbai India financial district',
+        'brazil': 'Sao Paulo Brazil skyline',
+        'russia': 'Moscow Russia city',
+        'japan': 'Tokyo Japan financial district',
+        'europe': 'European city financial district',
+        'usa': 'Wall Street New York finance',
+        'uk': 'London city financial district',
+        # Industries → visual representations
+        'oil': 'oil refinery industrial energy',
+        'gold': 'gold bars vault precious metal',
+        'copper': 'copper mining industrial',
+        'diamond': 'diamond mining luxury',
+        'platinum': 'platinum precious metal',
+        'coal': 'coal mining energy industrial',
+        'iron': 'iron ore mining industrial',
+        'lithium': 'lithium battery technology',
+        'solar': 'solar panels renewable energy',
+        'wind': 'wind farm renewable energy',
+        'gas': 'natural gas pipeline energy',
+        'electric': 'electric vehicle technology',
+        'telecom': 'telecommunications tower network',
+        'banking': 'modern bank building interior',
+        'insurance': 'insurance office corporate',
+        'real estate': 'modern architecture building',
+        'pharma': 'pharmaceutical laboratory medicine',
+        'retail': 'modern retail shopping mall',
+        'aviation': 'airplane airport aviation',
+        'shipping': 'container port shipping logistics',
+        'construction': 'construction site crane building',
+        'textile': 'textile manufacturing fashion',
+        'automobile': 'automotive car manufacturing',
+        'fintech': 'fintech digital payment mobile',
+        # Financial concepts → visual metaphors
+        'ipo': 'stock exchange bell ceremony trading',
+        'merger': 'business handshake corporate deal',
+        'acquisition': 'corporate merger business deal',
+        'inflation': 'rising prices economics charts',
+        'recession': 'economic downturn city empty',
+        'gdp': 'economic growth city development',
+        'interest rate': 'central bank monetary policy',
+        'trade': 'international trade shipping port',
+        'tariff': 'shipping containers trade port',
+        'debt': 'financial documents banking',
+        'bond': 'government bonds treasury finance',
+        'forex': 'currency exchange global finance',
+        'dividend': 'corporate profits wealth investment',
+        'earnings': 'financial results corporate office',
+        'crypto': 'cryptocurrency bitcoin digital',
+        'blockchain': 'blockchain technology digital',
+        'ai': 'artificial intelligence technology',
+        'startup': 'technology startup modern office',
+        'venture': 'venture capital startup office',
+        'investment': 'investment portfolio wealth',
+        'fund': 'investment fund management office',
+        'pension': 'retirement pension elderly',
+        'tax': 'tax documents finance calculator',
+        'regulation': 'government regulation courthouse',
+        'sanctions': 'international politics diplomacy',
+        'election': 'election politics government voting',
+        'corruption': 'justice courthouse gavel law',
+        'reform': 'government reform policy change',
+        'privatization': 'corporate takeover business',
+        'subsidy': 'government aid support',
+        'export': 'export shipping container port',
+        'import': 'import shipping dock cargo',
+        'drought': 'drought dry land agriculture',
+        'flood': 'flooding disaster water',
+        'pandemic': 'healthcare medical hospital',
+        'climate': 'climate change environment nature',
     }
 
     # Fallback images by category (high-quality default images) - EXPANDED for variety
@@ -421,38 +510,91 @@ class ArticleImageService:
         content: str,
     ) -> str:
         """
-        Build an optimized search query for Unsplash.
+        Build a contextual search query for Unsplash that produces
+        visually relevant HD images.
 
-        Combines:
-        - Keywords from title
-        - Category-specific terms
-        - Finance/business context
+        Strategy:
+        1. Check title for known visual concepts (countries, industries, topics)
+        2. Use concept map to translate abstract terms → visual search terms
+        3. Fall back to category-specific visual query
         """
-        # Extract keywords from title (most important)
-        title_keywords = self._extract_keywords(title, max_keywords=3)
+        text = f"{title} {excerpt}".lower()
 
-        # Add category context
-        category_terms = self.CATEGORY_QUERIES.get(category_slug, "")
+        # 1. Check for matching visual concepts
+        # Priority: countries first, then industries, then financial concepts
+        # (longer matches are more specific so they win within each tier)
+        country_match = None
+        industry_match = None
+        concept_match = None
 
-        # Build query
-        query_parts = []
+        # Countries are first ~20 entries, industries next ~25, concepts after
+        country_keys = [
+            'nigeria', 'kenya', 'south africa', 'ethiopia', 'ghana', 'egypt',
+            'morocco', 'tanzania', 'uganda', 'zimbabwe', 'botswana', 'rwanda',
+            'ivory coast', 'china', 'india', 'brazil', 'russia', 'japan',
+            'europe', 'usa', 'uk',
+        ]
+        industry_keys = [
+            'oil', 'gold', 'copper', 'diamond', 'platinum', 'coal', 'iron',
+            'lithium', 'solar', 'wind', 'gas', 'electric', 'telecom',
+            'banking', 'insurance', 'real estate', 'pharma', 'retail',
+            'aviation', 'shipping', 'construction', 'textile', 'automobile',
+            'fintech',
+        ]
 
-        # Title keywords are most important
-        if title_keywords:
-            query_parts.extend(title_keywords[:2])
+        for concept, visual_query in self.VISUAL_CONCEPT_MAP.items():
+            if concept not in text:
+                continue
+            if concept in country_keys:
+                if not country_match or len(concept) > len(country_match[0]):
+                    country_match = (concept, visual_query)
+            elif concept in industry_keys:
+                if not industry_match or len(concept) > len(industry_match[0]):
+                    industry_match = (concept, visual_query)
+            else:
+                if not concept_match or len(concept) > len(concept_match[0]):
+                    concept_match = (concept, visual_query)
 
-        # Add category context
-        if category_terms:
-            query_parts.append(category_terms.split()[0])
+        # Combine: country + industry is best, otherwise use whichever matched
+        if country_match and industry_match:
+            combined = f"{country_match[1].split()[0]} {industry_match[1]}"
+            logger.debug(f"Country+industry match for '{title[:50]}': {combined}")
+            return combined
+        best = country_match or industry_match or concept_match
+        if best:
+            logger.debug(f"Visual concept match for '{title[:50]}': {best[1]}")
+            return best[1]
 
-        # Always include financial context for relevance
-        query_parts.append("business")
+        # 2. Extract the most meaningful noun from the title
+        title_keywords = self._extract_keywords(title, max_keywords=4)
 
-        # Limit query length for better results
-        query = " ".join(query_parts[:4])
+        # Filter out generic financial words that don't produce good images
+        generic_words = {
+            'market', 'markets', 'stock', 'stocks', 'share', 'shares',
+            'report', 'reports', 'news', 'update', 'updates', 'latest',
+            'new', 'growth', 'rise', 'fall', 'drop', 'surge', 'rally',
+            'analysis', 'outlook', 'forecast', 'review', 'global',
+            'economy', 'economic', 'financial', 'sector', 'industry',
+            'company', 'companies', 'firm', 'firms', 'group', 'fund',
+            'billion', 'million', 'percent', 'year', 'quarter', 'annual',
+        }
+        specific_keywords = [w for w in title_keywords if w not in generic_words]
 
-        logger.debug(f"Built search query: {query}")
-        return query
+        if specific_keywords:
+            # Use specific keywords + category context
+            category_visual = self.CATEGORY_QUERIES.get(category_slug, '')
+            context_word = category_visual.split()[0] if category_visual else 'business'
+            query = f"{' '.join(specific_keywords[:2])} {context_word}"
+            logger.debug(f"Keyword query for '{title[:50]}': {query}")
+            return query
+
+        # 3. Fall back to category-specific visual query
+        category_query = self.CATEGORY_QUERIES.get(
+            category_slug,
+            "corporate business office modern"
+        )
+        logger.debug(f"Category fallback for '{title[:50]}': {category_query}")
+        return category_query
 
     def get_category_image(self, category_slug: str) -> str:
         """Get a default image for a category."""
