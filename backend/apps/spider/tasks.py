@@ -125,88 +125,96 @@ def fetch_polygon_news():
         raise
 
 
-@shared_task(name="apps.spider.tasks.fetch_newsapi_headlines")
-def fetch_newsapi_headlines():
+@shared_task(name="apps.spider.tasks.fetch_serpapi_news")
+def fetch_serpapi_news():
     """
-    Fetch business headlines from NewsAPI.org.
+    Fetch business/finance news from Google News via SerpAPI.
 
-    Fetches from multiple countries and categories to get diverse content.
-    Free tier only supports get_top_headlines (not get_everything).
+    Discovers articles via Google News search, then extracts full article
+    content from source URLs using trafilatura.
 
     Schedule: Every 30 minutes
     """
-    from .providers import NewsAPIProvider
+    from .providers import SerpAPIProvider
     from apps.news.models import NewsArticle, Category
     import hashlib
 
-    # Multiple country/category combos to rotate through
-    # NewsAPI free tier: top_headlines only, limited to one country per request
-    HEADLINE_QUERIES = [
-        {'category': 'business', 'country': 'us'},
-        {'category': 'business', 'country': 'gb'},
-        {'category': 'business', 'country': 'za'},    # South Africa
-        {'category': 'technology', 'country': 'us'},
-        {'category': 'business', 'country': 'ng'},    # Nigeria
-        {'category': 'business', 'country': 'ae'},    # UAE (African finance hub)
-        {'category': 'general', 'country': 'za'},
-        {'category': 'technology', 'country': 'gb'},
+    # Rotate through different finance queries each cycle
+    NEWS_QUERIES = [
+        'global finance stock market today',
+        'business economy news',
+        'stock market earnings report',
+        'banking finance industry news',
+        'emerging markets investment',
+        'commodity prices mining energy',
+        'technology stocks fintech',
+        'central bank monetary policy',
     ]
 
-    # Category mapping
-    cat_map = {
-        'business': ('business', 'Business', 'Business news'),
-        'technology': ('technology', 'Technology', 'Technology news'),
-        'general': ('markets', 'Markets', 'Market news and analysis'),
-    }
-
     try:
-        provider = NewsAPIProvider()
+        provider = SerpAPIProvider()
 
+        # Category mapping by keyword detection
         categories = {}
-        for slug, name, desc in cat_map.values():
+        for slug, name, desc in [
+            ('business', 'Business', 'Business news'),
+            ('markets', 'Markets', 'Market news and analysis'),
+            ('technology', 'Technology', 'Technology news'),
+            ('commodities', 'Commodities', 'Commodities and resources'),
+            ('banking', 'Banking', 'Banking and finance'),
+        ]:
             cat, _ = Category.objects.get_or_create(
                 slug=slug, defaults={'name': name, 'description': desc}
             )
             categories[slug] = cat
 
-        # Rotate: pick 3 queries per cycle to stay within rate limits
+        default_category = categories['business']
+
+        # Rotate: pick 2 queries per cycle
         hour_hash = int(hashlib.md5(
             timezone.now().strftime('%Y-%m-%d-%H').encode()
         ).hexdigest(), 16)
 
         selected = []
-        for i in range(3):
-            idx = (hour_hash + i) % len(HEADLINE_QUERIES)
-            if HEADLINE_QUERIES[idx] not in selected:
-                selected.append(HEADLINE_QUERIES[idx])
+        for i in range(2):
+            idx = (hour_hash + i) % len(NEWS_QUERIES)
+            q = NEWS_QUERIES[idx]
+            if q not in selected:
+                selected.append(q)
 
         saved = 0
         seen_titles = set()
 
-        for query in selected:
-            try:
-                articles = provider.get_top_headlines(
-                    category=query['category'],
-                    country=query['country'],
-                    page_size=20,
-                )
-            except Exception as e:
-                logger.warning(f"NewsAPI headlines failed for {query}: {e}")
-                continue
+        # Map queries to categories
+        query_categories = {
+            'banking finance industry news': 'banking',
+            'commodity prices mining energy': 'commodities',
+            'technology stocks fintech': 'technology',
+            'stock market earnings report': 'markets',
+            'central bank monetary policy': 'banking',
+            'emerging markets investment': 'markets',
+        }
 
-            cat_slug = cat_map.get(query['category'], ('business',))[0]
-            category = categories.get(cat_slug, categories['business'])
+        for query in selected:
+            articles = provider.search_news(
+                query,
+                gl='us',
+                extract_content=True,
+                max_extract=8,
+            )
+
+            cat_slug = query_categories.get(query, 'business')
+            category = categories.get(cat_slug, default_category)
 
             for item in articles:
                 title = (item.get('title') or '').strip()
-                if not title or title == '[Removed]':
+                if not title:
                     continue
 
                 if title[:500] in seen_titles:
                     continue
                 seen_titles.add(title[:500])
 
-                # Deduplicate by title or URL
                 ext_url = item.get('url', '')
                 if NewsArticle.objects.filter(title=title[:500]).exists():
                     continue
@@ -214,61 +222,51 @@ def fetch_newsapi_headlines():
                     continue
 
                 content = item.get('content', '') or item.get('description', '') or title
-                if not content:
+                if not content or len(content) < 20:
                     continue
 
-                NewsArticle.objects.create(
-                    title=title[:500],
-                    excerpt=item.get('description', '')[:500] if item.get('description') else title[:500],
-                    content=content,
-                    category=category,
-                    status='published',
-                    published_at=timezone.now(),
-                    source='newsapi',
-                    external_url=ext_url,
-                    external_source_name=item.get('source', {}).get('name', 'NewsAPI') if isinstance(item.get('source'), dict) else str(item.get('source', 'NewsAPI')),
-                    featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
-                )
-                saved += 1
+                try:
+                    NewsArticle.objects.create(
+                        title=title[:500],
+                        excerpt=(item.get('description', '') or content[:300])[:500],
+                        content=content,
+                        category=category,
+                        status='published',
+                        published_at=timezone.now(),
+                        source='serpapi',
+                        external_url=ext_url[:500],
+                        external_source_name=item.get('source', 'Google News')[:100],
+                        featured_image_url=item.get('image_url', '')[:500],
+                    )
+                    saved += 1
+                except Exception as e:
+                    logger.warning(f"Failed to save article '{title[:60]}': {e}")
+                    continue
 
-        logger.info(f"NewsAPI: saved {saved} new articles")
-        return f"NewsAPI: saved {saved} articles"
+        logger.info(f"SerpAPI news: saved {saved} new articles")
+        return f"SerpAPI: saved {saved} articles"
 
     except Exception as e:
-        logger.error(f"NewsAPI fetch failed: {e}")
+        logger.error(f"SerpAPI news fetch failed: {e}")
         raise
 
 
 @shared_task(name="apps.spider.tasks.fetch_african_news")
 def fetch_african_news():
     """
-    Fetch African market-specific news from NewsAPI.
+    Fetch African market-specific news from Google News via SerpAPI.
 
-    Uses get_top_headlines with African countries (free tier compatible)
-    instead of get_everything which requires a paid plan.
+    Searches for African finance/economy news and extracts full article
+    content from source URLs.
 
     Schedule: Every hour
     """
-    from .providers import NewsAPIProvider
+    from .providers import SerpAPIProvider
     from apps.news.models import NewsArticle, Category
-    import hashlib
-
-    # African countries supported by NewsAPI top_headlines
-    AFRICAN_QUERIES = [
-        {'country': 'za', 'category': 'business'},   # South Africa
-        {'country': 'za', 'category': 'general'},
-        {'country': 'ng', 'category': 'business'},   # Nigeria
-        {'country': 'ng', 'category': 'general'},
-        {'country': 'eg', 'category': 'business'},   # Egypt
-        {'country': 'ma', 'category': 'business'},   # Morocco
-        {'country': 'ke', 'category': 'business'},   # Kenya (if supported)
-        {'country': 'ae', 'category': 'business'},   # UAE (Africa-linked finance)
-    ]
 
     try:
-        provider = NewsAPIProvider()
+        provider = SerpAPIProvider()
 
-        # Category for African news
         africa_cat, _ = Category.objects.get_or_create(
             slug='africa',
             defaults={'name': 'Africa', 'description': 'Pan-African news'}
@@ -278,63 +276,56 @@ def fetch_african_news():
             defaults={'name': 'Markets', 'description': 'Market news and analysis'}
         )
 
-        # Rotate: pick 3 per cycle
-        hour_hash = int(hashlib.md5(
-            timezone.now().strftime('%Y-%m-%d-%H').encode()
-        ).hexdigest(), 16)
-
-        selected = []
-        for i in range(3):
-            idx = (hour_hash + i) % len(AFRICAN_QUERIES)
-            if AFRICAN_QUERIES[idx] not in selected:
-                selected.append(AFRICAN_QUERIES[idx])
+        articles = provider.get_african_market_news(max_extract=12)
 
         saved = 0
         seen_titles = set()
 
-        for query in selected:
-            try:
-                articles = provider.get_top_headlines(
-                    category=query['category'],
-                    country=query['country'],
-                    page_size=20,
-                )
-            except Exception as e:
-                logger.warning(f"African news failed for {query}: {e}")
+        for item in articles:
+            title = (item.get('title') or '').strip()
+            if not title:
                 continue
 
-            category = africa_cat if query['category'] == 'general' else markets_cat
+            if title[:500] in seen_titles:
+                continue
+            seen_titles.add(title[:500])
 
-            for item in articles:
-                title = (item.get('title') or '').strip()
-                if not title or title == '[Removed]':
-                    continue
+            ext_url = item.get('url', '')
+            if NewsArticle.objects.filter(title=title[:500]).exists():
+                continue
+            if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
+                continue
 
-                if title[:500] in seen_titles:
-                    continue
-                seen_titles.add(title[:500])
+            content = item.get('content', '') or item.get('description', '') or title
+            if not content or len(content) < 20:
+                continue
 
-                ext_url = item.get('url', '')
-                if NewsArticle.objects.filter(title=title[:500]).exists():
-                    continue
-                if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
-                    continue
+            # Assign category based on content keywords
+            content_lower = content.lower()
+            if any(kw in content_lower for kw in ['stock', 'market', 'exchange', 'index', 'trading']):
+                category = markets_cat
+            else:
+                category = africa_cat
 
+            try:
                 NewsArticle.objects.create(
                     title=title[:500],
-                    excerpt=item.get('description', '')[:500] if item.get('description') else '',
-                    content=item.get('content', '') or item.get('description', '') or title,
+                    excerpt=(item.get('description', '') or content[:300])[:500],
+                    content=content,
                     category=category,
                     status='published',
                     published_at=timezone.now(),
-                    source='newsapi',
-                    external_url=ext_url,
-                    external_source_name=item.get('source', {}).get('name', 'African News') if isinstance(item.get('source'), dict) else str(item.get('source', 'African News')),
-                    featured_image_url=item.get('image_url', '') or item.get('urlToImage', ''),
+                    source='serpapi',
+                    external_url=ext_url[:500],
+                    external_source_name=item.get('source', 'African News')[:100],
+                    featured_image_url=item.get('image_url', '')[:500],
                 )
                 saved += 1
+            except Exception as e:
+                logger.warning(f"Failed to save article '{title[:60]}': {e}")
+                continue
 
-        logger.info(f"African news: saved {saved} new articles")
+        logger.info(f"African news (SerpAPI): saved {saved} new articles")
         return f"African news: saved {saved} articles"
 
     except Exception as e:

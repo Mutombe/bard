@@ -441,5 +441,5 @@ SUBSCRIPTION_SETTINGS = {
 # =========================
 YOUTUBE_API_KEY = env("YOUTUBE_API_KEY", default="")
 POLYGON_API_KEY = env("POLYGON_API_KEY", default="")
-NEWSAPI_KEY = env("NEWSAPI_KEY", default="")
+SERPAPI_KEY = env("SERPAPI_KEY", default="")
 UNSPLASH_ACCESS_KEY = env("UNSPLASH_ACCESS_KEY", default="")

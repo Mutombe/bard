@@ -164,14 +164,14 @@ class Command(BaseCommand):
         except Exception as e:
             self.stdout.write(self.style.WARNING(f'    Polygon news failed: {e}'))
 
-        # NewsAPI headlines
+        # SerpAPI news (Google News with full article extraction)
         try:
-            from apps.spider.tasks import fetch_newsapi_headlines
-            self.stdout.write('  Fetching NewsAPI headlines...')
-            result = fetch_newsapi_headlines()
+            from apps.spider.tasks import fetch_serpapi_news
+            self.stdout.write('  Fetching SerpAPI news (full articles)...')
+            result = fetch_serpapi_news()
             self.stdout.write(self.style.SUCCESS(f'    {result}'))
         except Exception as e:
-            self.stdout.write(self.style.WARNING(f'    NewsAPI headlines failed: {e}'))
+            self.stdout.write(self.style.WARNING(f'    SerpAPI news failed: {e}'))
 
         # African market news
         try:

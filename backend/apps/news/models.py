@@ -131,10 +131,11 @@ class NewsArticle(BaseModel):
 
     class Source(models.TextChoices):
         EDITORIAL = "editorial", "Editorial"  # Written by in-house editors
-        NEWSAPI = "newsapi", "NewsAPI"
+        SERPAPI = "serpapi", "SerpAPI (Google News)"
         POLYGON = "polygon", "Polygon.io"
         SCRAPED = "scraped", "Web Scraped"
         SYNDICATED = "syndicated", "Syndicated"  # Partner content
+        NEWSAPI = "newsapi", "NewsAPI"  # Legacy
 
     # =========================
     # Core Content
