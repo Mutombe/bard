@@ -1,8 +1,8 @@
 """
 External Data Providers
 
-Provides market data from Polygon.io and news from NewsAPI.org
-as fallback when direct scraping fails.
+Provides market data from Polygon.io/Massive.com and news from SerpAPI
+(Google News) with full article extraction via trafilatura.
 """
 import logging
 import os
@@ -31,7 +31,7 @@ def get_api_key(key_name: str, env_var: str) -> str:
 
 # API Keys from environment/settings
 POLYGON_API_KEY = get_api_key('POLYGON_API_KEY', 'POLYGON_API_KEY')
-NEWSAPI_KEY = get_api_key('NEWSAPI_KEY', 'NEWSAPI_KEY')
+SERPAPI_KEY = get_api_key('SERPAPI_KEY', 'SERPAPI_KEY')
 ALPHA_VANTAGE_KEY = get_api_key('ALPHA_VANTAGE_KEY', 'ALPHA_VANTAGE_KEY')
 
 
@@ -368,118 +368,151 @@ class AlphaVantageProvider:
         }
 
 
-class NewsAPIProvider:
+class SerpAPIProvider:
     """
-    Provides news from NewsAPI.org.
+    Provides news from Google News via SerpAPI.
 
-    Great for business and financial news from multiple sources.
+    Uses SerpAPI to discover articles, then trafilatura to extract
+    full article content from the source URLs.
     """
 
     def __init__(self, api_key: str = None):
-        from newsapi import NewsApiClient
-        self.api_key = api_key or NEWSAPI_KEY
-        self.client = NewsApiClient(api_key=self.api_key)
+        self.api_key = api_key or SERPAPI_KEY
 
-    def get_top_headlines(
-        self,
-        category: str = 'business',
-        country: str = 'us',
-        page_size: int = 20
-    ) -> list[dict]:
-        """
-        Get top headlines for a category.
+    def _search_google_news(self, query: str, gl: str = 'us', hl: str = 'en') -> list[dict]:
+        """Run a Google News search via SerpAPI."""
+        from serpapi import GoogleSearch
 
-        Args:
-            category: business, technology, general, etc.
-            country: Country code (us, gb, za, etc.)
-            page_size: Number of articles to return
-        """
-        articles = []
+        params = {
+            'engine': 'google_news',
+            'q': query,
+            'gl': gl,
+            'hl': hl,
+            'api_key': self.api_key,
+        }
+
         try:
-            response = self.client.get_top_headlines(
-                category=category,
-                country=country,
-                page_size=page_size,
-            )
-
-            if response.get('status') == 'ok':
-                for article in response.get('articles', []):
-                    articles.append({
-                        'title': article.get('title', ''),
-                        'description': article.get('description', ''),
-                        'content': article.get('content', ''),
-                        'url': article.get('url', ''),
-                        'image_url': article.get('urlToImage', ''),
-                        'published_at': article.get('publishedAt', ''),
-                        'source': article.get('source', {}).get('name', 'Unknown'),
-                        'author': article.get('author', ''),
-                    })
+            search = GoogleSearch(params)
+            results = search.get_dict()
+            return results.get('news_results', [])
         except Exception as e:
-            logger.error(f"NewsAPI get_top_headlines failed: {e}")
-        return articles
+            logger.error(f"SerpAPI search failed for '{query}': {e}")
+            return []
+
+    @staticmethod
+    def extract_full_article(url: str) -> Optional[str]:
+        """Extract full article text from a URL using trafilatura."""
+        import trafilatura
+
+        try:
+            downloaded = trafilatura.fetch_url(url)
+            if not downloaded:
+                return None
+            text = trafilatura.extract(
+                downloaded,
+                include_comments=False,
+                include_tables=False,
+            )
+            return text
+        except Exception as e:
+            logger.warning(f"Article extraction failed for {url}: {e}")
+            return None
 
     def search_news(
         self,
         query: str,
-        language: str = 'en',
-        sort_by: str = 'publishedAt',
-        page_size: int = 20
+        gl: str = 'us',
+        hl: str = 'en',
+        extract_content: bool = True,
+        max_extract: int = 10,
     ) -> list[dict]:
         """
-        Search for news articles.
+        Search Google News and optionally extract full article content.
 
         Args:
-            query: Search query (e.g., 'stock market', 'bitcoin')
-            language: Language code
-            sort_by: relevancy, popularity, publishedAt
-            page_size: Number of articles to return
+            query: Search query
+            gl: Country code for localization
+            hl: Language code
+            extract_content: Whether to fetch full article bodies
+            max_extract: Max articles to extract full content for
         """
+        raw_results = self._search_google_news(query, gl=gl, hl=hl)
         articles = []
-        try:
-            response = self.client.get_everything(
-                q=query,
-                language=language,
-                sort_by=sort_by,
-                page_size=page_size,
-            )
+        extracted = 0
 
-            if response.get('status') == 'ok':
-                for article in response.get('articles', []):
-                    articles.append({
-                        'title': article.get('title', ''),
-                        'description': article.get('description', ''),
-                        'content': article.get('content', ''),
-                        'url': article.get('url', ''),
-                        'image_url': article.get('urlToImage', ''),
-                        'published_at': article.get('publishedAt', ''),
-                        'source': article.get('source', {}).get('name', 'Unknown'),
-                        'author': article.get('author', ''),
-                    })
-        except Exception as e:
-            logger.error(f"NewsAPI search_news failed: {e}")
+        for item in raw_results:
+            title = (item.get('title') or '').strip()
+            if not title:
+                continue
+
+            link = item.get('link', '')
+            source_info = item.get('source', {})
+            snippet = item.get('snippet', '')
+            thumbnail = item.get('thumbnail', '')
+
+            # Parse date
+            date_str = item.get('date', '')
+
+            # Extract full content if enabled and under limit
+            full_content = None
+            if extract_content and link and extracted < max_extract:
+                full_content = self.extract_full_article(link)
+                if full_content:
+                    extracted += 1
+
+            articles.append({
+                'title': title,
+                'description': snippet or '',
+                'content': full_content or snippet or '',
+                'url': link,
+                'image_url': thumbnail or '',
+                'published_at': date_str,
+                'source': source_info.get('name', 'Google News') if isinstance(source_info, dict) else str(source_info),
+                'author': source_info.get('authors', [''])[0] if isinstance(source_info, dict) and source_info.get('authors') else '',
+                'has_full_content': bool(full_content),
+            })
+
         return articles
 
-    def get_african_market_news(self, page_size: int = 20) -> list[dict]:
-        """Get news specifically about African markets."""
+    def get_business_news(self, gl: str = 'us', max_extract: int = 10) -> list[dict]:
+        """Get business/finance news headlines with full content."""
+        return self.search_news(
+            'finance business stock market',
+            gl=gl,
+            max_extract=max_extract,
+        )
+
+    def get_african_market_news(self, max_extract: int = 10) -> list[dict]:
+        """Get African market and finance news with full content."""
         queries = [
-            'South Africa stock market',
-            'Nigeria stock exchange',
-            'African economy',
-            'JSE Johannesburg',
+            'Africa finance stock market economy',
+            'South Africa JSE market',
+            'Nigeria economy finance',
+            'Kenya East Africa business',
         ]
 
         all_articles = []
+        per_query = max(max_extract // len(queries), 2)
+
         for query in queries:
-            articles = self.search_news(query, page_size=page_size // len(queries))
+            articles = self.search_news(
+                query,
+                gl='us',
+                extract_content=True,
+                max_extract=per_query,
+            )
             all_articles.extend(articles)
 
-        # Sort by published date
-        all_articles.sort(
-            key=lambda x: x.get('published_at', ''),
-            reverse=True
-        )
+        # Deduplicate by title
+        seen = set()
+        unique = []
+        for a in all_articles:
+            key = a['title'][:100]
+            if key not in seen:
+                seen.add(key)
+                unique.append(a)
 
-        return all_articles[:page_size]
+        return unique
 
 
 # Convenience functions
@@ -490,15 +523,15 @@ def fetch_polygon_market_data(symbol: str) -> Optional[dict]:
 
 
 def fetch_business_news(limit: int = 20) -> list[dict]:
-    """Fetch business news from NewsAPI."""
-    provider = NewsAPIProvider()
-    return provider.get_top_headlines(category='business', page_size=limit)
+    """Fetch business news from SerpAPI (Google News)."""
+    provider = SerpAPIProvider()
+    return provider.get_business_news(max_extract=limit)
 
 
 def fetch_african_news(limit: int = 20) -> list[dict]:
-    """Fetch African market news."""
-    provider = NewsAPIProvider()
-    return provider.get_african_market_news(page_size=limit)
+    """Fetch African market news from SerpAPI."""
+    provider = SerpAPIProvider()
+    return provider.get_african_market_news(max_extract=limit)
 
 
 def fetch_polygon_news(ticker: str = None, limit: int = 20) -> list[dict]:

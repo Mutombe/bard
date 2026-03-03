@@ -345,7 +345,7 @@ class TriggerSpiderView(APIView):
             "bse": [tasks.scrape_bse_data],
             "news": [
                 tasks.fetch_polygon_news,
-                tasks.fetch_newsapi_headlines,
+                tasks.fetch_serpapi_news,
                 tasks.fetch_african_news,
                 tasks.scrape_african_news_websites,
                 tasks.set_article_images,
