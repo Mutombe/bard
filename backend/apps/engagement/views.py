@@ -190,7 +190,7 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
             pass
 
         # Prepare emails
-        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@bardiqjournal.com")
+        from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "BGFI <publish@bgfi.global>")
         emails_sent = 0
         errors = []
 

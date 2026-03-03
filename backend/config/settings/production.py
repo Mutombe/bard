@@ -128,12 +128,9 @@ if SENTRY_DSN:
     )
 
 # =========================
-# Email (Production SMTP)
+# Email (Google Workspace SMTP)
 # =========================
-EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
-ANYMAIL = {
-    "SENDGRID_API_KEY": env("SENDGRID_API_KEY", default=""),  # noqa: F405
-}
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")  # noqa: F405
 
 # =========================
 # Caching (Redis in production)

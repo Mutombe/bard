@@ -31,7 +31,7 @@ def send_verification_email(subscription_id: str):
     if subscription.is_verified:
         return "Already verified"
 
-    frontend_url = getattr(settings, "FRONTEND_URL", "https://bardglobalfinance.com")
+    frontend_url = getattr(settings, "FRONTEND_URL", "https://bardiqjournal.com")
     verify_url = f"{frontend_url}/newsletter/verify?token={subscription.verification_token}"
 
     html_content = f"""
@@ -73,11 +73,11 @@ def send_verification_email(subscription_id: str):
     If you didn't subscribe to this newsletter, you can safely ignore this email.
     """
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@bardglobalfinance.com")
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "BGFI <publish@bgfi.global>")
 
     try:
         send_mail(
-            subject="Verify Your Newsletter Subscription - Bard Global Finance Institute",
+            subject="Verify Your Newsletter Subscription - BGFI",
             message=text_content,
             html_message=html_content,
             from_email=from_email,
@@ -136,7 +136,7 @@ def send_morning_brief():
             subject=f"Morning Market Brief - {context['date']}",
             message=text_content,
             html_message=html_content,
-            from_email="noreply@bardsantner.com",
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[subscription.email],
             fail_silently=True,
         )
@@ -186,7 +186,7 @@ def send_evening_wrap():
             subject=f"Evening Market Wrap - {context['date']}",
             message=text_content,
             html_message=html_content,
-            from_email="noreply@bardsantner.com",
+            from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[subscription.email],
             fail_silently=True,
         )
@@ -273,7 +273,7 @@ def send_breaking_news_alert(article_id: str):
         is_verified=True,
     )
 
-    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@bardglobalfinance.com")
+    from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "BGFI <publish@bgfi.global>")
 
     for subscription in subscriptions:
         send_mail(

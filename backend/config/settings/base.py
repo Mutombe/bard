@@ -322,9 +322,10 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@bardglobal.com")
-ADMIN_EMAIL = env("ADMIN_EMAIL", default="admin@bardglobal.com")
-SITE_URL = env("SITE_URL", default="https://bardglobal.com")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="BGFI <publish@bgfi.global>")
+ADMIN_EMAIL = env("ADMIN_EMAIL", default="publish@bgfi.global")
+SITE_URL = env("SITE_URL", default="https://bardiqjournal.com")
+FRONTEND_URL = env("FRONTEND_URL", default="https://bardiqjournal.com")
 
 # =========================
 # Google OAuth Configuration
