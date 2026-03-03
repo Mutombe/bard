@@ -225,16 +225,14 @@ def fetch_serpapi_news():
 
                 content = item.get('content', '') or item.get('description', '') or title
 
-                # Get HD image: use source image if good, otherwise fetch from Unsplash
-                image_url = item.get('image_url', '')
-                if not image_url:
-                    image_data = image_service.get_image_for_article(
-                        title=title,
-                        excerpt=item.get('description', ''),
-                        category_slug=cat_slug,
-                        content=content[:500],
-                    )
-                    image_url = image_data.get('url', '')
+                # Always fetch HD image from Unsplash based on article context
+                image_data = image_service.get_image_for_article(
+                    title=title,
+                    excerpt=item.get('description', ''),
+                    category_slug=cat_slug,
+                    content=content[:500],
+                )
+                image_url = image_data.get('url', '')
 
                 try:
                     NewsArticle.objects.create(
@@ -321,16 +319,14 @@ def fetch_african_news():
                 category = africa_cat
                 cat_slug = 'africa'
 
-            # Get HD image: use source image if good, otherwise fetch from Unsplash
-            image_url = item.get('image_url', '')
-            if not image_url:
-                image_data = image_service.get_image_for_article(
-                    title=title,
-                    excerpt=item.get('description', ''),
-                    category_slug=cat_slug,
-                    content=content[:500],
-                )
-                image_url = image_data.get('url', '')
+            # Always fetch HD image from Unsplash based on article context
+            image_data = image_service.get_image_for_article(
+                title=title,
+                excerpt=item.get('description', ''),
+                category_slug=cat_slug,
+                content=content[:500],
+            )
+            image_url = image_data.get('url', '')
 
             try:
                 NewsArticle.objects.create(
@@ -805,20 +801,12 @@ def set_article_images():
     try:
         from django.db.models import Q
 
-        # Get articles without images OR with bad Google News proxy thumbnails
-        bad_image_patterns = [
-            'news.google.com',
-            'encrypted-tbn',
-            'gstatic.com/images',
-        ]
-        bad_q = Q()
-        for pattern in bad_image_patterns:
-            bad_q |= Q(featured_image_url__contains=pattern)
-
+        # Get articles without Unsplash HD images — replace ALL non-Unsplash images
         articles = NewsArticle.objects.filter(
-            Q(featured_image='', featured_image_url='') | bad_q,
             status='published',
-        ).order_by('-is_featured', '-published_at')[:30]
+        ).exclude(
+            featured_image_url__contains='images.unsplash.com',
+        ).order_by('-is_featured', '-published_at')[:50]
 
         if not articles.exists():
             return "No articles need images"
