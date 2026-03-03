@@ -442,22 +442,25 @@ class SerpAPIProvider:
         gl: str = 'us',
         hl: str = 'en',
         extract_content: bool = True,
+        max_extract: int = 15,
     ) -> list[dict]:
         """
         Search Google News and extract full article content.
 
-        Tries to extract full content for every article. If extraction fails
-        (site blocks scraping), the article is still saved with its snippet.
-        Only truly empty articles (no title) are skipped.
+        Tries to extract full content for up to max_extract articles.
+        ALL articles are returned regardless of extraction success —
+        those that fail extraction keep their snippet.
 
         Args:
             query: Search query
             gl: Country code for localization
             hl: Language code
             extract_content: Whether to fetch full article bodies
+            max_extract: Max articles to attempt full extraction on
         """
         raw_results = self._search_google_news(query, gl=gl, hl=hl)
         articles = []
+        extracted_count = 0
 
         for item in raw_results:
             title = (item.get('title') or '').strip()
@@ -472,10 +475,11 @@ class SerpAPIProvider:
             # Parse date
             date_str = item.get('date', '')
 
-            # Try to extract full content
+            # Try to extract full content (up to max_extract attempts)
             full_content = None
-            if extract_content and link:
+            if extract_content and link and extracted_count < max_extract:
                 full_content = self.extract_full_article(link)
+                extracted_count += 1
 
             # Use full content if available, otherwise keep snippet
             content = full_content or snippet or title
