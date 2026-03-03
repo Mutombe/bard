@@ -49,10 +49,21 @@ services:
         sync: false
       - key: POLYGON_API_KEY
         sync: false
-      - key: NEWSAPI_KEY
+      - key: SERPAPI_KEY
         sync: false
       - key: UNSPLASH_ACCESS_KEY
         sync: false
+      # Email (Google Workspace SMTP)
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: "BGFI <publish@bgfi.global>"
+      - key: FRONTEND_URL
+        value: "https://bgfi.global"
+      - key: SITE_URL
+        value: "https://bgfi.global"
 
   # =========================
   # FRONTEND (Next.js)
@@ -105,7 +116,7 @@ services:
         sync: false
       - key: POLYGON_API_KEY
         sync: false
-      - key: NEWSAPI_KEY
+      - key: SERPAPI_KEY
         sync: false
       - key: UNSPLASH_ACCESS_KEY
         sync: false
