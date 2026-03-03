@@ -3,7 +3,7 @@ News Views
 """
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 
@@ -483,3 +483,18 @@ class CommentViewSet(viewsets.ModelViewSet):
 
         serializer = CommentWithRepliesSerializer(queryset, many=True, context={"request": request})
         return Response(serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def unsplash_image_view(request):
+    """Return an HD Unsplash image URL based on a search query."""
+    from apps.media.image_service import ArticleImageService
+
+    query = request.query_params.get("q", "business finance")
+    service = ArticleImageService()
+    result = service.get_image_for_article(
+        title=query,
+        category_slug="business",
+    )
+    return Response({"url": result.get("url", "")})

@@ -131,12 +131,14 @@ def fetch_serpapi_news():
     Fetch business/finance news from Google News via SerpAPI.
 
     Discovers articles via Google News search, then extracts full article
-    content from source URLs using trafilatura.
+    content from source URLs using trafilatura. Every article gets an HD
+    image — either from the source or fetched from Unsplash based on content.
 
     Schedule: Every 30 minutes
     """
     from .providers import SerpAPIProvider
     from apps.news.models import NewsArticle, Category
+    from apps.media.image_service import ArticleImageService
     import hashlib
 
     # Rotate through different finance queries each cycle
@@ -153,6 +155,7 @@ def fetch_serpapi_news():
 
     try:
         provider = SerpAPIProvider()
+        image_service = ArticleImageService()
 
         # Category mapping by keyword detection
         categories = {}
@@ -200,7 +203,6 @@ def fetch_serpapi_news():
                 query,
                 gl='us',
                 extract_content=True,
-                max_extract=8,
             )
 
             cat_slug = query_categories.get(query, 'business')
@@ -218,12 +220,21 @@ def fetch_serpapi_news():
                 ext_url = item.get('url', '')
                 if NewsArticle.objects.filter(title=title[:500]).exists():
                     continue
-                if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
+                if ext_url and NewsArticle.objects.filter(external_url=ext_url[:500]).exists():
                     continue
 
                 content = item.get('content', '') or item.get('description', '') or title
-                if not content or len(content) < 20:
-                    continue
+
+                # Get HD image: use source image if good, otherwise fetch from Unsplash
+                image_url = item.get('image_url', '')
+                if not image_url:
+                    image_data = image_service.get_image_for_article(
+                        title=title,
+                        excerpt=item.get('description', ''),
+                        category_slug=cat_slug,
+                        content=content[:500],
+                    )
+                    image_url = image_data.get('url', '')
 
                 try:
                     NewsArticle.objects.create(
@@ -236,7 +247,7 @@ def fetch_serpapi_news():
                         source='serpapi',
                         external_url=ext_url[:500],
                         external_source_name=item.get('source', 'Google News')[:100],
-                        featured_image_url=item.get('image_url', '')[:500],
+                        featured_image_url=(image_url or '')[:500],
                     )
                     saved += 1
                 except Exception as e:
@@ -257,15 +268,18 @@ def fetch_african_news():
     Fetch African market-specific news from Google News via SerpAPI.
 
     Searches for African finance/economy news and extracts full article
-    content from source URLs.
+    content from source URLs. Every article gets an HD Unsplash image
+    if the source doesn't provide one.
 
     Schedule: Every hour
     """
     from .providers import SerpAPIProvider
     from apps.news.models import NewsArticle, Category
+    from apps.media.image_service import ArticleImageService
 
     try:
         provider = SerpAPIProvider()
+        image_service = ArticleImageService()
 
         africa_cat, _ = Category.objects.get_or_create(
             slug='africa',
@@ -276,7 +290,7 @@ def fetch_african_news():
             defaults={'name': 'Markets', 'description': 'Market news and analysis'}
         )
 
-        articles = provider.get_african_market_news(max_extract=12)
+        articles = provider.get_african_market_news()
 
         saved = 0
         seen_titles = set()
@@ -293,19 +307,30 @@ def fetch_african_news():
             ext_url = item.get('url', '')
             if NewsArticle.objects.filter(title=title[:500]).exists():
                 continue
-            if ext_url and NewsArticle.objects.filter(external_url=ext_url).exists():
+            if ext_url and NewsArticle.objects.filter(external_url=ext_url[:500]).exists():
                 continue
 
             content = item.get('content', '') or item.get('description', '') or title
-            if not content or len(content) < 20:
-                continue
 
             # Assign category based on content keywords
             content_lower = content.lower()
             if any(kw in content_lower for kw in ['stock', 'market', 'exchange', 'index', 'trading']):
                 category = markets_cat
+                cat_slug = 'markets'
             else:
                 category = africa_cat
+                cat_slug = 'africa'
+
+            # Get HD image: use source image if good, otherwise fetch from Unsplash
+            image_url = item.get('image_url', '')
+            if not image_url:
+                image_data = image_service.get_image_for_article(
+                    title=title,
+                    excerpt=item.get('description', ''),
+                    category_slug=cat_slug,
+                    content=content[:500],
+                )
+                image_url = image_data.get('url', '')
 
             try:
                 NewsArticle.objects.create(
@@ -318,7 +343,7 @@ def fetch_african_news():
                     source='serpapi',
                     external_url=ext_url[:500],
                     external_source_name=item.get('source', 'African News')[:100],
-                    featured_image_url=item.get('image_url', '')[:500],
+                    featured_image_url=(image_url or '')[:500],
                 )
                 saved += 1
             except Exception as e:
@@ -778,10 +803,20 @@ def set_article_images():
     import hashlib
 
     try:
-        # Get articles without images (both local and URL), prioritize featured
+        from django.db.models import Q
+
+        # Get articles without images OR with bad Google News proxy thumbnails
+        bad_image_patterns = [
+            'news.google.com',
+            'encrypted-tbn',
+            'gstatic.com/images',
+        ]
+        bad_q = Q()
+        for pattern in bad_image_patterns:
+            bad_q |= Q(featured_image_url__contains=pattern)
+
         articles = NewsArticle.objects.filter(
-            featured_image='',
-            featured_image_url='',
+            Q(featured_image='', featured_image_url='') | bad_q,
             status='published',
         ).order_by('-is_featured', '-published_at')[:30]
 

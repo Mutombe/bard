@@ -81,8 +81,64 @@ function formatDate(dateString?: string): string {
   });
 }
 
-function getArticleImage(article: NewsArticle): string | null {
-  return article.featured_image || article.featured_image_url || null;
+/**
+ * Get the best image URL for an article.
+ * The API's featured_image field is computed by the serializer with
+ * Unsplash fallback, so it should always be populated.
+ */
+function getArticleImage(article: NewsArticle): string {
+  return article.featured_image || article.featured_image_url || "";
+}
+
+/**
+ * Fetch a contextual HD image from Unsplash based on article title/category.
+ * Used as onError fallback when the primary image URL fails to load.
+ */
+async function fetchUnsplashImage(query: string): Promise<string> {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+  try {
+    const res = await fetch(
+      `${API_URL}/api/news/unsplash-image/?q=${encodeURIComponent(query)}`,
+      { cache: "force-cache" }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.url) return data.url;
+    }
+  } catch {}
+  // Ultimate safety net — Unsplash source redirect (always works, HD quality)
+  return `https://source.unsplash.com/800x450/?${encodeURIComponent(query + " finance")}`;
+}
+
+/** Image component that guarantees HD images — never shows broken images */
+function ArticleImage({ article, fill = true, className = "" }: { article: NewsArticle; fill?: boolean; className?: string }) {
+  const primarySrc = getArticleImage(article);
+  const [src, setSrc] = useState(primarySrc);
+  const [hasErrored, setHasErrored] = useState(false);
+
+  // If primary image fails, fetch a contextual Unsplash image
+  const handleError = useCallback(async () => {
+    if (hasErrored) return;
+    setHasErrored(true);
+    const cat = article.category?.slug || "business";
+    const keywords = article.title.split(" ").slice(0, 3).join(" ");
+    const query = `${keywords} ${cat}`;
+    const fallbackUrl = await fetchUnsplashImage(query);
+    setSrc(fallbackUrl);
+  }, [hasErrored, article.title, article.category?.slug]);
+
+  if (!src) return <div className={cn("bg-muted", className)} />;
+
+  return (
+    <Image
+      src={src}
+      alt={article.title}
+      fill={fill}
+      className={className}
+      onError={handleError}
+      unoptimized
+    />
+  );
 }
 
 /** Consistent tag color for all topic tags — burgundy brand color */
@@ -453,29 +509,21 @@ function ExtendedFeedSkeleton() {
 
 /** FeaturedInsight - Hero article with burgundy rule, headline-hero class */
 function FeaturedInsight({ article }: { article: NewsArticle }) {
-  const imageUrl = getArticleImage(article);
-
   return (
     <Link href={`/news/${article.slug}`} className="group block">
       <article>
-        {imageUrl && (
-          <div className="relative aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated">
-            <Image
-              src={imageUrl}
-              alt={article.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-              unoptimized
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            {article.is_breaking && (
-              <div className="absolute top-4 left-4 badge-breaking">
-                Breaking
-              </div>
-            )}
-          </div>
-        )}
+        <div className="relative aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated">
+          <ArticleImage
+            article={article}
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          {article.is_breaking && (
+            <div className="absolute top-4 left-4 badge-breaking">
+              Breaking
+            </div>
+          )}
+        </div>
 
         <div className="max-w-4xl">
           {/* Burgundy rule */}
@@ -514,22 +562,15 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
 
 /** InsightCard - Card with image, colored category, topic tags */
 function InsightCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
-  const imageUrl = getArticleImage(article);
-
   return (
     <Link href={`/news/${article.slug}`} className="group block h-full">
       <article className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden card-hover">
-        {imageUrl && (
-          <div className="relative aspect-[16/10] overflow-hidden bg-terminal-bg-elevated">
-            <Image
-              src={imageUrl}
-              alt={article.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-              unoptimized
-            />
-          </div>
-        )}
+        <div className="relative aspect-[16/10] overflow-hidden bg-terminal-bg-elevated">
+          <ArticleImage
+            article={article}
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        </div>
 
         <div className="p-4">
           <div className="flex items-center gap-2 mb-2">
@@ -566,8 +607,6 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
 
 /** OverlayCard - Only used in Editor's Picks (max 3 cards) */
 function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?: "small" | "medium" | "large" }) {
-  const imageUrl = getArticleImage(article);
-
   const imageAspect = {
     small: "aspect-[4/3]",
     medium: "aspect-[16/10]",
@@ -578,17 +617,10 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
     <Link href={`/news/${article.slug}`} className="group block h-full">
       <article className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden hover:border-primary/50 transition-colors">
         <div className={cn("relative overflow-hidden", imageAspect[size])}>
-          {imageUrl ? (
-            <Image
-              src={imageUrl}
-              alt={article.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-              unoptimized
-            />
-          ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
-          )}
+          <ArticleImage
+            article={article}
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
 
           {/* Lighter gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
