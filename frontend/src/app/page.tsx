@@ -443,8 +443,6 @@ function SectionHeader({
 
 /** Text-only card — Finimize-inspired, no image, no background box */
 function TextCard({ article }: { article: NewsArticle }) {
-  const imageUrl = getArticleImage(article);
-
   return (
     <Link href={`/news/${article.slug}`} className="group block py-5 border-b border-border">
       <article className="flex gap-4">
@@ -481,17 +479,9 @@ function TextCard({ article }: { article: NewsArticle }) {
         </div>
 
         {/* Sharp-cut square thumbnail */}
-        {imageUrl && (
-          <div className="relative flex-shrink-0 w-20 h-20 md:w-[100px] md:h-[100px] overflow-hidden bg-terminal-bg-elevated self-center">
-            <Image
-              src={imageUrl}
-              alt=""
-              fill
-              className="object-cover transition-opacity duration-300 group-hover:opacity-90"
-              unoptimized
-            />
-          </div>
-        )}
+        <div className="relative flex-shrink-0 w-20 h-20 md:w-[100px] md:h-[100px] overflow-hidden bg-terminal-bg-elevated self-center">
+          <ArticleImage article={article} className="object-cover transition-opacity duration-300 group-hover:opacity-90" />
+        </div>
       </article>
     </Link>
   );
@@ -765,10 +755,8 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
   );
 }
 
-/** SidebarInsight - Rank number + category + title + time (no image) */
+/** SidebarInsight - Rank number + category + title + time + thumbnail */
 function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number }) {
-  const imageUrl = getArticleImage(article);
-
   return (
     <Link
       href={`/news/${article.slug}`}
@@ -792,17 +780,9 @@ function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number 
       </div>
 
       {/* Sharp-cut square thumbnail */}
-      {imageUrl && (
-        <div className="relative flex-shrink-0 w-[72px] h-[72px] overflow-hidden bg-terminal-bg-elevated self-center">
-          <Image
-            src={imageUrl}
-            alt=""
-            fill
-            className="object-cover transition-opacity duration-300 group-hover:opacity-90"
-            unoptimized
-          />
-        </div>
-      )}
+      <div className="relative flex-shrink-0 w-[72px] h-[72px] overflow-hidden bg-terminal-bg-elevated self-center">
+        <ArticleImage article={article} className="object-cover transition-opacity duration-300 group-hover:opacity-90" />
+      </div>
     </Link>
   );
 }
