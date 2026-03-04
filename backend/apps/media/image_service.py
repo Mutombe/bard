@@ -209,113 +209,113 @@ class ArticleImageService:
     by analyzing article content and category.
     """
 
-    # Category-specific visual search terms for Unsplash
+    # Category fallback queries — short and effective
     CATEGORY_QUERIES = {
-        "markets": "stock exchange trading floor",
-        "economy": "city skyline economic growth",
-        "banking": "modern bank building finance",
-        "technology": "technology digital innovation",
-        "commodities": "gold bars commodity trading",
-        "crypto": "cryptocurrency digital finance",
-        "real-estate": "modern building real estate",
-        "energy": "energy power plant industrial",
-        "mining": "mining mineral resources industrial",
-        "agriculture": "agriculture farming harvest",
-        "politics": "government parliament building",
-        "world": "global business international city",
-        "africa": "african city skyline modern",
-        "opinion": "business meeting discussion",
-        "analysis": "financial data analytics dashboard",
-        "research": "research laboratory data science",
-        "business": "corporate office business",
+        "markets": "stock exchange",
+        "economy": "economy",
+        "banking": "bank",
+        "technology": "technology",
+        "commodities": "commodities",
+        "crypto": "cryptocurrency",
+        "real-estate": "real estate",
+        "energy": "energy",
+        "mining": "mining",
+        "agriculture": "agriculture",
+        "politics": "parliament",
+        "world": "global business",
+        "africa": "Africa city",
+        "opinion": "discussion",
+        "analysis": "data analytics",
+        "research": "research",
+        "business": "business",
     }
 
-    # Maps abstract financial/news terms to concrete visual concepts for Unsplash
+    # Maps terms to SHORT Unsplash queries (1-2 words work best on Unsplash)
     VISUAL_CONCEPT_MAP = {
-        # Countries → landmarks / cityscapes
-        'nigeria': 'Lagos Nigeria skyline',
-        'kenya': 'Nairobi Kenya city',
-        'south africa': 'Johannesburg South Africa skyline',
-        'ethiopia': 'Addis Ababa Ethiopia modern',
-        'ghana': 'Accra Ghana city',
-        'egypt': 'Cairo Egypt modern city',
-        'morocco': 'Casablanca Morocco city',
-        'tanzania': 'Dar es Salaam Tanzania',
-        'uganda': 'Kampala Uganda city',
-        'zimbabwe': 'Harare Zimbabwe city',
-        'botswana': 'Gaborone Botswana',
-        'rwanda': 'Kigali Rwanda modern city',
-        'ivory coast': 'Abidjan Ivory Coast skyline',
-        'china': 'Shanghai China skyline',
-        'india': 'Mumbai India financial district',
-        'brazil': 'Sao Paulo Brazil skyline',
-        'russia': 'Moscow Russia city',
-        'japan': 'Tokyo Japan financial district',
-        'europe': 'European city financial district',
-        'usa': 'Wall Street New York finance',
-        'uk': 'London city financial district',
-        # Industries → visual representations
-        'oil': 'oil refinery industrial energy',
-        'gold': 'gold bars vault precious metal',
-        'copper': 'copper mining industrial',
-        'diamond': 'diamond mining luxury',
-        'platinum': 'platinum precious metal',
-        'coal': 'coal mining energy industrial',
-        'iron': 'iron ore mining industrial',
-        'lithium': 'lithium battery technology',
-        'solar': 'solar panels renewable energy',
-        'wind': 'wind farm renewable energy',
-        'gas': 'natural gas pipeline energy',
-        'electric': 'electric vehicle technology',
-        'telecom': 'telecommunications tower network',
-        'banking': 'modern bank building interior',
-        'insurance': 'insurance office corporate',
-        'real estate': 'modern architecture building',
-        'pharma': 'pharmaceutical laboratory medicine',
-        'retail': 'modern retail shopping mall',
-        'aviation': 'airplane airport aviation',
-        'shipping': 'container port shipping logistics',
-        'construction': 'construction site crane building',
-        'textile': 'textile manufacturing fashion',
-        'automobile': 'automotive car manufacturing',
-        'fintech': 'fintech digital payment mobile',
-        # Financial concepts → visual metaphors
-        'ipo': 'stock exchange bell ceremony trading',
-        'merger': 'business handshake corporate deal',
-        'acquisition': 'corporate merger business deal',
-        'inflation': 'rising prices economics charts',
-        'recession': 'economic downturn city empty',
-        'gdp': 'economic growth city development',
-        'interest rate': 'central bank monetary policy',
-        'trade': 'international trade shipping port',
-        'tariff': 'shipping containers trade port',
-        'debt': 'financial documents banking',
-        'bond': 'government bonds treasury finance',
-        'forex': 'currency exchange global finance',
-        'dividend': 'corporate profits wealth investment',
-        'earnings': 'financial results corporate office',
-        'crypto': 'cryptocurrency bitcoin digital',
-        'blockchain': 'blockchain technology digital',
-        'ai': 'artificial intelligence technology',
-        'startup': 'technology startup modern office',
-        'venture': 'venture capital startup office',
-        'investment': 'investment portfolio wealth',
-        'fund': 'investment fund management office',
-        'pension': 'retirement pension elderly',
-        'tax': 'tax documents finance calculator',
-        'regulation': 'government regulation courthouse',
-        'sanctions': 'international politics diplomacy',
-        'election': 'election politics government voting',
-        'corruption': 'justice courthouse gavel law',
-        'reform': 'government reform policy change',
-        'privatization': 'corporate takeover business',
-        'subsidy': 'government aid support',
-        'export': 'export shipping container port',
-        'import': 'import shipping dock cargo',
-        'drought': 'drought dry land agriculture',
-        'flood': 'flooding disaster water',
-        'pandemic': 'healthcare medical hospital',
-        'climate': 'climate change environment nature',
+        # Countries → simple city/country name
+        'nigeria': 'Lagos',
+        'kenya': 'Nairobi',
+        'south africa': 'Johannesburg',
+        'ethiopia': 'Addis Ababa',
+        'ghana': 'Accra',
+        'egypt': 'Cairo',
+        'morocco': 'Casablanca',
+        'tanzania': 'Dar es Salaam',
+        'uganda': 'Kampala',
+        'zimbabwe': 'Harare',
+        'botswana': 'Gaborone',
+        'rwanda': 'Kigali',
+        'ivory coast': 'Abidjan',
+        'china': 'Shanghai',
+        'india': 'Mumbai',
+        'brazil': 'Sao Paulo',
+        'russia': 'Moscow',
+        'japan': 'Tokyo',
+        'europe': 'London finance',
+        'usa': 'Wall Street',
+        'uk': 'London',
+        # Industries → 1-2 word visual
+        'oil': 'oil refinery',
+        'gold': 'gold bars',
+        'copper': 'copper mine',
+        'diamond': 'diamond',
+        'platinum': 'platinum',
+        'coal': 'coal mine',
+        'iron': 'iron ore',
+        'lithium': 'lithium battery',
+        'solar': 'solar panels',
+        'wind': 'wind turbines',
+        'gas': 'gas pipeline',
+        'electric': 'electric car',
+        'telecom': 'telecom tower',
+        'banking': 'bank building',
+        'insurance': 'insurance',
+        'real estate': 'skyscraper',
+        'pharma': 'pharmaceutical',
+        'retail': 'shopping mall',
+        'aviation': 'airplane',
+        'shipping': 'container ship',
+        'construction': 'construction crane',
+        'textile': 'textile factory',
+        'automobile': 'car factory',
+        'fintech': 'fintech',
+        # Financial concepts → simple visual
+        'ipo': 'stock exchange',
+        'merger': 'handshake deal',
+        'acquisition': 'corporate merger',
+        'inflation': 'inflation',
+        'recession': 'recession',
+        'gdp': 'economic growth',
+        'interest rate': 'central bank',
+        'trade': 'trade port',
+        'tariff': 'shipping containers',
+        'debt': 'debt finance',
+        'bond': 'treasury bonds',
+        'forex': 'currency exchange',
+        'dividend': 'dividend wealth',
+        'earnings': 'earnings report',
+        'crypto': 'cryptocurrency',
+        'blockchain': 'blockchain',
+        'ai': 'artificial intelligence',
+        'startup': 'startup office',
+        'venture': 'venture capital',
+        'investment': 'investment',
+        'fund': 'investment fund',
+        'pension': 'retirement',
+        'tax': 'tax',
+        'regulation': 'courthouse',
+        'sanctions': 'diplomacy',
+        'election': 'election voting',
+        'corruption': 'justice gavel',
+        'reform': 'reform',
+        'privatization': 'corporate',
+        'subsidy': 'government aid',
+        'export': 'export cargo',
+        'import': 'import dock',
+        'drought': 'drought',
+        'flood': 'flooding',
+        'pandemic': 'hospital',
+        'climate': 'climate change',
     }
 
     # Fallback images by category (high-quality default images) - EXPANDED for variety
@@ -592,20 +592,20 @@ class ArticleImageService:
                 if not concept_match or len(concept) > len(concept_match[0]):
                     concept_match = (concept, visual_query)
 
-        # Combine: country + industry is best, otherwise use whichever matched
+        # Combine: country + industry → "Nigerian oil" style (2 words max)
         if country_match and industry_match:
-            combined = f"{country_match[1].split()[0]} {industry_match[1]}"
-            logger.debug(f"Country+industry match for '{title[:50]}': {combined}")
+            # Use the concept key directly for natural language: "Nigerian oil"
+            combined = f"{country_match[0]} {industry_match[0]}"
+            logger.debug(f"Match: '{title[:40]}' -> '{combined}'")
             return combined
         best = country_match or industry_match or concept_match
         if best:
-            logger.debug(f"Visual concept match for '{title[:50]}': {best[1]}")
+            logger.debug(f"Match: '{title[:40]}' -> '{best[1]}'")
             return best[1]
 
-        # 2. Extract meaningful nouns and pair with category visual context
-        title_keywords = self._extract_keywords(title, max_keywords=4)
+        # 2. Extract 1-2 meaningful nouns from title (keep it SHORT)
+        title_keywords = self._extract_keywords(title, max_keywords=3)
 
-        # Words that are too generic/abstract for image search
         generic_words = {
             'market', 'markets', 'stock', 'stocks', 'share', 'shares',
             'report', 'reports', 'news', 'update', 'updates', 'latest',
@@ -618,25 +618,19 @@ class ArticleImageService:
             'says', 'finds', 'shows', 'reveals', 'launches', 'announces',
             'navigating', 'finding', 'opportunities', 'challenges',
             'trust', 'templeton', 'management', 'investment', 'investors',
+            'mid', 'cap', 'buy', 'sell', 'top', 'best', 'why', 'how',
         }
-        specific_keywords = [w for w in title_keywords if w not in generic_words]
+        specific = [w for w in title_keywords if w not in generic_words]
 
-        # Get the category visual query as context
-        category_visual = self.CATEGORY_QUERIES.get(
-            category_slug, "corporate business office modern"
-        )
-
-        if specific_keywords:
-            # Combine 1-2 specific keywords with the full category visual phrase
-            kw_part = ' '.join(specific_keywords[:2])
-            query = f"{kw_part} {category_visual}"
-            # Limit to ~5 words for best Unsplash results
-            query = ' '.join(query.split()[:5])
-            logger.debug(f"Keyword query for '{title[:50]}': {query}")
+        if specific:
+            # Just 1-2 keywords, nothing else — Unsplash works best this way
+            query = ' '.join(specific[:2])
+            logger.debug(f"Keywords: '{title[:40]}' -> '{query}'")
             return query
 
-        # 3. Fall back to category-specific visual query
-        logger.debug(f"Category fallback for '{title[:50]}': {category_visual}")
+        # 3. Category fallback — also short
+        category_visual = self.CATEGORY_QUERIES.get(category_slug, "business")
+        logger.debug(f"Category: '{title[:40]}' -> '{category_visual}'")
         return category_visual
 
     def get_category_image(self, category_slug: str) -> str:
