@@ -5,7 +5,6 @@ from rest_framework import serializers
 
 from apps.markets.models import Company
 from apps.markets.serializers import CompanyMinimalSerializer
-from apps.media.image_service import get_article_image
 from apps.users.serializers import UserSerializer
 
 from .models import Category, NewsArticle, Tag, Comment, CommentLike
@@ -14,7 +13,7 @@ from .models import Category, NewsArticle, Tag, Comment, CommentLike
 class CategorySerializer(serializers.ModelSerializer):
     """Serializer for Category model."""
 
-    article_count = serializers.SerializerMethodField()
+    article_count = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Category
@@ -30,9 +29,6 @@ class CategorySerializer(serializers.ModelSerializer):
             "article_count",
         ]
 
-    def get_article_count(self, obj):
-        return obj.articles.filter(status=NewsArticle.Status.PUBLISHED).count()
-
 
 class TagSerializer(serializers.ModelSerializer):
     """Serializer for Tag model."""
@@ -47,7 +43,8 @@ ULTIMATE_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1486406146926-c627a
 
 
 def _get_featured_image(obj, context):
-    """Return image URL — ALWAYS returns a valid URL, never null."""
+    """Return image URL — ALWAYS returns a valid URL, never null.
+    Never makes external API calls; relies on the cron job to populate images."""
     if obj.featured_image:
         request = context.get('request')
         if request:
@@ -56,19 +53,6 @@ def _get_featured_image(obj, context):
 
     if obj.featured_image_url:
         return obj.featured_image_url
-
-    try:
-        category_slug = obj.category.slug if obj.category else ""
-        image_data = get_article_image(
-            title=obj.title,
-            excerpt=obj.excerpt or "",
-            category_slug=category_slug,
-        )
-        url = image_data.get("url")
-        if url:
-            return url
-    except Exception:
-        pass
 
     return ULTIMATE_FALLBACK_IMAGE
 
@@ -128,19 +112,7 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
         return _get_featured_image(obj, self.context)
 
     def get_image_attribution(self, obj):
-        """Return image attribution for Unsplash images (list view)."""
-        if obj.featured_image or obj.featured_image_url:
-            return None
-
-        category_slug = obj.category.slug if obj.category else ""
-        image_data = get_article_image(
-            title=obj.title,
-            excerpt=obj.excerpt or "",
-            category_slug=category_slug,
-        )
-
-        if image_data.get("source") == "unsplash":
-            return {"photographer": image_data.get("photographer")}
+        """Return image attribution. No longer makes API calls."""
         return None
 
 
@@ -191,29 +163,7 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
         return _get_featured_image(obj, self.context)
 
     def get_image_attribution(self, obj):
-        """
-        Return image attribution for Unsplash images.
-
-        Only returns attribution when a dynamic Unsplash image is used.
-        """
-        # No attribution needed for uploaded or external images
-        if obj.featured_image or obj.featured_image_url:
-            return None
-
-        # Get dynamic image data (cached)
-        category_slug = obj.category.slug if obj.category else ""
-        image_data = get_article_image(
-            title=obj.title,
-            excerpt=obj.excerpt or "",
-            category_slug=category_slug,
-        )
-
-        # Only return attribution for Unsplash images
-        if image_data.get("source") == "unsplash":
-            return {
-                "html": image_data.get("attribution"),
-                "photographer": image_data.get("photographer"),
-            }
+        """Return image attribution. No longer makes API calls."""
         return None
 
 

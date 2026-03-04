@@ -69,6 +69,7 @@ export interface UseArticlesParams {
   is_premium?: boolean;
   search?: string;
   page_size?: number;
+  ordering?: string;
 }
 
 export function useArticles(params?: UseArticlesParams) {
