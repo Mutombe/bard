@@ -33,16 +33,20 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
         if self.action in ["create"]:
             return [AllowAny()]
         if self.action in ["list", "stats", "retrieve", "destroy"]:
-            # Admins can list all, regular users see their own
             return [IsAuthenticated()]
         return [IsAuthenticated()]
+
+    def get_authenticators(self):
+        """Skip JWT authentication on create — public endpoint."""
+        if self.action == "create":
+            return []
+        return super().get_authenticators()
 
     def get_queryset(self):
         user = self.request.user
         if not user.is_authenticated:
             return NewsletterSubscription.objects.none()
 
-        # Admins and editors can see all subscriptions
         if user.is_staff or (hasattr(user, 'role') and user.role in ['super_admin', 'editor']):
             queryset = NewsletterSubscription.objects.all()
         else:
@@ -50,36 +54,59 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
                 Q(user=user) | Q(email=user.email)
             )
 
-        # Filter by newsletter_type
         newsletter_type = self.request.query_params.get("newsletter_type")
         if newsletter_type:
             queryset = queryset.filter(newsletter_type=newsletter_type)
 
-        # Filter by is_active
         is_active = self.request.query_params.get("is_active")
         if is_active is not None:
             queryset = queryset.filter(is_active=is_active.lower() == "true")
 
         return queryset.order_by("-created_at")
 
-    def perform_create(self, serializer):
+    def create(self, request, *args, **kwargs):
+        """Handle subscribe — reactivate if exists, never error for duplicates."""
         import secrets
 
-        from .tasks import send_verification_email
+        email = request.data.get("email", "").strip().lower()
+        newsletter_type = request.data.get("newsletter_type", "morning_brief")
 
-        kwargs = {
-            "verification_token": secrets.token_urlsafe(32),
-            "unsubscribe_token": secrets.token_urlsafe(32),
-        }
+        if not email or "@" not in email:
+            return Response(
+                {"error": "Valid email is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        if self.request.user.is_authenticated:
-            kwargs["user"] = self.request.user
-            kwargs["email"] = self.request.user.email
+        # Check for existing subscription
+        existing = NewsletterSubscription.objects.filter(
+            email=email, newsletter_type=newsletter_type
+        ).first()
 
-        subscription = serializer.save(**kwargs)
+        if existing:
+            if not existing.is_active:
+                # Reactivate
+                existing.is_active = True
+                existing.save(update_fields=["is_active"])
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        # Send verification email asynchronously
-        send_verification_email.delay(str(subscription.id))
+        # Create new subscription
+        subscription = NewsletterSubscription.objects.create(
+            email=email,
+            newsletter_type=newsletter_type,
+            verification_token=secrets.token_urlsafe(32),
+            unsubscribe_token=secrets.token_urlsafe(32),
+        )
+
+        # Send verification email (don't let failures crash the response)
+        try:
+            from .tasks import send_verification_email
+            send_verification_email.delay(str(subscription.id))
+        except Exception:
+            pass
+
+        serializer = self.get_serializer(subscription)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=["get"], permission_classes=[IsAuthenticated])
     def stats(self, request):

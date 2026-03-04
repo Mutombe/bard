@@ -367,11 +367,13 @@ export default function ArticlePage() {
       toast.success("Subscribed! Check your email for confirmation.");
       setSubscribeEmail("");
     } catch (err: any) {
-      console.error("Subscription error:", err);
-      const errorMsg = err.response?.data?.email?.[0] ||
-                       err.response?.data?.detail ||
-                       "Failed to subscribe. Please try again.";
-      toast.error(errorMsg);
+      const msg = err.response?.data?.error || err.response?.data?.detail || "";
+      if (err.response?.status === 400 && (String(msg).includes("unique") || String(msg).includes("already"))) {
+        toast.success("You're already subscribed!");
+        setSubscribeEmail("");
+      } else {
+        toast.error("Something went wrong. Please check your email and try again.");
+      }
     } finally {
       setSubscribing(false);
     }

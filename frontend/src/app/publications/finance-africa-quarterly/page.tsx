@@ -83,13 +83,14 @@ export default function FinanceAfricaQuarterlyPage() {
       toast.success("Subscribed to Finance Africa Quarterly!");
       setEmail("");
     } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.email?.[0] ||
-        err.response?.data?.detail ||
-        err.response?.data?.error ||
-        "Failed to subscribe. Please try again.";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const msg = err.response?.data?.error || err.response?.data?.detail || "";
+      if (err.response?.status === 400 && (String(msg).includes("unique") || String(msg).includes("already"))) {
+        setShowSuccess(true);
+        toast.success("You're already subscribed!");
+      } else {
+        setError("Something went wrong. Please check your email and try again.");
+        toast.error("Something went wrong. Please check your email and try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }

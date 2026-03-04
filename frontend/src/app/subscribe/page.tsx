@@ -132,10 +132,12 @@ export default function SubscribePage() {
       setShowSuccess(true);
       toast.success(`Subscribed to ${selectedNewsletters.length} newsletter${selectedNewsletters.length > 1 ? "s" : ""}!`);
     } catch (error: any) {
-      if (error.response?.status === 400 && error.response?.data?.email) {
-        toast.error("This email is already subscribed");
+      const msg = error.response?.data?.error || error.response?.data?.detail || "";
+      if (error.response?.status === 400 && (String(msg).includes("unique") || String(msg).includes("already"))) {
+        setShowSuccess(true);
+        toast.success("You're already subscribed!");
       } else {
-        toast.error("Failed to subscribe. Please try again.");
+        toast.error("Something went wrong. Please check your email and try again.");
       }
     } finally {
       setIsSubmitting(false);
