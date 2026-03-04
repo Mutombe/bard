@@ -38,7 +38,7 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
 
     def get_authenticators(self):
         """Skip JWT authentication on create — public endpoint."""
-        if self.action == "create":
+        if getattr(self, "action", None) == "create":
             return []
         return super().get_authenticators()
 
