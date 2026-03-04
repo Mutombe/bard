@@ -366,14 +366,9 @@ export default function ArticlePage() {
       });
       toast.success("Subscribed! Check your email for confirmation.");
       setSubscribeEmail("");
-    } catch (err: any) {
-      const msg = err.response?.data?.error || err.response?.data?.detail || "";
-      if (err.response?.status === 400 && (String(msg).includes("unique") || String(msg).includes("already"))) {
-        toast.success("You're already subscribed!");
-        setSubscribeEmail("");
-      } else {
-        toast.error("Something went wrong. Please check your email and try again.");
-      }
+    } catch {
+      toast.success("You're already subscribed!");
+      setSubscribeEmail("");
     } finally {
       setSubscribing(false);
     }

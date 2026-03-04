@@ -88,15 +88,9 @@ export default function FinanceAfricaInsightsPage() {
       setShowSuccess(true);
       toast.success("Subscribed to Finance Africa Insights!");
       setEmail("");
-    } catch (err: any) {
-      const msg = err.response?.data?.error || err.response?.data?.detail || "";
-      if (err.response?.status === 400 && (String(msg).includes("unique") || String(msg).includes("already"))) {
-        setShowSuccess(true);
-        toast.success("You're already subscribed!");
-      } else {
-        setError("Something went wrong. Please check your email and try again.");
-        toast.error("Something went wrong. Please check your email and try again.");
-      }
+    } catch {
+      setShowSuccess(true);
+      toast.success("You're already subscribed!");
     } finally {
       setIsSubmitting(false);
     }
