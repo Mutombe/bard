@@ -443,37 +443,55 @@ function SectionHeader({
 
 /** Text-only card — Finimize-inspired, no image, no background box */
 function TextCard({ article }: { article: NewsArticle }) {
+  const imageUrl = getArticleImage(article);
+
   return (
     <Link href={`/news/${article.slug}`} className="group block py-5 border-b border-border">
-      <article>
-        {/* Top row: category + time + actions */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
-              {article.category?.name || "insight"}
-            </span>
-            <span className="text-muted-foreground/50 text-xs">·</span>
-            <span className="meta-line">{timeAgo(article.published_at)}</span>
+      <article className="flex gap-4">
+        {/* Text content */}
+        <div className="flex-1 min-w-0">
+          {/* Top row: category + time + actions */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
+                {article.category?.name || "insight"}
+              </span>
+              <span className="text-muted-foreground/50 text-xs">·</span>
+              <span className="meta-line">{timeAgo(article.published_at)}</span>
+            </div>
+            <ArticleActions articleId={`article-${article.slug}`} compact />
           </div>
-          <ArticleActions articleId={`article-${article.slug}`} compact />
+
+          {/* Serif title */}
+          <h3 className="font-serif text-lg font-bold leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
+            {article.title}
+          </h3>
+
+          {/* Excerpt */}
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+            {article.excerpt}
+          </p>
+
+          {/* Author + topic tags */}
+          <div className="flex items-center gap-2 meta-line">
+            <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
+            <span className="text-muted-foreground/50">·</span>
+            <TopicTags article={article} />
+          </div>
         </div>
 
-        {/* Serif title */}
-        <h3 className="font-serif text-lg font-bold leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
-          {article.title}
-        </h3>
-
-        {/* Excerpt */}
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {article.excerpt}
-        </p>
-
-        {/* Author + topic tags */}
-        <div className="flex items-center gap-2 meta-line">
-          <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
-          <span className="text-muted-foreground/50">·</span>
-          <TopicTags article={article} />
-        </div>
+        {/* Sharp-cut square thumbnail */}
+        {imageUrl && (
+          <div className="relative flex-shrink-0 w-20 h-20 md:w-[100px] md:h-[100px] overflow-hidden bg-terminal-bg-elevated self-center">
+            <Image
+              src={imageUrl}
+              alt=""
+              fill
+              className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+              unoptimized
+            />
+          </div>
+        )}
       </article>
     </Link>
   );
@@ -749,6 +767,8 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
 
 /** SidebarInsight - Rank number + category + title + time (no image) */
 function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number }) {
+  const imageUrl = getArticleImage(article);
+
   return (
     <Link
       href={`/news/${article.slug}`}
@@ -770,6 +790,19 @@ function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number 
           {timeAgo(article.published_at)}
         </span>
       </div>
+
+      {/* Sharp-cut square thumbnail */}
+      {imageUrl && (
+        <div className="relative flex-shrink-0 w-[72px] h-[72px] overflow-hidden bg-terminal-bg-elevated self-center">
+          <Image
+            src={imageUrl}
+            alt=""
+            fill
+            className="object-cover transition-opacity duration-300 group-hover:opacity-90"
+            unoptimized
+          />
+        </div>
+      )}
     </Link>
   );
 }
