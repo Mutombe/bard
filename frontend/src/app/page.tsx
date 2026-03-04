@@ -98,7 +98,7 @@ async function fetchUnsplashImage(query: string): Promise<string> {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
   try {
     const res = await fetch(
-      `${API_URL}/api/news/unsplash-image/?q=${encodeURIComponent(query)}`,
+      `${API_URL}/api/v1/news/unsplash-image/?q=${encodeURIComponent(query)}`,
       { cache: "force-cache" }
     );
     if (res.ok) {
