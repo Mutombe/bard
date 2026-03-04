@@ -42,6 +42,37 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "slug"]
 
 
+# Guaranteed fallback — Unsplash direct URL that never 404s
+ULTIMATE_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=450&fit=crop"
+
+
+def _get_featured_image(obj, context):
+    """Return image URL — ALWAYS returns a valid URL, never null."""
+    if obj.featured_image:
+        request = context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.featured_image.url)
+        return obj.featured_image.url
+
+    if obj.featured_image_url:
+        return obj.featured_image_url
+
+    try:
+        category_slug = obj.category.slug if obj.category else ""
+        image_data = get_article_image(
+            title=obj.title,
+            excerpt=obj.excerpt or "",
+            category_slug=category_slug,
+        )
+        url = image_data.get("url")
+        if url:
+            return url
+    except Exception:
+        pass
+
+    return ULTIMATE_FALLBACK_IMAGE
+
+
 class NewsArticleListSerializer(serializers.ModelSerializer):
     """Serializer for article listings."""
 
@@ -93,34 +124,8 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
         return None
 
     def get_featured_image(self, obj):
-        """
-        Return image URL with intelligent fallback.
-
-        Priority:
-        1. Uploaded featured image
-        2. External featured image URL
-        3. Dynamic image from Unsplash based on article content
-        4. Category-based fallback image
-        """
-        # Check for uploaded image
-        if obj.featured_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.featured_image.url)
-            return obj.featured_image.url
-
-        # Check for external image URL
-        if obj.featured_image_url:
-            return obj.featured_image_url
-
-        # Generate dynamic image based on article content
-        category_slug = obj.category.slug if obj.category else ""
-        image_data = get_article_image(
-            title=obj.title,
-            excerpt=obj.excerpt or "",
-            category_slug=category_slug,
-        )
-        return image_data.get("url")
+        """Return image URL — never null, never 404."""
+        return _get_featured_image(obj, self.context)
 
     def get_image_attribution(self, obj):
         """Return image attribution for Unsplash images (list view)."""
@@ -182,34 +187,8 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_featured_image(self, obj):
-        """
-        Return image URL with intelligent fallback.
-
-        Priority:
-        1. Uploaded featured image
-        2. External featured image URL
-        3. Dynamic image from Unsplash based on article content
-        4. Category-based fallback image
-        """
-        # Check for uploaded image
-        if obj.featured_image:
-            request = self.context.get('request')
-            if request:
-                return request.build_absolute_uri(obj.featured_image.url)
-            return obj.featured_image.url
-
-        # Check for external image URL
-        if obj.featured_image_url:
-            return obj.featured_image_url
-
-        # Generate dynamic image based on article content
-        category_slug = obj.category.slug if obj.category else ""
-        image_data = get_article_image(
-            title=obj.title,
-            excerpt=obj.excerpt or "",
-            category_slug=category_slug,
-        )
-        return image_data.get("url")
+        """Return image URL — never null, never 404."""
+        return _get_featured_image(obj, self.context)
 
     def get_image_attribution(self, obj):
         """

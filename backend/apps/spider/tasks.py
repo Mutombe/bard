@@ -801,12 +801,23 @@ def set_article_images():
     try:
         from django.db.models import Q
 
-        # Get articles without Unsplash HD images — replace ALL non-Unsplash images
-        articles = NewsArticle.objects.filter(
+        # Get articles that need contextual Unsplash images:
+        # 1. No image at all
+        # 2. Non-Unsplash images
+        # 3. Generic fallback Unsplash images (no ixid = not from API search)
+        from django.db.models import Q
+
+        needs_image = NewsArticle.objects.filter(
             status='published',
-        ).exclude(
-            featured_image_url__contains='images.unsplash.com',
-        ).order_by('-is_featured', '-published_at')[:50]
+        ).filter(
+            Q(featured_image_url='') |                          # No image
+            ~Q(featured_image_url__contains='images.unsplash.com') |  # Non-Unsplash
+            (
+                Q(featured_image_url__contains='images.unsplash.com') &
+                ~Q(featured_image_url__contains='ixid=')        # Generic fallback
+            )
+        ).order_by('-is_featured', '-published_at')[:45]
+        articles = needs_image
 
         if not articles.exists():
             return "No articles need images"
