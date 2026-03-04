@@ -98,12 +98,36 @@ class NewsletterSubscriptionViewSet(viewsets.ModelViewSet):
             unsubscribe_token=secrets.token_urlsafe(32),
         )
 
-        # Send verification email (don't let failures crash the response)
+        # Send verification email directly (no Celery dependency)
         try:
-            from .tasks import send_verification_email
-            send_verification_email.delay(str(subscription.id))
+            from django.conf import settings
+            from django.core.mail import send_mail
+            from django.template.loader import render_to_string
+
+            frontend_url = getattr(settings, "FRONTEND_URL", "https://bgfi.global")
+            verify_url = f"{frontend_url}/newsletter/verify?token={subscription.verification_token}"
+            unsubscribe_url = f"{frontend_url}/unsubscribe?token={subscription.unsubscribe_token}"
+
+            context = {
+                "verify_url": verify_url,
+                "unsubscribe_url": unsubscribe_url,
+                "newsletter_type_display": subscription.get_newsletter_type_display(),
+            }
+
+            html_content = render_to_string("emails/verify_email.html", context)
+            text_content = render_to_string("emails/verify_email.txt", context)
+            from_email = getattr(settings, "DEFAULT_FROM_EMAIL", "BGFI <publish@bgfi.global>")
+
+            send_mail(
+                subject="Verify Your Newsletter Subscription - BGFI",
+                message=text_content,
+                html_message=html_content,
+                from_email=from_email,
+                recipient_list=[subscription.email],
+                fail_silently=True,
+            )
         except Exception:
-            pass
+            pass  # Never crash the subscribe response
 
         serializer = self.get_serializer(subscription)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
