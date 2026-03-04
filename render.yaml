@@ -53,6 +53,10 @@ services:
         sync: false
       - key: UNSPLASH_ACCESS_KEY
         sync: false
+      - key: UNSPLASH_ACCESS_KEY_2
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY_3
+        sync: false
       # Email (Google Workspace SMTP)
       - key: EMAIL_HOST_USER
         sync: false
@@ -120,6 +124,10 @@ services:
         sync: false
       - key: UNSPLASH_ACCESS_KEY
         sync: false
+      - key: UNSPLASH_ACCESS_KEY_2
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY_3
+        sync: false
 
   # =========================
   # CRON JOB - Video Updates (every 4 hours)
@@ -173,6 +181,10 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: UNSPLASH_ACCESS_KEY
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY_2
+        sync: false
+      - key: UNSPLASH_ACCESS_KEY_3
         sync: false
 
 # Note: Database is hosted on Neon (external)
