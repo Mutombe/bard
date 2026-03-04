@@ -214,10 +214,10 @@ export function MainLayout({ children }: MainLayoutProps) {
         isScrolled && "is-scrolled"
       )}>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className={cn("flex items-center header-inner", isScrolled ? "h-14" : "h-20")}>
+          <div className={cn("flex items-center header-inner", isScrolled ? "h-14" : "h-24")}>
             {/* Logo - shrinks on scroll */}
             <Link href="/" className="flex items-center shrink-0">
-              <ThemeLogo width={360} height={90} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[50px]" : "max-h-[70px] md:max-h-[90px]")} />
+              <ThemeLogo width={400} height={100} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[55px]" : "max-h-[85px] md:max-h-[100px]")} />
             </Link>
 
             {/* Desktop Navigation — evenly spaced between logo and actions */}
@@ -360,7 +360,7 @@ export function MainLayout({ children }: MainLayoutProps) {
             {/* Brand */}
             <div className="col-span-2">
               <div className="mb-4">
-                <ThemeLogo width={300} height={75} />
+                <ThemeLogo width={340} height={85} className="max-h-[85px]" />
               </div>
               <p className="text-sm text-muted-foreground mb-2">
                 <span className="font-semibold text-foreground">African Finance Insights</span>
