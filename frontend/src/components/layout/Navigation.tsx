@@ -299,17 +299,17 @@ export function Navigation() {
   const savedCounts = useSavedCounts();
 
   // Calculate dropdown position based on header
-  useEffect(() => {
-    const updatePosition = () => {
-      if (navRef.current) {
-        const header = navRef.current.closest('header');
-        if (header) {
-          const rect = header.getBoundingClientRect();
-          setDropdownTop(rect.bottom);
-        }
+  const updatePosition = () => {
+    if (navRef.current) {
+      const header = navRef.current.closest('header');
+      if (header) {
+        const rect = header.getBoundingClientRect();
+        setDropdownTop(rect.bottom);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     updatePosition();
     window.addEventListener('scroll', updatePosition, { passive: true });
     window.addEventListener('resize', updatePosition, { passive: true });
@@ -320,11 +320,18 @@ export function Navigation() {
     };
   }, []);
 
+  // Recalculate on route change (header height may differ)
+  useEffect(() => {
+    updatePosition();
+  }, [pathname]);
+
   const handleMouseEnter = (label: string) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    // Recalculate position right before opening (header height may have changed)
+    updatePosition();
     setOpenDropdown(label);
   };
 
