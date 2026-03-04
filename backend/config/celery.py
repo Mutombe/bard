@@ -82,11 +82,12 @@ app.conf.beat_schedule = {
         "schedule": crontab(minute="*/30"),
         "options": {"queue": "scraping"},
     },
-    "fetch-polygon-news-every-30-min": {
-        "task": "apps.spider.tasks.fetch_polygon_news",
-        "schedule": crontab(minute="15,45"),
-        "options": {"queue": "scraping"},
-    },
+    # Polygon disabled — now Africa-only via SerpAPI in refresh_feed_content
+    # "fetch-polygon-news-every-30-min": {
+    #     "task": "apps.spider.tasks.fetch_polygon_news",
+    #     "schedule": crontab(minute="15,45"),
+    #     "options": {"queue": "scraping"},
+    # },
     "set-article-images-hourly": {
         "task": "apps.spider.tasks.set_article_images",
         "schedule": crontab(minute=5),

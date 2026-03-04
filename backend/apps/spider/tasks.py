@@ -144,16 +144,18 @@ def fetch_serpapi_news():
     from apps.media.image_service import ArticleImageService
     import hashlib
 
-    # Rotate through different finance queries each cycle
+    # Africa-focused economic and finance queries
     NEWS_QUERIES = [
-        'global finance stock market today',
-        'business economy news',
-        'stock market earnings report',
-        'banking finance industry news',
-        'emerging markets investment',
-        'commodity prices mining energy',
-        'technology stocks fintech',
-        'central bank monetary policy',
+        'Africa economy finance news today',
+        'South Africa economy JSE market',
+        'Nigeria economy business finance',
+        'Kenya East Africa business economy',
+        'Africa central bank monetary policy',
+        'Africa mining commodities resources',
+        'Africa infrastructure investment development',
+        'Africa fintech banking digital finance',
+        'African Development Bank economy',
+        'Africa trade AfCFTA economic growth',
     ]
 
     try:
@@ -163,7 +165,7 @@ def fetch_serpapi_news():
         # Category mapping by keyword detection
         categories = {}
         for slug, name, desc in [
-            ('business', 'Business', 'Business news'),
+            ('africa', 'Africa', 'Pan-African news'),
             ('markets', 'Markets', 'Market news and analysis'),
             ('technology', 'Technology', 'Technology news'),
             ('commodities', 'Commodities', 'Commodities and resources'),
@@ -174,7 +176,7 @@ def fetch_serpapi_news():
             )
             categories[slug] = cat
 
-        default_category = categories['business']
+        default_category = categories['africa']
 
         # Rotate: pick 2 queries per cycle
         hour_hash = int(hashlib.md5(
@@ -193,18 +195,21 @@ def fetch_serpapi_news():
 
         # Map queries to categories
         query_categories = {
-            'banking finance industry news': 'banking',
-            'commodity prices mining energy': 'commodities',
-            'technology stocks fintech': 'technology',
-            'stock market earnings report': 'markets',
-            'central bank monetary policy': 'banking',
-            'emerging markets investment': 'markets',
+            'South Africa economy JSE market': 'markets',
+            'Nigeria economy business finance': 'africa',
+            'Kenya East Africa business economy': 'africa',
+            'Africa central bank monetary policy': 'banking',
+            'Africa mining commodities resources': 'commodities',
+            'Africa infrastructure investment development': 'africa',
+            'Africa fintech banking digital finance': 'technology',
+            'African Development Bank economy': 'banking',
+            'Africa trade AfCFTA economic growth': 'markets',
         }
 
         for query in selected:
             articles = provider.search_news(
                 query,
-                gl='us',
+                gl='za',
                 extract_content=True,
             )
 
@@ -1150,16 +1155,11 @@ def refresh_feed_content():
 
     results = []
 
-    # 1. Fetch news from all sources
+    # 1. Fetch Africa-focused news from SerpAPI
     try:
-        results.append(fetch_polygon_news())
+        results.append(fetch_serpapi_news())
     except Exception as e:
-        results.append(f"Polygon failed: {e}")
-
-    try:
-        results.append(fetch_newsapi_headlines())
-    except Exception as e:
-        results.append(f"NewsAPI failed: {e}")
+        results.append(f"SerpAPI failed: {e}")
 
     try:
         results.append(fetch_african_news())
