@@ -22,7 +22,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
-import apiClient from "@/services/api/client";
+import apiClient, { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 import {
   useArticles,
@@ -947,7 +947,7 @@ function NewsletterSection() {
 
     setLoading(true);
     try {
-      await apiClient.post("/engagement/newsletters/", {
+      await publicClient.post("/engagement/newsletters/", {
         email,
         newsletter_type: "morning_brief",
       });

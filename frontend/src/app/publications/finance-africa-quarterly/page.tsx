@@ -14,7 +14,7 @@ import {
   Landmark,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 
 // Deep Indigo accent: #2D3A8C light, #6272C1 dark
@@ -75,7 +75,7 @@ export default function FinanceAfricaQuarterlyPage() {
     setError("");
 
     try {
-      await apiClient.post("/engagement/newsletters/", {
+      await publicClient.post("/engagement/newsletters/", {
         email,
         newsletter_type: "finance_africa_quarterly",
       });

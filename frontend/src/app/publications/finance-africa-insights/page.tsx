@@ -14,7 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 
 // Warm Amber accent
@@ -81,7 +81,7 @@ export default function FinanceAfricaInsightsPage() {
     setError("");
 
     try {
-      await apiClient.post("/engagement/newsletters/", {
+      await publicClient.post("/engagement/newsletters/", {
         email,
         newsletter_type: "finance_africa_insights",
       });

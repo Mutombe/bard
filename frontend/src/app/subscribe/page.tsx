@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 
 const newsletters = [
@@ -123,7 +123,7 @@ export default function SubscribePage() {
       // Subscribe to each selected newsletter
       await Promise.all(
         selectedNewsletters.map((type) =>
-          apiClient.post("/engagement/newsletters/", {
+          publicClient.post("/engagement/newsletters/", {
             email,
             newsletter_type: type,
           })
