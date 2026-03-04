@@ -453,23 +453,30 @@ class ArticleImageService:
             "photographer": None,
         }
 
-        # Try Unsplash first - pass article_id for variety
+        # Try Unsplash — with fallback to category query if first search fails
         if use_unsplash and self.unsplash.is_configured:
-            unsplash_result = self.unsplash.search_photo(
-                search_query,
-                article_id=article_id,
-                per_page=10  # Get more results for variety
-            )
-            if unsplash_result and unsplash_result.get("url"):
-                result = {
-                    "url": unsplash_result["url"],
-                    "attribution": unsplash_result["attribution"],
-                    "source": "unsplash",
-                    "photographer": unsplash_result["photographer"],
-                    "alt": unsplash_result.get("alt_description", title),
-                }
-                cache.set(cache_key, result, IMAGE_CACHE_DURATION)
-                return result
+            queries_to_try = [search_query]
+            # Add category fallback query if the primary query is keyword-based
+            cat_query = self.CATEGORY_QUERIES.get(category_slug, "")
+            if cat_query and cat_query != search_query:
+                queries_to_try.append(cat_query)
+
+            for query in queries_to_try:
+                unsplash_result = self.unsplash.search_photo(
+                    query,
+                    article_id=article_id,
+                    per_page=10,
+                )
+                if unsplash_result and unsplash_result.get("url"):
+                    result = {
+                        "url": unsplash_result["url"],
+                        "attribution": unsplash_result["attribution"],
+                        "source": "unsplash",
+                        "photographer": unsplash_result["photographer"],
+                        "alt": unsplash_result.get("alt_description", title),
+                    }
+                    cache.set(cache_key, result, IMAGE_CACHE_DURATION)
+                    return result
 
         # Fall back to category default - RANDOMIZED selection using article_id
         fallback_list = self.FALLBACK_IMAGES.get(
@@ -565,10 +572,10 @@ class ArticleImageService:
             logger.debug(f"Visual concept match for '{title[:50]}': {best[1]}")
             return best[1]
 
-        # 2. Extract the most meaningful noun from the title
+        # 2. Extract meaningful nouns and pair with category visual context
         title_keywords = self._extract_keywords(title, max_keywords=4)
 
-        # Filter out generic financial words that don't produce good images
+        # Words that are too generic/abstract for image search
         generic_words = {
             'market', 'markets', 'stock', 'stocks', 'share', 'shares',
             'report', 'reports', 'news', 'update', 'updates', 'latest',
@@ -577,24 +584,30 @@ class ArticleImageService:
             'economy', 'economic', 'financial', 'sector', 'industry',
             'company', 'companies', 'firm', 'firms', 'group', 'fund',
             'billion', 'million', 'percent', 'year', 'quarter', 'annual',
+            'amid', 'despite', 'public', 'first', 'next', 'today', 'all',
+            'says', 'finds', 'shows', 'reveals', 'launches', 'announces',
+            'navigating', 'finding', 'opportunities', 'challenges',
+            'trust', 'templeton', 'management', 'investment', 'investors',
         }
         specific_keywords = [w for w in title_keywords if w not in generic_words]
 
+        # Get the category visual query as context
+        category_visual = self.CATEGORY_QUERIES.get(
+            category_slug, "corporate business office modern"
+        )
+
         if specific_keywords:
-            # Use specific keywords + category context
-            category_visual = self.CATEGORY_QUERIES.get(category_slug, '')
-            context_word = category_visual.split()[0] if category_visual else 'business'
-            query = f"{' '.join(specific_keywords[:2])} {context_word}"
+            # Combine 1-2 specific keywords with the full category visual phrase
+            kw_part = ' '.join(specific_keywords[:2])
+            query = f"{kw_part} {category_visual}"
+            # Limit to ~5 words for best Unsplash results
+            query = ' '.join(query.split()[:5])
             logger.debug(f"Keyword query for '{title[:50]}': {query}")
             return query
 
         # 3. Fall back to category-specific visual query
-        category_query = self.CATEGORY_QUERIES.get(
-            category_slug,
-            "corporate business office modern"
-        )
-        logger.debug(f"Category fallback for '{title[:50]}': {category_query}")
-        return category_query
+        logger.debug(f"Category fallback for '{title[:50]}': {category_visual}")
+        return category_visual
 
     def get_category_image(self, category_slug: str) -> str:
         """Get a default image for a category."""
