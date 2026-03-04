@@ -18,6 +18,8 @@ import {
   FileText,
   MapPin,
   Tag,
+  Heart,
+  Bookmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -53,6 +55,70 @@ interface NewsArticle {
   is_breaking?: boolean;
   is_premium?: boolean;
   read_time_minutes?: number;
+}
+
+// =====================
+// LIKES & BOOKMARKS
+// =====================
+
+const LIKES_KEY = "bardiq_likes";
+const BOOKMARKS_KEY = "bardiq_bookmarks";
+
+function getLikes(): string[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(LIKES_KEY) || "[]"); } catch { return []; }
+}
+
+function getBookmarks(): string[] {
+  if (typeof window === "undefined") return [];
+  try { return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "[]"); } catch { return []; }
+}
+
+function toggleLike(id: string): boolean {
+  const likes = getLikes();
+  const i = likes.indexOf(id);
+  if (i > -1) { likes.splice(i, 1); } else { likes.push(id); }
+  localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
+  return i === -1;
+}
+
+function toggleBookmark(id: string): boolean {
+  const bookmarks = getBookmarks();
+  const i = bookmarks.indexOf(id);
+  if (i > -1) { bookmarks.splice(i, 1); } else { bookmarks.push(id); }
+  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
+  return i === -1;
+}
+
+function ArticleActions({ articleId, compact = false }: { articleId: string; compact?: boolean }) {
+  const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setLiked(getLikes().includes(articleId));
+    setBookmarked(getBookmarks().includes(articleId));
+  }, [articleId]);
+
+  if (!mounted) return null;
+
+  return (
+    <div className={cn("flex items-center", compact ? "gap-0.5" : "gap-1")} onClick={(e) => e.preventDefault()}>
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); const s = toggleLike(articleId); setLiked(s); toast.success(s ? "Added to liked articles" : "Removed from liked articles"); }}
+        className={cn("p-1.5 rounded-full transition-colors", liked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10")}
+      >
+        <Heart className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", liked && "fill-current")} />
+      </button>
+      <button
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); const s = toggleBookmark(articleId); setBookmarked(s); toast.success(s ? "Saved to reading list" : "Removed from reading list"); }}
+        className={cn("p-1.5 rounded-full transition-colors", bookmarked ? "text-brand-orange bg-brand-orange/10" : "text-muted-foreground hover:text-brand-orange hover:bg-brand-orange/10")}
+      >
+        <Bookmark className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", bookmarked && "fill-current")} />
+      </button>
+    </div>
+  );
 }
 
 // =====================
@@ -380,13 +446,16 @@ function TextCard({ article }: { article: NewsArticle }) {
   return (
     <Link href={`/news/${article.slug}`} className="group block py-5 border-b border-border">
       <article>
-        {/* Top row: category + time */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
-            {article.category?.name || "insight"}
-          </span>
-          <span className="text-muted-foreground/50 text-xs">·</span>
-          <span className="meta-line">{timeAgo(article.published_at)}</span>
+        {/* Top row: category + time + actions */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
+              {article.category?.name || "insight"}
+            </span>
+            <span className="text-muted-foreground/50 text-xs">·</span>
+            <span className="meta-line">{timeAgo(article.published_at)}</span>
+          </div>
+          <ArticleActions articleId={`article-${article.slug}`} compact />
         </div>
 
         {/* Serif title */}
@@ -573,10 +642,11 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
         </div>
 
         <div className="p-4">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center justify-between mb-2">
             <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
               {article.category?.name || "insight"}
             </span>
+            <ArticleActions articleId={`article-${article.slug}`} compact />
           </div>
 
           <h3 className={cn(
@@ -668,6 +738,7 @@ function OverlayCard({ article, size = "medium" }: { article: NewsArticle; size?
                   </span>
                 </>
               )}
+              <ArticleActions articleId={`article-${article.slug}`} compact />
             </div>
           </div>
         </div>
