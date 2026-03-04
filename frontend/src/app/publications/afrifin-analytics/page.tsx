@@ -14,7 +14,7 @@ import {
   Zap,
 } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 
 // Teal/Cyan accent
@@ -82,7 +82,7 @@ export default function AfriFinAnalyticsPage() {
     setError("");
 
     try {
-      await apiClient.post("/engagement/newsletters/", {
+      await publicClient.post("/engagement/newsletters/", {
         email,
         newsletter_type: "afrifin_analytics",
       });

@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, Mail } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 
 type VerificationStatus = "loading" | "success" | "already_verified" | "error";
 
@@ -25,7 +25,7 @@ export default function NewsletterVerifyPage() {
 
     const verifySubscription = async () => {
       try {
-        const response = await apiClient.post("/engagement/subscriptions/verify/", { token });
+        const response = await publicClient.post("/engagement/newsletters/verify/", { token });
         if (response.data.message === "Email already verified") {
           setStatus("already_verified");
         } else {

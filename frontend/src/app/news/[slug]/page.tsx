@@ -29,7 +29,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { CommentSection } from "@/components/news";
-import apiClient from "@/services/api/client";
+import apiClient, { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 import { addKeywordLinks } from "@/lib/keyword-linker";
 
@@ -360,7 +360,7 @@ export default function ArticlePage() {
 
     setSubscribing(true);
     try {
-      await apiClient.post("/engagement/newsletters/", {
+      await publicClient.post("/engagement/newsletters/", {
         email: subscribeEmail.trim(),
         newsletter_type: "morning_brief",
       });

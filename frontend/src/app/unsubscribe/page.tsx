@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, MailX } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 
 type UnsubscribeStatus = "loading" | "success" | "error";
 
@@ -24,7 +24,7 @@ export default function UnsubscribePage() {
 
     const unsubscribe = async () => {
       try {
-        await apiClient.post("/engagement/subscriptions/unsubscribe/", { token });
+        await publicClient.post("/engagement/newsletters/unsubscribe/", { token });
         setStatus("success");
       } catch (err: any) {
         setStatus("error");
