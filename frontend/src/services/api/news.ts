@@ -86,6 +86,7 @@ export const newsService = {
     cursor?: string;
     search?: string;
     page_size?: number;
+    ordering?: string;
   }): Promise<CursorPaginatedResponse<NewsArticle>> {
     const response = await publicClient.get<CursorPaginatedResponse<NewsArticle>>(
       "/news/articles/",

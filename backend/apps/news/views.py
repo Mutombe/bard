@@ -104,6 +104,15 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     lookup_field = "slug"
 
+    def get_queryset(self):
+        from django.db.models import Count, Q
+        return super().get_queryset().annotate(
+            article_count=Count(
+                'articles',
+                filter=Q(articles__status=NewsArticle.Status.PUBLISHED),
+            )
+        )
+
     @cache_reference_data
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -182,6 +191,10 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
             return [IsAuthenticated(), IsEditorOrReadOnly()]
         return [AllowAny()]
 
+    @cache_news_list
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def retrieve(self, request, *args, **kwargs):
         """Get article and increment view count."""
         instance = self.get_object()
@@ -230,6 +243,7 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"], url_path=r"by-company/(?P<company_id>[^/.]+)")
+    @cache_response(ttl=CacheTTL.SHORT, key_prefix="news_by_company")
     def by_company(self, request, company_id=None):
         """Get articles related to a specific company."""
         articles = self.get_queryset().filter(

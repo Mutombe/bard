@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -16,39 +16,12 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
-import apiClient, { publicClient } from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
-import { useCategories } from "@/hooks";
+import { useCategories, useArticles } from "@/hooks";
 
-// Types
-interface NewsArticle {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content?: string;
-  featured_image?: string;
-  category?: {
-    id: number;
-    name: string;
-    slug: string;
-  };
-  author?: {
-    id: number;
-    full_name: string;
-  };
-  published_at?: string;
-  is_featured?: boolean;
-  is_breaking?: boolean;
-  is_premium?: boolean;
-  view_count?: number;
-}
-
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-}
+// Types - use global NewsArticle from SWR hook, keep local alias for backward compat
+import type { NewsArticle, Category } from "@/types";
 
 // LocalStorage utilities
 const LIKES_KEY = "bardiq_likes";
@@ -382,78 +355,35 @@ function NewsletterSignup() {
 }
 
 export default function NewsPage() {
-  const [loading, setLoading] = useState(true);
-  const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [trendingArticles, setTrendingArticles] = useState<NewsArticle[]>([]);
 
   // Use SWR hook for categories (cached for 1 hour)
   const { data: categoriesData } = useCategories();
   const categories = categoriesData || [];
 
-  // Fetch articles when category or page changes
-  useEffect(() => {
-    const fetchArticles = async () => {
-      setLoading(true);
-      try {
-        const params: Record<string, any> = {
-          page: currentPage,
-          page_size: 12,
-        };
+  // Build SWR params
+  const articleParams = useMemo(() => {
+    const params: Record<string, any> = { page_size: 12 };
+    if (selectedCategory !== "all") params.category = selectedCategory;
+    if (searchQuery) params.search = searchQuery;
+    return params;
+  }, [selectedCategory, searchQuery]);
 
-        if (selectedCategory !== "all") {
-          params.category = selectedCategory;
-        }
+  // Fetch articles via SWR (cached, auto-refresh, instant re-visit)
+  const { data: articlesData, isLoading: loading } = useArticles(articleParams);
+  const articles = articlesData?.results || [];
 
-        if (searchQuery) {
-          params.search = searchQuery;
-        }
-
-        const response = await apiClient.get("/news/articles/", { params });
-        const data = response.data;
-
-        setArticles(data.results || data || []);
-        if (data.count) {
-          setTotalPages(Math.ceil(data.count / 12));
-        }
-      } catch (error) {
-        console.error("Failed to fetch articles:", error);
-        setArticles([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticles();
-  }, [selectedCategory, currentPage, searchQuery]);
-
-  // Fetch trending articles (most viewed)
-  useEffect(() => {
-    const fetchTrending = async () => {
-      try {
-        const response = await apiClient.get("/news/articles/", {
-          params: { ordering: "-view_count", page_size: 5 }
-        });
-        const data = response.data.results || response.data || [];
-        setTrendingArticles(data);
-      } catch (error) {
-        console.error("Failed to fetch trending:", error);
-      }
-    };
-    fetchTrending();
-  }, []);
+  // Fetch trending articles via SWR
+  const { data: trendingData } = useArticles({ ordering: "-view_count", page_size: 5 });
+  const trendingArticles = trendingData?.results || [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentPage(1);
   };
 
   const handleCategoryChange = (categorySlug: string) => {
     setSelectedCategory(categorySlug);
-    setCurrentPage(1);
   };
 
   const featuredArticle = articles[0];
@@ -538,26 +468,15 @@ export default function NewsPage() {
                   ))}
                 </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 pt-4">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 border border-terminal-border rounded-md text-sm font-medium hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50"
+                {/* Load more via cursor pagination */}
+                {articlesData?.next && (
+                  <div className="flex items-center justify-center pt-4">
+                    <Link
+                      href={`/news?category=${selectedCategory}`}
+                      className="px-6 py-2 border border-terminal-border rounded-md text-sm font-medium hover:bg-terminal-bg-elevated transition-colors"
                     >
-                      Previous
-                    </button>
-                    <span className="text-sm text-muted-foreground">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 border border-terminal-border rounded-md text-sm font-medium hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50"
-                    >
-                      Next
-                    </button>
+                      View more articles
+                    </Link>
                   </div>
                 )}
               </>

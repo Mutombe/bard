@@ -29,9 +29,10 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { CommentSection } from "@/components/news";
-import apiClient, { publicClient } from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
 import { addKeywordLinks } from "@/lib/keyword-linker";
+import { useArticle, useArticles } from "@/hooks";
 
 // LocalStorage utilities
 const LIKES_KEY = "bardiq_likes";
@@ -311,10 +312,17 @@ export default function ArticlePage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [article, setArticle] = useState<Article | null>(null);
-  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // SWR hooks for article and related articles
+  const { data: articleData, error: articleError, isLoading: loading } = useArticle(slug || null);
+  const article = articleData as unknown as Article | undefined;
+  const categorySlug = article?.category?.slug;
+  const { data: relatedData } = useArticles(
+    categorySlug ? { category: categorySlug, page_size: 5 } : undefined
+  );
+  const relatedArticles = (relatedData?.results || [])
+    .filter((a: any) => a.slug !== slug)
+    .slice(0, 4) as RelatedArticle[];
+
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -323,6 +331,7 @@ export default function ArticlePage() {
   const [readingProgress, setReadingProgress] = useState(0);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
   const articleRef = useRef<HTMLElement>(null);
+  const error = articleError ? (articleError?.response?.status === 404 ? "Article not found" : "Failed to load article") : null;
 
   // Reading progress tracking
   const handleScroll = useCallback(() => {
@@ -351,6 +360,14 @@ export default function ArticlePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
+  // Update likes/bookmarks when article loads
+  useEffect(() => {
+    if (mounted && slug) {
+      setLiked(getLikes().includes(`article-${slug}`));
+      setBookmarked(getBookmarks().includes(`article-${slug}`));
+    }
+  }, [mounted, slug]);
+
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subscribeEmail.trim()) {
@@ -373,56 +390,6 @@ export default function ArticlePage() {
       setSubscribing(false);
     }
   };
-
-  useEffect(() => {
-    if (!slug) return;
-
-    const fetchArticle = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        // Fetch article details
-        const response = await apiClient.get(`/news/articles/${slug}/`);
-        setArticle(response.data);
-
-        // Update likes/bookmarks state
-        if (mounted) {
-          setLiked(getLikes().includes(`article-${slug}`));
-          setBookmarked(getBookmarks().includes(`article-${slug}`));
-        }
-
-        // Fetch related articles (same category)
-        try {
-          const categorySlug = response.data.category?.slug;
-          if (categorySlug) {
-            const relatedResponse = await apiClient.get(
-              `/news/articles/?category=${categorySlug}&limit=4`
-            );
-            // Filter out current article
-            const related = (relatedResponse.data.results || [])
-              .filter((a: any) => a.slug !== slug)
-              .slice(0, 4);
-            setRelatedArticles(related);
-          }
-        } catch (e) {
-          // Related articles are not critical
-          console.warn("Failed to fetch related articles:", e);
-        }
-      } catch (err: any) {
-        console.error("Failed to fetch article:", err);
-        if (err.response?.status === 404) {
-          setError("Article not found");
-        } else {
-          setError("Failed to load article");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticle();
-  }, [slug, mounted]);
 
   const handleLike = () => {
     const newState = toggleLike(`article-${slug}`);
