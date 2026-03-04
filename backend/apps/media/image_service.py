@@ -25,30 +25,50 @@ IMAGE_CACHE_DURATION = 7 * 24 * 60 * 60
 
 class UnsplashService:
     """
-    Service for fetching images from Unsplash API.
+    Service for fetching images from Unsplash API with automatic key rotation.
 
-    Unsplash provides free high-quality images with proper attribution.
-    Rate limit: 50 requests/hour for demo, 5000/hour for production.
+    Supports multiple API keys — when one is rate-limited (403), automatically
+    rotates to the next key. This doubles (or more) effective rate limits.
     """
 
     BASE_URL = "https://api.unsplash.com"
 
     def __init__(self):
-        self._access_key = None
+        self._keys = None
+        self._current_key_idx = 0
 
     @property
-    def access_key(self) -> str:
-        """Lazy load API key to ensure settings are fully loaded."""
-        if self._access_key is None:
-            self._access_key = getattr(settings, "UNSPLASH_ACCESS_KEY", "")
-            if not self._access_key:
-                logger.warning("Unsplash API key not configured")
-        return self._access_key
+    def api_keys(self) -> list[str]:
+        """Lazy load all configured API keys."""
+        if self._keys is None:
+            self._keys = []
+            for attr in ("UNSPLASH_ACCESS_KEY", "UNSPLASH_ACCESS_KEY_2", "UNSPLASH_ACCESS_KEY_3"):
+                key = getattr(settings, attr, "")
+                if key:
+                    self._keys.append(key)
+            if not self._keys:
+                logger.warning("No Unsplash API keys configured")
+        return self._keys
 
     @property
     def is_configured(self) -> bool:
-        """Check if Unsplash is properly configured."""
-        return bool(self.access_key)
+        """Check if at least one Unsplash key is configured."""
+        return len(self.api_keys) > 0
+
+    def _get_current_key(self) -> str:
+        """Get the current active API key."""
+        if not self.api_keys:
+            return ""
+        return self.api_keys[self._current_key_idx % len(self.api_keys)]
+
+    def _rotate_key(self) -> bool:
+        """Rotate to the next API key. Returns True if a new key is available."""
+        if len(self.api_keys) <= 1:
+            return False
+        old_idx = self._current_key_idx
+        self._current_key_idx = (self._current_key_idx + 1) % len(self.api_keys)
+        logger.info(f"Rotated Unsplash API key: {old_idx} -> {self._current_key_idx}")
+        return True
 
     def _get_cache_key(self, query: str, orientation: str = "landscape") -> str:
         """Generate a deterministic cache key for a query."""
@@ -66,7 +86,7 @@ class UnsplashService:
         article_id: str = None,
     ) -> Optional[dict]:
         """
-        Search for photos matching the query.
+        Search for photos matching the query. Auto-rotates API keys on rate limit.
 
         Args:
             query: Search terms (e.g., "stock market trading")
@@ -82,7 +102,7 @@ class UnsplashService:
         if not self.is_configured:
             return None
 
-        # Check cache first - use article_id for unique caching
+        # Check cache first
         cache_key = self._get_cache_key(f"{query}:{article_id or ''}", orientation)
         if use_cache and article_id:
             cached = cache.get(cache_key)
@@ -90,85 +110,95 @@ class UnsplashService:
                 logger.debug(f"Unsplash cache hit for: {query}")
                 return cached
 
-        try:
-            response = requests.get(
-                f"{self.BASE_URL}/search/photos",
-                params={
-                    "query": query,
-                    "orientation": orientation,
-                    "per_page": per_page,
-                    "page": page,
-                    "content_filter": "high",  # Safe for all audiences
-                },
-                headers={
-                    "Authorization": f"Client-ID {self.access_key}",
-                    "Accept-Version": "v1",
-                },
-                timeout=10,
-            )
-            response.raise_for_status()
-            data = response.json()
+        # Try each API key (rotate on 403)
+        attempts = len(self.api_keys)
+        for attempt in range(attempts):
+            current_key = self._get_current_key()
+            try:
+                response = requests.get(
+                    f"{self.BASE_URL}/search/photos",
+                    params={
+                        "query": query,
+                        "orientation": orientation,
+                        "per_page": per_page,
+                        "page": page,
+                        "content_filter": "high",
+                    },
+                    headers={
+                        "Authorization": f"Client-ID {current_key}",
+                        "Accept-Version": "v1",
+                    },
+                    timeout=10,
+                )
 
-            results = data.get("results", [])
-            if not results:
-                logger.info(f"No Unsplash results for: {query}")
+                # Rate limited — rotate to next key and retry
+                if response.status_code == 403:
+                    logger.warning(f"Unsplash key {self._current_key_idx} rate limited, rotating...")
+                    if self._rotate_key():
+                        continue  # retry with next key
+                    else:
+                        logger.error("All Unsplash API keys rate limited")
+                        return None
+
+                response.raise_for_status()
+                data = response.json()
+
+                results = data.get("results", [])
+                if not results:
+                    logger.info(f"No Unsplash results for: {query}")
+                    return None
+
+                # Pick image — deterministic if article_id provided
+                if article_id:
+                    seed = int(hashlib.md5(article_id.encode()).hexdigest()[:8], 16)
+                    random.seed(seed)
+                photo = random.choice(results)
+                if article_id:
+                    random.seed()
+
+                result = {
+                    "id": photo["id"],
+                    "url_raw": photo["urls"]["raw"],
+                    "url_full": photo["urls"]["full"],
+                    "url_regular": photo["urls"]["regular"],
+                    "url_small": photo["urls"]["small"],
+                    "url_thumb": photo["urls"]["thumb"],
+                    "url": f"{photo['urls']['raw']}&w=800&h=450&fit=crop&auto=format",
+                    "alt_description": photo.get("alt_description", ""),
+                    "photographer": photo["user"]["name"],
+                    "photographer_url": photo["user"]["links"]["html"],
+                    "unsplash_url": photo["links"]["html"],
+                    "attribution": (
+                        f'Photo by <a href="{photo["user"]["links"]["html"]}?utm_source=bardiq&utm_medium=referral">'
+                        f'{photo["user"]["name"]}</a> on '
+                        f'<a href="https://unsplash.com/?utm_source=bardiq&utm_medium=referral">Unsplash</a>'
+                    ),
+                    "all_results": [
+                        {
+                            "id": p["id"],
+                            "url": f"{p['urls']['raw']}&w=800&h=450&fit=crop&auto=format",
+                            "photographer": p["user"]["name"],
+                            "alt_description": p.get("alt_description", ""),
+                        }
+                        for p in results
+                    ],
+                }
+
+                if use_cache and article_id:
+                    cache.set(cache_key, result, IMAGE_CACHE_DURATION)
+
+                return result
+
+            except requests.exceptions.RequestException as e:
+                if "403" in str(e) and self._rotate_key():
+                    continue
+                logger.error(f"Unsplash API request failed: {e}")
+                return None
+            except (KeyError, IndexError) as e:
+                logger.error(f"Unsplash response parsing failed: {e}")
                 return None
 
-            # Pick a RANDOM image from results to ensure variety
-            # Use article_id as seed for deterministic selection if provided
-            if article_id:
-                # Deterministic: same article always gets same image
-                seed = int(hashlib.md5(article_id.encode()).hexdigest()[:8], 16)
-                random.seed(seed)
-            photo = random.choice(results)
-            # Reset random state
-            if article_id:
-                random.seed()
-
-            result = {
-                "id": photo["id"],
-                "url_raw": photo["urls"]["raw"],
-                "url_full": photo["urls"]["full"],
-                "url_regular": photo["urls"]["regular"],  # 1080px width
-                "url_small": photo["urls"]["small"],  # 400px width
-                "url_thumb": photo["urls"]["thumb"],  # 200px width
-                # Recommended URL for article previews (optimized)
-                "url": f"{photo['urls']['raw']}&w=800&h=450&fit=crop&auto=format",
-                "alt_description": photo.get("alt_description", ""),
-                "photographer": photo["user"]["name"],
-                "photographer_url": photo["user"]["links"]["html"],
-                "unsplash_url": photo["links"]["html"],
-                # Attribution HTML for compliance
-                "attribution": (
-                    f'Photo by <a href="{photo["user"]["links"]["html"]}?utm_source=bardiq&utm_medium=referral">'
-                    f'{photo["user"]["name"]}</a> on '
-                    f'<a href="https://unsplash.com/?utm_source=bardiq&utm_medium=referral">Unsplash</a>'
-                ),
-                # Include all results for batch processing
-                "all_results": [
-                    {
-                        "id": p["id"],
-                        "url": f"{p['urls']['raw']}&w=800&h=450&fit=crop&auto=format",
-                        "photographer": p["user"]["name"],
-                        "alt_description": p.get("alt_description", ""),
-                    }
-                    for p in results
-                ],
-            }
-
-            # Cache successful result with article-specific key
-            if use_cache and article_id:
-                cache.set(cache_key, result, IMAGE_CACHE_DURATION)
-                logger.debug(f"Unsplash result cached for: {query} (article: {article_id})")
-
-            return result
-
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Unsplash API request failed: {e}")
-            return None
-        except (KeyError, IndexError) as e:
-            logger.error(f"Unsplash response parsing failed: {e}")
-            return None
+        return None
 
 
 class ArticleImageService:
