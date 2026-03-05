@@ -602,7 +602,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
           )}
         </div>
 
-        <div className="max-w-4xl">
+        <div>
           {/* Burgundy rule */}
           <div className="w-8 h-0.5 bg-primary mb-4" />
 
