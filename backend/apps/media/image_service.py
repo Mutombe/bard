@@ -230,92 +230,217 @@ class ArticleImageService:
         "business": "business",
     }
 
-    # Maps terms to SHORT Unsplash queries (1-2 words work best on Unsplash)
-    VISUAL_CONCEPT_MAP = {
-        # Countries → simple city/country name
-        'nigeria': 'Lagos',
-        'kenya': 'Nairobi',
-        'south africa': 'Johannesburg',
-        'ethiopia': 'Addis Ababa',
-        'ghana': 'Accra',
-        'egypt': 'Cairo',
-        'morocco': 'Casablanca',
-        'tanzania': 'Dar es Salaam',
-        'uganda': 'Kampala',
-        'zimbabwe': 'Harare',
-        'botswana': 'Gaborone',
-        'rwanda': 'Kigali',
-        'ivory coast': 'Abidjan',
-        'china': 'Shanghai',
-        'india': 'Mumbai',
-        'brazil': 'Sao Paulo',
-        'russia': 'Moscow',
-        'japan': 'Tokyo',
-        'europe': 'London finance',
-        'usa': 'Wall Street',
-        'uk': 'London',
-        # Industries → 1-2 word visual
-        'oil': 'oil refinery',
-        'gold': 'gold bars',
-        'copper': 'copper mine',
-        'diamond': 'diamond',
-        'platinum': 'platinum',
-        'coal': 'coal mine',
-        'iron': 'iron ore',
-        'lithium': 'lithium battery',
-        'solar': 'solar panels',
-        'wind': 'wind turbines',
-        'gas': 'gas pipeline',
-        'electric': 'electric car',
-        'telecom': 'telecom tower',
-        'banking': 'bank building',
-        'insurance': 'insurance',
-        'real estate': 'skyscraper',
-        'pharma': 'pharmaceutical',
-        'retail': 'shopping mall',
-        'aviation': 'airplane',
-        'shipping': 'container ship',
-        'construction': 'construction crane',
-        'textile': 'textile factory',
-        'automobile': 'car factory',
-        'fintech': 'fintech',
-        # Financial concepts → simple visual
-        'ipo': 'stock exchange',
-        'merger': 'handshake deal',
-        'acquisition': 'corporate merger',
-        'inflation': 'inflation',
-        'recession': 'recession',
-        'gdp': 'economic growth',
-        'interest rate': 'central bank',
-        'trade': 'trade port',
-        'tariff': 'shipping containers',
-        'debt': 'debt finance',
-        'bond': 'treasury bonds',
-        'forex': 'currency exchange',
-        'dividend': 'dividend wealth',
-        'earnings': 'earnings report',
-        'crypto': 'cryptocurrency',
-        'blockchain': 'blockchain',
-        'ai': 'artificial intelligence',
-        'startup': 'startup office',
-        'venture': 'venture capital',
-        'investment': 'investment',
-        'fund': 'investment fund',
-        'pension': 'retirement',
-        'tax': 'tax',
-        'regulation': 'courthouse',
-        'sanctions': 'diplomacy',
-        'election': 'election voting',
-        'corruption': 'justice gavel',
-        'reform': 'reform',
-        'privatization': 'corporate',
-        'subsidy': 'government aid',
-        'export': 'export cargo',
-        'import': 'import dock',
-        'drought': 'drought',
-        'flood': 'flooding',
-        'pandemic': 'hospital',
-        'climate': 'climate change',
+    # ── SUBJECT-FIRST visual concept map ──
+    # The key insight: Unsplash needs the *subject* of the photo, not the
+    # *topic* of the article.  "Nigeria GDP" → bad photo.
+    # "African currency notes" → great photo.
+    #
+    # Priority order: specific subjects > industries > broad topics > country
+    # Country is LAST because a city skyline tells you nothing about the story.
+
+    # Phrases checked FIRST (multi-word, most specific)
+    PHRASE_VISUALS = [
+        # Specific financial subjects
+        ('stock exchange', 'stock exchange trading floor'),
+        ('interest rate', 'central bank building'),
+        ('credit rating', 'credit score finance'),
+        ('real estate', 'modern building architecture'),
+        ('central bank', 'central bank building'),
+        ('monetary policy', 'central bank vault'),
+        ('fiscal policy', 'government budget documents'),
+        ('trade war', 'shipping containers port'),
+        ('supply chain', 'cargo logistics warehouse'),
+        ('private equity', 'boardroom meeting'),
+        ('venture capital', 'startup office team'),
+        ('foreign exchange', 'currency exchange rates'),
+        ('bond market', 'treasury bonds finance'),
+        ('commodity prices', 'commodity trading market'),
+        ('food security', 'grain harvest agriculture'),
+        ('climate change', 'climate environment nature'),
+        ('renewable energy', 'solar panels wind farm'),
+        ('electric vehicle', 'electric car charging'),
+        ('digital payment', 'mobile payment fintech'),
+        ('mobile money', 'mobile phone payment Africa'),
+        ('stock market', 'stock market trading screen'),
+        ('market cap', 'stock exchange digital'),
+        ('share price', 'stock price chart screen'),
+        ('economic growth', 'modern city skyline construction'),
+        ('economic crisis', 'empty market recession'),
+        ('debt restructuring', 'financial documents desk'),
+        ('budget deficit', 'government finance papers'),
+        ('trade deficit', 'shipping port containers'),
+        ('current account', 'international trade shipping'),
+        ('capital market', 'stock exchange floor'),
+        ('money market', 'bank vault currency'),
+        ('housing market', 'residential buildings aerial'),
+        ('labour market', 'workers office employment'),
+        ('job creation', 'construction workers building'),
+        ('unemployment', 'job search newspaper'),
+        ('cost of living', 'grocery shopping basket'),
+        ('consumer price', 'supermarket shopping aisle'),
+        ('fuel price', 'fuel pump petrol station'),
+        ('oil price', 'oil barrel refinery'),
+        ('gold price', 'gold bullion bars vault'),
+        ('exchange rate', 'currency notes exchange'),
+        ('bank recapitalisation', 'bank building modern'),
+        ('financial inclusion', 'mobile banking Africa'),
+        ('wealth management', 'luxury office finance'),
+        ('pension fund', 'retirement savings senior'),
+        ('insurance sector', 'insurance office documents'),
+        ('fintech', 'smartphone app digital payment'),
+        ('blockchain', 'blockchain digital network'),
+        ('cryptocurrency', 'cryptocurrency bitcoin digital'),
+    ]
+
+    # Single-word subject map — matches the SUBJECT of the image, not the topic
+    SUBJECT_VISUALS = {
+        # Commodities → the physical thing
+        'oil': 'oil refinery industrial',
+        'gold': 'gold bullion bars',
+        'copper': 'copper mine industrial',
+        'diamond': 'diamond gemstone',
+        'platinum': 'platinum metal bars',
+        'coal': 'coal mine industrial',
+        'iron': 'iron ore mine',
+        'lithium': 'lithium battery factory',
+        'cobalt': 'cobalt mining industrial',
+        'uranium': 'nuclear power plant',
+        'wheat': 'wheat field harvest',
+        'maize': 'corn field agriculture',
+        'cocoa': 'cocoa beans farm',
+        'coffee': 'coffee plantation Africa',
+        'cotton': 'cotton field harvest',
+        'sugar': 'sugar cane plantation',
+        'timber': 'timber logging forest',
+        # Energy
+        'solar': 'solar panels installation',
+        'wind': 'wind turbines farm',
+        'gas': 'natural gas pipeline',
+        'hydro': 'hydroelectric dam power',
+        'nuclear': 'nuclear power plant',
+        # Industries → what it looks like
+        'telecom': 'telecom tower antenna',
+        'banking': 'modern bank building',
+        'insurance': 'office meeting documents',
+        'pharma': 'pharmaceutical laboratory',
+        'retail': 'modern shopping mall',
+        'aviation': 'airplane airport runway',
+        'shipping': 'container ship port',
+        'construction': 'construction crane building',
+        'automobile': 'car assembly factory',
+        'mining': 'open pit mine aerial',
+        'agriculture': 'farm tractor field',
+        'manufacturing': 'factory production line',
+        'tourism': 'tourist destination Africa',
+        'healthcare': 'modern hospital building',
+        'education': 'university campus students',
+        'airline': 'airplane airport terminal',
+        'airlines': 'airplane airport terminal',
+        'economy': 'modern city skyline aerial',
+        'rand': 'South African currency notes',
+        'naira': 'Nigerian currency money',
+        'shilling': 'Kenyan currency notes',
+        'cedi': 'Ghanaian currency money',
+        'pound': 'Egyptian currency notes',
+        'franc': 'African currency banknotes',
+        'dollar': 'US dollar currency notes',
+        'currency': 'currency notes exchange',
+        'bank': 'modern bank building finance',
+        'loan': 'bank loan documents signing',
+        'profit': 'business profit chart growth',
+        'revenue': 'financial report documents',
+        'budget': 'government budget finance',
+        'pension': 'retirement savings senior',
+        'rating': 'credit rating finance documents',
+        'bond': 'treasury bonds government',
+        # Financial actions → visual representation
+        'ipo': 'stock exchange bell ceremony',
+        'merger': 'corporate handshake deal',
+        'acquisition': 'corporate merger signing',
+        'listing': 'stock exchange listing ceremony',
+        'delisting': 'stock exchange trading floor',
+        'inflation': 'price tags shopping expensive',
+        'recession': 'empty business district',
+        'gdp': 'modern city skyline aerial',
+        'tariff': 'customs shipping containers',
+        'debt': 'financial documents calculator',
+        'forex': 'currency exchange booth',
+        'dividend': 'money coins investment',
+        'earnings': 'financial report documents',
+        'crypto': 'cryptocurrency digital coins',
+        'startup': 'modern startup office',
+        'investor': 'stock market trading screen',
+        'investors': 'stock market trading screen',
+        'investment': 'financial growth chart',
+        'tax': 'tax documents calculator',
+        'regulation': 'government building courthouse',
+        'sanctions': 'international diplomacy flags',
+        'election': 'ballot box voting',
+        'corruption': 'justice scales gavel',
+        'privatisation': 'corporate office building',
+        'privatization': 'corporate office building',
+        'subsidy': 'government documents official',
+        'export': 'cargo containers ship port',
+        'import': 'cargo dock shipping containers',
+        'drought': 'dry cracked earth drought',
+        'flood': 'flooding water damage',
+        'pandemic': 'hospital medical equipment',
+        'poverty': 'market street developing',
+        'inequality': 'contrast rich poor city',
+        'infrastructure': 'road bridge construction',
+        'railway': 'railway train tracks',
+        'highway': 'highway road infrastructure',
+        'port': 'shipping port cranes containers',
+        'airport': 'modern airport terminal',
+        'stadium': 'sports stadium aerial',
+        'pipeline': 'pipeline construction industrial',
+        'refinery': 'oil refinery industrial night',
+        'smelter': 'metal smelting factory',
+        'warehouse': 'warehouse logistics storage',
+        'data center': 'server room data center',
+    }
+
+    # Low-priority exchange abbreviations — only used if no subject match
+    EXCHANGE_FALLBACKS = {
+        'jse': 'stock exchange trading floor',
+        'nyse': 'wall street stock exchange',
+        'nasdaq': 'stock market digital screen',
+        'lse': 'London stock exchange',
+        'top 40': 'stock exchange trading floor',
+        'nse': 'stock exchange trading floor',
+        'a2x': 'stock exchange trading floor',
+    }
+
+    # Country/region → used ONLY as modifier, never as sole query
+    COUNTRY_MODIFIERS = {
+        'nigeria': 'Nigeria',
+        'kenya': 'Kenya',
+        'south africa': 'South Africa',
+        'ethiopia': 'Ethiopia',
+        'ghana': 'Ghana',
+        'egypt': 'Egypt',
+        'morocco': 'Morocco',
+        'tanzania': 'Tanzania',
+        'uganda': 'Uganda',
+        'zimbabwe': 'Zimbabwe',
+        'botswana': 'Botswana',
+        'rwanda': 'Rwanda',
+        'ivory coast': 'Ivory Coast',
+        'senegal': 'Senegal',
+        'mozambique': 'Mozambique',
+        'zambia': 'Zambia',
+        'angola': 'Angola',
+        'cameroon': 'Cameroon',
+        'drc': 'Congo',
+        'congo': 'Congo',
+        'china': 'China',
+        'india': 'India',
+        'brazil': 'Brazil',
+        'russia': 'Russia',
+        'japan': 'Japan',
+        'europe': 'Europe',
+        'usa': 'United States',
+        'uk': 'United Kingdom',
     }
 
     # Fallback images by category (high-quality default images) - EXPANDED for variety
@@ -550,61 +675,64 @@ class ArticleImageService:
         Build a contextual search query for Unsplash that produces
         visually relevant HD images.
 
-        Strategy:
-        1. Check title for known visual concepts (countries, industries, topics)
-        2. Use concept map to translate abstract terms → visual search terms
-        3. Fall back to category-specific visual query
+        Key insight: Unsplash needs the SUBJECT of the photo, not the
+        topic of the article.  "Nigeria GDP growth" → bad results.
+        "African currency notes" or "modern city skyline aerial" → great.
+
+        Strategy (subject-first):
+        1. Check for specific multi-word phrases (highest precision)
+        2. Check for subject keywords (industries, commodities, actions)
+        3. Use country ONLY as modifier to the subject, never alone
+        4. Extract meaningful nouns from title as last resort
+        5. Fall back to category visual
         """
         text = f"{title} {excerpt}".lower()
 
-        # 1. Check for matching visual concepts
-        # Priority: countries first, then industries, then financial concepts
-        # (longer matches are more specific so they win within each tier)
-        country_match = None
-        industry_match = None
-        concept_match = None
+        # ── Step 1: Multi-word phrase matching (most precise) ──
+        best_phrase = None
+        for phrase, visual in self.PHRASE_VISUALS:
+            if phrase in text:
+                if not best_phrase or len(phrase) > len(best_phrase[0]):
+                    best_phrase = (phrase, visual)
 
-        # Countries are first ~20 entries, industries next ~25, concepts after
-        country_keys = [
-            'nigeria', 'kenya', 'south africa', 'ethiopia', 'ghana', 'egypt',
-            'morocco', 'tanzania', 'uganda', 'zimbabwe', 'botswana', 'rwanda',
-            'ivory coast', 'china', 'india', 'brazil', 'russia', 'japan',
-            'europe', 'usa', 'uk',
-        ]
-        industry_keys = [
-            'oil', 'gold', 'copper', 'diamond', 'platinum', 'coal', 'iron',
-            'lithium', 'solar', 'wind', 'gas', 'electric', 'telecom',
-            'banking', 'insurance', 'real estate', 'pharma', 'retail',
-            'aviation', 'shipping', 'construction', 'textile', 'automobile',
-            'fintech',
-        ]
+        if best_phrase:
+            logger.debug(f"Phrase: '{title[:40]}' -> '{best_phrase[1]}'")
+            return best_phrase[1]
 
-        for concept, visual_query in self.VISUAL_CONCEPT_MAP.items():
-            if concept not in text:
-                continue
-            if concept in country_keys:
-                if not country_match or len(concept) > len(country_match[0]):
-                    country_match = (concept, visual_query)
-            elif concept in industry_keys:
-                if not industry_match or len(concept) > len(industry_match[0]):
-                    industry_match = (concept, visual_query)
-            else:
-                if not concept_match or len(concept) > len(concept_match[0]):
-                    concept_match = (concept, visual_query)
+        # ── Step 2: Single-word subject matching ──
+        best_subject = None
+        for keyword, visual in self.SUBJECT_VISUALS.items():
+            if keyword in text:
+                if not best_subject or len(keyword) > len(best_subject[0]):
+                    best_subject = (keyword, visual)
 
-        # Combine: country + industry → "Nigerian oil" style (2 words max)
-        if country_match and industry_match:
-            # Use the concept key directly for natural language: "Nigerian oil"
-            combined = f"{country_match[0]} {industry_match[0]}"
-            logger.debug(f"Match: '{title[:40]}' -> '{combined}'")
-            return combined
-        best = country_match or industry_match or concept_match
-        if best:
-            logger.debug(f"Match: '{title[:40]}' -> '{best[1]}'")
-            return best[1]
+        # ── Step 3: Find country (used as modifier only) ──
+        country = None
+        for keyword, name in self.COUNTRY_MODIFIERS.items():
+            if keyword in text:
+                if not country or len(keyword) > len(country[0]):
+                    country = (keyword, name)
 
-        # 2. Extract 1-2 meaningful nouns from title (keep it SHORT)
-        title_keywords = self._extract_keywords(title, max_keywords=3)
+        # Combine: subject + country modifier → "gold bullion bars South Africa"
+        if best_subject:
+            query = best_subject[1]
+            # Only append country if query doesn't already contain a location
+            if country and country[1].lower() not in query.lower():
+                query = f"{query} {country[1]}"
+            logger.debug(f"Subject: '{title[:40]}' -> '{query}'")
+            return query
+
+        # ── Step 3b: Exchange abbreviations (low priority) ──
+        for abbrev, visual in self.EXCHANGE_FALLBACKS.items():
+            if abbrev in text:
+                query = visual
+                if country and country[1].lower() not in query.lower():
+                    query = f"{query} {country[1]}"
+                logger.debug(f"Exchange: '{title[:40]}' -> '{query}'")
+                return query
+
+        # ── Step 4: Extract meaningful nouns from title ──
+        title_keywords = self._extract_keywords(title, max_keywords=5)
 
         generic_words = {
             'market', 'markets', 'stock', 'stocks', 'share', 'shares',
@@ -619,17 +747,35 @@ class ArticleImageService:
             'navigating', 'finding', 'opportunities', 'challenges',
             'trust', 'templeton', 'management', 'investment', 'investors',
             'mid', 'cap', 'buy', 'sell', 'top', 'best', 'why', 'how',
+            'trillion', 'trn', 'value', 'worth', 'total', 'high', 'low',
+            'record', 'hits', 'makes', 'takes', 'gets', 'sees', 'plans',
+            'seeks', 'warns', 'calls', 'moves', 'sets', 'aims', 'eyes',
+            'backs', 'cuts', 'adds', 'wins', 'loses', 'holds', 'keeps',
+            'remains', 'continues', 'still', 'could', 'would', 'should',
+            'will', 'may', 'might', 'must', 'need', 'want', 'like',
+            'south', 'north', 'east', 'west', 'african', 'africa',
+            'nigerian', 'kenyan', 'egyptian', 'ghanaian', 'ethiopian',
         }
-        specific = [w for w in title_keywords if w not in generic_words]
+        specific = [w for w in title_keywords if w not in generic_words and len(w) > 3]
 
         if specific:
-            # Just 1-2 keywords, nothing else — Unsplash works best this way
-            query = ' '.join(specific[:2])
+            # Try to build a visual query from extracted words
+            query = ' '.join(specific[:3])
+            # Add country context if available and query is short
+            if country and len(specific) <= 2:
+                query = f"{query} {country[1]}"
             logger.debug(f"Keywords: '{title[:40]}' -> '{query}'")
             return query
 
-        # 3. Category fallback — also short
-        category_visual = self.CATEGORY_QUERIES.get(category_slug, "business")
+        # If we only have a country and nothing else, use country + category
+        if country:
+            cat_visual = self.CATEGORY_QUERIES.get(category_slug, 'business')
+            query = f"{cat_visual} {country[1]}"
+            logger.debug(f"Country+cat: '{title[:40]}' -> '{query}'")
+            return query
+
+        # ── Step 5: Category fallback ──
+        category_visual = self.CATEGORY_QUERIES.get(category_slug, "African business finance")
         logger.debug(f"Category: '{title[:40]}' -> '{category_visual}'")
         return category_visual
 
