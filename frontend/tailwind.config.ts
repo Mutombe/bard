@@ -86,10 +86,10 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-bricolage)", "system-ui", "sans-serif"],
-        serif: ["var(--font-fraunces)", "Georgia", "Times New Roman", "serif"],
-        "serif-body": ["var(--font-newsreader)", "Georgia", "serif"],
+        serif: ["var(--font-bricolage)", "system-ui", "sans-serif"],
+        "serif-body": ["var(--font-bricolage)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "Consolas", "Monaco", "monospace"],
-        headline: ["var(--font-fraunces)", "Georgia", "serif"],
+        headline: ["var(--font-bricolage)", "system-ui", "sans-serif"],
       },
       fontSize: {
         "2xs": ["0.625rem", { lineHeight: "0.875rem" }],
