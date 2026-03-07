@@ -152,35 +152,34 @@ class Command(BaseCommand):
             self.stdout.write(f'  Exchange: {name} - {status}')
 
     def _fetch_news(self):
-        """Fetch news from various sources."""
-        self.stdout.write('\n[2] Fetching news...')
+        """Fetch news using the master refresh task (SerpAPI + images + featured)."""
+        self.stdout.write('\n[2] Fetching news (master refresh)...')
 
-        # Polygon news
         try:
-            from apps.spider.tasks import fetch_polygon_news
-            self.stdout.write('  Fetching Polygon.io news...')
-            result = fetch_polygon_news()
+            from apps.spider.tasks import refresh_feed_content
+            self.stdout.write('  Running refresh_feed_content()...')
+            result = refresh_feed_content()
             self.stdout.write(self.style.SUCCESS(f'    {result}'))
         except Exception as e:
-            self.stdout.write(self.style.WARNING(f'    Polygon news failed: {e}'))
+            self.stdout.write(self.style.WARNING(f'    Feed refresh failed: {e}'))
+            # Fallback to individual tasks
+            self.stdout.write('  Falling back to individual tasks...')
 
-        # SerpAPI news (Google News with full article extraction)
-        try:
-            from apps.spider.tasks import fetch_serpapi_news
-            self.stdout.write('  Fetching SerpAPI news (full articles)...')
-            result = fetch_serpapi_news()
-            self.stdout.write(self.style.SUCCESS(f'    {result}'))
-        except Exception as e:
-            self.stdout.write(self.style.WARNING(f'    SerpAPI news failed: {e}'))
+            try:
+                from apps.spider.tasks import fetch_serpapi_news
+                self.stdout.write('  Fetching SerpAPI news...')
+                result = fetch_serpapi_news()
+                self.stdout.write(self.style.SUCCESS(f'    {result}'))
+            except Exception as e2:
+                self.stdout.write(self.style.WARNING(f'    SerpAPI failed: {e2}'))
 
-        # African market news
-        try:
-            from apps.spider.tasks import fetch_african_news
-            self.stdout.write('  Fetching African market news...')
-            result = fetch_african_news()
-            self.stdout.write(self.style.SUCCESS(f'    {result}'))
-        except Exception as e:
-            self.stdout.write(self.style.WARNING(f'    African news failed: {e}'))
+            try:
+                from apps.spider.tasks import fetch_african_news
+                self.stdout.write('  Fetching African news...')
+                result = fetch_african_news()
+                self.stdout.write(self.style.SUCCESS(f'    {result}'))
+            except Exception as e2:
+                self.stdout.write(self.style.WARNING(f'    African news failed: {e2}'))
 
     def _fetch_markets(self):
         """Fetch market data."""
