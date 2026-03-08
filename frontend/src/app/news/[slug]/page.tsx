@@ -487,17 +487,47 @@ export default function ArticlePage() {
     }
 
     // Otherwise, render as plain text with paragraphs
-    const paragraphs = article.content.split("\n\n");
-    // Process all paragraphs together for consistent keyword linking
-    const processedParagraphs = paragraphs.map((p) => addKeywordLinks(p, 2));
+    // The text may be one giant wall — split into sentences and group every 5-7
+    // sentences into visual paragraphs for readability.
+
+    // Normalize: collapse newlines into spaces so we work with one continuous text
+    const text = article.content.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+
+    // Split into sentences: match sentence-ending punctuation followed by a space
+    // and an uppercase letter — but preserve the punctuation with the sentence.
+    // Handles "U.S." / "Dr." style abbreviations by not splitting on them.
+    const sentenceRegex = /([^.!?]*(?:(?:U\.S|U\.K|U\.N|E\.U|Dr|Mr|Mrs|Ms|Jr|Sr|Inc|Corp|Ltd|Co|vs|etc)\.\s*)*[^.!?]*[.!?])(?:\s+|$)/g;
+    const sentences: string[] = [];
+    let match;
+    while ((match = sentenceRegex.exec(text)) !== null) {
+      const s = match[1].trim();
+      if (s) sentences.push(s);
+    }
+
+    // Fallback: if regex didn't split well, just use the whole text as one paragraph
+    if (sentences.length <= 1) {
+      const html = addKeywordLinks(text, 2);
+      return (
+        <div className="prose-journal max-w-none mb-8">
+          <p className="drop-cap" dangerouslySetInnerHTML={{ __html: html }} />
+        </div>
+      );
+    }
+
+    // Group sentences into paragraphs of ~6 sentences each
+    const SENTENCES_PER_PARAGRAPH = 6;
+    const paragraphs: string[] = [];
+    for (let i = 0; i < sentences.length; i += SENTENCES_PER_PARAGRAPH) {
+      paragraphs.push(sentences.slice(i, i + SENTENCES_PER_PARAGRAPH).join(' '));
+    }
 
     return (
       <div className="prose-journal max-w-none mb-8">
-        {processedParagraphs.map((paragraph, index) => (
+        {paragraphs.map((paragraph, index) => (
           <p
             key={index}
             className={index === 0 ? "drop-cap" : ""}
-            dangerouslySetInnerHTML={{ __html: paragraph }}
+            dangerouslySetInnerHTML={{ __html: addKeywordLinks(paragraph, 2) }}
           />
         ))}
       </div>

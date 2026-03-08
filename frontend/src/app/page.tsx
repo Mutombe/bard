@@ -584,8 +584,28 @@ function ExtendedFeedSkeleton() {
 // ARTICLE COMPONENTS
 // =====================
 
+/**
+ * Split a multi-sentence title into [headline, subtitle].
+ * First sentence becomes the headline; the rest becomes the subtitle.
+ * Skips abbreviations like U.S., Dr., Inc., etc.
+ */
+function splitTitle(title: string): [string, string] {
+  // Match '. ' / '? ' / '! ' followed by an uppercase letter
+  const abbr = /(?:U\.S|U\.K|U\.N|E\.U|Dr|Mr|Mrs|Ms|Jr|Sr|Inc|Corp|Ltd|Co|vs|etc|govt|dept)\.\s*$/i;
+  const match = title.match(/^(.+?[.!?])\s+([A-Z][\s\S]*)/);
+  if (!match) return [title, ''];
+  const candidate = match[1];
+  // Don't split on abbreviations
+  if (abbr.test(candidate)) return [title, ''];
+  // Don't split if first part is too short
+  if (candidate.length < 15) return [title, ''];
+  return [candidate.trim(), match[2].trim()];
+}
+
 /** FeaturedInsight - Hero article with burgundy rule, headline-hero class */
 function FeaturedInsight({ article }: { article: NewsArticle }) {
+  const [headline, subtitle] = splitTitle(article.title);
+
   return (
     <Link href={`/news/${article.slug}`} className="group block">
       <article>
@@ -619,8 +639,14 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
           </div>
 
           <h1 className="headline-hero mb-4 group-hover:text-primary transition-colors">
-            {article.title}
+            {headline}
           </h1>
+
+          {subtitle && (
+            <p className="text-xl text-foreground/70 mb-4 leading-relaxed font-serif">
+              {subtitle}
+            </p>
+          )}
 
           <p className="text-lg text-muted-foreground/90 mb-4 leading-relaxed line-clamp-3">
             {article.excerpt}
