@@ -5,22 +5,22 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Search,
-  Filter,
-  TrendingUp,
-  TrendingDown,
+  MagnifyingGlass,
+  Funnel,
+  TrendUp,
+  TrendDown,
   Newspaper,
-  Building2,
-  CircleUserRound,
+  Buildings,
+  UserCircle,
   X,
   Factory,
   Globe,
   Tag,
   FileText,
-  Mic,
-  Landmark,
-  ChevronRight,
-} from "lucide-react";
+  Microphone,
+  Bank,
+  CaretRight,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -294,11 +294,11 @@ function getTypeIcon(type: SearchResult["type"]) {
     case "article":
       return <Newspaper className="h-4 w-4 text-brand-orange" />;
     case "company":
-      return <Building2 className="h-4 w-4 text-blue-400" />;
+      return <Buildings className="h-4 w-4 text-blue-400" />;
     case "person":
-      return <CircleUserRound className="h-4 w-4 text-purple-400" />;
+      return <UserCircle className="h-4 w-4 text-purple-400" />;
     case "index":
-      return <TrendingUp className="h-4 w-4 text-market-up" />;
+      return <TrendUp className="h-4 w-4 text-market-up" />;
     case "industry":
       return <Factory className="h-4 w-4 text-amber-400" />;
     case "region":
@@ -308,11 +308,11 @@ function getTypeIcon(type: SearchResult["type"]) {
     case "research":
       return <FileText className="h-4 w-4 text-violet-400" />;
     case "podcast":
-      return <Mic className="h-4 w-4 text-rose-400" />;
+      return <Microphone className="h-4 w-4 text-rose-400" />;
     case "economics":
-      return <Landmark className="h-4 w-4 text-sky-400" />;
+      return <Bank className="h-4 w-4 text-sky-400" />;
     default:
-      return <Search className="h-4 w-4" />;
+      return <MagnifyingGlass className="h-4 w-4" />;
   }
 }
 
@@ -338,8 +338,8 @@ const browseCategories = [
   { label: "Topics", href: "/topics", icon: Tag, color: "text-cyan-400" },
   { label: "Regions", href: "/regions", icon: Globe, color: "text-emerald-400" },
   { label: "Research", href: "/research", icon: FileText, color: "text-violet-400" },
-  { label: "Podcasts", href: "/podcasts", icon: Mic, color: "text-rose-400" },
-  { label: "Markets", href: "/markets", icon: TrendingUp, color: "text-green-400" },
+  { label: "Podcasts", href: "/podcasts", icon: Microphone, color: "text-rose-400" },
+  { label: "Markets", href: "/markets", icon: TrendUp, color: "text-green-400" },
 ];
 
 function SearchContent() {
@@ -401,7 +401,7 @@ function SearchContent() {
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
         <Link href="/" className="hover:text-foreground">Home</Link>
-        <ChevronRight className="h-4 w-4" />
+        <CaretRight className="h-4 w-4" />
         <span className="text-foreground">Search</span>
       </nav>
 
@@ -413,7 +413,7 @@ function SearchContent() {
         </p>
         <form onSubmit={handleSearch} className="flex gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <input
               type="text"
               value={query}
@@ -445,7 +445,7 @@ function SearchContent() {
       {query && (
         <div className="flex flex-wrap items-center gap-4 mb-6 pb-6 border-b border-terminal-border">
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Funnel className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Filter by:</span>
           </div>
 
@@ -509,7 +509,7 @@ function SearchContent() {
         </div>
       ) : query && results.length === 0 ? (
         <div className="text-center py-12 bg-terminal-bg-secondary rounded-lg border border-terminal-border">
-          <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <MagnifyingGlass className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No results found</h3>
           <p className="text-muted-foreground mb-6">
             No results found for &quot;{query}&quot;. Try different keywords.
@@ -585,9 +585,9 @@ function SearchContent() {
                           )}
                         >
                           {result.meta.change >= 0 ? (
-                            <TrendingUp className="h-4 w-4" />
+                            <TrendUp className="h-4 w-4" />
                           ) : (
-                            <TrendingDown className="h-4 w-4" />
+                            <TrendDown className="h-4 w-4" />
                           )}
                           {result.meta.change >= 0 ? "+" : ""}
                           {result.meta.change?.toFixed(2)}%
@@ -622,7 +622,7 @@ function SearchContent() {
         /* Empty state - Browse categories */
         <div className="py-8">
           <div className="text-center mb-12">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <MagnifyingGlass className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="font-serif text-xl font-medium mb-2">Search African Finance Insights</h3>
             <p className="text-muted-foreground max-w-lg mx-auto">
               Find insights, research reports, industry analysis, regional coverage, and more across our comprehensive African finance database.

@@ -4,20 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
+  MagnifyingGlass,
   Globe,
-  Edit,
-  Trash2,
-  MoreVertical,
+  PencilSimple,
+  Trash,
+  DotsThreeVertical,
   FileText,
   Eye,
   Star,
-  Building2,
+  Buildings,
   MapPin,
   Flag,
-  Loader2,
+  CircleNotch,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -112,7 +112,7 @@ export default function AdminRegionsPage() {
           <div className="text-sm text-muted-foreground">Countries</div>
         </div>
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-          <Building2 className="h-5 w-5 text-amber-400 mb-2" />
+          <Buildings className="h-5 w-5 text-amber-400 mb-2" />
           <div className="text-2xl font-bold">{totalExchanges}</div>
           <div className="text-sm text-muted-foreground">Exchanges</div>
         </div>
@@ -151,7 +151,7 @@ export default function AdminRegionsPage() {
         </div>
 
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder={viewMode === "regions" ? "Search regions..." : "Search countries..."}
@@ -164,7 +164,7 @@ export default function AdminRegionsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center p-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <CircleNotch className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
         <>
@@ -184,7 +184,7 @@ export default function AdminRegionsPage() {
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger className="p-1 hover:bg-terminal-bg-elevated rounded">
-                        <MoreVertical className="h-4 w-4" />
+                        <DotsThreeVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
@@ -222,7 +222,7 @@ export default function AdminRegionsPage() {
                         {region.country_count} countries
                       </span>
                       <span className="flex items-center gap-1">
-                        <Building2 className="h-3 w-3" />
+                        <Buildings className="h-3 w-3" />
                         {region.exchange_count || 0} exchanges
                       </span>
                     </div>
@@ -287,7 +287,7 @@ export default function AdminRegionsPage() {
                       <td className="px-4 py-3 text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger className="p-2 hover:bg-terminal-bg-elevated rounded-md">
-                            <MoreVertical className="h-4 w-4" />
+                            <DotsThreeVertical className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>

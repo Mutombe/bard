@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, TrendingUp, Globe2, Zap } from "lucide-react";
+import { ArrowRight, TrendUp, GlobeHemisphereWest, Lightning } from "@phosphor-icons/react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +30,7 @@ export function HeroSection() {
           >
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-orange/10 text-brand-orange text-sm font-medium mb-6">
-              <Zap className="h-4 w-4" />
+              <Lightning className="h-4 w-4" />
               Real-time African Market Data
             </div>
 
@@ -96,7 +96,7 @@ export function HeroSection() {
             {/* Feature Card 1 */}
             <div className="card-terminal p-6 hover:border-brand-orange/50 transition-colors">
               <div className="h-10 w-10 rounded-lg bg-market-up-bg flex items-center justify-center mb-4">
-                <TrendingUp className="h-5 w-5 text-market-up" />
+                <TrendUp className="h-5 w-5 text-market-up" />
               </div>
               <h3 className="font-semibold mb-2">Real-Time Data</h3>
               <p className="text-sm text-muted-foreground">
@@ -107,7 +107,7 @@ export function HeroSection() {
             {/* Feature Card 2 */}
             <div className="card-terminal p-6 hover:border-brand-orange/50 transition-colors mt-8">
               <div className="h-10 w-10 rounded-lg bg-brand-orange/10 flex items-center justify-center mb-4">
-                <Globe2 className="h-5 w-5 text-brand-orange" />
+                <GlobeHemisphereWest className="h-5 w-5 text-brand-orange" />
               </div>
               <h3 className="font-semibold mb-2">Pan-African Coverage</h3>
               <p className="text-sm text-muted-foreground">

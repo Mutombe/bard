@@ -4,19 +4,19 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
-  Edit,
-  Trash2,
+  MagnifyingGlass,
+  PencilSimple,
+  Trash,
   Shield,
-  CircleUserRound,
-  Mail,
+  UserCircle,
+  Envelope,
   CheckCircle,
   XCircle,
   Crown,
   Users,
-  RefreshCw,
-  AlertCircle,
-} from "lucide-react";
+  ArrowClockwise,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton, LoadingSpinner, Skeleton } from "@/components/ui/loading";
 import { adminService, type AdminUser, type UserStats } from "@/services/api/admin";
@@ -257,7 +257,7 @@ export default function UsersPage() {
             className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md transition-colors disabled:opacity-50"
             title="Refresh"
           >
-            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
+            <ArrowClockwise className={cn("h-5 w-5", refreshing && "animate-spin")} />
           </button>
           <Link
             href="/admin/users/new"
@@ -303,7 +303,7 @@ export default function UsersPage() {
           </div>
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
             <div className="flex items-center gap-2 mb-2">
-              <CircleUserRound className="h-5 w-5 text-brand-orange" />
+              <UserCircle className="h-5 w-5 text-brand-orange" />
               <span className="text-sm text-muted-foreground">New Today</span>
             </div>
             <div className="text-2xl font-bold">
@@ -316,7 +316,7 @@ export default function UsersPage() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search users..."
@@ -385,7 +385,7 @@ export default function UsersPage() {
       {/* Error State */}
       {error && (
         <div className="flex items-center gap-3 p-4 mb-4 bg-market-down/10 border border-market-down/30 rounded-lg">
-          <AlertCircle className="h-5 w-5 text-market-down" />
+          <WarningCircle className="h-5 w-5 text-market-down" />
           <p className="text-market-down">{error}</p>
           <button
             onClick={() => fetchUsers()}
@@ -415,7 +415,7 @@ export default function UsersPage() {
       ) : users.length === 0 ? (
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
           <div className="text-muted-foreground mb-4">
-            <CircleUserRound className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <UserCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-medium mb-2">No users found</h3>
             <p className="text-sm">
               {searchQuery || selectedRole !== "all" || selectedTier !== "all"
@@ -473,7 +473,7 @@ export default function UsersPage() {
                     {user.full_name || `${user.first_name} ${user.last_name}`}
                   </div>
                   <div className="text-sm text-muted-foreground flex items-center gap-1 truncate">
-                    <Mail className="h-3 w-3 flex-shrink-0" />
+                    <Envelope className="h-3 w-3 flex-shrink-0" />
                     {user.email}
                   </div>
                 </div>
@@ -515,14 +515,14 @@ export default function UsersPage() {
                     className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
                     title="Edit"
                   >
-                    <Edit className="h-4 w-4" />
+                    <PencilSimple className="h-4 w-4" />
                   </Link>
                   <button
                     onClick={() => handleDelete(user.id)}
                     className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded"
                     title="Delete"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash className="h-4 w-4" />
                   </button>
                 </div>
               </div>

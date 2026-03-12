@@ -4,15 +4,15 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  MessageCircle,
+  ChatCircle,
   Heart,
-  Reply,
-  MoreHorizontal,
-  Edit2,
-  Trash2,
-  Send,
-  Loader2,
-} from "lucide-react";
+  ArrowBendUpLeft,
+  DotsThree,
+  PencilSimple,
+  Trash,
+  PaperPlaneTilt,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import {
@@ -144,7 +144,7 @@ export function CommentSection({ articleId, className }: CommentSectionProps) {
     <section className={cn("mt-12 pt-8 border-t border-border", className)}>
       {/* Header */}
       <div className="flex items-center gap-2 mb-6">
-        <MessageCircle className="h-5 w-5" />
+        <ChatCircle className="h-5 w-5" />
         <h2 className="text-xl font-semibold">
           Comments {totalComments > 0 && `(${totalComments})`}
         </h2>
@@ -177,9 +177,9 @@ export function CommentSection({ articleId, className }: CommentSectionProps) {
                 size="sm"
               >
                 {isSubmitting ? (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <CircleNotch className="h-4 w-4 animate-spin mr-2" />
                 ) : (
-                  <Send className="h-4 w-4 mr-2" />
+                  <PaperPlaneTilt className="h-4 w-4 mr-2" />
                 )}
                 {isAuthenticated ? "Post Comment" : "Sign in to Post"}
               </Button>
@@ -193,12 +193,12 @@ export function CommentSection({ articleId, className }: CommentSectionProps) {
         <CommentsSkeleton />
       ) : error ? (
         <div className="text-center py-8 text-muted-foreground">
-          <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
+          <ChatCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
           <p>Unable to load comments</p>
         </div>
       ) : comments.length === 0 ? (
         <div className="text-center py-8 text-muted-foreground">
-          <MessageCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
+          <ChatCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
           <p>No comments yet. Be the first to share your thoughts!</p>
         </div>
       ) : (
@@ -418,7 +418,7 @@ function CommentItem({
                   disabled={!editContent.trim() || isSubmitting}
                 >
                   {isSubmitting ? (
-                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                    <CircleNotch className="h-3 w-3 animate-spin mr-1" />
                   ) : null}
                   Save
                 </Button>
@@ -452,7 +452,7 @@ function CommentItem({
                 )}
               >
                 <Heart
-                  className={cn("h-4 w-4", localIsLiked && "fill-current")}
+                  className={cn("h-4 w-4")} weight={localIsLiked ? "fill" : "regular"}
                 />
                 {localLikeCount > 0 && <span>{localLikeCount}</span>}
               </button>
@@ -462,7 +462,7 @@ function CommentItem({
                   onClick={handleReplyClick}
                   className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <Reply className="h-4 w-4" />
+                  <ArrowBendUpLeft className="h-4 w-4" />
                   Reply
                 </button>
               )}
@@ -471,13 +471,13 @@ function CommentItem({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="text-muted-foreground hover:text-foreground transition-colors">
-                      <MoreHorizontal className="h-4 w-4" />
+                      <DotsThree className="h-4 w-4" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     {comment.can_edit && (
                       <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                        <Edit2 className="h-4 w-4 mr-2" />
+                        <PencilSimple className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
                     )}
@@ -486,7 +486,7 @@ function CommentItem({
                         onClick={handleDelete}
                         className="text-destructive"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash className="h-4 w-4 mr-2" />
                         Delete
                       </DropdownMenuItem>
                     )}
@@ -519,7 +519,7 @@ function CommentItem({
                     disabled={!replyContent.trim() || isSubmitting}
                   >
                     {isSubmitting ? (
-                      <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                      <CircleNotch className="h-3 w-3 animate-spin mr-1" />
                     ) : null}
                     Reply
                   </Button>

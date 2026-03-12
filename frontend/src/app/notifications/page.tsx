@@ -5,13 +5,13 @@ import Link from "next/link";
 import {
   Bell,
   Newspaper,
-  AlertCircle,
+  WarningCircle,
   Check,
-  Trash2,
-  Settings,
-  CheckCheck,
-  Loader2,
-} from "lucide-react";
+  Trash,
+  GearSix,
+  Checks,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
@@ -25,7 +25,7 @@ function getNotificationIcon(type: NotificationType) {
     case "breaking_news":
       return <Newspaper className="h-5 w-5 text-brand-orange" />;
     case "system":
-      return <AlertCircle className="h-5 w-5 text-purple-400" />;
+      return <WarningCircle className="h-5 w-5 text-purple-400" />;
     default:
       return <Bell className="h-5 w-5 text-muted-foreground" />;
   }
@@ -187,9 +187,9 @@ export default function NotificationsPage() {
                 className="flex items-center gap-2 px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-50"
               >
                 {actionLoading === "all" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <CircleNotch className="h-4 w-4 animate-spin" />
                 ) : (
-                  <CheckCheck className="h-4 w-4" />
+                  <Checks className="h-4 w-4" />
                 )}
                 Mark all read
               </button>
@@ -198,7 +198,7 @@ export default function NotificationsPage() {
               href="/settings"
               className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
             >
-              <Settings className="h-5 w-5" />
+              <GearSix className="h-5 w-5" />
             </Link>
           </div>
         </div>
@@ -275,7 +275,7 @@ export default function NotificationsPage() {
                               title="Mark as read"
                             >
                               {actionLoading === notification.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <CircleNotch className="h-4 w-4 animate-spin" />
                               ) : (
                                 <Check className="h-4 w-4" />
                               )}
@@ -288,9 +288,9 @@ export default function NotificationsPage() {
                             title="Delete"
                           >
                             {actionLoading === notification.id && notification.is_read ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <CircleNotch className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Trash2 className="h-4 w-4" />
+                              <Trash className="h-4 w-4" />
                             )}
                           </button>
                         </div>

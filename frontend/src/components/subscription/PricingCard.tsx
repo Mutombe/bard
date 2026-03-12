@@ -5,11 +5,11 @@ import { cn } from "@/lib/utils";
 import {
   Check,
   X,
-  Sparkles,
+  Sparkle,
   Crown,
-  Building2,
+  Buildings,
   User,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 interface PlanFeature {
@@ -46,9 +46,9 @@ interface PricingCardProps {
 
 const planIcons = {
   free: User,
-  premium: Sparkles,
+  premium: Sparkle,
   professional: Crown,
-  enterprise: Building2,
+  enterprise: Buildings,
 };
 
 const planColors = {

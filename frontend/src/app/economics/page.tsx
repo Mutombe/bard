@@ -2,23 +2,23 @@
 
 import Link from "next/link";
 import {
-  BarChart3,
-  TrendingUp,
+  ChartBar,
+  TrendUp,
   Calculator,
   Users,
   Globe,
-  Landmark,
+  Bank,
   Calendar,
-  ChevronRight,
-} from "lucide-react";
+  CaretRight,
+} from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 const economicCategories = [
   {
     title: "Macro Indicators",
     items: [
-      { label: "GDP Data", href: "/economics/gdp", icon: BarChart3, description: "Gross Domestic Product figures" },
-      { label: "Inflation", href: "/economics/inflation", icon: TrendingUp, description: "CPI and inflation rates" },
+      { label: "GDP Data", href: "/economics/gdp", icon: ChartBar, description: "Gross Domestic Product figures" },
+      { label: "Inflation", href: "/economics/inflation", icon: TrendUp, description: "CPI and inflation rates" },
       { label: "Interest Rates", href: "/economics/rates", icon: Calculator, description: "Central bank rates" },
       { label: "Employment", href: "/economics/employment", icon: Users, description: "Jobs and unemployment" },
       { label: "Trade Balance", href: "/economics/trade", icon: Globe, description: "Import/export data" },
@@ -27,10 +27,10 @@ const economicCategories = [
   {
     title: "Central Banks",
     items: [
-      { label: "SARB", href: "/economics/sarb", icon: Landmark, description: "South African Reserve Bank" },
-      { label: "CBN", href: "/economics/cbn", icon: Landmark, description: "Central Bank of Nigeria" },
-      { label: "Fed Watch", href: "/economics/fed", icon: Landmark, description: "US Federal Reserve" },
-      { label: "ECB", href: "/economics/ecb", icon: Landmark, description: "European Central Bank" },
+      { label: "SARB", href: "/economics/sarb", icon: Bank, description: "South African Reserve Bank" },
+      { label: "CBN", href: "/economics/cbn", icon: Bank, description: "Central Bank of Nigeria" },
+      { label: "Fed Watch", href: "/economics/fed", icon: Bank, description: "US Federal Reserve" },
+      { label: "ECB", href: "/economics/ecb", icon: Bank, description: "European Central Bank" },
     ],
   },
   {
@@ -38,7 +38,7 @@ const economicCategories = [
     items: [
       { label: "Economic Calendar", href: "/economics/calendar", icon: Calendar, description: "Upcoming economic events" },
       { label: "Earnings Calendar", href: "/economics/earnings", icon: Calculator, description: "Company earnings releases" },
-      { label: "IPO Calendar", href: "/economics/ipo", icon: TrendingUp, description: "Upcoming IPOs" },
+      { label: "IPO Calendar", href: "/economics/ipo", icon: TrendUp, description: "Upcoming IPOs" },
     ],
   },
 ];
@@ -72,7 +72,7 @@ export default function EconomicsPage() {
                       <div className="font-medium">{item.label}</div>
                       <div className="text-sm text-muted-foreground">{item.description}</div>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    <CaretRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 ))}
               </div>

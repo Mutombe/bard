@@ -6,14 +6,14 @@ import {
   Briefcase,
   MapPin,
   Clock,
-  ChevronRight,
+  CaretRight,
   Users,
   Heart,
-  Zap,
+  Lightning,
   Globe,
-  DollarSign,
+  CurrencyDollar,
   GraduationCap,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -132,7 +132,7 @@ const jobs: Job[] = [
 
 const benefits = [
   {
-    icon: <DollarSign className="h-6 w-6" />,
+    icon: <CurrencyDollar className="h-6 w-6" />,
     title: "Competitive Compensation",
     description: "Market-leading salaries with equity options for all team members.",
   },
@@ -152,7 +152,7 @@ const benefits = [
     description: "Work from anywhere in Africa with flexible hours.",
   },
   {
-    icon: <Zap className="h-6 w-6" />,
+    icon: <Lightning className="h-6 w-6" />,
     title: "Cutting-Edge Tools",
     description: "Best-in-class equipment and software to do your best work.",
   },
@@ -271,7 +271,7 @@ export default function CareersPage() {
                     className="flex-shrink-0 px-6 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors flex items-center gap-2"
                   >
                     Apply Now
-                    <ChevronRight className="h-4 w-4" />
+                    <CaretRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export default function CareersPage() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
           >
             Send General Application
-            <ChevronRight className="h-4 w-4" />
+            <CaretRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

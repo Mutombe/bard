@@ -5,22 +5,22 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   FileText,
-  Download,
+  DownloadSimple,
   Lock,
   Calendar,
   User,
-  TrendingUp,
-  Building2,
+  TrendUp,
+  Buildings,
   Globe,
-  Search,
-  ChevronRight,
+  MagnifyingGlass,
+  CaretRight,
   BookOpen,
-  BarChart3,
+  ChartBar,
   Briefcase,
   ArrowRight,
   Clock,
-  RefreshCw,
-} from "lucide-react";
+  ArrowClockwise,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
@@ -42,13 +42,13 @@ function getReportTypeIcon(type?: string) {
     case "whitepaper":
       return <FileText className="h-4 w-4" />;
     case "analysis":
-      return <TrendingUp className="h-4 w-4" />;
+      return <TrendUp className="h-4 w-4" />;
     case "outlook":
       return <Globe className="h-4 w-4" />;
     case "country":
-      return <Building2 className="h-4 w-4" />;
+      return <Buildings className="h-4 w-4" />;
     default:
-      return <BarChart3 className="h-4 w-4" />;
+      return <ChartBar className="h-4 w-4" />;
   }
 }
 
@@ -147,7 +147,7 @@ function FeaturedReport({ report }: { report: ResearchReport }) {
             </div>
             <div className="flex items-center gap-4">
               <span className="btn-primary flex items-center gap-2">
-                <Download className="h-4 w-4" />
+                <DownloadSimple className="h-4 w-4" />
                 Download Report
               </span>
               {report.read_time_minutes && (
@@ -229,7 +229,7 @@ function ReportCard({ report }: { report: ResearchReport }) {
           </div>
 
           <div className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm font-medium">
-            <Download className="h-4 w-4" />
+            <DownloadSimple className="h-4 w-4" />
             Download PDF
           </div>
         </div>
@@ -242,8 +242,8 @@ function ReportCard({ report }: { report: ResearchReport }) {
 const categories = [
   { id: "all", label: "All Research", icon: BookOpen },
   { id: "whitepaper", label: "Whitepapers", icon: FileText },
-  { id: "analysis", label: "Market Analysis", icon: TrendingUp },
-  { id: "outlook", label: "Sector Outlook", icon: Building2 },
+  { id: "analysis", label: "Market Analysis", icon: TrendUp },
+  { id: "outlook", label: "Sector Outlook", icon: Buildings },
   { id: "country", label: "Country Reports", icon: Globe },
   { id: "quarterly", label: "Quarterly", icon: Briefcase },
 ];
@@ -274,7 +274,7 @@ export default function ResearchPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-primary">Research & Publications</span>
         </nav>
 
@@ -296,7 +296,7 @@ export default function ResearchPage() {
         {/* Search & Filter */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search reports..."
@@ -333,7 +333,7 @@ export default function ResearchPage() {
             onClick={() => mutate()}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            <RefreshCw className="h-4 w-4" />
+            <ArrowClockwise className="h-4 w-4" />
             Refresh
           </button>
         </div>

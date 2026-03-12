@@ -4,19 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Check,
-  ChevronRight,
-  Mail,
+  CaretRight,
+  Envelope,
   Bell,
   FileText,
   ArrowRight,
-  Library,
+  Books,
   Feather,
-  DatabaseZap,
-  Loader2,
+  Database,
+  CircleNotch,
   Newspaper,
-  TrendingUp,
+  TrendUp,
   Globe,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
@@ -28,7 +28,7 @@ const newsletters = [
     name: "Morning Brief",
     description: "Daily market summary and top stories delivered before the opening bell.",
     frequency: "Daily",
-    icon: <Mail className="h-5 w-5" />,
+    icon: <Envelope className="h-5 w-5" />,
     color: "text-primary",
     bgColor: "bg-primary/10",
     borderColor: "border-primary/20",
@@ -38,7 +38,7 @@ const newsletters = [
     name: "Finance Africa Quarterly",
     description: "Flagship journal with deep-dive reports on African financial markets.",
     frequency: "Quarterly",
-    icon: <Library className="h-5 w-5" />,
+    icon: <Books className="h-5 w-5" />,
     color: "text-[#2D3A8C] dark:text-[#6272C1]",
     bgColor: "bg-[#2D3A8C]/10 dark:bg-[#6272C1]/10",
     borderColor: "border-[#2D3A8C]/20 dark:border-[#6272C1]/20",
@@ -60,7 +60,7 @@ const newsletters = [
     name: "AfriFin Analytics",
     description: "Data-driven market intelligence with charts, metrics, and quant screens.",
     frequency: "Daily",
-    icon: <DatabaseZap className="h-5 w-5" />,
+    icon: <Database className="h-5 w-5" />,
     color: "text-[#0D7377] dark:text-[#2DD4BF]",
     bgColor: "bg-[#0D7377]/10 dark:bg-[#2DD4BF]/10",
     borderColor: "border-[#0D7377]/20 dark:border-[#2DD4BF]/20",
@@ -89,7 +89,7 @@ const newsletters = [
 ];
 
 const benefits = [
-  { icon: <TrendingUp className="h-6 w-6 text-primary" />, title: "Market Intelligence", description: "Stay ahead with real-time African market analysis and insights delivered to your inbox." },
+  { icon: <TrendUp className="h-6 w-6 text-primary" />, title: "Market Intelligence", description: "Stay ahead with real-time African market analysis and insights delivered to your inbox." },
   { icon: <Globe className="h-6 w-6 text-primary" />, title: "Pan-African Coverage", description: "15+ economies covered across Southern, East, West, and North Africa." },
   { icon: <FileText className="h-6 w-6 text-primary" />, title: "Expert Research", description: "Original research reports, sector deep-dives, and macro analysis from our team." },
   { icon: <Bell className="h-6 w-6 text-primary" />, title: "Never Miss a Beat", description: "Custom alerts and breaking news notifications for the events that matter most." },
@@ -239,7 +239,7 @@ export default function SubscribePage() {
                               onClick={(e) => e.stopPropagation()}
                               className={cn("inline-flex items-center gap-1 text-xs font-medium mt-1 hover:underline", nl.color)}
                             >
-                              Learn more <ChevronRight className="h-3 w-3" />
+                              Learn more <CaretRight className="h-3 w-3" />
                             </Link>
                           )}
                         </div>
@@ -265,7 +265,7 @@ export default function SubscribePage() {
                   <div className="bg-terminal-bg-secondary border border-terminal-border p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="h-10 w-10 bg-primary/10 flex items-center justify-center">
-                        <Mail className="h-5 w-5 text-primary" />
+                        <Envelope className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <h3 className="font-semibold">Subscribe for Free</h3>
@@ -292,7 +292,7 @@ export default function SubscribePage() {
                         className="w-full py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 btn-press"
                       >
                         {isSubmitting ? (
-                          <><Loader2 className="h-4 w-4 animate-spin" /> Subscribing...</>
+                          <><CircleNotch className="h-4 w-4 animate-spin" /> Subscribing...</>
                         ) : (
                           <>
                             Subscribe to {selectedNewsletters.length} Newsletter{selectedNewsletters.length !== 1 ? "s" : ""}
@@ -362,7 +362,7 @@ export default function SubscribePage() {
                 <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
                   <summary className="flex items-center justify-between cursor-pointer font-medium">
                     Is this really free?
-                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                    <CaretRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                   </summary>
                   <p className="mt-3 text-sm text-muted-foreground">
                     Yes, all our email newsletters are completely free. We believe in making African market intelligence accessible to everyone.
@@ -371,7 +371,7 @@ export default function SubscribePage() {
                 <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
                   <summary className="flex items-center justify-between cursor-pointer font-medium">
                     How often will I receive emails?
-                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                    <CaretRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                   </summary>
                   <p className="mt-3 text-sm text-muted-foreground">
                     It depends on which newsletters you subscribe to. The Morning Brief and AfriFin Analytics are daily, Finance Africa Insights is weekly, and Finance Africa Quarterly is once per quarter. Breaking news alerts are sent as events occur.
@@ -380,7 +380,7 @@ export default function SubscribePage() {
                 <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
                   <summary className="flex items-center justify-between cursor-pointer font-medium">
                     Can I unsubscribe anytime?
-                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                    <CaretRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                   </summary>
                   <p className="mt-3 text-sm text-muted-foreground">
                     Absolutely. Every email includes a one-click unsubscribe link. You can also manage your preferences from your profile settings.
@@ -389,7 +389,7 @@ export default function SubscribePage() {
                 <details className="group p-4 bg-terminal-bg-secondary border border-terminal-border">
                   <summary className="flex items-center justify-between cursor-pointer font-medium">
                     Can I subscribe to multiple newsletters?
-                    <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                    <CaretRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                   </summary>
                   <p className="mt-3 text-sm text-muted-foreground">
                     Yes! Select as many newsletters as you like. Each one covers different aspects of African markets, so subscribing to multiple gives you the most comprehensive coverage.

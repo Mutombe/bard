@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
-  Send,
+  MagnifyingGlass,
+  PaperPlaneTilt,
   Clock,
   Users,
   Eye,
-  Edit,
-  Trash2,
+  PencilSimple,
+  Trash,
   CheckCircle,
-  BarChart3,
-  Loader2,
-  Mail,
-} from "lucide-react";
+  ChartBar,
+  CircleNotch,
+  Envelope,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { adminService, type NewsletterStats } from "@/services/api/admin";
 import { toast } from "sonner";
@@ -107,12 +107,12 @@ export default function NewslettersPage() {
     {
       label: "Newsletters Sent",
       value: stats?.newsletters_sent?.toLocaleString() || "0",
-      icon: Send
+      icon: PaperPlaneTilt
     },
     {
       label: "Avg Open Rate",
       value: stats?.avg_open_rate ? `${stats.avg_open_rate}%` : "N/A",
-      icon: BarChart3
+      icon: ChartBar
     },
   ];
 
@@ -160,7 +160,7 @@ export default function NewslettersPage() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search newsletters..."
@@ -200,12 +200,12 @@ export default function NewslettersPage() {
         <div className="divide-y divide-terminal-border">
           {isLoading ? (
             <div className="p-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-brand-orange" />
+              <CircleNotch className="h-8 w-8 animate-spin mx-auto text-brand-orange" />
               <p className="text-muted-foreground mt-2">Loading newsletters...</p>
             </div>
           ) : filteredNewsletters.length === 0 ? (
             <div className="p-8 text-center">
-              <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <Envelope className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No newsletters yet</h3>
               <p className="text-muted-foreground mb-4">
                 Create your first newsletter to engage with your subscribers.
@@ -270,11 +270,11 @@ export default function NewslettersPage() {
                     href={`/admin/newsletters/${newsletter.id}`}
                     className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
                   >
-                    <Edit className="h-4 w-4" />
+                    <PencilSimple className="h-4 w-4" />
                   </Link>
                   {newsletter.status === "draft" && (
                     <button className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded">
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                     </button>
                   )}
                 </div>

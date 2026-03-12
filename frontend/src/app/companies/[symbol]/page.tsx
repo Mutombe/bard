@@ -4,13 +4,13 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import {
-  TrendingUp,
-  TrendingDown,
-  ChevronRight,
+  TrendUp,
+  TrendDown,
+  CaretRight,
   Calendar,
-  AlertCircle,
+  WarningCircle,
   ArrowLeft,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
@@ -186,7 +186,7 @@ export default function CompanyDetailPage() {
     return (
       <MainLayout>
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-          <AlertCircle className="h-16 w-16 text-market-down mx-auto mb-4" />
+          <WarningCircle className="h-16 w-16 text-market-down mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Company Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The company &quot;{symbol}&quot; doesn&apos;t exist or couldn&apos;t be loaded.
@@ -229,11 +229,11 @@ export default function CompanyDetailPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/markets" className="hover:text-foreground">Markets</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/companies" className="hover:text-foreground">Companies</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-foreground">{company.symbol}</span>
         </nav>
 
@@ -263,7 +263,7 @@ export default function CompanyDetailPage() {
                 "flex items-center justify-end gap-2 text-lg font-semibold",
                 isUp ? "text-market-up" : "text-market-down"
               )}>
-                {isUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                {isUp ? <TrendUp className="h-5 w-5" /> : <TrendDown className="h-5 w-5" />}
                 <span>{isUp ? "+" : ""}{change.toFixed(2)}</span>
                 <span>({isUp ? "+" : ""}{changePercent.toFixed(2)}%)</span>
               </div>

@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, TrendingUp, TrendingDown, Building2, DollarSign } from "lucide-react";
+import {
+  Calendar,
+  TrendUp,
+  TrendDown,
+  Buildings,
+  CurrencyDollar,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useCompanies } from "@/hooks";
@@ -103,7 +109,7 @@ export default function EarningsPage() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-brand-orange/10 flex items-center justify-center">
-                          <Building2 className="h-5 w-5 text-brand-orange" />
+                          <Buildings className="h-5 w-5 text-brand-orange" />
                         </div>
                         <div>
                           <div className="font-medium">{item.symbol}</div>
@@ -133,7 +139,7 @@ export default function EarningsPage() {
           {/* Recent Earnings */}
           <div className="p-5 rounded-lg bg-terminal-bg-elevated border border-terminal-border">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-brand-orange" />
+              <CurrencyDollar className="h-5 w-5 text-brand-orange" />
               Recent Results
             </h2>
 
@@ -155,7 +161,7 @@ export default function EarningsPage() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-brand-orange/10 flex items-center justify-center">
-                          <Building2 className="h-5 w-5 text-brand-orange" />
+                          <Buildings className="h-5 w-5 text-brand-orange" />
                         </div>
                         <div>
                           <div className="font-medium">{item.symbol}</div>
@@ -171,9 +177,9 @@ export default function EarningsPage() {
                         isBeat ? "text-green-500" : "text-red-500"
                       )}>
                         {isBeat ? (
-                          <TrendingUp className="h-4 w-4" />
+                          <TrendUp className="h-4 w-4" />
                         ) : (
-                          <TrendingDown className="h-4 w-4" />
+                          <TrendDown className="h-4 w-4" />
                         )}
                         {item.surprise}
                       </div>

@@ -5,30 +5,30 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Save,
+  FloppyDisk,
   Eye,
   Clock,
   Image as ImageIcon,
   Link as LinkIcon,
-  Bold,
-  Italic,
-  List,
-  ListOrdered,
-  Quote,
+  TextB,
+  TextItalic,
+  ListBullets,
+  ListNumbers,
+  Quotes,
   Code,
-  Heading1,
-  Heading2,
+  TextHOne,
+  TextHTwo,
   Plus,
   X,
-  Upload,
-  Trash2,
-  Loader2,
-  AlertCircle,
-  Undo,
-  Redo,
-  Maximize2,
-  Minimize2,
-} from "lucide-react";
+  UploadSimple,
+  Trash,
+  CircleNotch,
+  WarningCircle,
+  ArrowCounterClockwise,
+  ArrowClockwise,
+  ArrowsOut,
+  ArrowsIn,
+} from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 import { editorialService, type Article } from "@/services/api/editorial";
@@ -393,7 +393,7 @@ export default function EditArticlePage() {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto text-center py-12">
-        <AlertCircle className="h-12 w-12 text-market-down mx-auto mb-4" />
+        <WarningCircle className="h-12 w-12 text-market-down mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-2">Error Loading Article</h2>
         <p className="text-muted-foreground mb-6">{error}</p>
         <Link
@@ -432,7 +432,7 @@ export default function EditArticlePage() {
             onClick={() => setShowDeleteConfirm(true)}
             className="px-4 py-2 text-market-down border border-market-down/30 rounded-md hover:bg-market-down/10 transition-colors text-sm flex items-center gap-2"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash className="h-4 w-4" />
             Delete
           </button>
           <button
@@ -449,12 +449,12 @@ export default function EditArticlePage() {
           >
             {isSaving ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
                 Saving...
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" />
+                <FloppyDisk className="h-4 w-4" />
                 Save Changes
               </>
             )}
@@ -486,7 +486,7 @@ export default function EditArticlePage() {
               >
                 {isDeleting ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <CircleNotch className="h-4 w-4 animate-spin" />
                     Deleting...
                   </>
                 ) : (
@@ -569,27 +569,27 @@ export default function EditArticlePage() {
             {/* Toolbar */}
             <div className="flex flex-wrap items-center gap-1 p-2 border-b border-terminal-border bg-terminal-bg">
               <button onClick={formatBold} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Bold (Ctrl+B)">
-                <Bold className="h-4 w-4" />
+                <TextB className="h-4 w-4" />
               </button>
               <button onClick={formatItalic} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Italic (Ctrl+I)">
-                <Italic className="h-4 w-4" />
+                <TextItalic className="h-4 w-4" />
               </button>
               <div className="w-px h-6 bg-terminal-border mx-1" />
               <button onClick={formatHeading1} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Heading 1">
-                <Heading1 className="h-4 w-4" />
+                <TextHOne className="h-4 w-4" />
               </button>
               <button onClick={formatHeading2} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Heading 2">
-                <Heading2 className="h-4 w-4" />
+                <TextHTwo className="h-4 w-4" />
               </button>
               <div className="w-px h-6 bg-terminal-border mx-1" />
               <button onClick={formatBulletList} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Bullet List">
-                <List className="h-4 w-4" />
+                <ListBullets className="h-4 w-4" />
               </button>
               <button onClick={formatNumberedList} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Numbered List">
-                <ListOrdered className="h-4 w-4" />
+                <ListNumbers className="h-4 w-4" />
               </button>
               <button onClick={formatQuote} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Quote">
-                <Quote className="h-4 w-4" />
+                <Quotes className="h-4 w-4" />
               </button>
               <button onClick={formatCode} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Code">
                 <Code className="h-4 w-4" />
@@ -608,7 +608,7 @@ export default function EditArticlePage() {
                 className="p-2 hover:bg-terminal-bg-secondary rounded disabled:opacity-30"
                 title="Undo (Ctrl+Z)"
               >
-                <Undo className="h-4 w-4" />
+                <ArrowCounterClockwise className="h-4 w-4" />
               </button>
               <button
                 onClick={handleRedo}
@@ -616,14 +616,14 @@ export default function EditArticlePage() {
                 className="p-2 hover:bg-terminal-bg-secondary rounded disabled:opacity-30"
                 title="Redo (Ctrl+Y)"
               >
-                <Redo className="h-4 w-4" />
+                <ArrowClockwise className="h-4 w-4" />
               </button>
               <button
                 onClick={() => setIsFullscreen(!isFullscreen)}
                 className="p-2 hover:bg-terminal-bg-secondary rounded"
                 title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
               >
-                {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                {isFullscreen ? <ArrowsIn className="h-4 w-4" /> : <ArrowsOut className="h-4 w-4" />}
               </button>
             </div>
             {/* Textarea */}

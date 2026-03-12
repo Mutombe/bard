@@ -5,14 +5,14 @@ import Link from "next/link";
 import {
   Feather,
   Check,
-  ChevronRight,
-  Loader2,
-  Quote,
-  Scale,
+  CaretRight,
+  CircleNotch,
+  Quotes,
+  Scales,
   Compass,
-  MessageCircle,
-  Sparkles,
-} from "lucide-react";
+  ChatCircle,
+  Sparkle,
+} from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
@@ -34,12 +34,12 @@ const highlights = [
 
 const focusAreas = [
   {
-    icon: <Quote className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
+    icon: <Quotes className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Editorial Commentary",
     description: "Sharp, opinionated analysis that goes beyond the headlines to explain why markets are moving.",
   },
   {
-    icon: <Scale className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
+    icon: <Scales className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Macro & Policy",
     description: "Central bank decisions, fiscal policy shifts, and their impact on African asset classes.",
   },
@@ -49,7 +49,7 @@ const focusAreas = [
     description: "Tactical insights on sector rotation, valuation opportunities, and risk management.",
   },
   {
-    icon: <MessageCircle className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
+    icon: <ChatCircle className="h-5 w-5 text-[#B45309] dark:text-[#F59E0B]" />,
     title: "Expert Voices",
     description: "Perspectives from Africa's leading investors, regulators, and corporate leaders.",
   },
@@ -101,9 +101,9 @@ export default function FinanceAfricaInsightsPage() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
-          <ChevronRight className="h-3 w-3" />
+          <CaretRight className="h-3 w-3" />
           <span>Publications</span>
-          <ChevronRight className="h-3 w-3" />
+          <CaretRight className="h-3 w-3" />
           <span className="text-foreground">Finance Africa Insights</span>
         </nav>
 
@@ -169,7 +169,7 @@ export default function FinanceAfricaInsightsPage() {
               <ul className="space-y-3">
                 {highlights.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm">
-                    <ChevronRight className={`h-4 w-4 ${ACCENT} flex-shrink-0 mt-0.5`} />
+                    <CaretRight className={`h-4 w-4 ${ACCENT} flex-shrink-0 mt-0.5`} />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -198,7 +198,7 @@ export default function FinanceAfricaInsightsPage() {
                     </div>
                     {error && <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">{error}</div>}
                     <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-[#B45309] dark:bg-[#F59E0B] text-white dark:text-black font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                      {isSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
+                      {isSubmitting ? (<><CircleNotch className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
                     </button>
                     <p className="text-xs text-muted-foreground text-center mt-3">Free email delivery. Unsubscribe anytime.</p>
                   </form>
@@ -207,7 +207,7 @@ export default function FinanceAfricaInsightsPage() {
 
               <div className={`relative overflow-hidden bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
                 <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="fai-cta-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#fai-cta-grid)"/></svg></div>
-                <Sparkles className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
+                <Sparkle className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">Want the full platform?</p>
                 <p className="text-xs text-muted-foreground mb-4">Get all three publications plus breaking news alerts and weekly digests — free.</p>
                 <Link href="/subscribe" className={`inline-block w-full py-2 border border-[#B45309] dark:border-[#F59E0B] ${ACCENT} text-sm font-medium hover:bg-[#B45309] hover:text-white dark:hover:bg-[#F59E0B] dark:hover:text-black transition-colors`}>

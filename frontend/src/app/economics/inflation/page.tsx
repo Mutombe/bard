@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { TrendingUp, ArrowLeft, TrendingDown } from "lucide-react";
+import { TrendUp, ArrowLeft, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -26,7 +26,7 @@ export default function InflationPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-brand-orange" />
+              <TrendUp className="h-6 w-6 text-brand-orange" />
               Inflation Rates
             </h1>
             <p className="text-muted-foreground">Consumer Price Index by country</p>
@@ -58,7 +58,7 @@ export default function InflationPage() {
                         "inline-flex items-center gap-1 text-sm font-mono",
                         isDecreasing ? "text-market-up" : "text-market-down"
                       )}>
-                        {isDecreasing ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+                        {isDecreasing ? <TrendDown className="h-3 w-3" /> : <TrendUp className="h-3 w-3" />}
                         {country.previous.toFixed(1)}%
                       </span>
                     </td>

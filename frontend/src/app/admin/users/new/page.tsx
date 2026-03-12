@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Save,
-  CircleUserRound,
-  Mail,
+  FloppyDisk,
+  UserCircle,
+  Envelope,
   Lock,
   Shield,
   CreditCard,
   Eye,
-  EyeOff,
-} from "lucide-react";
+  EyeSlash,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 const roles = [
@@ -120,7 +120,7 @@ export default function NewUserPage() {
           disabled={isSaving}
           className="px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors text-sm flex items-center gap-2"
         >
-          <Save className="h-4 w-4" />
+          <FloppyDisk className="h-4 w-4" />
           {isSaving ? "Creating..." : "Create User"}
         </button>
       </div>
@@ -135,7 +135,7 @@ export default function NewUserPage() {
         {/* Basic Info */}
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <CircleUserRound className="h-4 w-4" />
+            <UserCircle className="h-4 w-4" />
             Basic Information
           </h3>
           <div className="space-y-4">
@@ -168,7 +168,7 @@ export default function NewUserPage() {
 
             <div>
               <label className="block text-sm font-medium mb-2">
-                <Mail className="h-4 w-4 inline mr-1" />
+                <Envelope className="h-4 w-4 inline mr-1" />
                 Email <span className="text-market-down">*</span>
               </label>
               <input
@@ -204,7 +204,7 @@ export default function NewUserPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>

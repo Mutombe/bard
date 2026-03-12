@@ -4,14 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  LineChart,
-  Search,
+  ChartLine,
+  MagnifyingGlass,
   Clock,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  Filter,
-} from "lucide-react";
+  TrendUp,
+  TrendDown,
+  ChartBar,
+  Funnel,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -135,9 +135,9 @@ export default function AnalysisPage() {
 
   const getSentimentIcon = (sentiment: Analysis["sentiment"]) => {
     switch (sentiment) {
-      case "bullish": return <TrendingUp className="h-3 w-3" />;
-      case "bearish": return <TrendingDown className="h-3 w-3" />;
-      default: return <BarChart3 className="h-3 w-3" />;
+      case "bullish": return <TrendUp className="h-3 w-3" />;
+      case "bearish": return <TrendDown className="h-3 w-3" />;
+      default: return <ChartBar className="h-3 w-3" />;
     }
   };
 
@@ -148,7 +148,7 @@ export default function AnalysisPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-              <LineChart className="h-6 w-6 text-brand-orange" />
+              <ChartLine className="h-6 w-6 text-brand-orange" />
               Analysis
             </h1>
             <p className="text-muted-foreground">
@@ -156,7 +156,7 @@ export default function AnalysisPage() {
             </p>
           </div>
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search analysis..."
@@ -235,7 +235,7 @@ export default function AnalysisPage() {
 
         {filteredAnalyses.length === 0 && (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
-            <LineChart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <ChartLine className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No analysis found</h3>
             <p className="text-muted-foreground">
               Try adjusting your search or filter criteria.

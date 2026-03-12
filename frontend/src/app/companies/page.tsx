@@ -3,14 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Search,
-  ChevronRight,
-  TrendingUp,
-  TrendingDown,
-  Building2,
-  ArrowUpDown,
-  Loader2,
-} from "lucide-react";
+  MagnifyingGlass,
+  CaretRight,
+  TrendUp,
+  TrendDown,
+  Buildings,
+  ArrowsDownUp,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -117,7 +117,7 @@ export default function CompaniesPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-              <Building2 className="h-6 w-6 text-brand-orange" />
+              <Buildings className="h-6 w-6 text-brand-orange" />
               Companies
             </h1>
             <p className="text-muted-foreground">
@@ -127,7 +127,7 @@ export default function CompaniesPage() {
 
           {/* Search */}
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search by name or symbol..."
@@ -172,7 +172,7 @@ export default function CompaniesPage() {
               className="col-span-3 flex items-center gap-1 hover:text-foreground"
             >
               Company
-              <ArrowUpDown className="h-3 w-3" />
+              <ArrowsDownUp className="h-3 w-3" />
             </button>
             <div className="col-span-2 text-center">Exchange</div>
             <button
@@ -180,28 +180,28 @@ export default function CompaniesPage() {
               className="col-span-2 flex items-center justify-end gap-1 hover:text-foreground"
             >
               Price
-              <ArrowUpDown className="h-3 w-3" />
+              <ArrowsDownUp className="h-3 w-3" />
             </button>
             <button
               onClick={() => handleSort("price_change_percent")}
               className="col-span-2 flex items-center justify-end gap-1 hover:text-foreground"
             >
               Change
-              <ArrowUpDown className="h-3 w-3" />
+              <ArrowsDownUp className="h-3 w-3" />
             </button>
             <button
               onClick={() => handleSort("volume")}
               className="col-span-1 text-right hidden md:flex items-center justify-end gap-1 hover:text-foreground"
             >
               Volume
-              <ArrowUpDown className="h-3 w-3" />
+              <ArrowsDownUp className="h-3 w-3" />
             </button>
             <button
               onClick={() => handleSort("market_cap")}
               className="col-span-2 text-right hidden lg:flex items-center justify-end gap-1 hover:text-foreground"
             >
               Mkt Cap
-              <ArrowUpDown className="h-3 w-3" />
+              <ArrowsDownUp className="h-3 w-3" />
             </button>
           </div>
 
@@ -244,9 +244,9 @@ export default function CompaniesPage() {
                       )}
                     >
                       {isUp ? (
-                        <TrendingUp className="h-4 w-4" />
+                        <TrendUp className="h-4 w-4" />
                       ) : (
-                        <TrendingDown className="h-4 w-4" />
+                        <TrendDown className="h-4 w-4" />
                       )}
                       <span className="font-mono">
                         {isUp ? "+" : ""}
@@ -264,7 +264,7 @@ export default function CompaniesPage() {
               })
             ) : (
               <div className="p-12 text-center">
-                <Building2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+                <Buildings className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
                 <h3 className="font-medium mb-2">No companies found</h3>
                 <p className="text-sm text-muted-foreground">
                   {searchQuery

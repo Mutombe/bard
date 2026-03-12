@@ -3,16 +3,16 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import Image from "next/image";
 import {
-  Search,
+  MagnifyingGlass,
   X,
-  Loader2,
+  CircleNotch,
   Image as ImageIcon,
   Check,
-  ExternalLink,
-  Upload,
+  ArrowSquareOut,
+  UploadSimple,
   FolderOpen,
   Camera,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { mediaService, type MediaFile } from "@/services/api/media";
 import { toast } from "sonner";
@@ -274,7 +274,7 @@ export function ImagePicker({
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Upload className="h-4 w-4" />
+              <UploadSimple className="h-4 w-4" />
               Upload
             </button>
           </div>
@@ -287,7 +287,7 @@ export function ImagePicker({
             <div className="p-4">
               {/* Search */}
               <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   value={librarySearch}
@@ -300,7 +300,7 @@ export function ImagePicker({
               {/* Grid */}
               {libraryLoading ? (
                 <div className="flex items-center justify-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <CircleNotch className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : libraryImages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
@@ -357,7 +357,7 @@ export function ImagePicker({
               {/* Search */}
               <form onSubmit={handleUnsplashSearch} className="flex gap-2 mb-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={unsplashQuery}
@@ -372,7 +372,7 @@ export function ImagePicker({
                   disabled={unsplashLoading || !unsplashQuery.trim()}
                   className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 text-sm disabled:opacity-50 flex items-center gap-2"
                 >
-                  {unsplashLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  {unsplashLoading ? <CircleNotch className="h-4 w-4 animate-spin" /> : <MagnifyingGlass className="h-4 w-4" />}
                   Search
                 </button>
               </form>
@@ -404,7 +404,7 @@ export function ImagePicker({
                 </div>
               ) : unsplashLoading && unsplashImages.length === 0 ? (
                 <div className="flex items-center justify-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <CircleNotch className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : unsplashImages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
@@ -452,7 +452,7 @@ export function ImagePicker({
                         disabled={unsplashLoading}
                         className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary text-sm flex items-center gap-2"
                       >
-                        {unsplashLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {unsplashLoading && <CircleNotch className="h-4 w-4 animate-spin" />}
                         Load More
                       </button>
                     </div>
@@ -487,7 +487,7 @@ export function ImagePicker({
               >
                 {uploading ? (
                   <div className="flex flex-col items-center">
-                    <Loader2 className="h-12 w-12 mb-4 text-primary animate-spin" />
+                    <CircleNotch className="h-12 w-12 mb-4 text-primary animate-spin" />
                     <h3 className="font-medium mb-2">Uploading...</h3>
                     <div className="w-64 h-2 bg-terminal-bg-secondary rounded-full overflow-hidden">
                       <div
@@ -499,7 +499,7 @@ export function ImagePicker({
                   </div>
                 ) : (
                   <>
-                    <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <UploadSimple className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
                     <h3 className="font-medium mb-2">Drop images here to upload</h3>
                     <p className="text-sm text-muted-foreground mb-4">
                       or click to select files
@@ -541,7 +541,7 @@ export function ImagePicker({
                     className="text-primary hover:underline flex items-center gap-1"
                   >
                     Unsplash
-                    <ExternalLink className="h-3 w-3" />
+                    <ArrowSquareOut className="h-3 w-3" />
                   </a>
                 </>
               )}

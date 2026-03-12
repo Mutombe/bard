@@ -4,19 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  CircleUserRound,
-  Mail,
+  UserCircle,
+  Envelope,
   Phone,
   MapPin,
   Calendar,
-  Edit,
+  PencilSimple,
   Camera,
   Shield,
   Bell,
   Newspaper,
-  ChevronRight,
-  Loader2,
-} from "lucide-react";
+  CaretRight,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -74,7 +74,7 @@ export default function ProfilePage() {
       <MainLayout>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
           <div className="max-w-md mx-auto text-center">
-            <CircleUserRound className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+            <UserCircle className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
             <h1 className="text-2xl font-bold mb-4">Your Profile</h1>
             <p className="text-muted-foreground mb-6">
               Sign in to view and manage your profile.
@@ -121,7 +121,7 @@ export default function ProfilePage() {
                     className="absolute bottom-0 right-0 p-2 bg-brand-orange rounded-full text-white hover:bg-brand-orange-dark disabled:opacity-50"
                   >
                     {isUploadingAvatar ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CircleNotch className="h-4 w-4 animate-spin" />
                     ) : (
                       <Camera className="h-4 w-4" />
                     )}
@@ -146,7 +146,7 @@ export default function ProfilePage() {
                   onClick={() => setIsEditing(!isEditing)}
                   className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors text-sm"
                 >
-                  <Edit className="h-4 w-4" />
+                  <PencilSimple className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function ProfilePage() {
                     <Shield className="h-5 w-5 text-muted-foreground" />
                     <span>Account Settings</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <CaretRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 <Link
                   href="/notifications"
@@ -265,7 +265,7 @@ export default function ProfilePage() {
                     <Bell className="h-5 w-5 text-muted-foreground" />
                     <span>Notification Preferences</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <CaretRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
                 <Link
                   href="/subscribe"
@@ -275,7 +275,7 @@ export default function ProfilePage() {
                     <Newspaper className="h-5 w-5 text-muted-foreground" />
                     <span>Newsletter Subscriptions</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <CaretRight className="h-4 w-4 text-muted-foreground" />
                 </Link>
               </div>
             </div>

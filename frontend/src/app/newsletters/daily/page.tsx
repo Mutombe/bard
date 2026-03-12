@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, ArrowLeft, Clock, Calendar } from "lucide-react";
+import { Envelope, ArrowLeft, Clock, Calendar } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 const recentIssues = [
@@ -22,7 +22,7 @@ export default function DailyNewsletterPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Mail className="h-6 w-6 text-brand-orange" />
+              <Envelope className="h-6 w-6 text-brand-orange" />
               Daily Briefing
             </h1>
             <p className="text-muted-foreground">Your morning market wrap delivered daily at 6:00 AM</p>
@@ -63,7 +63,7 @@ export default function DailyNewsletterPage() {
                   <span>Delivered at 6:00 AM SAST</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-brand-orange" />
+                  <Envelope className="h-4 w-4 text-brand-orange" />
                   <span>Monday - Friday</span>
                 </div>
               </div>

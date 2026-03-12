@@ -6,31 +6,31 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   ArrowLeft,
-  Save,
+  FloppyDisk,
   Eye,
   Clock,
   Image as ImageIcon,
   Plus,
   X,
-  Upload,
-  Loader2,
+  UploadSimple,
+  CircleNotch,
   CheckCircle,
-  AlertCircle,
-  Maximize2,
-  Minimize2,
-  Settings,
-  ChevronDown,
-  ChevronUp,
-  Sparkles,
+  WarningCircle,
+  ArrowsOut,
+  ArrowsIn,
+  GearSix,
+  CaretDown,
+  CaretUp,
+  Sparkle,
   Calendar,
   Tag,
-  Bookmark,
+  BookmarkSimple,
   FileText,
-  MoreHorizontal,
+  DotsThree,
   Globe,
   Lock,
   Star,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
@@ -64,8 +64,8 @@ const availableTags = [
 
 const contentTypes = [
   { value: "news", label: "News", icon: FileText },
-  { value: "analysis", label: "Analysis", icon: Sparkles },
-  { value: "opinion", label: "Opinion", icon: Bookmark },
+  { value: "analysis", label: "Analysis", icon: Sparkle },
+  { value: "opinion", label: "Opinion", icon: BookmarkSimple },
   { value: "market_update", label: "Market Update", icon: Globe },
 ];
 
@@ -320,7 +320,7 @@ export default function NewArticlePage() {
               className="p-2 hover:bg-terminal-bg-secondary rounded-md transition-colors hidden sm:flex"
               title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
             >
-              {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              {isFullscreen ? <ArrowsIn className="h-4 w-4" /> : <ArrowsOut className="h-4 w-4" />}
             </button>
 
             <button
@@ -331,7 +331,7 @@ export default function NewArticlePage() {
               )}
               title="Toggle settings"
             >
-              <Settings className="h-4 w-4" />
+              <GearSix className="h-4 w-4" />
             </button>
 
             <button
@@ -339,7 +339,7 @@ export default function NewArticlePage() {
               disabled={isSaving || success}
               className="px-3 py-1.5 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
             >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isSaving ? <CircleNotch className="h-4 w-4 animate-spin" /> : <FloppyDisk className="h-4 w-4" />}
               <span className="hidden sm:inline">Save</span>
             </button>
 
@@ -349,7 +349,7 @@ export default function NewArticlePage() {
               className="px-4 py-1.5 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-50"
             >
               {isSaving ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
               ) : success ? (
                 <CheckCircle className="h-4 w-4" />
               ) : (
@@ -365,7 +365,7 @@ export default function NewArticlePage() {
       {error && (
         <div className="max-w-4xl mx-auto px-4 mt-4">
           <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+            <WarningCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
             <p className="text-red-400 text-sm">{error}</p>
             <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-300">
               <X className="h-4 w-4" />
@@ -490,7 +490,7 @@ export default function NewArticlePage() {
               {/* Publish Settings */}
               <div className="bg-terminal-bg-secondary rounded-xl border border-terminal-border p-5">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Settings className="h-4 w-4 text-primary" />
+                  <GearSix className="h-4 w-4 text-primary" />
                   Publish Settings
                 </h3>
 

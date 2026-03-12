@@ -3,16 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Filter,
-  Search,
-  ChevronDown,
-  TrendingUp,
-  TrendingDown,
-  RotateCcw,
-  Download,
+  Funnel,
+  MagnifyingGlass,
+  CaretDown,
+  TrendUp,
+  TrendDown,
+  ArrowCounterClockwise,
+  DownloadSimple,
   Star,
-  ArrowUpDown,
-} from "lucide-react";
+  ArrowsDownUp,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -129,7 +129,7 @@ export default function ScreenerPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-              <Filter className="h-6 w-6 text-brand-orange" />
+              <Funnel className="h-6 w-6 text-brand-orange" />
               Stock Screener
             </h1>
             <p className="text-muted-foreground">
@@ -141,11 +141,11 @@ export default function ScreenerPage() {
               onClick={resetFilters}
               className="flex items-center gap-2 px-4 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
             >
-              <RotateCcw className="h-4 w-4" />
+              <ArrowCounterClockwise className="h-4 w-4" />
               Reset
             </button>
             <button className="flex items-center gap-2 px-4 py-2 text-sm bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors">
-              <Download className="h-4 w-4" />
+              <DownloadSimple className="h-4 w-4" />
               Export
             </button>
           </div>
@@ -159,7 +159,7 @@ export default function ScreenerPage() {
               <div>
                 <label className="block text-sm font-medium mb-2">Search</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
                     placeholder="Symbol or name..."
@@ -274,27 +274,27 @@ export default function ScreenerPage() {
                     <th className="text-left p-4 hidden lg:table-cell">Sector</th>
                     <th className="text-right p-4 cursor-pointer hover:text-foreground" onClick={() => handleSort("price")}>
                       <span className="flex items-center justify-end gap-1">
-                        Price <ArrowUpDown className="h-3 w-3" />
+                        Price <ArrowsDownUp className="h-3 w-3" />
                       </span>
                     </th>
                     <th className="text-right p-4 cursor-pointer hover:text-foreground" onClick={() => handleSort("changePercent")}>
                       <span className="flex items-center justify-end gap-1">
-                        Change <ArrowUpDown className="h-3 w-3" />
+                        Change <ArrowsDownUp className="h-3 w-3" />
                       </span>
                     </th>
                     <th className="text-right p-4 cursor-pointer hover:text-foreground hidden md:table-cell" onClick={() => handleSort("marketCap")}>
                       <span className="flex items-center justify-end gap-1">
-                        Mkt Cap <ArrowUpDown className="h-3 w-3" />
+                        Mkt Cap <ArrowsDownUp className="h-3 w-3" />
                       </span>
                     </th>
                     <th className="text-right p-4 cursor-pointer hover:text-foreground hidden lg:table-cell" onClick={() => handleSort("pe")}>
                       <span className="flex items-center justify-end gap-1">
-                        P/E <ArrowUpDown className="h-3 w-3" />
+                        P/E <ArrowsDownUp className="h-3 w-3" />
                       </span>
                     </th>
                     <th className="text-right p-4 cursor-pointer hover:text-foreground hidden lg:table-cell" onClick={() => handleSort("dividend")}>
                       <span className="flex items-center justify-end gap-1">
-                        Div % <ArrowUpDown className="h-3 w-3" />
+                        Div % <ArrowsDownUp className="h-3 w-3" />
                       </span>
                     </th>
                     <th className="text-right p-4 hidden xl:table-cell">Volume</th>
@@ -321,9 +321,9 @@ export default function ScreenerPage() {
                           stock.change >= 0 ? "text-market-up" : "text-market-down"
                         )}>
                           {stock.change >= 0 ? (
-                            <TrendingUp className="h-3 w-3" />
+                            <TrendUp className="h-3 w-3" />
                           ) : (
-                            <TrendingDown className="h-3 w-3" />
+                            <TrendDown className="h-3 w-3" />
                           )}
                           {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
                         </span>
@@ -352,7 +352,7 @@ export default function ScreenerPage() {
 
               {filteredStocks.length === 0 && (
                 <div className="p-12 text-center">
-                  <Filter className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <Funnel className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-medium mb-2">No stocks found</h3>
                   <p className="text-muted-foreground">
                     Try adjusting your filters to see more results.

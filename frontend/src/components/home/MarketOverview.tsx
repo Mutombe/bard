@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
+import { TrendUp, TrendDown, Minus, ArrowClockwise } from "@phosphor-icons/react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { fetchIndices } from "@/store/slices/marketSlice";
 import { cn, formatPrice, formatPercent } from "@/lib/utils";
@@ -40,7 +40,7 @@ export function MarketOverview() {
           disabled={indicesLoading}
           className="gap-2"
         >
-          <RefreshCw
+          <ArrowClockwise
             className={cn("h-4 w-4", indicesLoading && "animate-spin")}
           />
           Refresh
@@ -76,7 +76,7 @@ export function MarketOverview() {
               : isDown
                 ? "bg-market-down-bg"
                 : "bg-terminal-bg-elevated";
-            const Icon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
+            const Icon = isUp ? TrendUp : isDown ? TrendDown : Minus;
 
             return (
               <motion.div

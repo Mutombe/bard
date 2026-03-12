@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { TrendingDown, ArrowLeft, Loader2 } from "lucide-react";
+import { TrendDown, ArrowLeft, CircleNotch } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
 
@@ -36,7 +36,7 @@ export default function LosersPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingDown className="h-6 w-6 text-market-down" />
+              <TrendDown className="h-6 w-6 text-market-down" />
               Top Losers
             </h1>
             <p className="text-muted-foreground">Biggest decliners today</p>
@@ -45,7 +45,7 @@ export default function LosersPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-orange" />
+            <CircleNotch className="h-8 w-8 animate-spin text-brand-orange" />
           </div>
         ) : (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">

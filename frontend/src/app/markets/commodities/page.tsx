@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Target, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { Target, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -48,9 +48,9 @@ export default function CommoditiesPage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono font-semibold text-brand-orange">{commodity.symbol}</span>
                   {isUp ? (
-                    <TrendingUp className="h-4 w-4 text-market-up" />
+                    <TrendUp className="h-4 w-4 text-market-up" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-market-down" />
+                    <TrendDown className="h-4 w-4 text-market-down" />
                   )}
                 </div>
                 <div className="text-sm text-muted-foreground mb-3">{commodity.name}</div>

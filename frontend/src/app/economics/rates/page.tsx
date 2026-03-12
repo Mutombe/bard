@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Calculator, ArrowLeft, TrendingUp, TrendingDown, MinusCircle } from "lucide-react";
+import {
+  Calculator,
+  ArrowLeft,
+  TrendUp,
+  TrendDown,
+  MinusCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -19,9 +25,9 @@ const ratesData = [
 function getChangeIcon(change: string) {
   switch (change) {
     case "hike":
-      return <TrendingUp className="h-4 w-4 text-market-down" />;
+      return <TrendUp className="h-4 w-4 text-market-down" />;
     case "cut":
-      return <TrendingDown className="h-4 w-4 text-market-up" />;
+      return <TrendDown className="h-4 w-4 text-market-up" />;
     default:
       return <MinusCircle className="h-4 w-4 text-muted-foreground" />;
   }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { TrendingUp, ArrowLeft, Loader2 } from "lucide-react";
+import { TrendUp, ArrowLeft, CircleNotch } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
@@ -37,7 +37,7 @@ export default function GainersPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-market-up" />
+              <TrendUp className="h-6 w-6 text-market-up" />
               Top Gainers
             </h1>
             <p className="text-muted-foreground">Best performing stocks today</p>
@@ -46,7 +46,7 @@ export default function GainersPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-orange" />
+            <CircleNotch className="h-8 w-8 animate-spin text-brand-orange" />
           </div>
         ) : (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">

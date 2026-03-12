@@ -6,16 +6,16 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import {
   Newspaper,
-  Search,
+  MagnifyingGlass,
   Clock,
-  CircleUserRound,
-  Zap,
-  BarChart3,
-  Building2,
-  Landmark,
+  UserCircle,
+  Lightning,
+  ChartBar,
+  Buildings,
+  Bank,
   Users,
   Cpu,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -42,7 +42,7 @@ const categoryData: Record<string, CategoryData> = {
   breaking: {
     name: "Breaking News",
     description: "Latest developments and urgent market updates",
-    icon: Zap,
+    icon: Lightning,
     articles: [
       { id: "1", title: "JSE All Share Index Hits Record High Amid Global Rally", excerpt: "The Johannesburg Stock Exchange reached unprecedented levels today as global markets...", author: "Thabo Mokoena", category: "Breaking", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop", publishedAt: "2025-01-24T14:30:00Z", readTime: "3 min", slug: "jse-record-high" },
       { id: "2", title: "SARB Announces Emergency Rate Decision Meeting", excerpt: "The South African Reserve Bank has called an unscheduled meeting of the Monetary Policy Committee...", author: "Amara Obi", category: "Breaking", image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&h=400&fit=crop", publishedAt: "2025-01-24T12:00:00Z", readTime: "2 min", slug: "sarb-emergency-meeting" },
@@ -52,7 +52,7 @@ const categoryData: Record<string, CategoryData> = {
   markets: {
     name: "Market News",
     description: "Stock market coverage and trading updates",
-    icon: BarChart3,
+    icon: ChartBar,
     articles: [
       { id: "1", title: "Top JSE Movers: Banking Stocks Lead the Charge", excerpt: "Financial sector stocks dominated today's session with Standard Bank and FirstRand...", author: "Thabo Mokoena", category: "Markets", image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&h=400&fit=crop", publishedAt: "2025-01-24T17:00:00Z", readTime: "4 min", slug: "jse-banking-stocks" },
       { id: "2", title: "NGX Weekly Wrap: Oil & Gas Sector Outperforms", excerpt: "Nigerian stocks closed the week higher with energy companies posting strong gains...", author: "Chidi Okonkwo", category: "Markets", image: "https://images.unsplash.com/photo-1642543348745-f05b3d1f56d1?w=600&h=400&fit=crop", publishedAt: "2025-01-24T16:30:00Z", readTime: "5 min", slug: "ngx-weekly-wrap" },
@@ -62,7 +62,7 @@ const categoryData: Record<string, CategoryData> = {
   companies: {
     name: "Company News",
     description: "Corporate updates and business developments",
-    icon: Building2,
+    icon: Buildings,
     articles: [
       { id: "1", title: "Naspers Announces Major Investment in African Fintech", excerpt: "The South African tech giant is expanding its fintech portfolio with a new strategic investment...", author: "Fatima Hassan", category: "Companies", image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&h=400&fit=crop", publishedAt: "2025-01-24T11:00:00Z", readTime: "5 min", slug: "naspers-fintech-investment" },
       { id: "2", title: "MTN Reports Strong Q4 Subscriber Growth", excerpt: "Africa's largest mobile operator added 5 million new subscribers in the fourth quarter...", author: "Amara Obi", category: "Companies", image: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=600&h=400&fit=crop", publishedAt: "2025-01-24T09:30:00Z", readTime: "4 min", slug: "mtn-subscriber-growth" },
@@ -72,7 +72,7 @@ const categoryData: Record<string, CategoryData> = {
   economy: {
     name: "Economy",
     description: "Economic developments and policy analysis",
-    icon: Landmark,
+    icon: Bank,
     articles: [
       { id: "1", title: "South Africa GDP Growth Beats Expectations in Q4", excerpt: "The economy expanded faster than anticipated driven by mining and manufacturing sectors...", author: "Dr. Amara Okafor", category: "Economy", image: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=600&h=400&fit=crop", publishedAt: "2025-01-24T08:00:00Z", readTime: "7 min", slug: "sa-gdp-growth" },
       { id: "2", title: "Nigeria Inflation Slows for Third Consecutive Month", excerpt: "Consumer price increases continue to moderate as monetary policy measures take effect...", author: "Chidi Okonkwo", category: "Economy", image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop", publishedAt: "2025-01-23T10:00:00Z", readTime: "5 min", slug: "nigeria-inflation-slowdown" },
@@ -152,7 +152,7 @@ export default function NewsCategoryPage() {
             <p className="text-muted-foreground">{category.description}</p>
           </div>
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search articles..."
@@ -186,7 +186,7 @@ export default function NewsCategoryPage() {
                   </p>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <CircleUserRound className="h-3 w-3" />
+                      <UserCircle className="h-3 w-3" />
                       {article.author}
                     </span>
                     <span className="flex items-center gap-1">

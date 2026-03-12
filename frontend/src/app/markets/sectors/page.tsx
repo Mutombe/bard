@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { PieChart, ArrowLeft, Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  ChartPie,
+  ArrowLeft,
+  CircleNotch,
+  TrendUp,
+  TrendDown,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
@@ -45,7 +51,7 @@ export default function SectorsPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <PieChart className="h-6 w-6 text-brand-orange" />
+              <ChartPie className="h-6 w-6 text-brand-orange" />
               Market Sectors
             </h1>
             <p className="text-muted-foreground">Sector performance overview</p>
@@ -54,7 +60,7 @@ export default function SectorsPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-orange" />
+            <CircleNotch className="h-8 w-8 animate-spin text-brand-orange" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -71,7 +77,7 @@ export default function SectorsPage() {
                     "flex items-center gap-1 text-2xl font-mono mb-3",
                     isUp ? "text-market-up" : "text-market-down"
                   )}>
-                    {isUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                    {isUp ? <TrendUp className="h-5 w-5" /> : <TrendDown className="h-5 w-5" />}
                     {isUp ? "+" : ""}{(sector.change_percent || 0).toFixed(2)}%
                   </div>
                   <div className="flex justify-between text-sm text-muted-foreground">

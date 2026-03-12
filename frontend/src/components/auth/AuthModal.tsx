@@ -6,15 +6,15 @@ import Script from "next/script";
 import {
   X,
   Eye,
-  EyeOff,
-  Mail,
+  EyeSlash,
+  Envelope,
   Lock,
-  CircleUserRound,
+  UserCircle,
   ArrowRight,
   Check,
-  AlertCircle,
-  Loader2,
-} from "lucide-react";
+  WarningCircle,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useAppDispatch } from "@/store";
 import { setCredentials } from "@/store/slices/authSlice";
@@ -351,7 +351,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
           {/* Error/Success Messages */}
           {error && (
             <div className="mb-4 p-3 rounded-md bg-market-down/10 border border-market-down/30 text-market-down text-sm flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 flex-shrink-0" />
+              <WarningCircle className="h-4 w-4 flex-shrink-0" />
               {error}
             </div>
           )}
@@ -368,7 +368,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="email"
                     value={email}
@@ -397,7 +397,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -419,7 +419,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <CircleNotch className="h-4 w-4 animate-spin" />
                     Signing in...
                   </>
                 ) : (
@@ -445,7 +445,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                 <div className="relative">
                   {isGoogleLoading && (
                     <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-md z-10">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
+                      <CircleNotch className="h-5 w-5 animate-spin text-gray-600" />
                     </div>
                   )}
                   <div id="google-signin-button" className="flex justify-center" />
@@ -470,7 +470,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                 <div>
                   <label className="block text-sm font-medium mb-2">First Name</label>
                   <div className="relative">
-                    <CircleUserRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <input
                       type="text"
                       value={firstName}
@@ -497,7 +497,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="email"
                     value={email}
@@ -526,7 +526,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -553,7 +553,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <CircleNotch className="h-4 w-4 animate-spin" />
                     Creating account...
                   </>
                 ) : (
@@ -579,7 +579,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
                 <div className="relative">
                   {isGoogleLoading && (
                     <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-md z-10">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-600" />
+                      <CircleNotch className="h-5 w-5 animate-spin text-gray-600" />
                     </div>
                   )}
                   <div id="google-signup-button" className="flex justify-center" />
@@ -603,7 +603,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="email"
                     value={email}
@@ -622,7 +622,7 @@ export function AuthModal({ isOpen, onClose, initialMode = "login" }: AuthModalP
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <CircleNotch className="h-4 w-4 animate-spin" />
                     Sending...
                   </>
                 ) : (

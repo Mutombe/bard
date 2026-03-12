@@ -5,18 +5,18 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ChevronRight,
+  CaretRight,
   Clock,
   ArrowRight,
-  Building2,
-  Landmark,
-  Pickaxe,
+  Buildings,
+  Bank,
+  Hammer,
   Cpu,
-  Wheat,
+  Plant,
   Globe,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+  TrendUp,
+  TrendDown,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -34,7 +34,7 @@ const industryData: Record<string, {
   banking: {
     name: "Banking & Finance",
     description: "Analysis and insights on African banking sectors, financial services, fintech innovation, and monetary policy developments across the continent.",
-    icon: Landmark,
+    icon: Bank,
     color: "text-blue-500",
     categories: ["banking", "finance", "fintech"],
     relatedTopics: [
@@ -47,7 +47,7 @@ const industryData: Record<string, {
   mining: {
     name: "Mining & Resources",
     description: "Coverage of Africa's mining industry, commodity markets, natural resource development, and the transition to sustainable extraction.",
-    icon: Pickaxe,
+    icon: Hammer,
     color: "text-amber-500",
     categories: ["mining", "commodities", "resources"],
     relatedTopics: [
@@ -73,7 +73,7 @@ const industryData: Record<string, {
   agriculture: {
     name: "Agriculture",
     description: "Insights on African agricultural markets, food security, agribusiness, and sustainable farming practices across diverse climates.",
-    icon: Wheat,
+    icon: Plant,
     color: "text-green-500",
     categories: ["agriculture", "agribusiness", "food"],
     relatedTopics: [
@@ -86,7 +86,7 @@ const industryData: Record<string, {
   infrastructure: {
     name: "Infrastructure",
     description: "Analysis of Africa's infrastructure development, construction, real estate, energy, and transportation sectors.",
-    icon: Building2,
+    icon: Buildings,
     color: "text-slate-500",
     categories: ["infrastructure", "construction", "real-estate", "energy"],
     relatedTopics: [
@@ -245,9 +245,9 @@ export default function IndustryPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/industries" className="hover:text-foreground">Industries</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-primary">{industry.name}</span>
         </nav>
 

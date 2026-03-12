@@ -5,10 +5,10 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ChevronRight,
-  Download,
-  Share2,
-  Bookmark,
+  CaretRight,
+  DownloadSimple,
+  ShareNetwork,
+  BookmarkSimple,
   Clock,
   Calendar,
   User,
@@ -16,8 +16,8 @@ import {
   ArrowRight,
   CheckCircle,
   Lock,
-  ExternalLink,
-} from "lucide-react";
+  ArrowSquareOut,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -174,9 +174,9 @@ export default function ResearchDetailPage() {
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-3">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-foreground">Home</Link>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
               <Link href="/research" className="hover:text-foreground">Research</Link>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
               <span className="text-foreground truncate">{report.title}</span>
             </nav>
           </div>
@@ -236,7 +236,7 @@ export default function ResearchDetailPage() {
 
               <div className="flex flex-wrap items-center gap-3">
                 <button className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
-                  <Download className="h-5 w-5" />
+                  <DownloadSimple className="h-5 w-5" />
                   Download PDF
                 </button>
                 <button
@@ -248,11 +248,11 @@ export default function ResearchDetailPage() {
                       : "border-slate-600 text-slate-300 hover:border-slate-500"
                   )}
                 >
-                  <Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} />
+                  <BookmarkSimple className={cn("h-5 w-5")} weight={isBookmarked ? "fill" : "regular"} />
                   {isBookmarked ? "Saved" : "Save"}
                 </button>
                 <button className="flex items-center gap-2 px-4 py-3 rounded-lg border border-slate-600 text-slate-300 hover:border-slate-500 transition-colors">
-                  <Share2 className="h-5 w-5" />
+                  <ShareNetwork className="h-5 w-5" />
                   Share
                 </button>
               </div>
@@ -383,7 +383,7 @@ export default function ResearchDetailPage() {
                   Get the full {report.pages}-page report with detailed analysis, charts, and appendices.
                 </p>
                 <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium">
-                  <Download className="h-5 w-5" />
+                  <DownloadSimple className="h-5 w-5" />
                   Download PDF
                 </button>
               </div>

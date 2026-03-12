@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, MapPin, ArrowRight } from "lucide-react";
+import { CaretRight, MapPin, ArrowRight } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 const regions = [
@@ -46,7 +46,7 @@ export default function RegionsPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-primary">Regions</span>
         </nav>
 

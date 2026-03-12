@@ -4,22 +4,22 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   FileText,
-  MessageSquare,
+  ChatText,
   Users,
-  TrendingUp,
+  TrendUp,
   Eye,
   Clock,
-  AlertCircle,
-  RefreshCw,
+  WarningCircle,
+  ArrowClockwise,
   BookOpen,
-  Mic,
+  Microphone,
   Globe,
   Tag,
   Factory,
-  Download,
+  DownloadSimple,
   Headphones,
-  BarChart3,
-} from "lucide-react";
+  ChartBar,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton, Skeleton } from "@/components/ui/loading";
 import { editorialService, type Article, type EditorialAssignment } from "@/services/api/editorial";
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
       label: "Newsletter Subs",
       value: stats.newsletterSubs.toLocaleString(),
       subtext: undefined,
-      icon: TrendingUp,
+      icon: TrendUp,
       href: "/admin/newsletters",
     },
   ];
@@ -293,7 +293,7 @@ export default function AdminDashboard() {
           className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md transition-colors disabled:opacity-50"
           title="Refresh"
         >
-          <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
+          <ArrowClockwise className={cn("h-5 w-5", refreshing && "animate-spin")} />
         </button>
       </div>
 
@@ -388,7 +388,7 @@ export default function AdminDashboard() {
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border">
           <div className="p-4 border-b border-terminal-border">
             <h2 className="font-semibold flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-brand-orange" />
+              <WarningCircle className="h-4 w-4 text-brand-orange" />
               Pending Tasks
             </h2>
           </div>
@@ -468,7 +468,7 @@ export default function AdminDashboard() {
             href="/admin/podcasts"
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
           >
-            <Mic className="h-5 w-5 text-purple-400 mb-2" />
+            <Microphone className="h-5 w-5 text-purple-400 mb-2" />
             <div className="text-xl font-bold">{mockPodcastStats.totalEpisodes}</div>
             <div className="text-sm text-muted-foreground">Podcast Episodes</div>
             <div className="text-xs text-purple-400 mt-1">
@@ -478,7 +478,7 @@ export default function AdminDashboard() {
 
           {/* Total Downloads */}
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-            <Download className="h-5 w-5 text-green-400 mb-2" />
+            <DownloadSimple className="h-5 w-5 text-green-400 mb-2" />
             <div className="text-xl font-bold">{mockResearchStats.totalDownloads.toLocaleString()}</div>
             <div className="text-sm text-muted-foreground">Report Downloads</div>
           </div>
@@ -554,7 +554,7 @@ export default function AdminDashboard() {
                 <div className="flex-1 min-w-0 mr-4">
                   <div className="font-medium truncate text-sm">{report.title}</div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                    <Download className="h-3 w-3" />
+                    <DownloadSimple className="h-3 w-3" />
                     {report.downloads.toLocaleString()} downloads
                   </div>
                 </div>
@@ -575,7 +575,7 @@ export default function AdminDashboard() {
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border">
           <div className="flex items-center justify-between p-4 border-b border-terminal-border">
             <h2 className="font-semibold flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-green-400" />
+              <ChartBar className="h-4 w-4 text-green-400" />
               Top Performing Content
             </h2>
           </div>
@@ -624,21 +624,21 @@ export default function AdminDashboard() {
           href="/admin/podcasts/new"
           className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-purple-400 transition-colors text-center"
         >
-          <Mic className="h-6 w-6 mx-auto mb-2 text-purple-400" />
+          <Microphone className="h-6 w-6 mx-auto mb-2 text-purple-400" />
           <span className="text-sm">New Episode</span>
         </Link>
         <Link
           href="/admin/opinions/new"
           className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-brand-orange transition-colors text-center"
         >
-          <MessageSquare className="h-6 w-6 mx-auto mb-2 text-brand-orange" />
+          <ChatText className="h-6 w-6 mx-auto mb-2 text-brand-orange" />
           <span className="text-sm">New Opinion</span>
         </Link>
         <Link
           href="/admin/newsletters/new"
           className="p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border hover:border-green-400 transition-colors text-center"
         >
-          <TrendingUp className="h-6 w-6 mx-auto mb-2 text-green-400" />
+          <TrendUp className="h-6 w-6 mx-auto mb-2 text-green-400" />
           <span className="text-sm">Newsletter</span>
         </Link>
         <Link

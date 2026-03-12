@@ -4,15 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Calendar,
-  ChevronLeft,
-  ChevronRight,
+  CaretLeft,
+  CaretRight,
   Clock,
   Globe,
-  TrendingUp,
-  TrendingDown,
+  TrendUp,
+  TrendDown,
   Minus,
-  Filter,
-} from "lucide-react";
+  Funnel,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -91,7 +91,7 @@ export default function EconomicCalendarPage() {
               onClick={() => navigateDate("prev")}
               className="p-2 hover:bg-terminal-bg-elevated rounded-md transition-colors"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <CaretLeft className="h-5 w-5" />
             </button>
             <div className="text-center">
               <div className="text-lg font-semibold">
@@ -113,7 +113,7 @@ export default function EconomicCalendarPage() {
               onClick={() => navigateDate("next")}
               className="p-2 hover:bg-terminal-bg-elevated rounded-md transition-colors"
             >
-              <ChevronRight className="h-5 w-5" />
+              <CaretRight className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function EconomicCalendarPage() {
             </select>
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Funnel className="h-4 w-4 text-muted-foreground" />
             <select
               value={selectedImpact}
               onChange={(e) => setSelectedImpact(e.target.value)}

@@ -9,10 +9,10 @@ import {
   Clock,
   Users,
   Video,
-  ExternalLink,
-  ChevronRight,
-  Filter,
-} from "lucide-react";
+  ArrowSquareOut,
+  CaretRight,
+  Funnel,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -241,7 +241,7 @@ export default function EventsPage() {
                   className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors w-fit"
                 >
                   Register Now
-                  <ExternalLink className="h-4 w-4" />
+                  <ArrowSquareOut className="h-4 w-4" />
                 </a>
               </div>
             </div>
@@ -326,7 +326,7 @@ export default function EventsPage() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
           >
             Contact Us
-            <ChevronRight className="h-4 w-4" />
+            <CaretRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

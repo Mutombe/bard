@@ -4,15 +4,15 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  Activity,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
+  Pulse,
+  TrendUp,
+  TrendDown,
+  Warning,
   CheckCircle,
   XCircle,
-  ChevronDown,
+  CaretDown,
   Info,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -102,7 +102,7 @@ export function TechnicalIndicators({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-primary" />
+          <Pulse className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold">Technical Analysis</h3>
           <span className="text-sm text-muted-foreground font-mono">{symbol}</span>
         </div>
@@ -161,7 +161,7 @@ export function TechnicalIndicators({
         <div className="flex items-center justify-center gap-6 mt-4">
           <div className="text-center">
             <div className="flex items-center gap-1 text-up">
-              <TrendingUp className="h-4 w-4" />
+              <TrendUp className="h-4 w-4" />
               <span className="text-xl font-bold">{summary.buyCount}</span>
             </div>
             <div className="text-xs text-muted-foreground">Buy</div>
@@ -169,7 +169,7 @@ export function TechnicalIndicators({
           <div className="h-8 w-px bg-border" />
           <div className="text-center">
             <div className="flex items-center gap-1 text-muted-foreground">
-              <Activity className="h-4 w-4" />
+              <Pulse className="h-4 w-4" />
               <span className="text-xl font-bold">{summary.neutralCount}</span>
             </div>
             <div className="text-xs text-muted-foreground">Neutral</div>
@@ -177,7 +177,7 @@ export function TechnicalIndicators({
           <div className="h-8 w-px bg-border" />
           <div className="text-center">
             <div className="flex items-center gap-1 text-down">
-              <TrendingDown className="h-4 w-4" />
+              <TrendDown className="h-4 w-4" />
               <span className="text-xl font-bold">{summary.sellCount}</span>
             </div>
             <div className="text-xs text-muted-foreground">Sell</div>
@@ -197,7 +197,7 @@ export function TechnicalIndicators({
               ({indicators.moving_averages.length} indicators)
             </span>
           </div>
-          <ChevronDown
+          <CaretDown
             className={cn(
               "h-4 w-4 text-muted-foreground transition-transform",
               expandedSection === "ma" && "rotate-180"
@@ -235,7 +235,7 @@ export function TechnicalIndicators({
               ({indicators.oscillators.length} indicators)
             </span>
           </div>
-          <ChevronDown
+          <CaretDown
             className={cn(
               "h-4 w-4 text-muted-foreground transition-transform",
               expandedSection === "osc" && "rotate-180"
@@ -272,7 +272,7 @@ function IndicatorRow({ indicator }: { indicator: TechnicalIndicator }) {
       case "sell":
         return <XCircle className="h-4 w-4 text-down" />;
       default:
-        return <AlertTriangle className="h-4 w-4 text-muted-foreground" />;
+        return <Warning className="h-4 w-4 text-muted-foreground" />;
     }
   };
 

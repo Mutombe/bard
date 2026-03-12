@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import {
   Bell,
   CheckCircle,
-  AlertCircle,
+  WarningCircle,
   Info,
   Users,
-  Mail,
+  Envelope,
   FileText,
-  Trash2,
+  Trash,
   Check,
-  RefreshCw,
-  Filter,
+  ArrowClockwise,
+  Funnel,
   Clock,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/loading";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -34,10 +34,10 @@ interface Notification {
 const notificationTypeConfig: Record<string, { icon: any; color: string; label: string }> = {
   info: { icon: Info, color: "text-blue-400", label: "Info" },
   success: { icon: CheckCircle, color: "text-market-up", label: "Success" },
-  warning: { icon: AlertCircle, color: "text-yellow-400", label: "Warning" },
-  error: { icon: AlertCircle, color: "text-market-down", label: "Error" },
+  warning: { icon: WarningCircle, color: "text-yellow-400", label: "Warning" },
+  error: { icon: WarningCircle, color: "text-market-down", label: "Error" },
   new_user: { icon: Users, color: "text-purple-400", label: "New User" },
-  new_subscription: { icon: Mail, color: "text-brand-orange", label: "Subscription" },
+  new_subscription: { icon: Envelope, color: "text-brand-orange", label: "Subscription" },
   new_article: { icon: FileText, color: "text-blue-400", label: "Article" },
   system: { icon: Bell, color: "text-muted-foreground", label: "System" },
 };
@@ -144,7 +144,7 @@ export default function AdminNotificationsPage() {
             className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
             title="Refresh"
           >
-            <RefreshCw className="h-5 w-5" />
+            <ArrowClockwise className="h-5 w-5" />
           </button>
           {unreadCount > 0 && (
             <button
@@ -160,7 +160,7 @@ export default function AdminNotificationsPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-2 mb-6">
-        <Filter className="h-4 w-4 text-muted-foreground" />
+        <Funnel className="h-4 w-4 text-muted-foreground" />
         <button
           onClick={() => setFilter("all")}
           className={cn(
@@ -269,7 +269,7 @@ export default function AdminNotificationsPage() {
                       className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg-elevated rounded"
                       title="Delete"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                     </button>
                   </div>
                 </div>

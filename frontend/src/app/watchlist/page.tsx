@@ -5,15 +5,15 @@ import Link from "next/link";
 import {
   Star,
   Plus,
-  Trash2,
-  TrendingUp,
-  TrendingDown,
+  Trash,
+  TrendUp,
+  TrendDown,
   Bell,
-  Search,
-  ChevronRight,
-  LogIn,
+  MagnifyingGlass,
+  CaretRight,
+  SignIn,
   Info,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useWatchlist } from "@/hooks/use-watchlist";
@@ -86,7 +86,7 @@ export default function WatchlistPage() {
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search watchlist..."
@@ -182,9 +182,9 @@ export default function WatchlistPage() {
                       )}
                     >
                       {isUp ? (
-                        <TrendingUp className="h-4 w-4" />
+                        <TrendUp className="h-4 w-4" />
                       ) : (
-                        <TrendingDown className="h-4 w-4" />
+                        <TrendDown className="h-4 w-4" />
                       )}
                       <span className="font-mono">
                         {isUp ? "+" : ""}{changePercent.toFixed(2)}%
@@ -209,14 +209,14 @@ export default function WatchlistPage() {
                         href={`/companies/${item.symbol.toLowerCase()}`}
                         className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md transition-colors"
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        <CaretRight className="h-4 w-4" />
                       </Link>
                       <button
                         onClick={() => handleRemove(item.id)}
                         className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg-elevated rounded-md transition-colors"
                         title="Remove from watchlist"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -244,7 +244,7 @@ export default function WatchlistPage() {
                   onClick={openLogin}
                   className="inline-flex items-center gap-2 px-6 py-3 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
                 >
-                  <LogIn className="h-4 w-4" />
+                  <SignIn className="h-4 w-4" />
                   Sign In
                 </button>
               )}
@@ -252,7 +252,7 @@ export default function WatchlistPage() {
           </div>
         ) : !isLoading && filteredItems.length === 0 ? (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
-            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <MagnifyingGlass className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">No results found</h3>
             <p className="text-muted-foreground">
               No stocks match &quot;{searchQuery}&quot;

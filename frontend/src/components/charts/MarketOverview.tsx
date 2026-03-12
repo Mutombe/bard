@@ -4,12 +4,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  BarChart2,
+  TrendUp,
+  TrendDown,
+  Pulse,
+  ChartBar,
   Globe,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Sparkline } from "./StockChart";
 
 interface MarketIndex {
@@ -80,9 +80,9 @@ export function MarketOverview({ indices, className }: MarketOverviewProps) {
                   )}
                 >
                   {isPositive ? (
-                    <TrendingUp className="h-3 w-3" />
+                    <TrendUp className="h-3 w-3" />
                   ) : (
-                    <TrendingDown className="h-3 w-3" />
+                    <TrendDown className="h-3 w-3" />
                   )}
                   {isPositive ? "+" : ""}
                   {index.changePercent.toFixed(2)}%
@@ -123,7 +123,7 @@ export function MarketOverview({ indices, className }: MarketOverviewProps) {
       <div className="flex items-center justify-between px-4 py-2 card-terminal">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Activity className="h-4 w-4 text-muted-foreground" />
+            <Pulse className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
               Market Status:
             </span>
@@ -135,7 +135,7 @@ export function MarketOverview({ indices, className }: MarketOverviewProps) {
         </div>
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
-            <BarChart2 className="h-3 w-3" />
+            <ChartBar className="h-3 w-3" />
             <span>Volume: 2.4B</span>
           </div>
           <div>Advances: 142 | Declines: 87</div>
@@ -179,7 +179,7 @@ export function TopMovers({ gainers, losers, className }: TopMoversProps) {
           )}
           onClick={() => setView("gainers")}
         >
-          <TrendingUp className="h-4 w-4" />
+          <TrendUp className="h-4 w-4" />
           Top Gainers
         </button>
         <button
@@ -191,7 +191,7 @@ export function TopMovers({ gainers, losers, className }: TopMoversProps) {
           )}
           onClick={() => setView("losers")}
         >
-          <TrendingDown className="h-4 w-4" />
+          <TrendDown className="h-4 w-4" />
           Top Losers
         </button>
       </div>

@@ -4,14 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  CandlestickChart,
-  LineChart,
-  Maximize2,
-  Settings,
-} from "lucide-react";
+  TrendUp,
+  TrendDown,
+  ChartBar,
+  ChartLine,
+  ArrowsOut,
+  GearSix,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -243,9 +242,9 @@ export function StockChart({
               )}
             >
               {isPositive ? (
-                <TrendingUp className="h-4 w-4" />
+                <TrendUp className="h-4 w-4" />
               ) : (
-                <TrendingDown className="h-4 w-4" />
+                <TrendDown className="h-4 w-4" />
               )}
               <span>
                 {isPositive ? "+" : ""}
@@ -261,34 +260,34 @@ export function StockChart({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  {chartType === "candlestick" && <CandlestickChart className="h-4 w-4" />}
-                  {chartType === "line" && <LineChart className="h-4 w-4" />}
-                  {chartType === "area" && <TrendingUp className="h-4 w-4" />}
-                  {chartType === "bar" && <BarChart3 className="h-4 w-4" />}
+                  {chartType === "candlestick" && <ChartBar className="h-4 w-4" />}
+                  {chartType === "line" && <ChartLine className="h-4 w-4" />}
+                  {chartType === "area" && <TrendUp className="h-4 w-4" />}
+                  {chartType === "bar" && <ChartBar className="h-4 w-4" />}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setChartType("candlestick")}>
-                  <CandlestickChart className="h-4 w-4 mr-2" />
+                  <ChartBar className="h-4 w-4 mr-2" />
                   Candlestick
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setChartType("line")}>
-                  <LineChart className="h-4 w-4 mr-2" />
+                  <ChartLine className="h-4 w-4 mr-2" />
                   Line
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setChartType("area")}>
-                  <TrendingUp className="h-4 w-4 mr-2" />
+                  <TrendUp className="h-4 w-4 mr-2" />
                   Area
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setChartType("bar")}>
-                  <BarChart3 className="h-4 w-4 mr-2" />
+                  <ChartBar className="h-4 w-4 mr-2" />
                   OHLC Bar
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
             <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Maximize2 className="h-4 w-4" />
+              <ArrowsOut className="h-4 w-4" />
             </Button>
           </div>
         )}

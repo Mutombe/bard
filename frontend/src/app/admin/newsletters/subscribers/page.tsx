@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Search,
-  Download,
-  Mail,
+  MagnifyingGlass,
+  DownloadSimple,
+  Envelope,
   Users,
   UserPlus,
-  MoreVertical,
+  DotsThreeVertical,
   Check,
   X,
-  Trash2,
-  Loader2,
-} from "lucide-react";
+  Trash,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { adminService, NewsletterSubscription } from "@/services/api/admin";
 import { Skeleton } from "@/components/ui/loading";
@@ -191,7 +191,7 @@ export default function SubscribersPage() {
             onClick={exportSubscribers}
             className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors text-sm flex items-center gap-2"
           >
-            <Download className="h-4 w-4" />
+            <DownloadSimple className="h-4 w-4" />
             Export CSV
           </button>
         </div>
@@ -231,7 +231,7 @@ export default function SubscribersPage() {
             </div>
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
               <div className="flex items-center gap-2 text-blue-400 mb-1">
-                <Mail className="h-4 w-4" />
+                <Envelope className="h-4 w-4" />
                 <span className="text-sm">Verified</span>
               </div>
               <div className="text-2xl font-bold">{stats.verified.toLocaleString()}</div>
@@ -243,7 +243,7 @@ export default function SubscribersPage() {
       {/* Filters */}
       <form onSubmit={handleSearch} className="flex items-center gap-4 mb-6">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             value={searchQuery}
@@ -294,7 +294,7 @@ export default function SubscribersPage() {
             {selectedIds.length} subscriber(s) selected
           </span>
           <button className="px-3 py-1 bg-market-down/20 text-market-down border border-market-down/30 rounded text-sm hover:bg-market-down/30">
-            <Trash2 className="h-4 w-4 inline mr-1" />
+            <Trash className="h-4 w-4 inline mr-1" />
             Delete
           </button>
         </div>
@@ -342,7 +342,7 @@ export default function SubscribersPage() {
             ) : filteredSubscribers.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                  <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <Envelope className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="font-medium">No subscribers found</p>
                   <p className="text-sm">Subscribers will appear here when users sign up for newsletters.</p>
                 </td>
@@ -386,7 +386,7 @@ export default function SubscribersPage() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button className="p-1 hover:bg-terminal-bg-elevated rounded">
-                      <MoreVertical className="h-4 w-4" />
+                      <DotsThreeVertical className="h-4 w-4" />
                     </button>
                   </td>
                 </tr>

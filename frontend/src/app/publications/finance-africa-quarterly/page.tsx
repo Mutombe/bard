@@ -3,16 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Library,
+  Books,
   Check,
-  ChevronRight,
-  Loader2,
-  CalendarRange,
+  CaretRight,
+  CircleNotch,
+  CalendarBlank,
   MapPin,
-  BookMarked,
-  ScrollText,
-  Landmark,
-} from "lucide-react";
+  BookBookmark,
+  Scroll,
+  Bank,
+} from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
@@ -98,9 +98,9 @@ export default function FinanceAfricaQuarterlyPage() {
           <Link href="/" className="hover:text-foreground transition-colors">
             Home
           </Link>
-          <ChevronRight className="h-3 w-3" />
+          <CaretRight className="h-3 w-3" />
           <span>Publications</span>
-          <ChevronRight className="h-3 w-3" />
+          <CaretRight className="h-3 w-3" />
           <span className="text-foreground">Finance Africa Quarterly</span>
         </nav>
 
@@ -147,7 +147,7 @@ export default function FinanceAfricaQuarterlyPage() {
           <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
             <div className="flex items-center gap-3 mb-4">
               <div className={`h-12 w-12 ${ACCENT_BG} backdrop-blur-sm flex items-center justify-center`}>
-                <Library className={`h-6 w-6 ${ACCENT}`} />
+                <Books className={`h-6 w-6 ${ACCENT}`} />
               </div>
               <span className={`px-3 py-1 ${ACCENT_BG} backdrop-blur-sm ${ACCENT} text-xs font-semibold uppercase tracking-wider border ${ACCENT_BORDER}`}>
                 Quarterly
@@ -187,7 +187,7 @@ export default function FinanceAfricaQuarterlyPage() {
                     className="p-4 bg-terminal-bg-secondary border border-terminal-border border-l-[3px] border-l-[#2D3A8C] dark:border-l-[#6272C1]"
                   >
                     <div className="flex items-start gap-3">
-                      <ScrollText className={`h-5 w-5 ${ACCENT} flex-shrink-0 mt-0.5`} />
+                      <Scroll className={`h-5 w-5 ${ACCENT} flex-shrink-0 mt-0.5`} />
                       <div>
                         <h3 className="font-semibold mb-1">{issue.title}</h3>
                         <p className="text-sm text-muted-foreground">{issue.description}</p>
@@ -251,7 +251,7 @@ export default function FinanceAfricaQuarterlyPage() {
                       disabled={isSubmitting}
                       className="w-full py-3 bg-[#2D3A8C] dark:bg-[#6272C1] text-white font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {isSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
+                      {isSubmitting ? (<><CircleNotch className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
                     </button>
                     <p className="text-xs text-muted-foreground text-center mt-3">Free email delivery. Unsubscribe anytime.</p>
                   </form>
@@ -260,7 +260,7 @@ export default function FinanceAfricaQuarterlyPage() {
 
               <div className={`relative overflow-hidden bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
                 <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="faq-cta-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#faq-cta-grid)"/></svg></div>
-                <Landmark className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
+                <Bank className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">Want the full platform?</p>
                 <p className="text-xs text-muted-foreground mb-4">Get all three publications plus breaking news alerts and weekly digests — free.</p>
                 <Link

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, TrendingDown, Activity, ChevronRight } from "lucide-react";
+import { TrendUp, TrendDown, Pulse, CaretRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { fetchTopMovers } from "@/store/slices/marketSlice";
@@ -24,9 +24,9 @@ export function TopMovers() {
   }, [dispatch]);
 
   const tabs = [
-    { id: "gainers" as Tab, label: "Top Gainers", icon: TrendingUp, color: "text-market-up" },
-    { id: "losers" as Tab, label: "Top Losers", icon: TrendingDown, color: "text-market-down" },
-    { id: "active" as Tab, label: "Most Active", icon: Activity, color: "text-brand-orange" },
+    { id: "gainers" as Tab, label: "Top Gainers", icon: TrendUp, color: "text-market-up" },
+    { id: "losers" as Tab, label: "Top Losers", icon: TrendDown, color: "text-market-down" },
+    { id: "active" as Tab, label: "Most Active", icon: Pulse, color: "text-brand-orange" },
   ];
 
   const getActiveData = () => {
@@ -53,7 +53,7 @@ export function TopMovers() {
         <Link href="/markets">
           <Button variant="ghost" size="sm" className="gap-2">
             View All
-            <ChevronRight className="h-4 w-4" />
+            <CaretRight className="h-4 w-4" />
           </Button>
         </Link>
       </div>

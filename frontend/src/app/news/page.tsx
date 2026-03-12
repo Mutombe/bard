@@ -5,14 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Clock,
-  ChevronRight,
-  Search,
-  TrendingUp,
+  CaretRight,
+  MagnifyingGlass,
+  TrendUp,
   Newspaper,
   Check,
   Heart,
-  Bookmark,
-} from "lucide-react";
+  BookmarkSimple,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -168,7 +168,7 @@ function ArticleActions({ articleId, compact = false }: { articleId: string; com
         )}
         title={liked ? "Unlike" : "Like"}
       >
-        <Heart className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", liked && "fill-current")} />
+        <Heart className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} weight={liked ? "fill" : "regular"} />
       </button>
       <button
         onClick={handleBookmark}
@@ -178,7 +178,7 @@ function ArticleActions({ articleId, compact = false }: { articleId: string; com
         )}
         title={bookmarked ? "Remove from reading list" : "Save to reading list"}
       >
-        <Bookmark className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", bookmarked && "fill-current")} />
+        <BookmarkSimple className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} weight={bookmarked ? "fill" : "regular"} />
       </button>
     </div>
   );
@@ -403,7 +403,7 @@ export default function NewsPage() {
 
           {/* Search */}
           <form onSubmit={handleSearch} className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search news..."
@@ -498,7 +498,7 @@ export default function NewsPage() {
             {/* Trending */}
             <section className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
               <h2 className="font-bold flex items-center gap-2 mb-4">
-                <TrendingUp className="h-4 w-4 text-brand-orange" />
+                <TrendUp className="h-4 w-4 text-brand-orange" />
                 Trending
               </h2>
               <div className="space-y-3">

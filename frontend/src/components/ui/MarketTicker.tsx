@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useAnimationFrame } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Pause, Play } from "lucide-react";
+import { TrendUp, TrendDown, Pause, Play } from "@phosphor-icons/react";
 
 interface TickerItem {
   symbol: string;
@@ -97,9 +97,9 @@ export function MarketTicker({
                 )}
               >
                 {isPositive ? (
-                  <TrendingUp className="h-3 w-3" />
+                  <TrendUp className="h-3 w-3" />
                 ) : (
-                  <TrendingDown className="h-3 w-3" />
+                  <TrendDown className="h-3 w-3" />
                 )}
                 {isPositive ? "+" : ""}
                 {item.changePercent.toFixed(2)}%
@@ -348,9 +348,9 @@ export function PriceChangeBadge({
     >
       {showIcon && (
         isPositive ? (
-          <TrendingUp className={iconSizes[size]} />
+          <TrendUp className={iconSizes[size]} />
         ) : (
-          <TrendingDown className={iconSizes[size]} />
+          <TrendDown className={iconSizes[size]} />
         )
       )}
       {isPositive ? "+" : ""}

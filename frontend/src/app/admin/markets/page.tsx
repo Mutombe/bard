@@ -3,17 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  TrendingUp,
-  TrendingDown,
-  RefreshCw,
+  TrendUp,
+  TrendDown,
+  ArrowClockwise,
   Database,
   Clock,
-  AlertCircle,
+  WarningCircle,
   CheckCircle,
-  Settings,
+  GearSix,
   Play,
   Pause,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface DataSource {
@@ -137,7 +137,7 @@ export default function MarketsAdminPage() {
             disabled={refreshing === "all"}
             className="flex items-center gap-2 px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors"
           >
-            <RefreshCw className={cn("h-4 w-4", refreshing === "all" && "animate-spin")} />
+            <ArrowClockwise className={cn("h-4 w-4", refreshing === "all" && "animate-spin")} />
             Refresh All
           </button>
           <Link
@@ -170,7 +170,7 @@ export default function MarketsAdminPage() {
         </div>
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
           <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="h-5 w-5 text-market-down" />
+            <WarningCircle className="h-5 w-5 text-market-down" />
             <span className="text-sm text-muted-foreground">Errors</span>
           </div>
           <div className="text-2xl font-bold text-market-down">
@@ -179,7 +179,7 @@ export default function MarketsAdminPage() {
         </div>
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-5 w-5 text-brand-orange" />
+            <TrendUp className="h-5 w-5 text-brand-orange" />
             <span className="text-sm text-muted-foreground">Total Records</span>
           </div>
           <div className="text-2xl font-bold">
@@ -237,7 +237,7 @@ export default function MarketsAdminPage() {
                       disabled={refreshing === source.id}
                       className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
                     >
-                      <RefreshCw
+                      <ArrowClockwise
                         className={cn(
                           "h-4 w-4",
                           refreshing === source.id && "animate-spin"
@@ -258,7 +258,7 @@ export default function MarketsAdminPage() {
                       href={`/admin/markets/sources/${source.id}`}
                       className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
                     >
-                      <Settings className="h-4 w-4" />
+                      <GearSix className="h-4 w-4" />
                     </Link>
                   </div>
                 </div>
@@ -300,9 +300,9 @@ export default function MarketsAdminPage() {
                         )}
                       >
                         {isUp ? (
-                          <TrendingUp className="h-4 w-4" />
+                          <TrendUp className="h-4 w-4" />
                         ) : (
-                          <TrendingDown className="h-4 w-4" />
+                          <TrendDown className="h-4 w-4" />
                         )}
                         {isUp ? "+" : ""}
                         {index.changePercent.toFixed(2)}%

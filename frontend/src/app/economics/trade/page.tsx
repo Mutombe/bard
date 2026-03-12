@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Globe, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { Globe, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -57,7 +57,7 @@ export default function TradePage() {
                         "inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono",
                         isSurplus ? "bg-market-up/20 text-market-up" : "bg-market-down/20 text-market-down"
                       )}>
-                        {isSurplus ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {isSurplus ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                         {isSurplus ? "+" : ""}{country.balance.toFixed(1)}B
                       </span>
                     </td>

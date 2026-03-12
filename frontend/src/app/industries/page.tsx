@@ -2,15 +2,15 @@
 
 import Link from "next/link";
 import {
-  ChevronRight,
-  Landmark,
-  Pickaxe,
+  CaretRight,
+  Bank,
+  Hammer,
   Cpu,
-  Wheat,
-  Building2,
+  Plant,
+  Buildings,
   Globe,
   ArrowRight,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -18,7 +18,7 @@ const industries = [
   {
     name: "Banking & Finance",
     slug: "banking",
-    icon: Landmark,
+    icon: Bank,
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
     description: "Central banks, commercial banking, fintech, insurance, and financial services across Africa.",
@@ -27,7 +27,7 @@ const industries = [
   {
     name: "Mining & Resources",
     slug: "mining",
-    icon: Pickaxe,
+    icon: Hammer,
     color: "text-amber-500",
     bgColor: "bg-amber-500/10",
     description: "Gold, platinum, copper, and other mineral extraction driving African economies.",
@@ -45,7 +45,7 @@ const industries = [
   {
     name: "Agriculture",
     slug: "agriculture",
-    icon: Wheat,
+    icon: Plant,
     color: "text-green-500",
     bgColor: "bg-green-500/10",
     description: "Agribusiness, food security, sustainable farming, and agricultural commodities.",
@@ -54,7 +54,7 @@ const industries = [
   {
     name: "Infrastructure",
     slug: "infrastructure",
-    icon: Building2,
+    icon: Buildings,
     color: "text-slate-500",
     bgColor: "bg-slate-500/10",
     description: "Construction, energy, transport, real estate, and public-private partnerships.",
@@ -78,7 +78,7 @@ export default function IndustriesPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-primary">Industries</span>
         </nav>
 

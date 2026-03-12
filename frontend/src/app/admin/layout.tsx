@@ -4,27 +4,27 @@ import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
+  SquaresFour,
   FileText,
-  Mail,
+  Envelope,
   Users,
   Image as ImageIcon,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
+  GearSix,
+  CaretLeft,
+  CaretRight,
   Bell,
-  Search,
-  LogOut,
-  Menu,
+  MagnifyingGlass,
+  SignOut,
+  List,
   X,
   Lock,
-  ClipboardList,
+  ClipboardText,
   BookOpen,
   Tag,
   Factory,
   Globe,
-  BarChart3,
-} from "lucide-react";
+  ChartBar,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAppSelector, useAppDispatch } from "@/store";
@@ -36,19 +36,19 @@ interface AdminLayoutProps {
 }
 
 const sidebarItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin", label: "Dashboard", icon: SquaresFour },
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/research", label: "Research", icon: BookOpen },
-  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/admin/tasks", label: "Tasks", icon: ClipboardList },
+  { href: "/admin/analytics", label: "Analytics", icon: ChartBar },
+  { href: "/admin/tasks", label: "Tasks", icon: ClipboardText },
   { href: "/admin/topics", label: "Topics", icon: Tag },
   { href: "/admin/industries", label: "Industries", icon: Factory },
   { href: "/admin/regions", label: "Regions", icon: Globe },
-  { href: "/admin/newsletters", label: "Newsletters", icon: Mail },
+  { href: "/admin/newsletters", label: "Newsletters", icon: Envelope },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/media", label: "Media Library", icon: ImageIcon },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+  { href: "/admin/settings", label: "Settings", icon: GearSix },
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
@@ -159,9 +159,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             className="p-2 hover:bg-terminal-bg-elevated rounded-md"
           >
             {sidebarCollapsed ? (
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
             ) : (
-              <ChevronLeft className="h-4 w-4" />
+              <CaretLeft className="h-4 w-4" />
             )}
           </button>
         </div>
@@ -208,7 +208,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 onClick={handleLogout}
                 className="p-2 text-muted-foreground hover:text-foreground"
               >
-                <LogOut className="h-4 w-4" />
+                <SignOut className="h-4 w-4" />
               </button>
             </div>
           ) : (
@@ -225,7 +225,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               onClick={handleLogout}
               className="w-full flex justify-center p-2 text-muted-foreground hover:text-foreground"
             >
-              <LogOut className="h-5 w-5" />
+              <SignOut className="h-5 w-5" />
             </button>
           )}
         </div>
@@ -244,7 +244,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="p-2 hover:bg-terminal-bg-elevated rounded-md"
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <List className="h-5 w-5" />}
           </button>
         </div>
 
@@ -286,7 +286,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Top Bar */}
         <div className="hidden lg:flex h-16 items-center justify-between px-6 border-b border-terminal-border bg-terminal-bg">
           <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search articles, users..."

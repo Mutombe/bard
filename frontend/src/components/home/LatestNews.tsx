@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ChevronRight, Clock, CircleUserRound, Zap } from "lucide-react";
+import { CaretRight, Clock, UserCircle, Lightning } from "@phosphor-icons/react";
 import { newsService } from "@/services/api/news";
 import { cn, formatRelativeTime, truncate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +73,7 @@ export function LatestNews() {
         <div className="mb-6 p-4 rounded-lg bg-market-down-bg border border-market-down/30">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-market-down">
-              <Zap className="h-5 w-5 animate-pulse" />
+              <Lightning className="h-5 w-5 animate-pulse" />
               <span className="font-bold uppercase text-sm">Breaking</span>
             </div>
             <Link
@@ -97,7 +97,7 @@ export function LatestNews() {
         <Link href="/news">
           <Button variant="ghost" size="sm" className="gap-2">
             All News
-            <ChevronRight className="h-4 w-4" />
+            <CaretRight className="h-4 w-4" />
           </Button>
         </Link>
       </div>
@@ -157,7 +157,7 @@ export function LatestNews() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CircleUserRound className="h-4 w-4" />
+                    <UserCircle className="h-4 w-4" />
                     {mainArticle.author?.full_name || "Editorial Team"}
                   </div>
                   <span className="text-sm text-muted-foreground">

@@ -1,8 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Star, Bell, Share2, Check, Copy, Link2, Facebook, Linkedin, Loader2 } from "lucide-react";
-import { FaXTwitter } from "react-icons/fa6";
+import {
+  Star,
+  Bell,
+  ShareNetwork,
+  Check,
+  Copy,
+  LinkSimple,
+  FacebookLogo,
+  LinkedinLogo,
+  CircleNotch,
+  XLogo,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useWatchlist } from "@/hooks/use-watchlist";
 import { useAppSelector } from "@/store";
@@ -120,9 +130,9 @@ export function StockActions({ company, className, variant = "default" }: StockA
         title={isWatched ? "Remove from Watchlist" : "Add to Watchlist"}
       >
         {isToggling ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
+          <CircleNotch className="h-5 w-5 animate-spin" />
         ) : (
-          <Star className={cn("h-5 w-5 transition-all", isWatched && "fill-current")} />
+          <Star className={cn("h-5 w-5 transition-all")} weight={isWatched ? "fill" : "regular"} />
         )}
       </button>
 
@@ -142,7 +152,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
           className="p-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
           title="Share"
         >
-          <Share2 className="h-5 w-5" />
+          <ShareNetwork className="h-5 w-5" />
         </button>
 
         {/* Share Menu Dropdown */}
@@ -171,7 +181,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
                   onClick={shareToTwitter}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <FaXTwitter className="h-4 w-4" />
+                  <XLogo className="h-4 w-4" />
                   Share on X
                 </button>
 
@@ -179,7 +189,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
                   onClick={shareToFacebook}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <Facebook className="h-4 w-4" />
+                  <FacebookLogo className="h-4 w-4" />
                   Share on Facebook
                 </button>
 
@@ -187,7 +197,7 @@ export function StockActions({ company, className, variant = "default" }: StockA
                   onClick={shareToLinkedIn}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <LinkedinLogo className="h-4 w-4" />
                   Share on LinkedIn
                 </button>
               </div>
@@ -375,7 +385,7 @@ export function IndexActions({ index, className }: IndexActionsProps) {
           className="p-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors"
           title="Share"
         >
-          <Share2 className="h-5 w-5" />
+          <ShareNetwork className="h-5 w-5" />
         </button>
 
         {/* Share Menu Dropdown */}
@@ -404,7 +414,7 @@ export function IndexActions({ index, className }: IndexActionsProps) {
                   onClick={shareToTwitter}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <FaXTwitter className="h-4 w-4" />
+                  <XLogo className="h-4 w-4" />
                   Share on X
                 </button>
 
@@ -412,7 +422,7 @@ export function IndexActions({ index, className }: IndexActionsProps) {
                   onClick={shareToFacebook}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <Facebook className="h-4 w-4" />
+                  <FacebookLogo className="h-4 w-4" />
                   Share on Facebook
                 </button>
 
@@ -420,7 +430,7 @@ export function IndexActions({ index, className }: IndexActionsProps) {
                   onClick={shareToLinkedIn}
                   className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-terminal-bg-elevated rounded-md transition-colors"
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <LinkedinLogo className="h-4 w-4" />
                   Share on LinkedIn
                 </button>
               </div>

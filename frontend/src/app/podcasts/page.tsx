@@ -11,13 +11,13 @@ import {
   Headphones,
   Eye,
   ThumbsUp,
-  RefreshCw,
+  ArrowClockwise,
   X,
-  ChevronRight,
-  Mic,
+  CaretRight,
+  Microphone,
   Radio,
-  ExternalLink,
-} from "lucide-react";
+  ArrowSquareOut,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useYouTubeSearch } from "@/hooks";
@@ -144,7 +144,7 @@ export default function PodcastsPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-primary">Podcasts & Media</span>
         </nav>
 
@@ -152,7 +152,7 @@ export default function PodcastsPage() {
         <header className="mb-12 max-w-3xl">
           <div className="flex items-center gap-4 mb-4">
             <div className="p-3 rounded-lg bg-primary/10">
-              <Mic className="h-8 w-8 text-primary" />
+              <Microphone className="h-8 w-8 text-primary" />
             </div>
             <h1 className="headline-xl">Podcasts & Media</h1>
           </div>
@@ -233,7 +233,7 @@ export default function PodcastsPage() {
                   onClick={() => mutate()}
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <ArrowClockwise className="h-4 w-4" />
                   Refresh
                 </button>
               </div>
@@ -369,7 +369,7 @@ export default function PodcastsPage() {
                   href="/webinars"
                   className="flex items-center gap-3 p-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
                 >
-                  <ExternalLink className="h-5 w-5 text-muted-foreground" />
+                  <ArrowSquareOut className="h-5 w-5 text-muted-foreground" />
                   <span className="text-sm font-medium">Webinars</span>
                 </Link>
               </div>

@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, ArrowLeft, Clock, Mail, Download } from "lucide-react";
+import {
+  FileText,
+  ArrowLeft,
+  Clock,
+  Envelope,
+  DownloadSimple,
+} from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 const recentReports = [
@@ -50,7 +56,7 @@ export default function ResearchNewsletterPage() {
                         <p className="text-sm text-muted-foreground">{report.pages} pages</p>
                       </div>
                       <button className="p-2 hover:bg-terminal-bg rounded-md text-brand-orange">
-                        <Download className="h-5 w-5" />
+                        <DownloadSimple className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -72,7 +78,7 @@ export default function ResearchNewsletterPage() {
                   <span>Instant notification</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-brand-orange" />
+                  <Envelope className="h-4 w-4 text-brand-orange" />
                   <span>Free for all subscribers</span>
                 </div>
               </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Loader2, MailX } from "lucide-react";
+import { CheckCircle, XCircle, CircleNotch, EnvelopeOpen } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
 
@@ -41,7 +41,7 @@ export default function UnsubscribePage() {
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-8 text-center">
           {status === "loading" && (
             <>
-              <Loader2 className="h-16 w-16 text-brand-orange mx-auto mb-6 animate-spin" />
+              <CircleNotch className="h-16 w-16 text-brand-orange mx-auto mb-6 animate-spin" />
               <h1 className="text-2xl font-bold mb-2">Processing...</h1>
               <p className="text-muted-foreground">Please wait while we process your request.</p>
             </>
@@ -49,7 +49,7 @@ export default function UnsubscribePage() {
 
           {status === "success" && (
             <>
-              <MailX className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+              <EnvelopeOpen className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
               <h1 className="text-2xl font-bold mb-2">Unsubscribed</h1>
               <p className="text-muted-foreground mb-6">
                 You have been successfully unsubscribed from our newsletter.

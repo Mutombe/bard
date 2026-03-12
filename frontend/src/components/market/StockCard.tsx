@@ -3,16 +3,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  TrendingUp,
-  TrendingDown,
+  TrendUp,
+  TrendDown,
   Minus,
   Star,
-  StarOff,
-  ExternalLink,
-  BarChart3,
+  StarHalf,
+  ArrowSquareOut,
+  ChartBar,
   Bell,
-  MoreHorizontal,
-} from "lucide-react";
+  DotsThree,
+} from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useAppSelector, useAppDispatch } from "@/store";
 import {
@@ -99,7 +99,7 @@ export function StockCard({
   const displayName = short_name || name;
   const colorClass = getPriceColorClass(price_change);
   const bgClass = getPriceBgClass(price_change);
-  const Icon = is_up ? TrendingUp : price_change < 0 ? TrendingDown : Minus;
+  const Icon = is_up ? TrendUp : price_change < 0 ? TrendDown : Minus;
 
   // Handle watchlist toggle with optimistic update
   const handleWatchlistToggle = async () => {
@@ -222,7 +222,7 @@ export function StockCard({
                             {isInWatchlist ? (
                               <Star className="h-4 w-4 fill-brand-orange text-brand-orange" />
                             ) : (
-                              <StarOff className="h-4 w-4 text-muted-foreground" />
+                              <StarHalf className="h-4 w-4 text-muted-foreground" />
                             )}
                           </motion.div>
                         </AnimatePresence>
@@ -237,12 +237,12 @@ export function StockCard({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <MoreHorizontal className="h-4 w-4" />
+                      <DotsThree className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onViewDetails?.(company)}>
-                      <BarChart3 className="h-4 w-4 mr-2" />
+                      <ChartBar className="h-4 w-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onCreateAlert?.(company)}>
@@ -251,7 +251,7 @@ export function StockCard({
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <ExternalLink className="h-4 w-4 mr-2" />
+                      <ArrowSquareOut className="h-4 w-4 mr-2" />
                       Company Website
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -359,7 +359,7 @@ export function StockCard({
               {isInWatchlist ? (
                 <Star className="h-4 w-4 fill-brand-orange text-brand-orange" />
               ) : (
-                <StarOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                <StarHalf className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               )}
             </Button>
           )}

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, ArrowLeft, Clock, Calendar } from "lucide-react";
+import { Envelope, ArrowLeft, Clock, Calendar } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 const recentIssues = [
@@ -21,7 +21,7 @@ export default function WeeklyNewsletterPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Mail className="h-6 w-6 text-brand-orange" />
+              <Envelope className="h-6 w-6 text-brand-orange" />
               Weekly Digest
             </h1>
             <p className="text-muted-foreground">Comprehensive week in review delivered every Friday</p>
@@ -62,7 +62,7 @@ export default function WeeklyNewsletterPage() {
                   <span>Delivered Friday at 4:00 PM SAST</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Mail className="h-4 w-4 text-brand-orange" />
+                  <Envelope className="h-4 w-4 text-brand-orange" />
                   <span>Weekly</span>
                 </div>
               </div>

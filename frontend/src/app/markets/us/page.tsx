@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Flag, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { Flag, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -48,9 +48,9 @@ export default function USMarketsPage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono font-semibold text-brand-orange">{index.symbol}</span>
                   {isUp ? (
-                    <TrendingUp className="h-4 w-4 text-market-up" />
+                    <TrendUp className="h-4 w-4 text-market-up" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-market-down" />
+                    <TrendDown className="h-4 w-4 text-market-down" />
                   )}
                 </div>
                 <div className="text-sm text-muted-foreground mb-2">{index.name}</div>
@@ -93,7 +93,7 @@ export default function USMarketsPage() {
                         "inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono",
                         isUp ? "bg-market-up/20 text-market-up" : "bg-market-down/20 text-market-down"
                       )}>
-                        {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                         {isUp ? "+" : ""}{stock.change.toFixed(2)}%
                       </span>
                     </td>

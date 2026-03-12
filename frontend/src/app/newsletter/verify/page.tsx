@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, XCircle, Loader2, Mail } from "lucide-react";
+import { CheckCircle, XCircle, CircleNotch, Envelope } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
 
@@ -54,7 +54,7 @@ export default function NewsletterVerifyPage() {
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-8 text-center">
           {status === "loading" && (
             <>
-              <Loader2 className="h-16 w-16 text-brand-orange mx-auto mb-6 animate-spin" />
+              <CircleNotch className="h-16 w-16 text-brand-orange mx-auto mb-6 animate-spin" />
               <h1 className="text-2xl font-bold mb-2">Verifying your email...</h1>
               <p className="text-muted-foreground">Please wait while we verify your subscription.</p>
             </>
@@ -62,7 +62,7 @@ export default function NewsletterVerifyPage() {
 
           {status === "success" && (
             <>
-              <CheckCircle2 className="h-16 w-16 text-market-up mx-auto mb-6" />
+              <CheckCircle className="h-16 w-16 text-market-up mx-auto mb-6" />
               <h1 className="text-2xl font-bold mb-2">Email Verified!</h1>
               <p className="text-muted-foreground mb-6">
                 Your subscription to{" "}
@@ -87,7 +87,7 @@ export default function NewsletterVerifyPage() {
 
           {status === "already_verified" && (
             <>
-              <Mail className="h-16 w-16 text-blue-400 mx-auto mb-6" />
+              <Envelope className="h-16 w-16 text-blue-400 mx-auto mb-6" />
               <h1 className="text-2xl font-bold mb-2">Already Verified</h1>
               <p className="text-muted-foreground mb-6">
                 Your email has already been verified. You're all set to receive our newsletters!

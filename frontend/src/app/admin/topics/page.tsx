@@ -4,17 +4,17 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
+  MagnifyingGlass,
   Tag,
-  Edit,
-  Trash2,
-  MoreVertical,
+  PencilSimple,
+  Trash,
+  DotsThreeVertical,
   FileText,
   Eye,
   Star,
   X,
-  Loader2,
-} from "lucide-react";
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -216,7 +216,7 @@ export default function AdminTopicsPage() {
 
       {/* Search */}
       <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search topics..."
@@ -229,7 +229,7 @@ export default function AdminTopicsPage() {
       {/* Topics Grid */}
       {loading ? (
         <div className="flex items-center justify-center p-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <CircleNotch className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -252,7 +252,7 @@ export default function AdminTopicsPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-1 hover:bg-terminal-bg-elevated rounded">
-                    <MoreVertical className="h-4 w-4" />
+                    <DotsThreeVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
@@ -265,7 +265,7 @@ export default function AdminTopicsPage() {
                       className="flex items-center gap-2"
                       onClick={() => handleEdit(topic)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <PencilSimple className="h-4 w-4" />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
@@ -279,7 +279,7 @@ export default function AdminTopicsPage() {
                       className="flex items-center gap-2 text-red-400"
                       onClick={() => setDeleteConfirm(topic.slug)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -431,7 +431,7 @@ export default function AdminTopicsPage() {
                   disabled={saving}
                   className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {saving && <CircleNotch className="h-4 w-4 animate-spin" />}
                   {editingTopic ? "Update" : "Create"}
                 </button>
               </div>

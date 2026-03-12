@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AlertTriangle, Trash2, Info, AlertCircle } from "lucide-react";
+import { Warning, Trash, Info, WarningCircle } from "@phosphor-icons/react";
 import {
   Dialog,
   DialogContent,
@@ -32,12 +32,12 @@ const variantConfig: Record<
   { icon: React.ElementType; iconClass: string; buttonClass: string }
 > = {
   danger: {
-    icon: Trash2,
+    icon: Trash,
     iconClass: "text-market-down bg-market-down/10",
     buttonClass: "bg-market-down hover:bg-market-down/90 text-white",
   },
   warning: {
-    icon: AlertTriangle,
+    icon: Warning,
     iconClass: "text-yellow-500 bg-yellow-500/10",
     buttonClass: "bg-yellow-500 hover:bg-yellow-600 text-black",
   },

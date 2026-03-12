@@ -4,17 +4,17 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
+  MagnifyingGlass,
   Clock,
-  CircleUserRound,
+  UserCircle,
   FileText,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
+  CheckCircle,
+  WarningCircle,
+  CircleNotch,
   X,
-  Edit2,
-  Trash2,
-} from "lucide-react";
+  PencilSimple,
+  Trash,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { editorialService, type EditorialAssignment, type Article } from "@/services/api/editorial";
 import { adminService, type AdminUser } from "@/services/api/admin";
@@ -352,7 +352,7 @@ export default function TasksPage() {
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-market-down/20 text-market-down flex items-center justify-center">
-              <AlertCircle className="h-5 w-5" />
+              <WarningCircle className="h-5 w-5" />
             </div>
             <div>
               <div className="text-2xl font-bold">{overdueCount}</div>
@@ -363,7 +363,7 @@ export default function TasksPage() {
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-lg bg-market-up/20 text-market-up flex items-center justify-center">
-              <CheckCircle2 className="h-5 w-5" />
+              <CheckCircle className="h-5 w-5" />
             </div>
             <div>
               <div className="text-2xl font-bold">
@@ -378,7 +378,7 @@ export default function TasksPage() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search tasks..."
@@ -462,7 +462,7 @@ export default function TasksPage() {
 
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          <CircleUserRound className="h-3 w-3" />
+                          <UserCircle className="h-3 w-3" />
                           {assignment.assignee?.full_name || "Unassigned"}
                         </span>
                         {assignment.deadline && (
@@ -496,7 +496,7 @@ export default function TasksPage() {
                           className="px-3 py-1 text-xs bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors disabled:opacity-50"
                         >
                           {actionLoading === assignment.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <CircleNotch className="h-3 w-3 animate-spin" />
                           ) : (
                             "Accept"
                           )}
@@ -510,7 +510,7 @@ export default function TasksPage() {
                           className="px-3 py-1 text-xs bg-market-up/20 text-market-up rounded hover:bg-market-up/30 transition-colors disabled:opacity-50"
                         >
                           {actionLoading === assignment.id ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <CircleNotch className="h-3 w-3 animate-spin" />
                           ) : (
                             "Complete"
                           )}
@@ -522,7 +522,7 @@ export default function TasksPage() {
                         className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded transition-colors"
                         title="Edit"
                       >
-                        <Edit2 className="h-4 w-4" />
+                        <PencilSimple className="h-4 w-4" />
                       </button>
 
                       <button
@@ -530,7 +530,7 @@ export default function TasksPage() {
                         className="p-1.5 text-muted-foreground hover:text-market-down hover:bg-terminal-bg rounded transition-colors"
                         title="Delete"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -672,7 +672,7 @@ export default function TasksPage() {
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CircleNotch className="h-4 w-4 animate-spin" />
                       {modalMode === "create" ? "Creating..." : "Saving..."}
                     </>
                   ) : (
@@ -710,7 +710,7 @@ export default function TasksPage() {
               >
                 {isDeleting ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <CircleNotch className="h-4 w-4 animate-spin" />
                     Deleting...
                   </>
                 ) : (
