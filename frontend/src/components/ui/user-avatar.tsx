@@ -5,19 +5,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-// Creative gradient backgrounds for users without avatars
-// These are inspired by abstract art and professional aesthetics
+// Burgundy-themed gradient backgrounds for users without avatars
+// Variations on the brand burgundy for visual distinction
 const AVATAR_GRADIENTS = [
-  "from-amber-500 via-orange-600 to-red-700",        // Warm sunset
-  "from-emerald-500 via-teal-600 to-cyan-700",       // Ocean depths
-  "from-violet-500 via-purple-600 to-indigo-700",    // Royal purple
-  "from-rose-400 via-pink-500 to-fuchsia-600",       // Rose garden
-  "from-blue-500 via-indigo-600 to-violet-700",      // Night sky
-  "from-slate-600 via-gray-700 to-zinc-800",         // Sophisticated gray
-  "from-orange-400 via-amber-500 to-yellow-600",     // Golden hour
-  "from-cyan-400 via-sky-500 to-blue-600",           // Clear sky
-  "from-lime-500 via-green-600 to-emerald-700",      // Forest green
-  "from-red-500 via-rose-600 to-pink-700",           // Berry blend
+  "from-[#9b2335] via-[#7a1c2a] to-[#5e1520]",     // Deep burgundy
+  "from-[#b83a4b] via-[#9b2335] to-[#7a1c2a]",     // Light to dark burgundy
+  "from-[#9b2335] via-[#8a1f30] to-[#6b1825]",     // Classic burgundy
+  "from-[#a82d40] via-[#9b2335] to-[#6b1825]",     // Rose burgundy
+  "from-[#7a1c2a] via-[#9b2335] to-[#a82d40]",     // Inverted burgundy
+  "from-[#8a1f30] via-[#6b1825] to-[#4d111b]",     // Dark burgundy
+  "from-[#b83a4b] via-[#a82d40] to-[#9b2335]",     // Warm burgundy
+  "from-[#9b2335] via-[#a82d40] to-[#8a1f30]",     // Mid burgundy
+  "from-[#6b1825] via-[#7a1c2a] to-[#9b2335]",     // Deep to light
+  "from-[#a82d40] via-[#b83a4b] to-[#9b2335]",     // Bright burgundy
 ];
 
 // Geometric patterns for visual interest
