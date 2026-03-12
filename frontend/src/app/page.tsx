@@ -358,12 +358,12 @@ function useFadeIn() {
 // =====================
 
 const industries = [
-  { name: "Banking & Finance", slug: "banking", icon: Bank, color: "text-blue-500" },
-  { name: "Mining & Resources", slug: "mining", icon: Hammer, color: "text-amber-500" },
-  { name: "Technology", slug: "technology", icon: Cpu, color: "text-violet-500" },
-  { name: "Agriculture", slug: "agriculture", icon: Plant, color: "text-emerald-500" },
-  { name: "Infrastructure", slug: "infrastructure", icon: Buildings, color: "text-slate-500" },
-  { name: "Global Markets", slug: "global", icon: Globe, color: "text-cyan-500" },
+  { name: "Banking & Finance", slug: "banking", icon: Bank },
+  { name: "Mining & Resources", slug: "mining", icon: Hammer },
+  { name: "Technology", slug: "technology", icon: Cpu },
+  { name: "Agriculture", slug: "agriculture", icon: Plant },
+  { name: "Infrastructure", slug: "infrastructure", icon: Buildings },
+  { name: "Global Markets", slug: "global", icon: Globe },
 ];
 
 const featuredTopics = [
@@ -817,11 +817,22 @@ function SidebarInsight({ article, rank }: { article: NewsArticle; rank: number 
 // SECTION COMPONENTS
 // =====================
 
-/** Industry chips with left-color accent on hover */
+/** Industry chips with burgundy-themed icons and fading background image */
 function IndustryNavigation() {
   return (
-    <section className="py-6 border-y border-terminal-border bg-terminal-bg-secondary/50">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+    <section className="relative py-6 border-y border-terminal-border bg-terminal-bg-secondary/50 overflow-hidden">
+      {/* Background image fading from right to middle */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1200&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center right",
+          maskImage: "linear-gradient(to left, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 30%, transparent 55%)",
+          WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.1) 30%, transparent 55%)",
+        }}
+      />
+      <div className="relative max-w-[1400px] mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Explore by Industry
@@ -838,10 +849,10 @@ function IndustryNavigation() {
             <Link
               key={industry.slug}
               href={`/industries/${industry.slug}`}
-              className="group flex items-center gap-3 p-4 bg-terminal-bg border border-terminal-border hover:border-l-2 hover:border-l-current transition-all"
+              className="group flex items-center gap-3 p-4 bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border hover:border-l-2 hover:border-l-brand-burgundy transition-all"
             >
-              <industry.icon className={cn("h-5 w-5", industry.color)} />
-              <span className="font-medium text-sm group-hover:text-primary transition-colors">
+              <industry.icon className="h-5 w-5 text-brand-burgundy" />
+              <span className="font-medium text-sm group-hover:text-brand-burgundy transition-colors">
                 {industry.name}
               </span>
             </Link>
