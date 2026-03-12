@@ -4,23 +4,23 @@ import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Search,
-  CircleUserRound,
-  Menu,
+  MagnifyingGlass,
+  UserCircle,
+  List,
   X,
   Bell,
-  Settings,
-  LogOut,
-  ChevronDown,
-  ChevronRight,
-  Bookmark,
-  Mail,
-  Linkedin,
-  Facebook,
-  Instagram,
-  LayoutDashboard,
-} from "lucide-react";
-import { FaXTwitter } from "react-icons/fa6";
+  GearSix,
+  SignOut,
+  CaretDown,
+  CaretRight,
+  BookmarkSimple,
+  Envelope,
+  LinkedinLogo,
+  FacebookLogo,
+  InstagramLogo,
+  SquaresFour,
+  XLogo,
+} from "@phosphor-icons/react";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { toggleMobileMenu, toggleSearch } from "@/store/slices/uiSlice";
 import { clearAuth } from "@/store/slices/authSlice";
@@ -80,7 +80,7 @@ function MobileNavigation({ isOpen, onClose }: { isOpen: boolean; onClose: () =>
                 className="flex items-center justify-between w-full px-3 py-3 text-left font-bold hover:bg-terminal-bg-elevated rounded-md"
               >
                 {dropdown.label}
-                <ChevronDown
+                <CaretDown
                   className={cn(
                     "h-4 w-4 transition-transform",
                     expandedSection === dropdown.label && "rotate-180"
@@ -237,7 +237,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 onClick={() => dispatch(toggleSearch())}
                 className="hidden sm:flex"
               >
-                <Search className="h-5 w-5" />
+                <MagnifyingGlass className="h-5 w-5" />
               </Button>
 
               {isAuthenticated ? (
@@ -258,7 +258,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon">
-                        <CircleUserRound className="h-5 w-5" />
+                        <UserCircle className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
@@ -273,26 +273,26 @@ export function MainLayout({ children }: MainLayoutProps) {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link href="/profile">
-                          <CircleUserRound className="h-4 w-4 mr-2" />
+                          <UserCircle className="h-4 w-4 mr-2" />
                           Profile
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/saved">
-                          <Bookmark className="h-4 w-4 mr-2" />
+                          <BookmarkSimple className="h-4 w-4 mr-2" />
                           Saved Articles
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/subscribe">
-                          <Mail className="h-4 w-4 mr-2" />
+                          <Envelope className="h-4 w-4 mr-2" />
                           Newsletters
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link href="/settings">
-                          <Settings className="h-4 w-4 mr-2" />
+                          <GearSix className="h-4 w-4 mr-2" />
                           Settings
                         </Link>
                       </DropdownMenuItem>
@@ -302,7 +302,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem asChild>
                             <Link href="/admin" className="text-primary">
-                              <LayoutDashboard className="h-4 w-4 mr-2" />
+                              <SquaresFour className="h-4 w-4 mr-2" />
                               Admin Dashboard
                             </Link>
                           </DropdownMenuItem>
@@ -310,7 +310,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="h-4 w-4 mr-2" />
+                        <SignOut className="h-4 w-4 mr-2" />
                         Sign Out
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -343,7 +343,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 className="lg:hidden"
                 onClick={() => dispatch(toggleMobileMenu())}
               >
-                <Menu className="h-5 w-5" />
+                <List className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -370,16 +370,16 @@ export function MainLayout({ children }: MainLayoutProps) {
               </p>
               <div className="flex items-center gap-3">
                 <a href="https://x.com/BardGlobal" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <FaXTwitter className="h-4 w-4" />
+                  <XLogo className="h-4 w-4" />
                 </a>
                 <a href="https://www.instagram.com/bgfi.global/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <Instagram className="h-4 w-4" />
+                  <InstagramLogo className="h-4 w-4" />
                 </a>
                 <a href="https://www.linkedin.com/company/bgif" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <Linkedin className="h-4 w-4" />
+                  <LinkedinLogo className="h-4 w-4" />
                 </a>
                 <a href="https://www.facebook.com/profile.php?id=61588487751160" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <Facebook className="h-4 w-4" />
+                  <FacebookLogo className="h-4 w-4" />
                 </a>
               </div>
             </div>

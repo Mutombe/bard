@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, TrendingUp, TrendingDown, Building2 } from "lucide-react";
+import { ChartBar, TrendUp, TrendDown, Buildings } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useCompanies } from "@/hooks";
@@ -45,7 +45,7 @@ export default function MarketCapPage() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-brand-orange" />
+            <ChartBar className="h-6 w-6 text-brand-orange" />
             Companies by Market Cap
           </h1>
           <p className="text-muted-foreground">
@@ -97,7 +97,7 @@ export default function MarketCapPage() {
                                 href={`/companies/${company.symbol}`}
                                 className="flex items-center gap-2 hover:text-brand-orange"
                               >
-                                <Building2 className="h-4 w-4 text-muted-foreground" />
+                                <Buildings className="h-4 w-4 text-muted-foreground" />
                                 <div>
                                   <span className="font-medium">{company.symbol}</span>
                                   <span className="text-muted-foreground ml-2 hidden md:inline">
@@ -117,9 +117,9 @@ export default function MarketCapPage() {
                             )}>
                               <span className="flex items-center justify-end gap-1">
                                 {(company.price_change_percent || 0) >= 0 ? (
-                                  <TrendingUp className="h-3 w-3" />
+                                  <TrendUp className="h-3 w-3" />
                                 ) : (
-                                  <TrendingDown className="h-3 w-3" />
+                                  <TrendDown className="h-3 w-3" />
                                 )}
                                 {(company.price_change_percent || 0) >= 0 ? "+" : ""}
                                 {(company.price_change_percent || 0).toFixed(2)}%

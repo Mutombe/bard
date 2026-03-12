@@ -2,17 +2,17 @@
 
 import { useState } from "react";
 import {
-  Settings,
+  GearSix,
   Globe,
   Bell,
   Shield,
   Database,
-  Mail,
+  Envelope,
   Key,
-  Save,
+  FloppyDisk,
   Eye,
-  EyeOff,
-} from "lucide-react";
+  EyeSlash,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
@@ -21,11 +21,11 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
 
   const tabs = [
-    { id: "general", label: "General", icon: Settings },
+    { id: "general", label: "General", icon: GearSix },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "security", label: "Security", icon: Shield },
     { id: "api", label: "API Keys", icon: Key },
-    { id: "email", label: "Email Settings", icon: Mail },
+    { id: "email", label: "Email Settings", icon: Envelope },
     { id: "database", label: "Database", icon: Database },
   ];
 
@@ -50,7 +50,7 @@ export default function SettingsPage() {
           disabled={isSaving}
           className="flex items-center gap-2 px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors"
         >
-          <Save className="h-4 w-4" />
+          <FloppyDisk className="h-4 w-4" />
           {isSaving ? "Saving..." : "Save Changes"}
         </button>
       </div>
@@ -242,7 +242,7 @@ export default function SettingsPage() {
                     onClick={() => setShowApiKey(!showApiKey)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showApiKey ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default function SettingsPage() {
                     onClick={() => setShowApiKey(!showApiKey)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showApiKey ? <EyeSlash className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>

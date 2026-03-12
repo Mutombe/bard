@@ -3,16 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  DatabaseZap,
+  Database,
   Check,
-  ChevronRight,
-  Loader2,
-  ArrowUpDown,
-  Layers,
+  CaretRight,
+  CircleNotch,
+  ArrowsDownUp,
+  Stack,
   Gauge,
   SlidersHorizontal,
-  Zap,
-} from "lucide-react";
+  Lightning,
+} from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
 import { toast } from "sonner";
@@ -35,12 +35,12 @@ const highlights = [
 
 const dataProducts = [
   {
-    icon: <ArrowUpDown className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
+    icon: <ArrowsDownUp className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
     title: "Market Dashboards",
     description: "Real-time and historical charts across all major African indices, currencies, and benchmarks.",
   },
   {
-    icon: <Layers className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
+    icon: <Stack className="h-5 w-5 text-[#0D7377] dark:text-[#2DD4BF]" />,
     title: "Sector Analytics",
     description: "Breakdown of sector performance, capital flows, and relative valuation metrics.",
   },
@@ -102,9 +102,9 @@ export default function AfriFinAnalyticsPage() {
       <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6">
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
-          <ChevronRight className="h-3 w-3" />
+          <CaretRight className="h-3 w-3" />
           <span>Publications</span>
-          <ChevronRight className="h-3 w-3" />
+          <CaretRight className="h-3 w-3" />
           <span className="text-foreground">AfriFin Analytics</span>
         </nav>
 
@@ -138,7 +138,7 @@ export default function AfriFinAnalyticsPage() {
           <div className="relative z-10 h-full flex flex-col justify-end p-8 md:p-12">
             <div className="flex items-center gap-3 mb-4">
               <div className={`h-12 w-12 ${ACCENT_BG} backdrop-blur-sm flex items-center justify-center`}>
-                <DatabaseZap className={`h-6 w-6 ${ACCENT}`} />
+                <Database className={`h-6 w-6 ${ACCENT}`} />
               </div>
               <span className={`px-3 py-1 ${ACCENT_BG} backdrop-blur-sm ${ACCENT} text-xs font-semibold uppercase tracking-wider border ${ACCENT_BORDER}`}>
                 Daily
@@ -205,7 +205,7 @@ export default function AfriFinAnalyticsPage() {
                     </div>
                     {error && <div className="mb-4 p-3 bg-market-down/10 border border-market-down/30 text-market-down text-sm">{error}</div>}
                     <button type="submit" disabled={isSubmitting} className="w-full py-3 bg-[#0D7377] dark:bg-[#2DD4BF] text-white dark:text-black font-medium hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                      {isSubmitting ? (<><Loader2 className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
+                      {isSubmitting ? (<><CircleNotch className="h-4 w-4 animate-spin" />Subscribing...</>) : "Subscribe Free"}
                     </button>
                     <p className="text-xs text-muted-foreground text-center mt-3">Free email delivery. Unsubscribe anytime.</p>
                   </form>
@@ -214,7 +214,7 @@ export default function AfriFinAnalyticsPage() {
 
               <div className={`relative overflow-hidden bg-terminal-bg-elevated border ${ACCENT_BORDER} p-6 text-center`}>
                 <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="afa-cta-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#afa-cta-grid)"/></svg></div>
-                <Zap className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
+                <Lightning className={`relative h-6 w-6 ${ACCENT} mx-auto mb-3`} />
                 <p className="text-sm font-semibold mb-2">Want the full platform?</p>
                 <p className="text-xs text-muted-foreground mb-4">Get all three publications plus breaking news alerts and weekly digests — free.</p>
                 <Link href="/subscribe" className={`inline-block w-full py-2 border border-[#0D7377] dark:border-[#2DD4BF] ${ACCENT} text-sm font-medium hover:bg-[#0D7377] hover:text-white dark:hover:bg-[#2DD4BF] dark:hover:text-black transition-colors`}>

@@ -1,7 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Download, Building2, Calendar, ExternalLink, TrendingUp, BarChart3 } from "lucide-react";
+import {
+  FileText,
+  DownloadSimple,
+  Buildings,
+  Calendar,
+  ArrowSquareOut,
+  TrendUp,
+  ChartBar,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useCompanies } from "@/hooks";
@@ -64,10 +72,10 @@ const recentReports = [
 
 // Categories of reports
 const reportCategories = [
-  { name: "Annual Results", count: 45, icon: BarChart3, color: "text-blue-500" },
-  { name: "Interim Results", count: 38, icon: TrendingUp, color: "text-green-500" },
+  { name: "Annual Results", count: 45, icon: ChartBar, color: "text-blue-500" },
+  { name: "Interim Results", count: 38, icon: TrendUp, color: "text-green-500" },
   { name: "Trading Statements", count: 62, icon: FileText, color: "text-orange-500" },
-  { name: "Investor Presentations", count: 28, icon: ExternalLink, color: "text-purple-500" },
+  { name: "Investor Presentations", count: 28, icon: ArrowSquareOut, color: "text-purple-500" },
 ];
 
 export default function ReportsPage() {
@@ -124,7 +132,7 @@ export default function ReportsPage() {
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-lg bg-brand-orange/10 flex items-center justify-center flex-shrink-0">
-                      <Building2 className="h-6 w-6 text-brand-orange" />
+                      <Buildings className="h-6 w-6 text-brand-orange" />
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -164,7 +172,7 @@ export default function ReportsPage() {
                       </div>
                     </div>
                     <button className="flex items-center gap-2 px-4 py-2 bg-brand-orange/10 text-brand-orange rounded-md hover:bg-brand-orange hover:text-white transition-colors text-sm">
-                      <Download className="h-4 w-4" />
+                      <DownloadSimple className="h-4 w-4" />
                       PDF
                     </button>
                   </div>
@@ -196,7 +204,7 @@ export default function ReportsPage() {
                   className="flex items-center gap-2 p-3 rounded-lg bg-terminal-bg hover:bg-brand-orange/10 hover:text-brand-orange transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-terminal-bg-elevated flex items-center justify-center flex-shrink-0">
-                    <Building2 className="h-4 w-4" />
+                    <Buildings className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
                     <div className="font-medium truncate">{company.symbol}</div>

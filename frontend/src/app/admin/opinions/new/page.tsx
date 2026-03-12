@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Save,
+  FloppyDisk,
   Eye,
   X,
   User,
-  Loader2,
+  CircleNotch,
   Plus,
-  Settings,
+  GearSix,
   Image as ImageIcon,
-  ChevronRight,
-} from "lucide-react";
+  CaretRight,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { editorialService } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
@@ -169,14 +169,14 @@ export default function NewOpinionPage() {
               )}
               title="Toggle settings"
             >
-              <Settings className="h-5 w-5" />
+              <GearSix className="h-5 w-5" />
             </button>
             <button
               onClick={() => handleSave("draft")}
               disabled={isSaving}
               className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
             >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isSaving ? <CircleNotch className="h-4 w-4 animate-spin" /> : <FloppyDisk className="h-4 w-4" />}
               Save Draft
             </button>
             <button
@@ -186,7 +186,7 @@ export default function NewOpinionPage() {
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <CircleNotch className="h-4 w-4 animate-spin" />
                   Publishing...
                 </>
               ) : (

@@ -3,14 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  BarChart3,
-  Search,
+  ChartBar,
+  MagnifyingGlass,
   Plus,
   X,
-  TrendingUp,
-  TrendingDown,
+  TrendUp,
+  TrendDown,
   ArrowRight,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -88,7 +88,7 @@ export default function ComparePage() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-            <BarChart3 className="h-6 w-6 text-brand-orange" />
+            <ChartBar className="h-6 w-6 text-brand-orange" />
             Compare Stocks
           </h1>
           <p className="text-muted-foreground">
@@ -143,7 +143,7 @@ export default function ComparePage() {
                 <div className="absolute top-full left-0 mt-2 w-64 bg-terminal-bg-secondary border border-terminal-border rounded-md shadow-lg z-10">
                   <div className="p-2">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <input
                         type="text"
                         placeholder="Search stocks..."
@@ -210,7 +210,7 @@ export default function ComparePage() {
                         "flex items-center justify-center gap-1 font-mono",
                         stock.change >= 0 ? "text-market-up" : "text-market-down"
                       )}>
-                        {stock.change >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {stock.change >= 0 ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                         {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
                       </span>
                     </td>
@@ -322,7 +322,7 @@ export default function ComparePage() {
 
         {compareStocks.length === 0 && (
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
-            <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <ChartBar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium mb-2">Add stocks to compare</h3>
             <p className="text-muted-foreground">
               Select up to 4 stocks to compare their key metrics side by side.

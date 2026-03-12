@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, X, Loader2 } from "lucide-react";
+import { MagnifyingGlass, X, CircleNotch } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface SearchInputProps {
@@ -94,7 +94,7 @@ export function SearchInput({
   return (
     <div className={cn("relative", className)}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           ref={inputRef}
           type="text"
@@ -110,7 +110,7 @@ export function SearchInput({
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
           {isLoading ? (
-            <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+            <CircleNotch className="h-4 w-4 text-muted-foreground animate-spin" />
           ) : query ? (
             <button
               onClick={handleClear}
@@ -135,7 +135,7 @@ export function SearchInput({
               className="w-full px-4 py-2 text-left text-sm hover:bg-terminal-bg transition-colors"
             >
               <span className="flex items-center gap-2">
-                <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                <MagnifyingGlass className="h-3.5 w-3.5 text-muted-foreground" />
                 {suggestion}
               </span>
             </button>

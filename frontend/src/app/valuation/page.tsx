@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Calculator,
-  Search,
-  HelpCircle,
-  TrendingUp,
-  TrendingDown,
-  RefreshCw,
-} from "lucide-react";
+  MagnifyingGlass,
+  Question,
+  TrendUp,
+  TrendDown,
+  ArrowClockwise,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -136,7 +136,7 @@ export default function ValuationPage() {
                 onClick={() => setShowSearch(!showSearch)}
                 className="flex items-center gap-2 px-4 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-md hover:border-brand-orange transition-colors"
               >
-                <Search className="h-4 w-4" />
+                <MagnifyingGlass className="h-4 w-4" />
                 {selectedStock ? selectedStock.symbol : "Select"}
               </button>
               {showSearch && (
@@ -202,7 +202,7 @@ export default function ValuationPage() {
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 DCF Parameters
-                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                <Question className="h-4 w-4 text-muted-foreground" />
               </h3>
               <div className="space-y-4">
                 <div>
@@ -239,7 +239,7 @@ export default function ValuationPage() {
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 Comparable Parameters
-                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                <Question className="h-4 w-4 text-muted-foreground" />
               </h3>
               <div className="space-y-4">
                 <div>
@@ -283,9 +283,9 @@ export default function ValuationPage() {
                       getUpsideDownside(avgFairValue) >= 0 ? "text-market-up" : "text-market-down"
                     )}>
                       {getUpsideDownside(avgFairValue) >= 0 ? (
-                        <TrendingUp className="h-4 w-4" />
+                        <TrendUp className="h-4 w-4" />
                       ) : (
-                        <TrendingDown className="h-4 w-4" />
+                        <TrendDown className="h-4 w-4" />
                       )}
                       <span className="font-medium">
                         {getUpsideDownside(avgFairValue) >= 0 ? "+" : ""}

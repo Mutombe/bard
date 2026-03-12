@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Landmark, ArrowLeft, Calendar, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  Bank,
+  ArrowLeft,
+  Calendar,
+  TrendUp,
+  TrendDown,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -43,7 +49,7 @@ export default function FedPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Landmark className="h-6 w-6 text-brand-orange" />
+              <Bank className="h-6 w-6 text-brand-orange" />
               Federal Reserve
             </h1>
             <p className="text-muted-foreground">US Fed monetary policy and interest rates</p>
@@ -114,8 +120,8 @@ export default function FedPage() {
                           item.change === "cut" ? "bg-market-up/20 text-market-up" :
                           "bg-terminal-bg-elevated text-muted-foreground"
                         )}>
-                          {item.change === "hike" && <TrendingUp className="h-3 w-3" />}
-                          {item.change === "cut" && <TrendingDown className="h-3 w-3" />}
+                          {item.change === "hike" && <TrendUp className="h-3 w-3" />}
+                          {item.change === "cut" && <TrendDown className="h-3 w-3" />}
                           {item.change}
                         </span>
                       </div>

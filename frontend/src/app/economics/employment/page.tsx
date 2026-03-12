@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Users, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { Users, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -58,7 +58,7 @@ export default function EmploymentPage() {
                         "inline-flex items-center gap-1 text-sm font-mono",
                         isImproving ? "text-market-up" : "text-market-down"
                       )}>
-                        {isImproving ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+                        {isImproving ? <TrendDown className="h-3 w-3" /> : <TrendUp className="h-3 w-3" />}
                         {country.previous.toFixed(1)}%
                       </span>
                     </td>

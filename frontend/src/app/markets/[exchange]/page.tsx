@@ -4,14 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
-  TrendingUp,
-  TrendingDown,
-  Search,
-  ArrowUpDown,
+  TrendUp,
+  TrendDown,
+  MagnifyingGlass,
+  ArrowsDownUp,
   Star,
   Clock,
-  BarChart3,
-} from "lucide-react";
+  ChartBar,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -161,7 +161,7 @@ export default function ExchangePage() {
     return (
       <MainLayout>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
-          <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+          <ChartBar className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
           <h1 className="text-2xl font-bold mb-4">Exchange Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The exchange you're looking for doesn't exist or is not available.
@@ -242,9 +242,9 @@ export default function ExchangePage() {
                   exchange.indexChange >= 0 ? "text-market-up" : "text-market-down"
                 )}>
                   {exchange.indexChange >= 0 ? (
-                    <TrendingUp className="h-5 w-5" />
+                    <TrendUp className="h-5 w-5" />
                   ) : (
-                    <TrendingDown className="h-5 w-5" />
+                    <TrendDown className="h-5 w-5" />
                   )}
                   {exchange.indexChange >= 0 ? "+" : ""}{exchange.indexChange.toFixed(2)}
                   ({exchange.indexChangePercent >= 0 ? "+" : ""}{exchange.indexChangePercent.toFixed(2)}%)
@@ -261,7 +261,7 @@ export default function ExchangePage() {
         {/* Search */}
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search stocks..."
@@ -284,22 +284,22 @@ export default function ExchangePage() {
                 <th className="text-left p-4 hidden md:table-cell">Sector</th>
                 <th className="text-right p-4 cursor-pointer hover:text-foreground" onClick={() => handleSort("price")}>
                   <span className="flex items-center justify-end gap-1">
-                    Price <ArrowUpDown className="h-3 w-3" />
+                    Price <ArrowsDownUp className="h-3 w-3" />
                   </span>
                 </th>
                 <th className="text-right p-4 cursor-pointer hover:text-foreground" onClick={() => handleSort("changePercent")}>
                   <span className="flex items-center justify-end gap-1">
-                    Change <ArrowUpDown className="h-3 w-3" />
+                    Change <ArrowsDownUp className="h-3 w-3" />
                   </span>
                 </th>
                 <th className="text-right p-4 cursor-pointer hover:text-foreground hidden lg:table-cell" onClick={() => handleSort("volume")}>
                   <span className="flex items-center justify-end gap-1">
-                    Volume <ArrowUpDown className="h-3 w-3" />
+                    Volume <ArrowsDownUp className="h-3 w-3" />
                   </span>
                 </th>
                 <th className="text-right p-4 cursor-pointer hover:text-foreground hidden md:table-cell" onClick={() => handleSort("marketCap")}>
                   <span className="flex items-center justify-end gap-1">
-                    Mkt Cap <ArrowUpDown className="h-3 w-3" />
+                    Mkt Cap <ArrowsDownUp className="h-3 w-3" />
                   </span>
                 </th>
                 <th className="p-4 w-12"></th>
@@ -324,9 +324,9 @@ export default function ExchangePage() {
                       stock.change >= 0 ? "text-market-up" : "text-market-down"
                     )}>
                       {stock.change >= 0 ? (
-                        <TrendingUp className="h-3 w-3" />
+                        <TrendUp className="h-3 w-3" />
                       ) : (
-                        <TrendingDown className="h-3 w-3" />
+                        <TrendDown className="h-3 w-3" />
                       )}
                       {stock.changePercent >= 0 ? "+" : ""}{stock.changePercent.toFixed(2)}%
                     </span>
@@ -349,7 +349,7 @@ export default function ExchangePage() {
 
           {filteredStocks.length === 0 && (
             <div className="p-12 text-center">
-              <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <MagnifyingGlass className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No stocks found</h3>
               <p className="text-muted-foreground">
                 Try adjusting your search query.

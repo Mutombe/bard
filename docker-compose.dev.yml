@@ -1,0 +1,81 @@
+# =========================
+# DEVELOPMENT OVERRIDES
+# =========================
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+version: "3.9"
+
+services:
+  # ============================================
+  # Django Backend - Development Mode
+  # ============================================
+  backend:
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - DATABASE_URL=postgres://bard_user:${POSTGRES_PASSWORD:-bard_secure_password}@db:5432/bard_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-dev-key-change-in-production}
+      - ALLOWED_HOSTS=*
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY:-}
+      - POLYGON_API_KEY=${POLYGON_API_KEY:-}
+      - NEWSAPI_KEY=${NEWSAPI_KEY:-}
+      - UNSPLASH_ACCESS_KEY=${UNSPLASH_ACCESS_KEY:-}
+    volumes:
+      - ./backend:/app
+    # Hot reload - no need for collectstatic in dev
+    stdin_open: true
+    tty: true
+
+  # ============================================
+  # Celery Worker - Development (fewer workers)
+  # ============================================
+  celery_worker:
+    command: celery -A config worker -l DEBUG -c 2
+    environment:
+      - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - DATABASE_URL=postgres://bard_user:${POSTGRES_PASSWORD:-bard_secure_password}@db:5432/bard_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-dev-key-change-in-production}
+
+  # ============================================
+  # Celery Beat - Development
+  # ============================================
+  celery_beat:
+    environment:
+      - DEBUG=1
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - DATABASE_URL=postgres://bard_user:${POSTGRES_PASSWORD:-bard_secure_password}@db:5432/bard_db
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+      - SECRET_KEY=${DJANGO_SECRET_KEY:-django-insecure-dev-key-change-in-production}
+
+  # ============================================
+  # Next.js Frontend - Development Mode
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+      - WATCHPACK_POLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+  # ============================================
+  # Disable Nginx in Development
+  # ============================================
+  nginx:
+    profiles:
+      - production

@@ -19,41 +19,41 @@ import Highlight from "@tiptap/extension-highlight";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import {
-  Bold,
-  Italic,
-  Underline as UnderlineIcon,
-  Strikethrough,
+  TextB,
+  TextItalic,
+  TextUnderline as UnderlineIcon,
+  TextStrikethrough as Strikethrough,
   Link as LinkIcon,
-  Link2Off,
-  Heading1,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
-  Quote,
+  LinkBreak,
+  TextHOne,
+  TextHTwo,
+  TextHThree,
+  ListBullets,
+  ListNumbers,
+  Quotes,
   Code,
   Image as ImageIcon,
   Table as TableIcon,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
+  TextAlignLeft,
+  TextAlignCenter,
+  TextAlignRight,
   Minus,
-  Undo,
-  Redo,
-  Type,
-  Highlighter,
+  ArrowCounterClockwise,
+  ArrowClockwise,
+  TextT,
+  HighlighterCircle,
   Plus,
-  Trash2,
-  MoreHorizontal,
+  Trash,
+  DotsThree,
   FileText,
-  Sparkles,
+  Sparkle,
   Columns,
-  RowsIcon,
+  Rows,
   X,
-  Upload,
-  FileUp,
-  Loader2,
-} from "lucide-react";
+  UploadSimple,
+  FileArrowUp,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import mammoth from "mammoth";
 import { cn } from "@/lib/utils";
 
@@ -120,7 +120,7 @@ function LinkPopup({
           className="p-1.5 text-destructive hover:bg-destructive/10 rounded-md"
           title="Remove link"
         >
-          <Link2Off className="h-4 w-4" />
+          <LinkBreak className="h-4 w-4" />
         </button>
       )}
     </form>
@@ -400,14 +400,14 @@ export function ModernEditor({
           disabled={!editor.can().undo()}
           title="Undo (Ctrl+Z)"
         >
-          <Undo className="h-4 w-4" />
+          <ArrowCounterClockwise className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
           title="Redo (Ctrl+Y)"
         >
-          <Redo className="h-4 w-4" />
+          <ArrowClockwise className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarDivider />
@@ -418,14 +418,14 @@ export function ModernEditor({
           isActive={editor.isActive("bold")}
           title="Bold (Ctrl+B)"
         >
-          <Bold className="h-4 w-4" />
+          <TextB className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleItalic().run()}
           isActive={editor.isActive("italic")}
           title="Italic (Ctrl+I)"
         >
-          <Italic className="h-4 w-4" />
+          <TextItalic className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -446,7 +446,7 @@ export function ModernEditor({
           isActive={editor.isActive("highlight")}
           title="Highlight"
         >
-          <Highlighter className="h-4 w-4" />
+          <HighlighterCircle className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarDivider />
@@ -457,21 +457,21 @@ export function ModernEditor({
           isActive={editor.isActive("heading", { level: 1 })}
           title="Heading 1"
         >
-          <Heading1 className="h-4 w-4" />
+          <TextHOne className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
           isActive={editor.isActive("heading", { level: 2 })}
           title="Heading 2"
         >
-          <Heading2 className="h-4 w-4" />
+          <TextHTwo className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
           isActive={editor.isActive("heading", { level: 3 })}
           title="Heading 3"
         >
-          <Heading3 className="h-4 w-4" />
+          <TextHThree className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarDivider />
@@ -482,14 +482,14 @@ export function ModernEditor({
           isActive={editor.isActive("bulletList")}
           title="Bullet List"
         >
-          <List className="h-4 w-4" />
+          <ListBullets className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           isActive={editor.isActive("orderedList")}
           title="Numbered List"
         >
-          <ListOrdered className="h-4 w-4" />
+          <ListNumbers className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarDivider />
@@ -500,7 +500,7 @@ export function ModernEditor({
           isActive={editor.isActive("blockquote")}
           title="Quote"
         >
-          <Quote className="h-4 w-4" />
+          <Quotes className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleCodeBlock().run()}
@@ -524,21 +524,21 @@ export function ModernEditor({
           isActive={editor.isActive({ textAlign: "left" })}
           title="Align Left"
         >
-          <AlignLeft className="h-4 w-4" />
+          <TextAlignLeft className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setTextAlign("center").run()}
           isActive={editor.isActive({ textAlign: "center" })}
           title="Align Center"
         >
-          <AlignCenter className="h-4 w-4" />
+          <TextAlignCenter className="h-4 w-4" />
         </ToolbarButton>
         <ToolbarButton
           onClick={() => editor.chain().focus().setTextAlign("right").run()}
           isActive={editor.isActive({ textAlign: "right" })}
           title="Align Right"
         >
-          <AlignRight className="h-4 w-4" />
+          <TextAlignRight className="h-4 w-4" />
         </ToolbarButton>
 
         <ToolbarDivider />
@@ -646,7 +646,7 @@ export function ModernEditor({
             isActive={showDocumentPopup}
             title="Import Document"
           >
-            <FileUp className="h-4 w-4" />
+            <FileArrowUp className="h-4 w-4" />
           </ToolbarButton>
           {showDocumentPopup && (
             <div className="absolute top-full left-0 mt-2 z-50 p-4 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-xl w-80">
@@ -664,12 +664,12 @@ export function ModernEditor({
                 >
                   {isImportingDocument ? (
                     <>
-                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <CircleNotch className="h-6 w-6 animate-spin" />
                       <span>Importing...</span>
                     </>
                   ) : (
                     <>
-                      <Upload className="h-6 w-6" />
+                      <UploadSimple className="h-6 w-6" />
                       <span>Choose file to import</span>
                     </>
                   )}
@@ -726,7 +726,7 @@ export function ModernEditor({
             title="Bold"
             className="p-1.5"
           >
-            <Bold className="h-3.5 w-3.5" />
+            <TextB className="h-3.5 w-3.5" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -734,7 +734,7 @@ export function ModernEditor({
             title="Italic"
             className="p-1.5"
           >
-            <Italic className="h-3.5 w-3.5" />
+            <TextItalic className="h-3.5 w-3.5" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -759,7 +759,7 @@ export function ModernEditor({
             title="Highlight"
             className="p-1.5"
           >
-            <Highlighter className="h-3.5 w-3.5" />
+            <HighlighterCircle className="h-3.5 w-3.5" />
           </ToolbarButton>
           <div className="w-px h-4 bg-terminal-border mx-0.5" />
           <ToolbarButton
@@ -793,14 +793,14 @@ export function ModernEditor({
             title="Heading 1"
             className="p-1.5"
           >
-            <Heading1 className="h-3.5 w-3.5" />
+            <TextHOne className="h-3.5 w-3.5" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
             title="Heading 2"
             className="p-1.5"
           >
-            <Heading2 className="h-3.5 w-3.5" />
+            <TextHTwo className="h-3.5 w-3.5" />
           </ToolbarButton>
           <div className="w-px h-4 bg-terminal-border mx-0.5" />
           <ToolbarButton
@@ -808,14 +808,14 @@ export function ModernEditor({
             title="Bullet List"
             className="p-1.5"
           >
-            <List className="h-3.5 w-3.5" />
+            <ListBullets className="h-3.5 w-3.5" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             title="Numbered List"
             className="p-1.5"
           >
-            <ListOrdered className="h-3.5 w-3.5" />
+            <ListNumbers className="h-3.5 w-3.5" />
           </ToolbarButton>
           <div className="w-px h-4 bg-terminal-border mx-0.5" />
           <ToolbarButton
@@ -823,7 +823,7 @@ export function ModernEditor({
             title="Quote"
             className="p-1.5"
           >
-            <Quote className="h-3.5 w-3.5" />
+            <Quotes className="h-3.5 w-3.5" />
           </ToolbarButton>
           <ToolbarButton
             onClick={() => setShowImagePopup(true)}

@@ -3,20 +3,20 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import {
-  Search,
+  MagnifyingGlass,
   X,
   Newspaper,
-  CircleUserRound,
+  UserCircle,
   Clock,
   ArrowRight,
-  Sparkles,
+  Sparkle,
   Factory,
   Globe,
   Tag,
   FileText,
-  Mic,
-  Landmark,
-} from "lucide-react";
+  Microphone,
+  Bank,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface SearchResult {
@@ -145,7 +145,7 @@ function getIcon(type: SearchResult["type"]) {
     case "article":
       return <Newspaper className="h-4 w-4 text-brand-orange" />;
     case "person":
-      return <CircleUserRound className="h-4 w-4 text-purple-400" />;
+      return <UserCircle className="h-4 w-4 text-purple-400" />;
     case "industry":
       return <Factory className="h-4 w-4 text-amber-400" />;
     case "region":
@@ -155,13 +155,13 @@ function getIcon(type: SearchResult["type"]) {
     case "research":
       return <FileText className="h-4 w-4 text-violet-400" />;
     case "podcast":
-      return <Mic className="h-4 w-4 text-rose-400" />;
+      return <Microphone className="h-4 w-4 text-rose-400" />;
     case "economics":
-      return <Landmark className="h-4 w-4 text-sky-400" />;
+      return <Bank className="h-4 w-4 text-sky-400" />;
     case "suggestion":
-      return <Sparkles className="h-4 w-4 text-yellow-400" />;
+      return <Sparkle className="h-4 w-4 text-yellow-400" />;
     default:
-      return <Search className="h-4 w-4" />;
+      return <MagnifyingGlass className="h-4 w-4" />;
   }
 }
 
@@ -327,7 +327,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
         <div className="max-w-2xl mx-auto bg-terminal-bg border border-terminal-border rounded-lg shadow-2xl overflow-hidden">
           {/* Search Input */}
           <div className="flex items-center gap-3 px-4 py-3 border-b border-terminal-border">
-            <Search className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+            <MagnifyingGlass className="h-5 w-5 text-muted-foreground flex-shrink-0" />
             <input
               ref={inputRef}
               type="text"
@@ -443,7 +443,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
                       onClick={onClose}
                       className="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated text-sm transition-colors"
                     >
-                      <Mic className="h-4 w-4 text-rose-400" />
+                      <Microphone className="h-4 w-4 text-rose-400" />
                       Podcasts
                     </Link>
                   </div>
@@ -539,7 +539,7 @@ export function LiveSearch({ isOpen, onClose }: LiveSearchProps) {
               </div>
             ) : (
               <div className="p-8 text-center text-muted-foreground">
-                <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <MagnifyingGlass className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>No results found for &quot;{query}&quot;</p>
                 <p className="text-sm mt-1">Try different keywords or browse categories</p>
               </div>

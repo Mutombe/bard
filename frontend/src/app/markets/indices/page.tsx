@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LineChart, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { ChartLine, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -35,7 +35,7 @@ export default function IndicesPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <LineChart className="h-6 w-6 text-brand-orange" />
+              <ChartLine className="h-6 w-6 text-brand-orange" />
               Market Indices
             </h1>
             <p className="text-muted-foreground">Track major African and global indices</p>
@@ -77,7 +77,7 @@ export default function IndicesPage() {
                           "inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono",
                           isUp ? "bg-market-up/20 text-market-up" : "bg-market-down/20 text-market-down"
                         )}>
-                          {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                          {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                           {isUp ? "+" : ""}{index.change.toFixed(2)}%
                         </span>
                       </td>
@@ -126,7 +126,7 @@ export default function IndicesPage() {
                           "inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono",
                           isUp ? "bg-market-up/20 text-market-up" : "bg-market-down/20 text-market-down"
                         )}>
-                          {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                          {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                           {isUp ? "+" : ""}{index.change.toFixed(2)}%
                         </span>
                       </td>

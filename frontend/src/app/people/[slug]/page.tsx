@@ -7,22 +7,22 @@ import Image from "next/image";
 import {
   ArrowLeft,
   Briefcase,
-  Building2,
+  Buildings,
   MapPin,
   Calendar,
-  ExternalLink,
-  Linkedin,
-  Mail,
-  ChevronRight,
-  TrendingUp,
+  ArrowSquareOut,
+  LinkedinLogo,
+  Envelope,
+  CaretRight,
+  TrendUp,
   FileText,
   Clock,
-  Loader2,
+  CircleNotch,
   UserPlus,
   UserCheck,
   Bell,
-} from "lucide-react";
-import { FaXTwitter } from "react-icons/fa6";
+  XLogo,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -471,7 +471,7 @@ export default function PersonPage() {
                     )}
                   >
                     {isFollowLoading || checkingFollow ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CircleNotch className="h-4 w-4 animate-spin" />
                     ) : isFollowing ? (
                       <>
                         <UserCheck className="h-4 w-4" />
@@ -520,9 +520,9 @@ export default function PersonPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/people" className="hover:text-foreground">People</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-foreground">{person.name}</span>
         </nav>
 
@@ -545,7 +545,7 @@ export default function PersonPage() {
                   <p className="text-brand-orange mb-2">{person.title}</p>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
                     <span className="flex items-center gap-1">
-                      <Building2 className="h-4 w-4" />
+                      <Buildings className="h-4 w-4" />
                       {person.company}
                     </span>
                     <span className="flex items-center gap-1">
@@ -561,7 +561,7 @@ export default function PersonPage() {
                         rel="noopener noreferrer"
                         className="p-2 bg-terminal-bg-elevated rounded hover:bg-brand-orange/20 hover:text-brand-orange transition-colors"
                       >
-                        <Linkedin className="h-4 w-4" />
+                        <LinkedinLogo className="h-4 w-4" />
                       </a>
                     )}
                     {person.socialLinks.twitter && (
@@ -571,7 +571,7 @@ export default function PersonPage() {
                         rel="noopener noreferrer"
                         className="p-2 bg-terminal-bg-elevated rounded hover:bg-brand-orange/20 hover:text-brand-orange transition-colors"
                       >
-                        <FaXTwitter className="h-4 w-4" />
+                        <XLogo className="h-4 w-4" />
                       </a>
                     )}
                     {person.socialLinks.email && (
@@ -579,7 +579,7 @@ export default function PersonPage() {
                         href={`mailto:${person.socialLinks.email}`}
                         className="p-2 bg-terminal-bg-elevated rounded hover:bg-brand-orange/20 hover:text-brand-orange transition-colors"
                       >
-                        <Mail className="h-4 w-4" />
+                        <Envelope className="h-4 w-4" />
                       </a>
                     )}
                   </div>
@@ -606,7 +606,7 @@ export default function PersonPage() {
                     className="flex items-start gap-4 pb-4 border-b border-terminal-border last:border-0 last:pb-0"
                   >
                     <div className="h-10 w-10 rounded bg-brand-orange/20 text-brand-orange flex items-center justify-center flex-shrink-0">
-                      <Building2 className="h-5 w-5" />
+                      <Buildings className="h-5 w-5" />
                     </div>
                     <div>
                       <div className="font-medium">{exp.role}</div>
@@ -657,7 +657,7 @@ export default function PersonPage() {
             {/* Related Companies */}
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-brand-orange" />
+                <TrendUp className="h-4 w-4 text-brand-orange" />
                 Related Companies
               </h3>
               <div className="space-y-3">
@@ -672,7 +672,7 @@ export default function PersonPage() {
                         <div className="font-mono font-semibold">{company.symbol}</div>
                         <div className="text-sm text-muted-foreground">{company.name}</div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                      <CaretRight className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="text-xs text-brand-orange mt-1">{company.role}</div>
                   </Link>

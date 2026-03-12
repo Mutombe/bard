@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Calculator, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { Calculator, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 

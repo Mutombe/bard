@@ -5,27 +5,27 @@ import Link from "next/link";
 import {
   Globe,
   Users,
-  Award,
-  TrendingUp,
+  Trophy,
+  TrendUp,
   Target,
   Heart,
-  ChevronRight,
+  CaretRight,
   BookOpen,
   FileText,
-  Mic,
-  Mail,
-  Building2,
+  Microphone,
+  Envelope,
+  Buildings,
   Shield,
   Lightbulb,
-  Scale,
-} from "lucide-react";
+  Scales,
+} from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 
 const stats = [
   { label: "Daily Readers", value: "250K+", icon: Users },
   { label: "Research Reports Published", value: "340+", icon: FileText },
   { label: "Markets Covered", value: "15+", icon: Globe },
-  { label: "Years of Analysis", value: "12", icon: Award },
+  { label: "Years of Analysis", value: "12", icon: Trophy },
 ];
 
 const values = [
@@ -40,7 +40,7 @@ const values = [
     description: "We cover the entire continent with depth and nuance, understanding that African markets are interconnected and diverse.",
   },
   {
-    icon: <Scale className="h-6 w-6" />,
+    icon: <Scales className="h-6 w-6" />,
     title: "Editorial Independence",
     description: "Our research and analysis are independent of commercial interests. We call it as we see it, without bias.",
   },
@@ -153,7 +153,7 @@ export default function AboutPage() {
                 href="/contact"
                 className="inline-flex items-center gap-2 px-6 py-3 border border-terminal-border rounded-lg hover:bg-terminal-bg-elevated transition-colors"
               >
-                <Mail className="h-5 w-5" />
+                <Envelope className="h-5 w-5" />
                 Contact Us
               </Link>
             </div>
@@ -211,14 +211,14 @@ export default function AboutPage() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <TrendUp className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <strong className="block">Market Intelligence</strong>
                     <span className="text-sm text-muted-foreground">Real-time analysis and commentary on market developments</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <Mic className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                  <Microphone className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                   <div>
                     <strong className="block">Media & Podcasts</strong>
                     <span className="text-sm text-muted-foreground">Daily market briefings and in-depth expert discussions</span>
@@ -392,12 +392,12 @@ export default function AboutPage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 View Open Positions
-                <ChevronRight className="h-4 w-4" />
+                <CaretRight className="h-4 w-4" />
               </Link>
             </div>
             <div className="relative overflow-hidden bg-primary/10 rounded-lg border border-primary/20 p-8">
               <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="about-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#about-sub-grid)"/></svg></div>
-              <Mail className="relative h-8 w-8 text-primary mb-4" />
+              <Envelope className="relative h-8 w-8 text-primary mb-4" />
               <h2 className="relative font-serif text-2xl font-bold mb-4">Stay Informed</h2>
               <p className="text-muted-foreground mb-6">
                 Subscribe to African Finance Insights for our latest research, analysis, and market intelligence.
@@ -407,7 +407,7 @@ export default function AboutPage() {
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
               >
                 Subscribe Now
-                <ChevronRight className="h-4 w-4" />
+                <CaretRight className="h-4 w-4" />
               </Link>
             </div>
           </div>

@@ -4,18 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
+  MagnifyingGlass,
   Factory,
-  Edit,
-  Trash2,
-  MoreVertical,
+  PencilSimple,
+  Trash,
+  DotsThreeVertical,
   FileText,
   Eye,
   Star,
-  Building2,
+  Buildings,
   X,
-  Loader2,
-} from "lucide-react";
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -207,7 +207,7 @@ export default function AdminIndustriesPage() {
           <div className="text-sm text-muted-foreground">Featured</div>
         </div>
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-          <Building2 className="h-5 w-5 text-blue-400 mb-2" />
+          <Buildings className="h-5 w-5 text-blue-400 mb-2" />
           <div className="text-2xl font-bold">{industries.filter(i => i.is_active !== false).length}</div>
           <div className="text-sm text-muted-foreground">Active</div>
         </div>
@@ -215,7 +215,7 @@ export default function AdminIndustriesPage() {
 
       {/* Search */}
       <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search industries..."
@@ -229,7 +229,7 @@ export default function AdminIndustriesPage() {
       <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center p-12">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <CircleNotch className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : (
           <table className="w-full">
@@ -273,7 +273,7 @@ export default function AdminIndustriesPage() {
                   <td className="px-4 py-3 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger className="p-2 hover:bg-terminal-bg-elevated rounded-md">
-                        <MoreVertical className="h-4 w-4" />
+                        <DotsThreeVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
@@ -286,7 +286,7 @@ export default function AdminIndustriesPage() {
                           className="flex items-center gap-2"
                           onClick={() => handleEdit(industry)}
                         >
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -300,7 +300,7 @@ export default function AdminIndustriesPage() {
                           className="flex items-center gap-2 text-red-400"
                           onClick={() => setDeleteConfirm(industry.slug)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -436,7 +436,7 @@ export default function AdminIndustriesPage() {
                   disabled={saving}
                   className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {saving && <CircleNotch className="h-4 w-4 animate-spin" />}
                   {editingIndustry ? "Update" : "Create"}
                 </button>
               </div>

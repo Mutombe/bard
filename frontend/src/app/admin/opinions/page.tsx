@@ -5,14 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Plus,
-  Search,
-  Edit,
-  Trash2,
+  MagnifyingGlass,
+  PencilSimple,
+  Trash,
   Eye,
-  MessageSquare,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+  ChatText,
+  CircleNotch,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { editorialService, type Article } from "@/services/api/editorial";
@@ -196,7 +196,7 @@ export default function OpinionsPage() {
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search opinions..."
@@ -225,7 +225,7 @@ export default function OpinionsPage() {
         </div>
       ) : filteredOpinions.length === 0 ? (
         <div className="text-center py-12 bg-terminal-bg-secondary rounded-lg border border-terminal-border">
-          <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <ChatText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium mb-2">No opinions found</h3>
           <p className="text-muted-foreground mb-6">
             {searchQuery || selectedCategory !== "All Categories"
@@ -314,7 +314,7 @@ export default function OpinionsPage() {
                       className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded"
                       title="Edit"
                     >
-                      <Edit className="h-4 w-4" />
+                      <PencilSimple className="h-4 w-4" />
                     </Link>
                     <button
                       onClick={() => openDeleteModal(opinion)}
@@ -323,9 +323,9 @@ export default function OpinionsPage() {
                       title="Delete"
                     >
                       {deletingIds.includes(opinion.id) ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <CircleNotch className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                       )}
                     </button>
                   </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { TrendingUp, ArrowLeft, Calendar, DollarSign } from "lucide-react";
+import { TrendUp, ArrowLeft, Calendar, CurrencyDollar } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -26,7 +26,7 @@ export default function IPOCalendarPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <TrendingUp className="h-6 w-6 text-brand-orange" />
+              <TrendUp className="h-6 w-6 text-brand-orange" />
               IPO Calendar
             </h1>
             <p className="text-muted-foreground">Upcoming Initial Public Offerings</p>
@@ -68,7 +68,7 @@ export default function IPOCalendarPage() {
                   <td className="px-4 py-4 text-right font-mono">{ipo.priceRange}</td>
                   <td className="px-4 py-4 text-right">
                     <span className="inline-flex items-center gap-1 font-mono text-market-up">
-                      <DollarSign className="h-3 w-3" />
+                      <CurrencyDollar className="h-3 w-3" />
                       {ipo.valuation}
                     </span>
                   </td>

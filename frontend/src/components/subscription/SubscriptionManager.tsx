@@ -6,17 +6,17 @@ import { cn } from "@/lib/utils";
 import {
   CreditCard,
   Calendar,
-  AlertTriangle,
+  Warning,
   CheckCircle,
   XCircle,
-  RefreshCw,
-  ExternalLink,
-  ChevronRight,
+  ArrowClockwise,
+  ArrowSquareOut,
+  CaretRight,
   FileText,
   Bell,
-  BarChart3,
+  ChartBar,
   Wallet,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -122,7 +122,7 @@ export function SubscriptionManager({
         };
       case "past_due":
         return {
-          icon: AlertTriangle,
+          icon: Warning,
           label: "Past Due",
           color: "text-amber-500",
           bg: "bg-amber-500/10",
@@ -136,7 +136,7 @@ export function SubscriptionManager({
         };
       default:
         return {
-          icon: AlertTriangle,
+          icon: Warning,
           label: "Unknown",
           color: "text-muted-foreground",
           bg: "bg-muted",
@@ -223,7 +223,7 @@ export function SubscriptionManager({
 
           <div className="p-4 bg-terminal-elevated rounded-lg">
             <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <RefreshCw className="h-4 w-4" />
+              <ArrowClockwise className="h-4 w-4" />
               <span className="text-sm">Auto Renew</span>
             </div>
             <div className={cn(
@@ -252,7 +252,7 @@ export function SubscriptionManager({
         {/* Past Due Banner */}
         {subscription.status === "past_due" && (
           <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg mb-6">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            <Warning className="h-5 w-5 text-amber-500" />
             <div>
               <div className="font-medium text-amber-500">Payment Failed</div>
               <div className="text-sm text-muted-foreground">
@@ -340,7 +340,7 @@ export function SubscriptionManager({
       {/* Usage Stats */}
       <div className="card-terminal p-6">
         <h3 className="font-semibold mb-4 flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
+          <ChartBar className="h-5 w-5" />
           Usage This Period
         </h3>
 
@@ -368,7 +368,7 @@ export function SubscriptionManager({
             </h3>
             <Button variant="ghost" size="sm" onClick={onManagePaymentMethods}>
               Manage
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <CaretRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
 
@@ -430,7 +430,7 @@ export function SubscriptionManager({
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-foreground"
                     >
-                      <ExternalLink className="h-4 w-4" />
+                      <ArrowSquareOut className="h-4 w-4" />
                     </a>
                   )}
                 </div>

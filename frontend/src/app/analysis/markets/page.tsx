@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { LineChart, ArrowLeft, TrendingUp, TrendingDown, Calendar, CircleUserRound } from "lucide-react";
+import {
+  ChartLine,
+  ArrowLeft,
+  TrendUp,
+  TrendDown,
+  Calendar,
+  UserCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -69,7 +76,7 @@ export default function MarketAnalysisPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <LineChart className="h-6 w-6 text-brand-orange" />
+              <ChartLine className="h-6 w-6 text-brand-orange" />
               Market Analysis
             </h1>
             <p className="text-muted-foreground">Technical and fundamental market analysis</p>
@@ -98,8 +105,8 @@ export default function MarketAnalysisPage() {
                         "px-2 py-0.5 rounded text-xs capitalize inline-flex items-center gap-1",
                         getSentimentColor(analysis.sentiment)
                       )}>
-                        {analysis.sentiment === "bullish" ? <TrendingUp className="h-3 w-3" /> :
-                         analysis.sentiment === "bearish" ? <TrendingDown className="h-3 w-3" /> : null}
+                        {analysis.sentiment === "bullish" ? <TrendUp className="h-3 w-3" /> :
+                         analysis.sentiment === "bearish" ? <TrendDown className="h-3 w-3" /> : null}
                         {analysis.sentiment}
                       </span>
                     </div>
@@ -107,7 +114,7 @@ export default function MarketAnalysisPage() {
                     <p className="text-sm text-muted-foreground mb-3">{analysis.preview}</p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <CircleUserRound className="h-3 w-3" />
+                        <UserCircle className="h-3 w-3" />
                         {analysis.author}
                       </span>
                       <span className="flex items-center gap-1">

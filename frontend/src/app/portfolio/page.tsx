@@ -5,14 +5,14 @@ import Link from "next/link";
 import {
   Briefcase,
   Plus,
-  TrendingUp,
-  TrendingDown,
-  PieChart,
-  BarChart3,
+  TrendUp,
+  TrendDown,
+  ChartPie,
+  ChartBar,
   ArrowUpRight,
   ArrowDownRight,
-  ChevronRight,
-} from "lucide-react";
+  CaretRight,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
@@ -184,9 +184,9 @@ export default function PortfolioPage() {
                         )}
                       >
                         {isUp ? (
-                          <TrendingUp className="h-4 w-4" />
+                          <TrendUp className="h-4 w-4" />
                         ) : (
-                          <TrendingDown className="h-4 w-4" />
+                          <TrendDown className="h-4 w-4" />
                         )}
                         <span className="font-mono">
                           {isUp ? "+" : ""}{holding.gainPercent.toFixed(2)}%
@@ -207,7 +207,7 @@ export default function PortfolioPage() {
             {/* Allocation Chart */}
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <PieChart className="h-4 w-4 text-brand-orange" />
+                <ChartPie className="h-4 w-4 text-brand-orange" />
                 Allocation
               </h3>
               <div className="space-y-3">
@@ -233,7 +233,7 @@ export default function PortfolioPage() {
             {/* Performance by Sector */}
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-brand-orange" />
+                <ChartBar className="h-4 w-4 text-brand-orange" />
                 By Sector
               </h3>
               <div className="space-y-3">
@@ -270,21 +270,21 @@ export default function PortfolioPage() {
                   className="flex items-center justify-between p-2 rounded hover:bg-terminal-bg-elevated transition-colors text-sm"
                 >
                   <span>Transaction History</span>
-                  <ChevronRight className="h-4 w-4" />
+                  <CaretRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/portfolio/performance"
                   className="flex items-center justify-between p-2 rounded hover:bg-terminal-bg-elevated transition-colors text-sm"
                 >
                   <span>Performance Report</span>
-                  <ChevronRight className="h-4 w-4" />
+                  <CaretRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/portfolio/dividends"
                   className="flex items-center justify-between p-2 rounded hover:bg-terminal-bg-elevated transition-colors text-sm"
                 >
                   <span>Dividend Income</span>
-                  <ChevronRight className="h-4 w-4" />
+                  <CaretRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>

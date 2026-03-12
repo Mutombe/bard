@@ -6,18 +6,17 @@ import { cn } from "@/lib/utils";
 import {
   Clock,
   Calendar,
-  Share2,
-  Bookmark,
-  BookmarkCheck,
-  MessageCircle,
-  TrendingUp,
-  TrendingDown,
-  ExternalLink,
-  ChevronLeft,
+  ShareNetwork,
+  BookmarkSimple,
+  ChatCircle,
+  TrendUp,
+  TrendDown,
+  ArrowSquareOut,
+  CaretLeft,
   Play,
   Pause,
-  Volume2,
-} from "lucide-react";
+  SpeakerHigh,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
@@ -106,7 +105,7 @@ export function ArticlePage({
         href="/news"
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 text-sm"
       >
-        <ChevronLeft className="h-4 w-4" />
+        <CaretLeft className="h-4 w-4" />
         Back to News
       </Link>
 
@@ -193,7 +192,7 @@ export function ArticlePage({
               {isPlaying ? (
                 <Pause className="h-4 w-4" />
               ) : (
-                <Volume2 className="h-4 w-4" />
+                <SpeakerHigh className="h-4 w-4" />
               )}
             </Button>
 
@@ -204,9 +203,9 @@ export function ArticlePage({
               onClick={onBookmark}
             >
               {isBookmarked ? (
-                <BookmarkCheck className="h-4 w-4 text-primary" />
+                <BookmarkSimple className="h-4 w-4 text-primary" />
               ) : (
-                <Bookmark className="h-4 w-4" />
+                <BookmarkSimple className="h-4 w-4" />
               )}
             </Button>
 
@@ -216,7 +215,7 @@ export function ArticlePage({
               className="h-9 w-9"
               onClick={onShare}
             >
-              <Share2 className="h-4 w-4" />
+              <ShareNetwork className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -273,9 +272,9 @@ export function ArticlePage({
                         )}
                       >
                         {isPositive ? (
-                          <TrendingUp className="h-3 w-3" />
+                          <TrendUp className="h-3 w-3" />
                         ) : (
-                          <TrendingDown className="h-3 w-3" />
+                          <TrendDown className="h-3 w-3" />
                         )}
                         {stock.changePercent.toFixed(2)}%
                       </div>
@@ -336,7 +335,7 @@ export function ArticlePage({
                 className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
               >
                 View all articles
-                <ExternalLink className="h-3 w-3" />
+                <ArrowSquareOut className="h-3 w-3" />
               </Link>
             </div>
           </div>
@@ -411,7 +410,7 @@ function PremiumPaywall() {
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-background via-background/95 to-transparent">
         <div className="text-center p-8 max-w-md">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
-            <Bookmark className="h-8 w-8 text-amber-500" />
+            <BookmarkSimple className="h-8 w-8 text-amber-500" />
           </div>
           <h3 className="text-xl font-semibold mb-2">Subscriber Content</h3>
           <p className="text-muted-foreground mb-6">

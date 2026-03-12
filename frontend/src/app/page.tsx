@@ -4,23 +4,23 @@ import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ChevronRight,
+  CaretRight,
   Clock,
   Play,
-  Mic,
+  Microphone,
   ArrowRight,
   Globe,
-  Building2,
-  Pickaxe,
+  Buildings,
+  Hammer,
   Cpu,
-  Landmark,
-  Wheat,
+  Bank,
+  Plant,
   FileText,
   MapPin,
   Tag,
   Heart,
-  Bookmark,
-} from "lucide-react";
+  BookmarkSimple,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -109,13 +109,13 @@ function ArticleActions({ articleId, compact = false }: { articleId: string; com
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); const s = toggleLike(articleId); setLiked(s); toast.success(s ? "Added to liked articles" : "Removed from liked articles"); }}
         className={cn("p-1.5 rounded-full transition-colors", liked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10")}
       >
-        <Heart className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", liked && "fill-current")} />
+        <Heart className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} weight={liked ? "fill" : "regular"} />
       </button>
       <button
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); const s = toggleBookmark(articleId); setBookmarked(s); toast.success(s ? "Saved to reading list" : "Removed from reading list"); }}
         className={cn("p-1.5 rounded-full transition-colors", bookmarked ? "text-brand-orange bg-brand-orange/10" : "text-muted-foreground hover:text-brand-orange hover:bg-brand-orange/10")}
       >
-        <Bookmark className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4", bookmarked && "fill-current")} />
+        <BookmarkSimple className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} weight={bookmarked ? "fill" : "regular"} />
       </button>
     </div>
   );
@@ -358,11 +358,11 @@ function useFadeIn() {
 // =====================
 
 const industries = [
-  { name: "Banking & Finance", slug: "banking", icon: Landmark, color: "text-blue-500" },
-  { name: "Mining & Resources", slug: "mining", icon: Pickaxe, color: "text-amber-500" },
+  { name: "Banking & Finance", slug: "banking", icon: Bank, color: "text-blue-500" },
+  { name: "Mining & Resources", slug: "mining", icon: Hammer, color: "text-amber-500" },
   { name: "Technology", slug: "technology", icon: Cpu, color: "text-violet-500" },
-  { name: "Agriculture", slug: "agriculture", icon: Wheat, color: "text-emerald-500" },
-  { name: "Infrastructure", slug: "infrastructure", icon: Building2, color: "text-slate-500" },
+  { name: "Agriculture", slug: "agriculture", icon: Plant, color: "text-emerald-500" },
+  { name: "Infrastructure", slug: "infrastructure", icon: Buildings, color: "text-slate-500" },
   { name: "Global Markets", slug: "global", icon: Globe, color: "text-cyan-500" },
 ];
 
@@ -830,7 +830,7 @@ function IndustryNavigation() {
             href="/industries"
             className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
           >
-            All Industries <ChevronRight className="h-4 w-4" />
+            All Industries <CaretRight className="h-4 w-4" />
           </Link>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -908,7 +908,7 @@ function TopicsRegionsSection() {
                 href="/topics"
                 className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
               >
-                All Topics <ChevronRight className="h-3 w-3" />
+                All Topics <CaretRight className="h-3 w-3" />
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -940,7 +940,7 @@ function TopicsRegionsSection() {
                 href="/regions"
                 className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
               >
-                All Regions <ChevronRight className="h-3 w-3" />
+                All Regions <CaretRight className="h-3 w-3" />
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -975,14 +975,14 @@ function PodcastSection({ video }: { video: any }) {
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <Mic className="h-6 w-6 text-primary" />
+            <Microphone className="h-6 w-6 text-primary" />
             <h2 className="text-2xl font-serif font-bold text-white">Global Media</h2>
           </div>
           <Link
             href="/podcasts"
             className="text-sm text-primary hover:text-primary/80 flex items-center gap-1"
           >
-            All Videos <ChevronRight className="h-4 w-4" />
+            All Videos <CaretRight className="h-4 w-4" />
           </Link>
         </div>
 
@@ -1010,7 +1010,7 @@ function PodcastSection({ video }: { video: any }) {
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors">
                   <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Play className="h-10 w-10 text-white ml-1" fill="white" />
+                    <Play className="h-10 w-10 text-white ml-1" weight="fill" />
                   </div>
                 </div>
                 <div className="absolute bottom-4 right-4 px-3 py-1 bg-black/80 text-white text-sm">
@@ -1457,7 +1457,7 @@ export default function HomePage() {
                 Research Reports <FileText className="h-4 w-4" />
               </Link>
               <Link href="/podcasts" className="btn-secondary btn-press flex items-center gap-2">
-                Podcasts <Mic className="h-4 w-4" />
+                Podcasts <Microphone className="h-4 w-4" />
               </Link>
             </div>
           </div>

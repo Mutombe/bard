@@ -4,18 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
+  MagnifyingGlass,
   FileText,
   Eye,
-  Edit,
-  Trash2,
-  Download,
-  ChevronDown,
+  PencilSimple,
+  Trash,
+  DownloadSimple,
+  CaretDown,
   Calendar,
   User,
-  Filter,
-  MoreVertical,
-} from "lucide-react";
+  Funnel,
+  DotsThreeVertical,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -171,7 +171,7 @@ export default function AdminResearchPage() {
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search reports..."
@@ -253,7 +253,7 @@ export default function AdminResearchPage() {
                 <td className="px-4 py-3 text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger className="p-2 hover:bg-terminal-bg-elevated rounded-md">
-                      <MoreVertical className="h-4 w-4" />
+                      <DotsThreeVertical className="h-4 w-4" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
@@ -264,16 +264,16 @@ export default function AdminResearchPage() {
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href={`/admin/research/${report.id}`} className="flex items-center gap-2">
-                          <Edit className="h-4 w-4" />
+                          <PencilSimple className="h-4 w-4" />
                           Edit
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem className="flex items-center gap-2">
-                        <Download className="h-4 w-4" />
+                        <DownloadSimple className="h-4 w-4" />
                         Download PDF
                       </DropdownMenuItem>
                       <DropdownMenuItem className="flex items-center gap-2 text-red-400">
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>

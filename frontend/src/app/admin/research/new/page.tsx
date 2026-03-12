@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Save,
-  Send,
-  Loader2,
+  FloppyDisk,
+  PaperPlaneTilt,
+  CircleNotch,
   Plus,
   X,
   FileText,
   Users,
   Globe,
   Tag,
-  Settings,
+  GearSix,
   Image as ImageIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { researchService, type Topic, type Industry } from "@/services/api/research";
 import { mediaService } from "@/services/api/media";
@@ -244,14 +244,14 @@ export default function NewResearchReportPage() {
               )}
               title="Toggle settings"
             >
-              <Settings className="h-5 w-5" />
+              <GearSix className="h-5 w-5" />
             </button>
             <button
               onClick={handleSaveDraft}
               disabled={isSaving}
               className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary transition-colors text-sm flex items-center gap-2"
             >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isSaving ? <CircleNotch className="h-4 w-4 animate-spin" /> : <FloppyDisk className="h-4 w-4" />}
               Save Draft
             </button>
             <button
@@ -259,7 +259,7 @@ export default function NewResearchReportPage() {
               disabled={isLoading}
               className="px-4 py-2 bg-brand-burgundy text-white rounded-md hover:bg-brand-burgundy-dark transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
             >
-              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {isLoading ? <CircleNotch className="h-4 w-4 animate-spin" /> : <PaperPlaneTilt className="h-4 w-4" />}
               Publish
             </button>
           </div>

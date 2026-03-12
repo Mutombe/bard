@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Settings,
+  GearSix,
   User,
   Bell,
   Shield,
@@ -12,13 +12,13 @@ import {
   Sun,
   Monitor,
   Globe,
-  Mail,
+  Envelope,
   Key,
-  Trash2,
-  ChevronRight,
-  Loader2,
+  Trash,
+  CaretRight,
+  CircleNotch,
   Check,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -136,7 +136,7 @@ export default function SettingsPage() {
       <MainLayout>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12">
           <div className="max-w-md mx-auto text-center">
-            <Settings className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
+            <GearSix className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
             <h1 className="text-2xl font-bold mb-4">Settings</h1>
             <p className="text-muted-foreground mb-6">
               Sign in to manage your account settings.
@@ -228,7 +228,7 @@ export default function SettingsPage() {
                       disabled={isSavingProfile}
                       className="px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark disabled:opacity-50 flex items-center gap-2"
                     >
-                      {isSavingProfile && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {isSavingProfile && <CircleNotch className="h-4 w-4 animate-spin" />}
                       Save Changes
                     </button>
                   </div>
@@ -269,7 +269,7 @@ export default function SettingsPage() {
                       disabled={isSavingPassword}
                       className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-elevated disabled:opacity-50 flex items-center gap-2"
                     >
-                      {isSavingPassword && <Loader2 className="h-4 w-4 animate-spin" />}
+                      {isSavingPassword && <CircleNotch className="h-4 w-4 animate-spin" />}
                       Update Password
                     </button>
                   </div>
@@ -281,7 +281,7 @@ export default function SettingsPage() {
                     Once you delete your account, there is no going back.
                   </p>
                   <button className="px-4 py-2 border border-market-down text-market-down rounded-md hover:bg-market-down/10 flex items-center gap-2">
-                    <Trash2 className="h-4 w-4" />
+                    <Trash className="h-4 w-4" />
                     Delete Account
                   </button>
                 </div>

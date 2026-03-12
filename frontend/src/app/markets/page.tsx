@@ -3,15 +3,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  TrendingUp,
-  TrendingDown,
+  TrendUp,
+  TrendDown,
   Globe,
-  Search,
-  ChevronRight,
-  BarChart3,
+  MagnifyingGlass,
+  CaretRight,
+  ChartBar,
   Clock,
-  RefreshCw,
-} from "lucide-react";
+  ArrowClockwise,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -96,7 +96,7 @@ function IndexCard({ index }: { index: any }) {
           {currentValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
         </span>
         <span className={cn("flex items-center gap-1 text-sm", isUp ? "text-market-up" : "text-market-down")}>
-          {isUp ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+          {isUp ? <TrendUp className="h-4 w-4" /> : <TrendDown className="h-4 w-4" />}
           {isUp ? "+" : ""}{change.toFixed(2)}
         </span>
       </div>
@@ -176,14 +176,14 @@ export default function MarketsPage() {
                 onClick={handleRefresh}
                 className="text-brand-orange hover:text-brand-orange-light"
               >
-                <RefreshCw className="h-4 w-4" />
+                <ArrowClockwise className="h-4 w-4" />
               </button>
             </p>
           </div>
 
           {/* Search */}
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search markets..."
@@ -223,7 +223,7 @@ export default function MarketsPage() {
               href="/markets/indices"
               className="text-sm text-brand-orange hover:text-brand-orange-light flex items-center gap-1"
             >
-              View All <ChevronRight className="h-4 w-4" />
+              View All <CaretRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -247,7 +247,7 @@ export default function MarketsPage() {
           <section className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-terminal-border">
               <h2 className="font-bold flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-market-up" />
+                <TrendUp className="h-4 w-4 text-market-up" />
                 Top Gainers
               </h2>
               <Link
@@ -276,7 +276,7 @@ export default function MarketsPage() {
           <section className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-terminal-border">
               <h2 className="font-bold flex items-center gap-2">
-                <TrendingDown className="h-4 w-4 text-market-down" />
+                <TrendDown className="h-4 w-4 text-market-down" />
                 Top Losers
               </h2>
               <Link
@@ -305,7 +305,7 @@ export default function MarketsPage() {
           <section className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
             <div className="flex items-center justify-between p-4 border-b border-terminal-border">
               <h2 className="font-bold flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-brand-orange" />
+                <ChartBar className="h-4 w-4 text-brand-orange" />
                 Most Active
               </h2>
               <Link

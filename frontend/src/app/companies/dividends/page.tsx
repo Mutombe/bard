@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { DollarSign, TrendingUp, Building2, Calendar, Percent } from "lucide-react";
+import {
+  CurrencyDollar,
+  TrendUp,
+  Buildings,
+  Calendar,
+  Percent,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useCompanies } from "@/hooks";
@@ -58,7 +64,7 @@ export default function DividendsPage() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-            <DollarSign className="h-6 w-6 text-brand-orange" />
+            <CurrencyDollar className="h-6 w-6 text-brand-orange" />
             Dividends
           </h1>
           <p className="text-muted-foreground">
@@ -118,7 +124,7 @@ export default function DividendsPage() {
                           href={`/companies/${item.symbol}`}
                           className="flex items-center gap-2 hover:text-brand-orange"
                         >
-                          <Building2 className="h-4 w-4 text-muted-foreground" />
+                          <Buildings className="h-4 w-4 text-muted-foreground" />
                           <div>
                             <span className="font-medium">{item.symbol}</span>
                             <span className="text-muted-foreground ml-2 hidden md:inline">
@@ -195,7 +201,7 @@ export default function DividendsPage() {
           {/* Dividend Aristocrats */}
           <div className="p-5 rounded-lg bg-terminal-bg-elevated border border-terminal-border">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-brand-orange" />
+              <TrendUp className="h-5 w-5 text-brand-orange" />
               Dividend Growth Leaders
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
@@ -218,7 +224,7 @@ export default function DividendsPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-brand-orange/10 flex items-center justify-center">
-                        <Building2 className="h-5 w-5 text-brand-orange" />
+                        <Buildings className="h-5 w-5 text-brand-orange" />
                       </div>
                       <div>
                         <div className="font-medium">{item.symbol}</div>

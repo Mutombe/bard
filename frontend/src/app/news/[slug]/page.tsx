@@ -6,24 +6,24 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Clock,
-  Share2,
-  Bookmark,
-  MessageSquare,
+  ShareNetwork,
+  BookmarkSimple,
+  ChatText,
   Heart,
-  ChevronRight,
-  Linkedin,
-  Facebook,
+  CaretRight,
+  LinkedinLogo,
+  FacebookLogo,
   Link as LinkIcon,
-  TrendingUp,
-  TrendingDown,
-  ExternalLink,
-  Loader2,
+  TrendUp,
+  TrendDown,
+  ArrowSquareOut,
+  CircleNotch,
   ArrowLeft,
   Printer,
-  Volume2,
-  Mail,
-} from "lucide-react";
-import { FaXTwitter } from "react-icons/fa6";
+  SpeakerHigh,
+  Envelope,
+  XLogo,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -201,13 +201,13 @@ function StickyArticleHeader({
               bookmarked ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
+            <BookmarkSimple className={cn("h-4 w-4")} weight={bookmarked ? "fill" : "regular"} />
           </button>
           <button
             onClick={onShare}
             className="p-2 text-muted-foreground hover:text-foreground rounded-md transition-colors"
           >
-            <Share2 className="h-4 w-4" />
+            <ShareNetwork className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -241,25 +241,25 @@ function ArticleToolbar({
       </button>
 
       <button onClick={onEmail} className="toolbar-btn">
-        <Mail className="h-4 w-4" />
+        <Envelope className="h-4 w-4" />
         <span className="hidden sm:inline">Email</span>
       </button>
 
       <button onClick={onBookmark} className={cn("toolbar-btn", bookmarked && "active")}>
-        <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
+        <BookmarkSimple className={cn("h-4 w-4")} weight={bookmarked ? "fill" : "regular"} />
         <span className="hidden sm:inline">{bookmarked ? "Saved" : "Save"}</span>
       </button>
 
       <div className="toolbar-divider" />
 
       <button onClick={() => onShare("twitter")} className="toolbar-btn">
-        <FaXTwitter className="h-4 w-4" />
+        <XLogo className="h-4 w-4" />
       </button>
       <button onClick={() => onShare("linkedin")} className="toolbar-btn">
-        <Linkedin className="h-4 w-4" />
+        <LinkedinLogo className="h-4 w-4" />
       </button>
       <button onClick={() => onShare("facebook")} className="toolbar-btn">
-        <Facebook className="h-4 w-4" />
+        <FacebookLogo className="h-4 w-4" />
       </button>
       <button onClick={() => onShare("copy")} className="toolbar-btn">
         <LinkIcon className="h-4 w-4" />
@@ -268,7 +268,7 @@ function ArticleToolbar({
       <div className="flex-1" />
 
       <button onClick={onLike} className={cn("toolbar-btn", liked && "active")}>
-        <Heart className={cn("h-4 w-4", liked && "fill-current")} />
+        <Heart className={cn("h-4 w-4")} weight={liked ? "fill" : "regular"} />
         <span className="hidden sm:inline">{liked ? "Liked" : "Like"}</span>
       </button>
     </div>
@@ -553,9 +553,9 @@ export default function ArticlePage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/insights" className="hover:text-foreground">Insights</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-primary">{article.category?.name || "Article"}</span>
         </nav>
 
@@ -687,7 +687,7 @@ export default function ArticlePage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-brand-orange hover:text-brand-orange-light text-sm"
                 >
-                  Read original article <ExternalLink className="h-4 w-4" />
+                  Read original article <ArrowSquareOut className="h-4 w-4" />
                 </a>
               </div>
             )}
@@ -720,19 +720,19 @@ export default function ArticlePage() {
                 <span>Print</span>
               </button>
               <button onClick={handleEmail} className="toolbar-btn">
-                <Mail className="h-4 w-4" />
+                <Envelope className="h-4 w-4" />
                 <span>Email</span>
               </button>
               <button onClick={handleBookmark} className={cn("toolbar-btn", bookmarked && "active")}>
-                <Bookmark className={cn("h-4 w-4", bookmarked && "fill-current")} />
+                <BookmarkSimple className={cn("h-4 w-4")} weight={bookmarked ? "fill" : "regular"} />
                 <span>{bookmarked ? "Saved" : "Save"}</span>
               </button>
               <div className="toolbar-divider" />
               <button onClick={() => handleShare("twitter")} className="toolbar-btn">
-                <FaXTwitter className="h-4 w-4" />
+                <XLogo className="h-4 w-4" />
               </button>
               <button onClick={() => handleShare("linkedin")} className="toolbar-btn">
-                <Linkedin className="h-4 w-4" />
+                <LinkedinLogo className="h-4 w-4" />
               </button>
               <button onClick={() => handleShare("copy")} className="toolbar-btn">
                 <LinkIcon className="h-4 w-4" />
@@ -843,7 +843,7 @@ export default function ArticlePage() {
                 >
                   {subscribing ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CircleNotch className="h-4 w-4 animate-spin" />
                       Subscribing...
                     </>
                   ) : (
@@ -873,7 +873,7 @@ export default function ArticlePage() {
                         <div className="text-right">
                           <div className="font-mono text-sm">{Number(stock.current_price).toFixed(2)}</div>
                           <div className={cn("text-xs flex items-center gap-1", isUp ? "text-up" : "text-down")}>
-                            {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                            {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                             {isUp ? "+" : ""}{Number(stock.price_change_percent).toFixed(2)}%
                           </div>
                         </div>

@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  Bookmark,
-  Search,
+  BookmarkSimple,
+  MagnifyingGlass,
   Heart,
   Play,
   Newspaper,
-  Trash2,
-  Loader2,
-} from "lucide-react";
+  Trash,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -231,7 +231,7 @@ export default function SavedPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-              <Bookmark className="h-6 w-6 text-brand-orange" />
+              <BookmarkSimple className="h-6 w-6 text-brand-orange" />
               Saved Items
             </h1>
             <p className="text-muted-foreground">
@@ -239,7 +239,7 @@ export default function SavedPage() {
             </p>
           </div>
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search saved items..."
@@ -261,7 +261,7 @@ export default function SavedPage() {
                 : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
-            <Bookmark className="h-4 w-4" />
+            <BookmarkSimple className="h-4 w-4" />
             Reading List
             <span className="px-2 py-0.5 text-xs rounded-full bg-terminal-bg-elevated">
               {bookmarkedItems.length}
@@ -320,7 +320,7 @@ export default function SavedPage() {
                           className="p-2 bg-black/70 rounded-full text-white hover:bg-black/90 transition-colors"
                           title="Remove"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -361,7 +361,7 @@ export default function SavedPage() {
                       )}
                       <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                         <div className="w-12 h-12 rounded-full bg-red-600/90 flex items-center justify-center">
-                          <Play className="h-6 w-6 text-white ml-0.5" fill="white" />
+                          <Play className="h-6 w-6 text-white ml-0.5" weight="fill" />
                         </div>
                       </div>
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -370,7 +370,7 @@ export default function SavedPage() {
                           className="p-2 bg-black/70 rounded-full text-white hover:bg-black/90 transition-colors"
                           title="Remove"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
@@ -409,7 +409,7 @@ export default function SavedPage() {
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-12 text-center">
             {activeTab === "bookmarks" ? (
               <>
-                <Bookmark className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <BookmarkSimple className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium mb-2">No saved articles</h3>
                 <p className="text-muted-foreground mb-6">
                   {searchQuery

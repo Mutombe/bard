@@ -5,14 +5,14 @@ import Link from "next/link";
 import {
   Bell,
   Plus,
-  Trash2,
-  Edit,
-  TrendingUp,
-  TrendingDown,
-  AlertCircle,
-  ChevronRight,
+  Trash,
+  PencilSimple,
+  TrendUp,
+  TrendDown,
+  WarningCircle,
+  CaretRight,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAppSelector } from "@/store";
@@ -176,9 +176,9 @@ export default function AlertsPage() {
                         )}
                       >
                         {alert.condition === "above" ? (
-                          <TrendingUp className="h-3 w-3" />
+                          <TrendUp className="h-3 w-3" />
                         ) : (
-                          <TrendingDown className="h-3 w-3" />
+                          <TrendDown className="h-3 w-3" />
                         )}
                         {alert.condition === "above" ? "Above" : "Below"}
                       </span>
@@ -199,7 +199,7 @@ export default function AlertsPage() {
                         onClick={() => deleteAlert(alert.id)}
                         className="p-2 text-muted-foreground hover:text-market-down hover:bg-terminal-bg-elevated rounded transition-colors"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -287,7 +287,7 @@ export default function AlertsPage() {
                           : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      <TrendingUp className="h-4 w-4" />
+                      <TrendUp className="h-4 w-4" />
                       Above
                     </button>
                     <button
@@ -299,7 +299,7 @@ export default function AlertsPage() {
                           : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
                       )}
                     >
-                      <TrendingDown className="h-4 w-4" />
+                      <TrendDown className="h-4 w-4" />
                       Below
                     </button>
                   </div>

@@ -5,22 +5,22 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import {
-  ChevronRight,
+  CaretRight,
   Play,
   Pause,
-  Download,
-  Share2,
+  DownloadSimple,
+  ShareNetwork,
   Clock,
   Calendar,
   User,
-  Mic,
+  Microphone,
   ArrowRight,
-  ExternalLink,
-  Volume2,
+  ArrowSquareOut,
+  SpeakerHigh,
   SkipBack,
   SkipForward,
-  ListMusic,
-} from "lucide-react";
+  Playlist,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -144,7 +144,7 @@ export default function PodcastEpisodePage() {
     return (
       <MainLayout>
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
-          <Mic className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <Microphone className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h1 className="font-serif text-2xl font-bold mb-2">Episode Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The podcast episode you're looking for doesn't exist or has been moved.
@@ -176,13 +176,13 @@ export default function PodcastEpisodePage() {
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-3">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground">
               <Link href="/" className="hover:text-foreground">Home</Link>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
               <Link href="/podcasts" className="hover:text-foreground">Podcasts</Link>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
               <Link href={`/podcasts?show=${episode.showSlug}`} className="hover:text-foreground">
                 {episode.showName}
               </Link>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
               <span className="text-foreground">Episode {episode.episodeNumber}</span>
             </nav>
           </div>
@@ -250,7 +250,7 @@ export default function PodcastEpisodePage() {
                       {isPlaying ? (
                         <Pause className="h-6 w-6 text-white" fill="white" />
                       ) : (
-                        <Play className="h-6 w-6 text-white ml-1" fill="white" />
+                        <Play className="h-6 w-6 text-white ml-1" weight="fill" />
                       )}
                     </button>
 
@@ -275,7 +275,7 @@ export default function PodcastEpisodePage() {
                         <SkipForward className="h-5 w-5" />
                       </button>
                       <button className="p-2 text-slate-400 hover:text-white">
-                        <Volume2 className="h-5 w-5" />
+                        <SpeakerHigh className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -284,11 +284,11 @@ export default function PodcastEpisodePage() {
                 {/* Action Buttons */}
                 <div className="flex flex-wrap items-center gap-3">
                   <button className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">
-                    <Download className="h-4 w-4" />
+                    <DownloadSimple className="h-4 w-4" />
                     Download
                   </button>
                   <button className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">
-                    <Share2 className="h-4 w-4" />
+                    <ShareNetwork className="h-4 w-4" />
                     Share
                   </button>
                   {episode.platforms.spotify && (
@@ -299,7 +299,7 @@ export default function PodcastEpisodePage() {
                       className="flex items-center gap-2 px-4 py-2 bg-[#1DB954] hover:bg-[#1ed760] rounded-lg text-sm text-white transition-colors"
                     >
                       Spotify
-                      <ExternalLink className="h-3 w-3" />
+                      <ArrowSquareOut className="h-3 w-3" />
                     </a>
                   )}
                   {episode.platforms.apple && (
@@ -310,7 +310,7 @@ export default function PodcastEpisodePage() {
                       className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
                     >
                       Apple Podcasts
-                      <ExternalLink className="h-3 w-3" />
+                      <ArrowSquareOut className="h-3 w-3" />
                     </a>
                   )}
                 </div>
@@ -430,7 +430,7 @@ export default function PodcastEpisodePage() {
               {episode.relatedEpisodes.length > 0 && (
                 <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-6 mb-6">
                   <h3 className="font-semibold mb-4 flex items-center gap-2">
-                    <ListMusic className="h-4 w-4" />
+                    <Playlist className="h-4 w-4" />
                     More Episodes
                   </h3>
                   <div className="space-y-4">

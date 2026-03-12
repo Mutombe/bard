@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, ChevronRight, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, CaretRight, ArrowRight, CircleNotch } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
@@ -282,7 +282,7 @@ export default function InsightsPage() {
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
               <Link href="/" className="hover:text-foreground">Home</Link>
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight className="h-4 w-4" />
               <span className="text-foreground">Insights</span>
             </nav>
 
@@ -371,7 +371,7 @@ export default function InsightsPage() {
             {/* Loading more indicator */}
             {isLoadingMore && (
               <div className="flex items-center justify-center py-10 gap-2 text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <CircleNotch className="h-5 w-5 animate-spin" />
                 <span className="text-sm">Loading more articles...</span>
               </div>
             )}

@@ -4,11 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Plus,
-  Search,
-  Mic,
-  Edit,
-  Trash2,
-  MoreVertical,
+  MagnifyingGlass,
+  Microphone,
+  PencilSimple,
+  Trash,
+  DotsThreeVertical,
   Eye,
   Play,
   Pause,
@@ -17,7 +17,7 @@ import {
   Headphones,
   Radio,
   Users,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -163,7 +163,7 @@ export default function AdminPodcastsPage() {
           <div className="text-sm text-muted-foreground">Shows</div>
         </div>
         <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-          <Mic className="h-5 w-5 text-blue-400 mb-2" />
+          <Microphone className="h-5 w-5 text-blue-400 mb-2" />
           <div className="text-2xl font-bold">{stats.totalEpisodes}</div>
           <div className="text-sm text-muted-foreground">Episodes</div>
         </div>
@@ -207,7 +207,7 @@ export default function AdminPodcastsPage() {
         </div>
 
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search episodes..."
@@ -304,7 +304,7 @@ export default function AdminPodcastsPage() {
                   <td className="px-4 py-3 text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger className="p-2 hover:bg-terminal-bg-elevated rounded-md">
-                        <MoreVertical className="h-4 w-4" />
+                        <DotsThreeVertical className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem asChild>
@@ -315,7 +315,7 @@ export default function AdminPodcastsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href={`/admin/podcasts/${episode.id}`} className="flex items-center gap-2">
-                            <Edit className="h-4 w-4" />
+                            <PencilSimple className="h-4 w-4" />
                             Edit
                           </Link>
                         </DropdownMenuItem>
@@ -324,7 +324,7 @@ export default function AdminPodcastsPage() {
                           Preview Audio
                         </DropdownMenuItem>
                         <DropdownMenuItem className="flex items-center gap-2 text-red-400">
-                          <Trash2 className="h-4 w-4" />
+                          <Trash className="h-4 w-4" />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -337,7 +337,7 @@ export default function AdminPodcastsPage() {
 
           {filteredEpisodes.length === 0 && (
             <div className="p-8 text-center text-muted-foreground">
-              <Mic className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <Microphone className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No episodes found</p>
             </div>
           )}
@@ -358,7 +358,7 @@ export default function AdminPodcastsPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-1 hover:bg-terminal-bg-elevated rounded">
-                    <MoreVertical className="h-4 w-4" />
+                    <DotsThreeVertical className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
@@ -368,7 +368,7 @@ export default function AdminPodcastsPage() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="flex items-center gap-2">
-                      <Edit className="h-4 w-4" />
+                      <PencilSimple className="h-4 w-4" />
                       Edit Show
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
@@ -378,7 +378,7 @@ export default function AdminPodcastsPage() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="flex items-center gap-2 text-red-400">
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                       Delete Show
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -391,7 +391,7 @@ export default function AdminPodcastsPage() {
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-4 text-muted-foreground">
                   <span className="flex items-center gap-1">
-                    <Mic className="h-3 w-3" />
+                    <Microphone className="h-3 w-3" />
                     {show.episodeCount} episodes
                   </span>
                 </div>

@@ -4,12 +4,12 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  Grid3X3,
-  List,
-  TrendingUp,
-  TrendingDown,
-  Filter,
-} from "lucide-react";
+  GridNine,
+  ListBullets,
+  TrendUp,
+  TrendDown,
+  Funnel,
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -99,7 +99,7 @@ export function MarketHeatmap({ stocks, className }: MarketHeatmapProps) {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="h-8">
-                <Filter className="h-4 w-4 mr-1" />
+                <Funnel className="h-4 w-4 mr-1" />
                 {filterBy === "all" ? "All" : filterBy === "gainers" ? "Gainers" : "Losers"}
               </Button>
             </DropdownMenuTrigger>
@@ -108,11 +108,11 @@ export function MarketHeatmap({ stocks, className }: MarketHeatmapProps) {
                 All Stocks
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setFilterBy("gainers")}>
-                <TrendingUp className="h-4 w-4 mr-2 text-up" />
+                <TrendUp className="h-4 w-4 mr-2 text-up" />
                 Gainers Only
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setFilterBy("losers")}>
-                <TrendingDown className="h-4 w-4 mr-2 text-down" />
+                <TrendDown className="h-4 w-4 mr-2 text-down" />
                 Losers Only
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -149,7 +149,7 @@ export function MarketHeatmap({ stocks, className }: MarketHeatmapProps) {
               className="h-7 w-7"
               onClick={() => setViewMode("heatmap")}
             >
-              <Grid3X3 className="h-4 w-4" />
+              <GridNine className="h-4 w-4" />
             </Button>
             <Button
               variant={viewMode === "list" ? "secondary" : "ghost"}
@@ -157,7 +157,7 @@ export function MarketHeatmap({ stocks, className }: MarketHeatmapProps) {
               className="h-7 w-7"
               onClick={() => setViewMode("list")}
             >
-              <List className="h-4 w-4" />
+              <ListBullets className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -281,9 +281,9 @@ export function MarketHeatmap({ stocks, className }: MarketHeatmapProps) {
                     selectedStock.changePercent >= 0 ? "text-up" : "text-down"
                   )}>
                     {selectedStock.changePercent >= 0 ? (
-                      <TrendingUp className="h-4 w-4" />
+                      <TrendUp className="h-4 w-4" />
                     ) : (
-                      <TrendingDown className="h-4 w-4" />
+                      <TrendDown className="h-4 w-4" />
                     )}
                     {selectedStock.changePercent >= 0 ? "+" : ""}
                     {selectedStock.change.toFixed(2)} ({selectedStock.changePercent.toFixed(2)}%)

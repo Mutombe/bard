@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { ChartBar, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -26,7 +26,7 @@ export default function GDPPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <BarChart3 className="h-6 w-6 text-brand-orange" />
+              <ChartBar className="h-6 w-6 text-brand-orange" />
               GDP Data
             </h1>
             <p className="text-muted-foreground">Gross Domestic Product by country</p>
@@ -59,7 +59,7 @@ export default function GDPPage() {
                         "inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono",
                         isUp ? "bg-market-up/20 text-market-up" : "bg-market-down/20 text-market-down"
                       )}>
-                        {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                         {isUp ? "+" : ""}{country.growth.toFixed(1)}%
                       </span>
                     </td>

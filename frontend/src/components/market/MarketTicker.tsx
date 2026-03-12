@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { motion, useAnimationControls } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendUp, TrendDown, Minus } from "@phosphor-icons/react";
 import { useAppSelector, useAppDispatch } from "@/store";
 import { fetchTickerTape } from "@/store/slices/marketSlice";
 import { cn, formatPrice, formatPercent } from "@/lib/utils";
@@ -28,7 +28,7 @@ function TickerItem({ data, onClick }: TickerItemProps) {
       ? "hover:bg-market-down-bg"
       : "hover:bg-terminal-bg-elevated";
 
-  const Icon = is_up ? TrendingUp : change < 0 ? TrendingDown : Minus;
+  const Icon = is_up ? TrendUp : change < 0 ? TrendDown : Minus;
 
   return (
     <button

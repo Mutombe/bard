@@ -3,7 +3,13 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Pause, Play, RefreshCw } from "lucide-react";
+import {
+  TrendUp,
+  TrendDown,
+  Pause,
+  Play,
+  ArrowClockwise,
+} from "@phosphor-icons/react";
 import { marketService } from "@/services/api/market";
 
 interface TickerItem {
@@ -82,9 +88,9 @@ function TickerItemComponent({ item }: { item: TickerItem }) {
         )}
       >
         {item.isUp ? (
-          <TrendingUp className="h-3 w-3" />
+          <TrendUp className="h-3 w-3" />
         ) : (
-          <TrendingDown className="h-3 w-3" />
+          <TrendDown className="h-3 w-3" />
         )}
         {formatChange(item.change, item.changePercent)}
       </span>
@@ -303,7 +309,7 @@ export function MarketStrip() {
             title="Refresh"
             disabled={isLoading}
           >
-            <RefreshCw className="h-3 w-3" />
+            <ArrowClockwise className="h-3 w-3" />
           </button>
           <Link
             href="/markets"

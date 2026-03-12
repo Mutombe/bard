@@ -4,16 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import {
-  TrendingUp,
-  TrendingDown,
-  PieChart,
-  BarChart3,
+  TrendUp,
+  TrendDown,
+  ChartPie,
+  ChartBar,
   Calendar,
-  DollarSign,
+  CurrencyDollar,
   Percent,
   ArrowUpRight,
   ArrowDownRight,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
 interface PortfolioHolding {
@@ -103,7 +103,7 @@ export function PortfolioChart({
             className="h-8"
             onClick={() => setViewMode("allocation")}
           >
-            <PieChart className="h-4 w-4 mr-1" />
+            <ChartPie className="h-4 w-4 mr-1" />
             Allocation
           </Button>
           <Button
@@ -112,7 +112,7 @@ export function PortfolioChart({
             className="h-8"
             onClick={() => setViewMode("performance")}
           >
-            <BarChart3 className="h-4 w-4 mr-1" />
+            <ChartBar className="h-4 w-4 mr-1" />
             Performance
           </Button>
           <Button
@@ -505,9 +505,9 @@ function PerformanceChart({ data }: PerformanceChartProps) {
           )}
         >
           {isPositive ? (
-            <TrendingUp className="h-4 w-4" />
+            <TrendUp className="h-4 w-4" />
           ) : (
-            <TrendingDown className="h-4 w-4" />
+            <TrendDown className="h-4 w-4" />
           )}
           {isPositive ? "+" : ""}
           {latestReturn.toFixed(2)}%

@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Save,
+  FloppyDisk,
   Database,
   Globe,
   Key,
   Clock,
-  Settings,
+  GearSix,
   CheckCircle,
-  AlertCircle,
-} from "lucide-react";
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 const sourceTypes = [
@@ -93,7 +93,7 @@ export default function NewDataSourcePage() {
               </>
             ) : (
               <>
-                <Settings className="h-4 w-4" />
+                <GearSix className="h-4 w-4" />
                 Test Connection
               </>
             )}
@@ -103,7 +103,7 @@ export default function NewDataSourcePage() {
             disabled={isSaving}
             className="px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors text-sm flex items-center gap-2"
           >
-            <Save className="h-4 w-4" />
+            <FloppyDisk className="h-4 w-4" />
             {isSaving ? "Saving..." : "Save Source"}
           </button>
         </div>
@@ -125,7 +125,7 @@ export default function NewDataSourcePage() {
             </>
           ) : (
             <>
-              <AlertCircle className="h-5 w-5" />
+              <WarningCircle className="h-5 w-5" />
               <span>Connection failed. Please check your configuration.</span>
             </>
           )}

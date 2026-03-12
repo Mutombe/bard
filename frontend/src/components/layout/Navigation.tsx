@@ -4,39 +4,39 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  ChevronDown,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
+  CaretDown,
+  TrendUp,
+  TrendDown,
+  ChartBar,
   Globe,
-  Building2,
+  Buildings,
   Newspaper,
   FileText,
-  Mic,
+  Microphone,
   Radio,
-  Mail,
+  Envelope,
   Bell,
-  Bookmark,
+  BookmarkSimple,
   Heart,
-  DollarSign,
+  CurrencyDollar,
   Briefcase,
-  Landmark,
+  Bank,
   Calculator,
-  CircleUserRound,
+  UserCircle,
   Crown,
-  Settings,
+  GearSix,
   Users,
   Target,
-  Zap,
+  Lightning,
   MapPin,
   Cpu,
-  Pickaxe,
-  Wheat,
-  Library,
+  Hammer,
+  Plant,
+  Books,
   BookOpen,
   Video,
   Lightbulb,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useSavedCounts } from "@/hooks/use-saved-counts";
 
@@ -71,11 +71,11 @@ const navigationData: NavDropdown[] = [
       {
         title: "By Industry",
         items: [
-          { label: "Banking & Finance", href: "/industries/banking", icon: Landmark, description: "Financial services coverage" },
-          { label: "Mining & Resources", href: "/industries/mining", icon: Pickaxe, description: "Commodities & extraction" },
+          { label: "Banking & Finance", href: "/industries/banking", icon: Bank, description: "Financial services coverage" },
+          { label: "Mining & Resources", href: "/industries/mining", icon: Hammer, description: "Commodities & extraction" },
           { label: "Technology", href: "/industries/technology", icon: Cpu, description: "Tech & innovation" },
-          { label: "Agriculture", href: "/industries/agriculture", icon: Wheat, description: "Agribusiness & food" },
-          { label: "Infrastructure", href: "/industries/infrastructure", icon: Building2, description: "Construction & energy" },
+          { label: "Agriculture", href: "/industries/agriculture", icon: Plant, description: "Agribusiness & food" },
+          { label: "Infrastructure", href: "/industries/infrastructure", icon: Buildings, description: "Construction & energy" },
           { label: "All Industries", href: "/industries", icon: Briefcase, description: "View all sectors" },
         ],
       },
@@ -92,11 +92,11 @@ const navigationData: NavDropdown[] = [
       {
         title: "By Topic",
         items: [
-          { label: "Central Banks", href: "/topics/central-banks", icon: Landmark, description: "Monetary policy" },
+          { label: "Central Banks", href: "/topics/central-banks", icon: Bank, description: "Monetary policy" },
           { label: "Trade & Policy", href: "/topics/trade-policy", icon: Globe, description: "AfCFTA & trade" },
-          { label: "Fintech", href: "/topics/fintech", icon: Zap, description: "Digital finance" },
+          { label: "Fintech", href: "/topics/fintech", icon: Lightning, description: "Digital finance" },
           { label: "Sustainability", href: "/topics/sustainability", icon: Target, description: "ESG & climate" },
-          { label: "All Topics", href: "/topics", icon: Library, description: "Browse all topics" },
+          { label: "All Topics", href: "/topics", icon: Books, description: "Browse all topics" },
         ],
       },
     ],
@@ -113,8 +113,8 @@ const navigationData: NavDropdown[] = [
         title: "Publications",
         items: [
           { label: "All Research", href: "/research", icon: FileText, description: "Reports & analysis" },
-          { label: "Equity Research", href: "/research?type=equity", icon: TrendingUp, description: "Company analysis" },
-          { label: "Sector Reports", href: "/research?type=sector", icon: Building2, description: "Industry deep-dives" },
+          { label: "Equity Research", href: "/research?type=equity", icon: TrendUp, description: "Company analysis" },
+          { label: "Sector Reports", href: "/research?type=sector", icon: Buildings, description: "Industry deep-dives" },
           { label: "Macro Analysis", href: "/research?type=macro", icon: Globe, description: "Economic research" },
           { label: "Strategy", href: "/research?type=strategy", icon: Target, description: "Investment strategy" },
         ],
@@ -142,7 +142,7 @@ const navigationData: NavDropdown[] = [
         items: [
           { label: "Finance Africa Quarterly", href: "/publications/finance-africa-quarterly", icon: BookOpen, description: "Flagship quarterly journal" },
           { label: "Finance Africa Insights", href: "/publications/finance-africa-insights", icon: Lightbulb, description: "Weekly editorial & analysis" },
-          { label: "AfriFin Analytics", href: "/publications/afrifin-analytics", icon: BarChart3, description: "Daily data intelligence" },
+          { label: "AfriFin Analytics", href: "/publications/afrifin-analytics", icon: ChartBar, description: "Daily data intelligence" },
         ],
       },
     ],
@@ -153,27 +153,27 @@ const navigationData: NavDropdown[] = [
       {
         title: "Audio & Video",
         items: [
-          { label: "Podcasts", href: "/podcasts", icon: Mic, description: "Expert discussions" },
+          { label: "Podcasts", href: "/podcasts", icon: Microphone, description: "Expert discussions" },
           { label: "Videos", href: "/videos", icon: Video, description: "Market coverage" },
         ],
       },
     ],
   },
   {
-    label: "My Library",
+    label: "My Books",
     sections: [
       {
         title: "Saved Content",
         items: [
-          { label: "Saved Articles", href: "/saved", icon: Bookmark, description: "Bookmarked content" },
+          { label: "Saved Articles", href: "/saved", icon: BookmarkSimple, description: "Bookmarked content" },
           { label: "Liked Articles", href: "/saved?tab=liked", icon: Heart, description: "Articles you liked" },
         ],
       },
       {
         title: "Account",
         items: [
-          { label: "Profile", href: "/profile", icon: CircleUserRound, description: "Your account" },
-          { label: "Settings", href: "/settings", icon: Settings, description: "Preferences" },
+          { label: "Profile", href: "/profile", icon: UserCircle, description: "Your account" },
+          { label: "Settings", href: "/settings", icon: GearSix, description: "Preferences" },
           { label: "Newsletters", href: "/subscribe", icon: Crown, description: "Manage subscriptions" },
         ],
       },
@@ -244,8 +244,8 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
 function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number; savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number } }) {
   if (!isOpen) return null;
 
-  // Pass savedCounts to My Library dropdown
-  const showSavedCounts = dropdown.label === "My Library" ? savedCounts : undefined;
+  // Pass savedCounts to My Books dropdown
+  const showSavedCounts = dropdown.label === "My Books" ? savedCounts : undefined;
 
   return (
     <div
@@ -354,14 +354,14 @@ export function Navigation() {
     }, 150);
   };
 
-  // Check if My Library has any saved items
-  const hasLibraryItems = savedCounts.totalCount > 0;
+  // Check if My Books has any saved items
+  const hasBooksItems = savedCounts.totalCount > 0;
 
   return (
     <>
       <nav ref={navRef} className="hidden lg:flex items-center gap-2 relative">
         {navigationData.map((dropdown) => {
-          const showBadge = dropdown.label === "My Library" && hasLibraryItems;
+          const showBadge = dropdown.label === "My Books" && hasBooksItems;
           return (
             <div
               key={dropdown.label}
@@ -381,7 +381,7 @@ export function Navigation() {
                 {showBadge && (
                   <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                 )}
-                <ChevronDown
+                <CaretDown
                   className={cn(
                     "h-4 w-4 transition-transform",
                     openDropdown === dropdown.label && "rotate-180"

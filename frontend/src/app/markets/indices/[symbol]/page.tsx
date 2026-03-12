@@ -4,13 +4,13 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import {
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
+  TrendUp,
+  TrendDown,
+  ChartBar,
   Globe,
-  ChevronRight,
-  AlertCircle,
-} from "lucide-react";
+  CaretRight,
+  WarningCircle,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { marketService } from "@/services/api/market";
@@ -144,7 +144,7 @@ export default function IndexDetailPage() {
     return (
       <MainLayout>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-12 text-center">
-          <AlertCircle className="h-16 w-16 text-market-down mx-auto mb-4" />
+          <WarningCircle className="h-16 w-16 text-market-down mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-4">Index Not Found</h1>
           <p className="text-muted-foreground mb-6">
             The index &quot;{symbol.toUpperCase()}&quot; was not found in our database.
@@ -169,9 +169,9 @@ export default function IndexDetailPage() {
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/markets" className="hover:text-foreground">Markets</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <Link href="/markets" className="hover:text-foreground">Indices</Link>
-          <ChevronRight className="h-4 w-4" />
+          <CaretRight className="h-4 w-4" />
           <span className="text-foreground">{indexData.code}</span>
         </nav>
 
@@ -204,7 +204,7 @@ export default function IndexDetailPage() {
                       "flex items-center justify-end gap-1 text-lg",
                       isUp ? "text-market-up" : "text-market-down"
                     )}>
-                      {isUp ? <TrendingUp className="h-5 w-5" /> : <TrendingDown className="h-5 w-5" />}
+                      {isUp ? <TrendUp className="h-5 w-5" /> : <TrendDown className="h-5 w-5" />}
                       <span className="font-mono">
                         {isUp ? "+" : ""}{change.toFixed(2)} ({isUp ? "+" : ""}{changePercent.toFixed(2)}%)
                       </span>
@@ -314,7 +314,7 @@ export default function IndexDetailPage() {
             {/* Key Statistics */}
             <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-brand-orange" />
+                <ChartBar className="h-4 w-4 text-brand-orange" />
                 Key Statistics
               </h3>
               <div className="space-y-3">
@@ -422,14 +422,14 @@ export default function IndexDetailPage() {
                   className="flex items-center justify-between p-2 rounded hover:bg-terminal-bg-elevated transition-colors text-sm"
                 >
                   <span>Related News</span>
-                  <ChevronRight className="h-4 w-4" />
+                  <CaretRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href={`/research?index=${symbol}`}
                   className="flex items-center justify-between p-2 rounded hover:bg-terminal-bg-elevated transition-colors text-sm"
                 >
                   <span>Research Reports</span>
-                  <ChevronRight className="h-4 w-4" />
+                  <CaretRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>

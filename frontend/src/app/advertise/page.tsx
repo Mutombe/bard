@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import {
-  BarChart3,
+  ChartBar,
   Users,
   Globe,
-  Mail,
+  Envelope,
   CheckCircle,
   ArrowRight,
-  TrendingUp,
+  TrendUp,
   Target,
   Newspaper,
   Radio,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -35,7 +35,7 @@ const adFormats = [
   {
     name: "Display Advertising",
     description: "Premium banner placements across our platform with targeting options.",
-    icon: BarChart3,
+    icon: ChartBar,
     features: ["Leaderboard", "Rectangle", "Skyscraper", "Mobile banners"],
   },
   {
@@ -47,7 +47,7 @@ const adFormats = [
   {
     name: "Newsletter Sponsorship",
     description: "Reach our engaged email audience with dedicated or shared sponsorships.",
-    icon: Mail,
+    icon: Envelope,
     features: ["Daily briefing", "Weekly digest", "Dedicated sends", "Section sponsorship"],
   },
   {
@@ -188,7 +188,7 @@ export default function AdvertisePage() {
               </h3>
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-3 bg-terminal-bg-elevated rounded-md">
-                  <TrendingUp className="h-5 w-5 text-market-up" />
+                  <TrendUp className="h-5 w-5 text-market-up" />
                   <div>
                     <div className="font-medium">Average Income</div>
                     <div className="text-sm text-muted-foreground">$150,000+ annually</div>
@@ -209,7 +209,7 @@ export default function AdvertisePage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-terminal-bg-elevated rounded-md">
-                  <BarChart3 className="h-5 w-5 text-brand-orange" />
+                  <ChartBar className="h-5 w-5 text-brand-orange" />
                   <div>
                     <div className="font-medium">Investment Activity</div>
                     <div className="text-sm text-muted-foreground">85% active investors</div>
@@ -318,7 +318,7 @@ export default function AdvertisePage() {
               href="mailto:advertising@Bard Global Finance Institute.com"
               className="flex items-center gap-2 px-6 py-3 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors font-medium"
             >
-              <Mail className="h-4 w-4" />
+              <Envelope className="h-4 w-4" />
               advertising@Bard Global Finance Institute.com
             </a>
             <Link

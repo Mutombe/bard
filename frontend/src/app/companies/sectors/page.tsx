@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PieChart, TrendingUp, TrendingDown, Building2, ChevronRight } from "lucide-react";
+import {
+  ChartPie,
+  TrendUp,
+  TrendDown,
+  Buildings,
+  CaretRight,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useCompanies } from "@/hooks";
@@ -70,7 +76,7 @@ export default function SectorsPage() {
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-            <PieChart className="h-6 w-6 text-brand-orange" />
+            <ChartPie className="h-6 w-6 text-brand-orange" />
             Companies by Sector
           </h1>
           <p className="text-muted-foreground">
@@ -105,9 +111,9 @@ export default function SectorsPage() {
                     sector.change >= 0 ? "text-green-500" : "text-red-500"
                   )}>
                     {sector.change >= 0 ? (
-                      <TrendingUp className="h-4 w-4" />
+                      <TrendUp className="h-4 w-4" />
                     ) : (
-                      <TrendingDown className="h-4 w-4" />
+                      <TrendDown className="h-4 w-4" />
                     )}
                     {Math.abs(sector.change).toFixed(2)}%
                   </div>
@@ -137,7 +143,7 @@ export default function SectorsPage() {
                   href={`/companies?sector=${sector.code}`}
                   className="flex items-center justify-center gap-1 text-sm text-brand-orange hover:text-brand-orange-light"
                 >
-                  View all {sector.name} <ChevronRight className="h-4 w-4" />
+                  View all {sector.name} <CaretRight className="h-4 w-4" />
                 </Link>
               </div>
             ))}

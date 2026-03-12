@@ -5,11 +5,11 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Users,
-  Search,
+  MagnifyingGlass,
   Clock,
-  MessageSquare,
+  ChatText,
   ArrowRight,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -122,7 +122,7 @@ export default function OpinionsPage() {
             </p>
           </div>
           <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search opinions..."
@@ -236,7 +236,7 @@ export default function OpinionsPage() {
                       {opinion.readTime}
                     </span>
                     <span className="flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" />
+                      <ChatText className="h-3 w-3" />
                       {opinion.comments}
                     </span>
                   </div>

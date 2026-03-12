@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { DollarSign, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { CurrencyDollar, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -26,7 +26,7 @@ export default function ForexPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <DollarSign className="h-6 w-6 text-brand-orange" />
+              <CurrencyDollar className="h-6 w-6 text-brand-orange" />
               Forex Markets
             </h1>
             <p className="text-muted-foreground">Currency exchange rates and pairs</p>
@@ -44,9 +44,9 @@ export default function ForexPage() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-mono font-semibold">{fx.pair}</span>
                   {isUp ? (
-                    <TrendingUp className="h-4 w-4 text-market-up" />
+                    <TrendUp className="h-4 w-4 text-market-up" />
                   ) : (
-                    <TrendingDown className="h-4 w-4 text-market-down" />
+                    <TrendDown className="h-4 w-4 text-market-down" />
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground mb-3">{fx.name}</div>

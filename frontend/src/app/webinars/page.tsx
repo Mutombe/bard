@@ -10,9 +10,9 @@ import {
   Play,
   Eye,
   ThumbsUp,
-  RefreshCw,
+  ArrowClockwise,
   X,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useYouTubeSearch } from "@/hooks";
@@ -135,7 +135,7 @@ export default function WebinarsPage() {
               onClick={() => mutate()}
               className="flex items-center gap-2 px-3 py-2 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-full hover:border-brand-orange transition-colors"
             >
-              <RefreshCw className="h-4 w-4" />
+              <ArrowClockwise className="h-4 w-4" />
             </button>
           </div>
         </div>

@@ -2,13 +2,13 @@
 
 import { useState, useCallback } from "react";
 import {
-  Search,
+  MagnifyingGlass,
   X,
-  Loader2,
+  CircleNotch,
   Image as ImageIcon,
   Check,
-  ExternalLink,
-} from "lucide-react";
+  ArrowSquareOut,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { authClient } from "@/services/api/client";
 import { toast } from "sonner";
@@ -116,7 +116,7 @@ export function UnsplashImagePicker({
         <div className="p-4 border-b border-terminal-border">
           <form onSubmit={handleSearch} className="flex gap-2">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 value={query}
@@ -131,7 +131,7 @@ export function UnsplashImagePicker({
               disabled={loading || !query.trim()}
               className="px-4 py-2 bg-brand-orange text-white rounded-md hover:bg-brand-orange-dark transition-colors text-sm disabled:opacity-50 flex items-center gap-2"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+              {loading ? <CircleNotch className="h-4 w-4 animate-spin" /> : <MagnifyingGlass className="h-4 w-4" />}
               Search
             </button>
           </form>
@@ -165,7 +165,7 @@ export function UnsplashImagePicker({
             </div>
           ) : loading && images.length === 0 ? (
             <div className="flex items-center justify-center h-64">
-              <Loader2 className="h-8 w-8 animate-spin text-brand-orange" />
+              <CircleNotch className="h-8 w-8 animate-spin text-brand-orange" />
             </div>
           ) : images.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
@@ -216,7 +216,7 @@ export function UnsplashImagePicker({
                     className="px-4 py-2 border border-terminal-border rounded-md hover:bg-terminal-bg-secondary text-sm flex items-center gap-2"
                   >
                     {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CircleNotch className="h-4 w-4 animate-spin" />
                     ) : null}
                     Load More
                   </button>
@@ -237,7 +237,7 @@ export function UnsplashImagePicker({
               className="text-brand-orange hover:underline flex items-center gap-1"
             >
               Unsplash
-              <ExternalLink className="h-3 w-3" />
+              <ArrowSquareOut className="h-3 w-3" />
             </a>
           </div>
           <div className="flex items-center gap-2">
@@ -281,7 +281,7 @@ export function UnsplashInlinePicker({
           className
         )}
       >
-        <Search className="h-4 w-4" />
+        <MagnifyingGlass className="h-4 w-4" />
         Search Unsplash
       </button>
       <UnsplashImagePicker

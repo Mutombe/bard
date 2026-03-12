@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { Warning, ArrowClockwise, House } from "@phosphor-icons/react";
 import Link from "next/link";
 
 interface Props {
@@ -72,7 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-[400px] flex items-center justify-center p-6">
           <div className="max-w-md w-full bg-terminal-bg-elevated border border-terminal-border rounded-lg p-6 text-center">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-red-500" />
+              <Warning className="h-6 w-6 text-red-500" />
             </div>
             <h2 className="text-lg font-bold mb-2">Something went wrong</h2>
             <p className="text-sm text-muted-foreground mb-6">
@@ -94,14 +94,14 @@ export class ErrorBoundary extends Component<Props, State> {
                 onClick={this.handleReset}
                 className="flex items-center gap-2 px-4 py-2 bg-brand-orange text-white rounded-md text-sm font-medium hover:bg-brand-orange-dark transition-colors"
               >
-                <RefreshCw className="h-4 w-4" />
+                <ArrowClockwise className="h-4 w-4" />
                 Try Again
               </button>
               <Link
                 href="/"
                 className="flex items-center gap-2 px-4 py-2 border border-terminal-border rounded-md text-sm font-medium hover:bg-terminal-bg transition-colors"
               >
-                <Home className="h-4 w-4" />
+                <House className="h-4 w-4" />
                 Go Home
               </Link>
             </div>
@@ -143,7 +143,7 @@ export function ErrorFallback({
   return (
     <div className="p-6 text-center">
       <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-red-500/10 flex items-center justify-center">
-        <AlertTriangle className="h-5 w-5 text-red-500" />
+        <Warning className="h-5 w-5 text-red-500" />
       </div>
       <p className="text-sm text-muted-foreground mb-4">
         Failed to load this section

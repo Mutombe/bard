@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Layers, ArrowLeft, TrendingUp, TrendingDown } from "lucide-react";
+import { Stack, ArrowLeft, TrendUp, TrendDown } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 
@@ -28,7 +28,7 @@ export default function ETFsPage() {
           </Link>
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Layers className="h-6 w-6 text-brand-orange" />
+              <Stack className="h-6 w-6 text-brand-orange" />
               ETFs
             </h1>
             <p className="text-muted-foreground">Exchange-traded funds on African exchanges</p>
@@ -66,7 +66,7 @@ export default function ETFsPage() {
                         "inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-mono",
                         isUp ? "bg-market-up/20 text-market-up" : "bg-market-down/20 text-market-down"
                       )}>
-                        {isUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                        {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                         {isUp ? "+" : ""}{etf.change.toFixed(2)}%
                       </span>
                     </td>

@@ -6,18 +6,18 @@ import {
   FileText,
   UserPlus,
   Eye,
-  MessageSquare,
-  Mail,
-  DollarSign,
-  TrendingUp,
-  RefreshCw,
-  AlertCircle,
+  ChatText,
+  Envelope,
+  CurrencyDollar,
+  TrendUp,
+  ArrowClockwise,
+  WarningCircle,
   Crown,
-  BarChart3,
+  ChartBar,
   Heart,
-  Activity,
+  Pulse,
   Check,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/loading";
 import { authClient } from "@/services/api/client";
@@ -480,7 +480,7 @@ export default function AnalyticsPage() {
           {refreshDone ? (
             <Check className="h-5 w-5 text-market-up" />
           ) : (
-            <RefreshCw className={cn("h-5 w-5", refreshing && "animate-spin")} />
+            <ArrowClockwise className={cn("h-5 w-5", refreshing && "animate-spin")} />
           )}
         </button>
       </div>
@@ -488,7 +488,7 @@ export default function AnalyticsPage() {
       {/* Error */}
       {error && (
         <div className="flex items-center gap-3 p-4 mb-6 bg-market-down/10 border border-market-down/30">
-          <AlertCircle className="h-5 w-5 text-market-down flex-shrink-0" />
+          <WarningCircle className="h-5 w-5 text-market-down flex-shrink-0" />
           <p className="text-sm text-market-down">{error}</p>
           <button
             onClick={() => fetchData()}
@@ -569,7 +569,7 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard icon={Users} label="Total Users" value={data.users.total_users} iconColor="text-brand-orange" />
             <StatCard icon={UserPlus} label="New in Period" value={data.users.new_users_in_period} iconColor="text-brand-orange" />
-            <StatCard icon={Activity} label="Active in Period" value={data.users.active_in_period} iconColor="text-brand-orange" />
+            <StatCard icon={Pulse} label="Active in Period" value={data.users.active_in_period} iconColor="text-brand-orange" />
             <StatCard icon={Crown} label="Premium Users" value={premiumUsers} iconColor="text-brand-orange" />
           </div>
 
@@ -593,7 +593,7 @@ export default function AnalyticsPage() {
               />
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={TrendingUp} title="Registration Trend" iconColor="text-brand-orange/70" />
+              <SectionHeader icon={TrendUp} title="Registration Trend" iconColor="text-brand-orange/70" />
               <TrendBar data={data.users.registration_trend} label="New Registrations" barClass="bg-brand-orange/60 hover:bg-brand-orange" />
             </div>
           </div>
@@ -624,7 +624,7 @@ export default function AnalyticsPage() {
             <StatCard icon={FileText} label="Total Published" value={data.content.total_published} iconColor="text-blue-400" />
             <StatCard icon={FileText} label="Published in Period" value={data.content.published_in_period} iconColor="text-blue-400" />
             <StatCard icon={Eye} label="Total Views" value={data.content.total_view_count} iconColor="text-blue-400" />
-            <StatCard icon={AlertCircle} label="Pending Review" value={pendingReview} iconColor="text-yellow-400" />
+            <StatCard icon={WarningCircle} label="Pending Review" value={pendingReview} iconColor="text-yellow-400" />
           </div>
 
           {/* Status pills */}
@@ -644,7 +644,7 @@ export default function AnalyticsPage() {
 
           {/* Top 10 articles */}
           <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden mb-6">
-            <SectionHeader icon={BarChart3} title="Top 10 Most Viewed Articles" iconColor="text-blue-400/70" />
+            <SectionHeader icon={ChartBar} title="Top 10 Most Viewed Articles" iconColor="text-blue-400/70" />
             {data.content.top_articles_by_views.length === 0 ? (
               <EmptyState icon={FileText} message="No published articles yet" sub="Articles will appear here once published" />
             ) : (
@@ -691,7 +691,7 @@ export default function AnalyticsPage() {
           {/* Publishing Trend -- uses publishing_trend data from API that was previously unused */}
           {data.content.publishing_trend.length > 0 && (
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={TrendingUp} title="Publishing Trend" iconColor="text-blue-400/70" />
+              <SectionHeader icon={TrendUp} title="Publishing Trend" iconColor="text-blue-400/70" />
               <TrendBar data={data.content.publishing_trend} label="Articles Published" barClass="bg-blue-400/60 hover:bg-blue-400" />
             </div>
           )}
@@ -705,7 +705,7 @@ export default function AnalyticsPage() {
       <section className="mb-10">
       <div className="flex items-center gap-3 mb-5 pb-3 border-b border-terminal-border">
         <div className="h-8 w-8 flex items-center justify-center bg-market-up/10">
-          <MessageSquare className="h-4 w-4 text-market-up" />
+          <ChatText className="h-4 w-4 text-market-up" />
         </div>
         <div>
           <h2 className="text-base font-semibold leading-tight">Engagement Analytics</h2>
@@ -716,15 +716,15 @@ export default function AnalyticsPage() {
       ) : data ? (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatCard icon={MessageSquare} label="Total Comments" value={data.engagement.total_comments} iconColor="text-market-up" />
-            <StatCard icon={MessageSquare} label="New Comments" value={data.engagement.new_comments_in_period} iconColor="text-market-up" />
+            <StatCard icon={ChatText} label="Total Comments" value={data.engagement.total_comments} iconColor="text-market-up" />
+            <StatCard icon={ChatText} label="New Comments" value={data.engagement.new_comments_in_period} iconColor="text-market-up" />
             <StatCard icon={Eye} label="Unique Viewers" value={data.engagement.unique_viewers_in_period} iconColor="text-market-up" />
             <StatCard icon={Heart} label="Comment Likes" value={data.engagement.total_comment_likes} iconColor="text-market-up" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={MessageSquare} title="Top Commented Articles" iconColor="text-market-up/70" />
+              <SectionHeader icon={ChatText} title="Top Commented Articles" iconColor="text-market-up/70" />
               <MiniTable
                 headers={["Title", "Comments", "Views"]}
                 rows={data.engagement.top_commented_articles.map((a) => [
@@ -734,7 +734,7 @@ export default function AnalyticsPage() {
                 ])}
                 alignRight={[1, 2]}
                 emptyMsg="No comments yet"
-                emptyIcon={MessageSquare}
+                emptyIcon={ChatText}
               />
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
@@ -762,7 +762,7 @@ export default function AnalyticsPage() {
       <section className="mb-10">
       <div className="flex items-center gap-3 mb-5 pb-3 border-b border-terminal-border">
         <div className="h-8 w-8 flex items-center justify-center bg-purple-400/10">
-          <Mail className="h-4 w-4 text-purple-400" />
+          <Envelope className="h-4 w-4 text-purple-400" />
         </div>
         <div>
           <h2 className="text-base font-semibold leading-tight">Newsletter Analytics</h2>
@@ -773,24 +773,24 @@ export default function AnalyticsPage() {
       ) : data ? (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <StatCard icon={Mail} label="Total Subscribers" value={data.newsletters.total_subscribers} iconColor="text-purple-400" />
-            <StatCard icon={Mail} label="Active" value={data.newsletters.active_subscribers} iconColor="text-purple-400" />
+            <StatCard icon={Envelope} label="Total Subscribers" value={data.newsletters.total_subscribers} iconColor="text-purple-400" />
+            <StatCard icon={Envelope} label="Active" value={data.newsletters.active_subscribers} iconColor="text-purple-400" />
             <StatCard icon={UserPlus} label="New in Period" value={data.newsletters.new_in_period} iconColor="text-purple-400" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={Mail} title="Subscribers by Type" iconColor="text-purple-400/70" />
+              <SectionHeader icon={Envelope} title="Subscribers by Type" iconColor="text-purple-400/70" />
               <MiniTable
                 headers={["Newsletter", "Subscribers"]}
                 rows={data.newsletters.by_type.map((t) => [formatNewsletterType(t.newsletter_type), t.count])}
                 alignRight={[1]}
                 emptyMsg="No newsletter subscribers yet"
-                emptyIcon={Mail}
+                emptyIcon={Envelope}
               />
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={TrendingUp} title="Subscription Trend" iconColor="text-purple-400/70" />
+              <SectionHeader icon={TrendUp} title="Subscription Trend" iconColor="text-purple-400/70" />
               <TrendBar data={data.newsletters.trend} label="New Subscribers" barClass="bg-purple-400/60 hover:bg-purple-400" />
             </div>
           </div>
@@ -804,7 +804,7 @@ export default function AnalyticsPage() {
       <section className="mb-10">
       <div className="flex items-center gap-3 mb-5 pb-3 border-b border-terminal-border">
         <div className="h-8 w-8 flex items-center justify-center bg-amber-400/10">
-          <DollarSign className="h-4 w-4 text-amber-400" />
+          <CurrencyDollar className="h-4 w-4 text-amber-400" />
         </div>
         <div>
           <h2 className="text-base font-semibold leading-tight">Subscription & Revenue</h2>
@@ -819,21 +819,21 @@ export default function AnalyticsPage() {
             <div className="bg-terminal-bg-secondary border border-terminal-border border-l-2 border-l-amber-400 p-4 hover:border-terminal-border-light hover:shadow-theme-sm transition-all duration-200 group">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">MRR</span>
-                <DollarSign className="h-4 w-4 text-amber-400/60 group-hover:text-amber-400 transition-colors" />
+                <CurrencyDollar className="h-4 w-4 text-amber-400/60 group-hover:text-amber-400 transition-colors" />
               </div>
               <div className="text-2xl font-bold font-mono tabular-nums tracking-tight">{formatMoney(data.subscriptions.mrr_usd)}</div>
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border border-l-2 border-l-amber-400 p-4 hover:border-terminal-border-light hover:shadow-theme-sm transition-all duration-200 group">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">Revenue in Period</span>
-                <DollarSign className="h-4 w-4 text-amber-400/60 group-hover:text-amber-400 transition-colors" />
+                <CurrencyDollar className="h-4 w-4 text-amber-400/60 group-hover:text-amber-400 transition-colors" />
               </div>
               <div className="text-2xl font-bold font-mono tabular-nums tracking-tight">{formatMoney(data.subscriptions.revenue_in_period_usd)}</div>
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border border-l-2 border-l-amber-400 p-4 hover:border-terminal-border-light hover:shadow-theme-sm transition-all duration-200 group">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-2xs font-medium uppercase tracking-wider text-muted-foreground">All-Time Revenue</span>
-                <DollarSign className="h-4 w-4 text-amber-400/60 group-hover:text-amber-400 transition-colors" />
+                <CurrencyDollar className="h-4 w-4 text-amber-400/60 group-hover:text-amber-400 transition-colors" />
               </div>
               <div className="text-2xl font-bold font-mono tabular-nums tracking-tight">{formatMoney(data.subscriptions.total_revenue_all_time_usd)}</div>
             </div>
@@ -855,9 +855,9 @@ export default function AnalyticsPage() {
               />
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={Activity} title="Status Breakdown" iconColor="text-amber-400/70" />
+              <SectionHeader icon={Pulse} title="Status Breakdown" iconColor="text-amber-400/70" />
               {data.subscriptions.status_breakdown.length === 0 ? (
-                <EmptyState icon={Activity} message="No subscriptions yet" />
+                <EmptyState icon={Pulse} message="No subscriptions yet" />
               ) : (
                 <div className="divide-y divide-terminal-border/50">
                   {data.subscriptions.status_breakdown.map((s) => (
@@ -872,7 +872,7 @@ export default function AnalyticsPage() {
               )}
             </div>
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={DollarSign} title="Revenue by Currency" iconColor="text-amber-400/70" />
+              <SectionHeader icon={CurrencyDollar} title="Revenue by Currency" iconColor="text-amber-400/70" />
               <MiniTable
                 headers={["Currency", "Revenue", "Payments"]}
                 rows={data.subscriptions.revenue_by_currency.map((r) => [
@@ -882,7 +882,7 @@ export default function AnalyticsPage() {
                 ])}
                 alignRight={[1, 2]}
                 emptyMsg="No payments recorded"
-                emptyIcon={DollarSign}
+                emptyIcon={CurrencyDollar}
               />
             </div>
           </div>
@@ -890,7 +890,7 @@ export default function AnalyticsPage() {
           {/* Revenue Trend -- uses revenue_trend data from API that was previously unused */}
           {data.subscriptions.revenue_trend.length > 0 && (
             <div className="bg-terminal-bg-secondary border border-terminal-border overflow-hidden">
-              <SectionHeader icon={TrendingUp} title="Revenue Trend" iconColor="text-amber-400/70" />
+              <SectionHeader icon={TrendUp} title="Revenue Trend" iconColor="text-amber-400/70" />
               <TrendBar
                 data={data.subscriptions.revenue_trend.map((r) => ({ date: r.date, count: Math.round(r.total) }))}
                 label="Revenue (USD)"

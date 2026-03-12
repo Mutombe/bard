@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Play,
-  Search,
+  MagnifyingGlass,
   Eye,
   Calendar,
-  RefreshCw,
-  Loader2,
-} from "lucide-react";
+  ArrowClockwise,
+  CircleNotch,
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { mediaService, YouTubeVideo } from "@/services/media";
@@ -116,7 +116,7 @@ export default function VideosPage() {
             </p>
           </div>
           <form onSubmit={handleSearch} className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search videos..."
@@ -151,7 +151,7 @@ export default function VideosPage() {
             disabled={loading}
             className="ml-auto px-3 py-2 text-sm rounded-md bg-terminal-bg-secondary text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
           >
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+            <ArrowClockwise className={cn("h-4 w-4", loading && "animate-spin")} />
             Refresh
           </button>
         </div>
@@ -159,7 +159,7 @@ export default function VideosPage() {
         {/* Loading State */}
         {loading && (
           <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-brand-orange" />
+            <CircleNotch className="h-8 w-8 animate-spin text-brand-orange" />
           </div>
         )}
 

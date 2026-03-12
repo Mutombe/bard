@@ -3,23 +3,23 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import Image from "next/image";
 import {
-  Upload,
-  Search,
-  Grid,
-  List,
-  Trash2,
-  Download,
+  UploadSimple,
+  MagnifyingGlass,
+  GridFour,
+  ListBullets,
+  Trash,
+  DownloadSimple,
   Copy,
   Image as ImageIcon,
   FileText,
-  Film,
-  Music,
+  FilmStrip,
+  MusicNote,
   X,
   Check,
-  Loader2,
-  AlertCircle,
+  CircleNotch,
+  WarningCircle,
   File,
-} from "lucide-react";
+} from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { mediaService, type MediaFile } from "@/services/api/media";
@@ -30,11 +30,11 @@ function getTypeIcon(type: MediaFile["file_type"]) {
     case "image":
       return <ImageIcon className="h-5 w-5" />;
     case "video":
-      return <Film className="h-5 w-5" />;
+      return <FilmStrip className="h-5 w-5" />;
     case "document":
       return <FileText className="h-5 w-5" />;
     case "audio":
-      return <Music className="h-5 w-5" />;
+      return <MusicNote className="h-5 w-5" />;
     default:
       return <File className="h-5 w-5" />;
   }
@@ -319,12 +319,12 @@ export default function MediaPage() {
           >
             {isUploading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <CircleNotch className="h-4 w-4 animate-spin" />
                 Uploading... {uploadProgress}%
               </>
             ) : (
               <>
-                <Upload className="h-4 w-4" />
+                <UploadSimple className="h-4 w-4" />
                 Upload Files
               </>
             )}
@@ -335,7 +335,7 @@ export default function MediaPage() {
       {/* Filters & View Toggle */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search files..."
@@ -366,7 +366,7 @@ export default function MediaPage() {
                   : "bg-terminal-bg-secondary text-muted-foreground hover:text-foreground"
               )}
             >
-              <Grid className="h-4 w-4" />
+              <GridFour className="h-4 w-4" />
             </button>
             <button
               onClick={() => setViewMode("list")}
@@ -377,7 +377,7 @@ export default function MediaPage() {
                   : "bg-terminal-bg-secondary text-muted-foreground hover:text-foreground"
               )}
             >
-              <List className="h-4 w-4" />
+              <ListBullets className="h-4 w-4" />
             </button>
           </div>
         </div>
@@ -395,9 +395,9 @@ export default function MediaPage() {
             className="px-3 py-1 text-sm bg-market-down/20 text-market-down rounded hover:bg-market-down/30 flex items-center gap-1 disabled:opacity-50"
           >
             {deletingIds.length > 0 ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <CircleNotch className="h-3 w-3 animate-spin" />
             ) : (
-              <Trash2 className="h-3 w-3" />
+              <Trash className="h-3 w-3" />
             )}
             Delete
           </button>
@@ -444,7 +444,7 @@ export default function MediaPage() {
             onClick={() => fileInputRef.current?.click()}
             className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
           >
-            <Upload className="h-4 w-4" />
+            <UploadSimple className="h-4 w-4" />
             Upload Files
           </button>
         </div>
@@ -496,7 +496,7 @@ export default function MediaPage() {
                       className="p-2 bg-white/20 rounded-full hover:bg-white/30"
                       title="Download"
                     >
-                      <Download className="h-4 w-4 text-white" />
+                      <DownloadSimple className="h-4 w-4 text-white" />
                     </button>
                     <button
                       onClick={(e) => {
@@ -508,9 +508,9 @@ export default function MediaPage() {
                       title="Delete"
                     >
                       {deletingIds.includes(item.id) ? (
-                        <Loader2 className="h-4 w-4 text-white animate-spin" />
+                        <CircleNotch className="h-4 w-4 text-white animate-spin" />
                       ) : (
-                        <Trash2 className="h-4 w-4 text-white" />
+                        <Trash className="h-4 w-4 text-white" />
                       )}
                     </button>
                   </div>
@@ -603,7 +603,7 @@ export default function MediaPage() {
                     className="p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg rounded"
                     title="Download"
                   >
-                    <Download className="h-4 w-4" />
+                    <DownloadSimple className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => openDeleteModal(item)}
@@ -612,9 +612,9 @@ export default function MediaPage() {
                     title="Delete"
                   >
                     {deletingIds.includes(item.id) ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <CircleNotch className="h-4 w-4 animate-spin" />
                     ) : (
-                      <Trash2 className="h-4 w-4" />
+                      <Trash className="h-4 w-4" />
                     )}
                   </button>
                 </div>
@@ -637,7 +637,7 @@ export default function MediaPage() {
       >
         {isUploading ? (
           <div className="flex flex-col items-center">
-            <Loader2 className="h-12 w-12 mb-4 text-primary animate-spin" />
+            <CircleNotch className="h-12 w-12 mb-4 text-primary animate-spin" />
             <h3 className="font-medium mb-2">Uploading files...</h3>
             <div className="w-64 h-2 bg-terminal-bg rounded-full overflow-hidden">
               <div
@@ -649,7 +649,7 @@ export default function MediaPage() {
           </div>
         ) : (
           <>
-            <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <UploadSimple className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
             <h3 className="font-medium mb-2">Drop files here to upload</h3>
             <p className="text-sm text-muted-foreground mb-4">
               or click the button above to select files
