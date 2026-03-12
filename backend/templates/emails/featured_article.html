@@ -1,0 +1,286 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
+  <title>Featured: {{ article.title }} - BGFI</title>
+  <!--[if mso]>
+  <noscript>
+    <xml>
+      <o:OfficeDocumentSettings>
+        <o:PixelsPerInch>96</o:PixelsPerInch>
+      </o:OfficeDocumentSettings>
+    </xml>
+  </noscript>
+  <![endif]-->
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+    a[x-apple-data-detectors] { color: inherit !important; text-decoration: none !important; font-size: inherit !important; font-family: inherit !important; font-weight: inherit !important; line-height: inherit !important; }
+
+    @media (prefers-color-scheme: dark) {
+      .email-bg { background-color: #0a0a0f !important; }
+      .email-container { background-color: #12121a !important; }
+      .text-primary { color: #e8e6e3 !important; }
+      .text-secondary { color: #a0a0a0 !important; }
+      .text-muted { color: #787878 !important; }
+      .border-color { border-color: #2a2a35 !important; }
+      .bg-card { background-color: #1a1a25 !important; }
+    }
+
+    @media only screen and (max-width: 620px) {
+      .email-container { width: 100% !important; max-width: 100% !important; }
+      .stack-column { display: block !important; width: 100% !important; }
+      .mobile-padding { padding-left: 20px !important; padding-right: 20px !important; }
+      .mobile-headline { font-size: 24px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f0efeb; -webkit-font-smoothing: antialiased;">
+
+  <!-- Preheader -->
+  <div style="display: none; font-size: 1px; color: #f0efeb; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+    Featured: {{ article.title }} - Read the full analysis on BGFI.
+  </div>
+
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0efeb;" class="email-bg">
+    <tr>
+      <td align="center" style="padding: 40px 16px;">
+
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="max-width: 600px; background-color: #ffffff;" class="email-container">
+
+          <!-- ============================
+               HEADER - Burgundy branded strip
+               ============================ -->
+          <tr>
+            <td style="background-color: #9b2335; padding: 0;">
+
+              <!-- Top accent bar -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="height: 4px; background-color: #d4a853; font-size: 0; line-height: 0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <!-- Header content -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding: 24px 40px;" class="mobile-padding">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td>
+                          <!-- BGFI branding -->
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                              <td style="font-family: Georgia, 'Times New Roman', serif; font-size: 12px; letter-spacing: 0.15em; color: rgba(255,255,255,0.7); text-transform: uppercase; font-weight: 400; line-height: 1; padding-bottom: 16px;">
+                                BARD GLOBAL FINANCE INSTITUTE
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <!-- FEATURED badge -->
+                          <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                            <tr>
+                              <td style="background-color: #d4a853; padding: 6px 16px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.15em; color: #1a1a1a; text-transform: uppercase;">
+                                &#9733;&nbsp; FEATURED ARTICLE
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- ============================
+               FEATURED IMAGE
+               ============================ -->
+          {% if image_url %}
+          <tr>
+            <td style="padding: 0; line-height: 0;">
+              <img src="{{ image_url }}" alt="{{ article.title }}" width="600" style="width: 100%; max-width: 600px; height: auto; display: block;">
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- ============================
+               TIMESTAMP BAR
+               ============================ -->
+          <tr>
+            <td style="background-color: #f5f5f0; border-bottom: 1px solid #e5e2dc; padding: 10px 40px;" class="mobile-padding bg-card border-color">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="font-family: 'Courier New', Courier, monospace; font-size: 11px; letter-spacing: 0.05em; color: #888888;">
+                    {{ article.published_at|date:"H:i" }} {{ article.published_at|date:"e" }}&nbsp;&nbsp;&#183;&nbsp;&nbsp;{{ article.published_at|date:"l, F j, Y" }}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================
+               ARTICLE CONTENT
+               ============================ -->
+          <tr>
+            <td style="padding: 40px 40px 32px 40px;" class="mobile-padding">
+
+              <!-- Category tag -->
+              {% if article.category %}
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #9b2335; padding-bottom: 12px;">
+                    {{ article.category }}
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
+
+              <!-- Headline -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 700; color: #1a1a1a; line-height: 1.2; letter-spacing: -0.02em; padding-bottom: 20px;" class="text-primary mobile-headline">
+                    {{ article.title }}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Accent line -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="padding-bottom: 20px;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="width: 48px; height: 3px; background-color: #d4a853; font-size: 0; line-height: 0;">&nbsp;</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Excerpt -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.75; color: #3d3d3d; padding-bottom: 32px;" class="text-secondary">
+                    {{ article.excerpt }}
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Related companies (if any) -->
+              {% if article.related_companies.all %}
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="border-top: 1px solid #e5e2dc; border-bottom: 1px solid #e5e2dc; margin-bottom: 32px;" class="border-color">
+                <tr>
+                  <td style="padding: 16px 0;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #999999; padding-bottom: 8px;">
+                          RELATED TICKERS
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.05em;">
+                          {% for company in article.related_companies.all %}{{ company.symbol }}{% if not forloop.last %}&nbsp;&nbsp;&#183;&nbsp;&nbsp;{% endif %}{% endfor %}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              {% endif %}
+
+              <!-- CTA Button -->
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <!--[if mso]>
+                    <v:rect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ article_url }}" style="height:52px;v-text-anchor:middle;width:280px;" fillcolor="#9b2335" stroke="f">
+                      <w:anchorlock/>
+                      <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;letter-spacing:0.05em;">READ FULL ARTICLE &rarr;</center>
+                    </v:rect>
+                    <![endif]-->
+                    <!--[if !mso]><!-->
+                    <a href="{{ article_url }}" target="_blank" style="display: inline-block; background-color: #9b2335; color: #ffffff; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; padding: 16px 36px; border: 2px solid #9b2335;">
+                      READ FULL ARTICLE&nbsp;&nbsp;&rarr;
+                    </a>
+                    <!--<![endif]-->
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+
+          <!-- ============================
+               ALERT SETTINGS CALLOUT
+               ============================ -->
+          <tr>
+            <td style="padding: 0 40px 40px 40px;" class="mobile-padding">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="border-top: 1px solid #e5e2dc; padding-top: 24px;" class="border-color">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #999999;" class="text-muted">
+                          You are receiving this because you subscribed to <strong>Breaking News Alerts</strong> from BGFI. Featured articles are our editors' top picks for must-read financial intelligence.
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ============================
+               FOOTER
+               ============================ -->
+          <tr>
+            <td style="border-top: 1px solid #e5e2dc; padding: 32px 40px; background-color: #fafaf8;" class="mobile-padding border-color">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td style="font-family: Georgia, 'Times New Roman', serif; font-size: 11px; letter-spacing: 0.12em; color: #9b2335; text-transform: uppercase; font-weight: 700; padding-bottom: 12px;">
+                    BGFI
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #999999; padding-bottom: 16px;" class="text-muted">
+                    Bard Global Finance Institute<br>
+                    Premium African Financial Intelligence
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; line-height: 1.6; color: #999999;" class="text-muted">
+                    <a href="https://bgfi.global" style="color: #9b2335; text-decoration: none;">bgfi.global</a>
+                    &nbsp;&nbsp;&#183;&nbsp;&nbsp;
+                    <a href="{{ unsubscribe_url }}" style="color: #999999; text-decoration: underline;">Unsubscribe from alerts</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; line-height: 1.6; color: #bbbbbb; padding-top: 16px;" class="text-muted">
+                    &copy; {% now "Y" %} Bard Global Finance Institute. All rights reserved.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
