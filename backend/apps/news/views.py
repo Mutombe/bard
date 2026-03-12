@@ -1,6 +1,7 @@
 """
 News Views
 """
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -170,14 +171,19 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
 
         # Non-authenticated users only see published articles
         if not self.request.user.is_authenticated:
-            return queryset.filter(status=NewsArticle.Status.PUBLISHED)
+            queryset = queryset.filter(status=NewsArticle.Status.PUBLISHED)
+        elif not self.request.user.is_editor:
+            # Regular users see published articles
+            queryset = queryset.filter(status=NewsArticle.Status.PUBLISHED)
 
-        # Editors can see all their articles
-        if self.request.user.is_editor:
-            return queryset
+        # For feed listings: only show articles with scraped body and real images
+        if self.action == "list":
+            queryset = queryset.exclude(content__isnull=True).exclude(content="")
+            queryset = queryset.filter(
+                Q(featured_image__gt="") | Q(featured_image_url__gt="")
+            )
 
-        # Regular users see published articles
-        return queryset.filter(status=NewsArticle.Status.PUBLISHED)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == "retrieve":

@@ -214,10 +214,10 @@ export function MainLayout({ children }: MainLayoutProps) {
         isScrolled && "is-scrolled"
       )}>
         <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-          <div className={cn("flex items-center header-inner", isScrolled ? "h-14" : "h-24")}>
-            {/* Logo - shrinks on scroll */}
+          <div className={cn("flex items-center header-inner", isScrolled ? "h-12 md:h-14" : "h-16 md:h-24")}>
+            {/* Logo - smaller on mobile so other items fit */}
             <Link href="/" className="flex items-center shrink-0">
-              <ThemeLogo width={400} height={100} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[55px]" : "max-h-[85px] md:max-h-[100px]")} />
+              <ThemeLogo width={400} height={100} className={cn("header-logo transition-all duration-300", isScrolled ? "max-h-[40px] md:max-h-[55px]" : "max-h-[50px] md:max-h-[85px] lg:max-h-[100px]")} />
             </Link>
 
             {/* Desktop Navigation — evenly spaced between logo and actions */}
