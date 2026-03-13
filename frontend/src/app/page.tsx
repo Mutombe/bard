@@ -1168,8 +1168,19 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
   if (articles.length < 5) return null;
 
   return (
-    <section ref={fadeRef} className="py-10 md:py-14 border-y border-terminal-border fade-in-section">
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+    <section ref={fadeRef} className="relative py-10 md:py-14 border-y border-terminal-border fade-in-section overflow-hidden">
+      {/* Newspaper background fading from right to middle */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1504711434969-e33886168d9c?w=1200&q=80')",
+          backgroundSize: "cover",
+          backgroundPosition: "center right",
+          maskImage: "linear-gradient(to left, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.08) 30%, transparent 55%)",
+          WebkitMaskImage: "linear-gradient(to left, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.08) 30%, transparent 55%)",
+        }}
+      />
+      <div className="relative max-w-[1400px] mx-auto px-4 md:px-6">
         <SectionHeader title="Trending Now" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
