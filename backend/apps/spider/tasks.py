@@ -1,18 +1,17 @@
 """
-Spider Celery Tasks
+Spider Tasks
 
 Scheduled tasks for market data scraping.
 Includes integration with Polygon.io and NewsAPI.org
+
+Tasks are plain functions — called by django-q2 scheduler or management commands.
 """
 import logging
-
-from celery import shared_task
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
 
-@shared_task(name="apps.spider.tasks.fetch_polygon_news")
 def fetch_polygon_news():
     """
     Fetch financial news from Polygon.io API.
@@ -128,7 +127,6 @@ def fetch_polygon_news():
         raise
 
 
-@shared_task(name="apps.spider.tasks.fetch_serpapi_news")
 def fetch_serpapi_news():
     """
     Fetch business/finance news from Google News via SerpAPI.
@@ -278,7 +276,6 @@ def fetch_serpapi_news():
         raise
 
 
-@shared_task(name="apps.spider.tasks.fetch_african_news")
 def fetch_african_news():
     """
     Fetch African market-specific news from Google News via SerpAPI.
@@ -380,7 +377,6 @@ def fetch_african_news():
         raise
 
 
-@shared_task(name="apps.spider.tasks.fetch_polygon_indices")
 def fetch_polygon_indices():
     """
     Fetch market indices from Polygon.io.
@@ -428,7 +424,6 @@ def fetch_polygon_indices():
         raise
 
 
-@shared_task(name="apps.spider.tasks.scrape_jse_data")
 def scrape_jse_data():
     """
     Scrape JSE (Johannesburg Stock Exchange) data.
@@ -447,7 +442,6 @@ def scrape_jse_data():
         raise
 
 
-@shared_task(name="apps.spider.tasks.scrape_zse_data")
 def scrape_zse_data():
     """
     Scrape ZSE (Zimbabwe Stock Exchange) data.
@@ -466,7 +460,6 @@ def scrape_zse_data():
         raise
 
 
-@shared_task(name="apps.spider.tasks.scrape_bse_data")
 def scrape_bse_data():
     """
     Scrape BSE (Botswana Stock Exchange) data.
@@ -485,7 +478,6 @@ def scrape_bse_data():
         raise
 
 
-@shared_task(name="apps.spider.tasks.scrape_african_financials")
 def scrape_african_financials(exchange_code: str = None):
     """
     Scrape market data from africanfinancials.com.
@@ -515,7 +507,6 @@ def scrape_african_financials(exchange_code: str = None):
         raise
 
 
-@shared_task(name="apps.spider.tasks.scrape_vfex_data")
 def scrape_vfex_data():
     """
     Scrape Victoria Falls Stock Exchange (VFEX) data.
@@ -526,7 +517,6 @@ def scrape_vfex_data():
     return scrape_african_financials(exchange_code="VFEX")
 
 
-@shared_task(name="apps.spider.tasks.aggregate_daily_data")
 def aggregate_daily_data():
     """
     Aggregate intraday data into daily OHLCV records.
@@ -592,7 +582,6 @@ def aggregate_daily_data():
     return f"Aggregated {aggregated} daily records"
 
 
-@shared_task(name="apps.spider.tasks.calculate_indices")
 def calculate_indices():
     """
     Calculate and update market indices.
@@ -647,7 +636,6 @@ def calculate_indices():
     return f"Updated {updated} indices"
 
 
-@shared_task(name="apps.spider.tasks.scrape_african_news_websites")
 def scrape_african_news_websites():
     """
     Scrape news from African business/finance websites:
@@ -668,7 +656,6 @@ def scrape_african_news_websites():
         raise
 
 
-@shared_task(name="apps.spider.tasks.cleanup_old_data")
 def cleanup_old_data():
     """
     Clean up old intraday ticker data.
@@ -712,7 +699,6 @@ def cleanup_old_data():
     return f"Deleted {total_deleted} old records"
 
 
-@shared_task(name="apps.spider.tasks.fetch_youtube_african_finance")
 def fetch_youtube_african_finance():
     """
     Fetch YouTube videos about African finance, economics, and markets
@@ -810,7 +796,6 @@ def fetch_youtube_african_finance():
         raise
 
 
-@shared_task(name="apps.spider.tasks.set_article_images")
 def set_article_images():
     """
     Set contextual HD Unsplash images for articles.
@@ -926,7 +911,6 @@ def set_article_images():
         raise
 
 
-@shared_task(name="apps.spider.tasks.set_featured_article")
 def set_featured_article():
     """
     Rotate the featured article to the most recent published article with an image.
@@ -986,7 +970,6 @@ def set_featured_article():
 CNBC_AFRICA_CHANNEL_ID = "UCsba91UGiQLFOb5DN3Z_AdQ"
 
 
-@shared_task(name="apps.spider.tasks.fetch_cnbc_africa_video")
 def fetch_cnbc_africa_video():
     """
     Fetch the latest video from CNBC Africa YouTube channel.
@@ -1096,7 +1079,6 @@ def fetch_cnbc_africa_video():
         raise
 
 
-@shared_task(name="apps.spider.tasks.get_featured_video")
 def get_featured_video():
     """
     Get the current featured CNBC Africa video for the feed.
@@ -1137,7 +1119,6 @@ def get_featured_video():
         return None
 
 
-@shared_task(name="apps.spider.tasks.refresh_feed_content")
 def refresh_feed_content():
     """
     Master task to refresh all feed content (Bloomberg-style).
@@ -1201,7 +1182,6 @@ def refresh_feed_content():
     return results
 
 
-@shared_task(name="apps.spider.tasks.fetch_alpha_vantage_quotes")
 def fetch_alpha_vantage_quotes():
     """
     Fetch real-time quotes from Alpha Vantage API.
@@ -1260,7 +1240,6 @@ def fetch_alpha_vantage_quotes():
         raise
 
 
-@shared_task(name="apps.spider.tasks.fetch_alpha_vantage_company_data")
 def fetch_alpha_vantage_company_data(symbol: str):
     """
     Fetch detailed company data from Alpha Vantage.

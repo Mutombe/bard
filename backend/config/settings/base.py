@@ -55,9 +55,8 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     # Filtering
     "django_filters",
-    # Celery
-    "django_celery_beat",
-    "django_celery_results",
+    # Task Queue
+    "django_q",
     # Rich Text Editor
     "ckeditor",
     "ckeditor_uploader",
@@ -260,17 +259,21 @@ CORS_ALLOWED_ORIGINS = env.list(
 CORS_ALLOW_CREDENTIALS = True
 
 # =========================
-# Celery Configuration
+# Django-Q2 Configuration
 # =========================
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
-CELERY_RESULT_BACKEND = "django-db"
-CELERY_CACHE_BACKEND = "django-cache"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = TIME_ZONE
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+Q_CLUSTER = {
+    "name": "bard",
+    "workers": 2,
+    "timeout": 600,          # 10 min per task
+    "retry": 660,            # retry after 11 min
+    "queue_limit": 50,
+    "bulk": 10,
+    "orm": "default",        # Use PostgreSQL as broker — no Redis needed
+    "catch_up": False,       # Don't run missed schedules all at once
+    "max_attempts": 3,
+    "ack_failures": True,
+    "poll": 10,              # Check for new tasks every 10 seconds
+}
 
 # =========================
 # Redis Cache
@@ -384,7 +387,7 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "celery": {
+        "django_q": {
             "handlers": ["console", "file"],
             "level": "INFO",
             "propagate": False,

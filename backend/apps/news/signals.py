@@ -7,7 +7,6 @@ Handles:
 - Article status change events
 """
 import logging
-import threading
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -50,7 +49,7 @@ def trigger_breaking_news_alert(sender, instance, created, **kwargs):
     - Article is published (status='published')
     - Article was not previously breaking (to avoid duplicate alerts)
     """
-    from apps.engagement.tasks import send_breaking_news_alert
+    from django_q.tasks import async_task
 
     # Check if article just became breaking news
     was_breaking = getattr(instance, "_was_breaking", False)
@@ -61,8 +60,12 @@ def trigger_breaking_news_alert(sender, instance, created, **kwargs):
     # 1. Article is now breaking and published
     # 2. Article wasn't breaking before (or is newly created with breaking=True)
     if is_now_breaking and is_published and not was_breaking:
-        # Send breaking news alert asynchronously
-        send_breaking_news_alert.delay(str(instance.id))
+        # Send breaking news alert via django-q2
+        async_task(
+            "apps.engagement.tasks.send_breaking_news_alert",
+            str(instance.id),
+            task_name=f"breaking-news-{instance.slug}",
+        )
 
 
 @receiver(post_save, sender=NewsArticle)
@@ -77,13 +80,12 @@ def notify_subscribers_featured_article(sender, instance, created, **kwargs):
     is_published = instance.status == NewsArticle.Status.PUBLISHED
 
     if is_now_featured and is_published and not was_featured:
-        # Send in a background thread so we don't block the request
-        thread = threading.Thread(
-            target=_send_featured_article_emails,
-            args=(str(instance.id),),
-            daemon=True,
+        # Send featured article emails via django-q2 worker
+        async_task(
+            "apps.news.signals._send_featured_article_emails",
+            str(instance.id),
+            task_name=f"featured-article-{instance.slug}",
         )
-        thread.start()
 
 
 def _send_featured_article_emails(article_id: str):

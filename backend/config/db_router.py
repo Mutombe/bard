@@ -24,8 +24,7 @@ class ReadReplicaRouter:
         'sessions',
         'admin',
         'token_blacklist',
-        'django_celery_beat',
-        'django_celery_results',
+        'django_q',
     }
 
     # Apps that benefit most from read replica

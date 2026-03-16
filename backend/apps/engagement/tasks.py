@@ -1,20 +1,20 @@
 """
-Engagement Celery Tasks
+Engagement Tasks
 
 Handles:
 - Newsletter delivery
 - Price alert processing
 - Notification sending
 - Email verification
+
+Tasks are plain functions — called by django-q2 scheduler or management commands.
 """
-from celery import shared_task
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils import timezone
 
 
-@shared_task(name="apps.engagement.tasks.send_verification_email")
 def send_verification_email(subscription_id: str):
     """
     Send verification email for newsletter subscription.
@@ -61,7 +61,6 @@ def send_verification_email(subscription_id: str):
         return f"Failed to send verification email: {str(e)}"
 
 
-@shared_task(name="apps.engagement.tasks.send_morning_brief")
 def send_morning_brief():
     """
     Send daily morning market brief newsletter.
@@ -120,7 +119,6 @@ def send_morning_brief():
     return f"Sent morning brief to {subscriptions.count()} subscribers"
 
 
-@shared_task(name="apps.engagement.tasks.send_evening_wrap")
 def send_evening_wrap():
     """
     Send daily evening market wrap newsletter.
@@ -174,7 +172,6 @@ def send_evening_wrap():
     return f"Sent evening wrap to {subscriptions.count()} subscribers"
 
 
-@shared_task(name="apps.engagement.tasks.process_price_alerts")
 def process_price_alerts():
     """
     Process active price alerts and trigger notifications.
@@ -229,7 +226,6 @@ def process_price_alerts():
     return f"Processed {active_alerts.count()} alerts, triggered {triggered_count}, created {notifications_created} notifications"
 
 
-@shared_task(name="apps.engagement.tasks.send_breaking_news_alert")
 def send_breaking_news_alert(article_id: str):
     """
     Send breaking news alert to subscribers.

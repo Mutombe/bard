@@ -31,10 +31,13 @@ PASSWORD_HASHERS = [
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 # =========================
-# Celery (Eager execution for tests)
+# Django-Q2 (Sync execution for tests)
 # =========================
-CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = True
+Q_CLUSTER = {
+    "name": "bard-test",
+    "sync": True,  # Execute tasks synchronously in tests
+    "orm": "default",
+}
 
 # =========================
 # Caching (Dummy for tests)
