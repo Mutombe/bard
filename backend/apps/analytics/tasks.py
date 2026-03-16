@@ -1,16 +1,15 @@
 """
-Analytics Celery Tasks
+Analytics Tasks
 
 Periodic tasks for calculating and aggregating analytics.
+
+Tasks are plain functions — called by django-q2 scheduler or management commands.
 """
 from datetime import timedelta
-
-from celery import shared_task
 from django.db.models import Sum, Avg, Count
 from django.utils import timezone
 
 
-@shared_task
 def calculate_daily_metrics():
     """
     Calculate and store daily metrics.
@@ -80,7 +79,6 @@ def calculate_daily_metrics():
     return f"Calculated metrics for {yesterday}"
 
 
-@shared_task
 def calculate_content_performance():
     """
     Calculate content performance metrics.
@@ -160,7 +158,6 @@ def calculate_content_performance():
     return f"Updated performance for {articles.count()} articles"
 
 
-@shared_task
 def update_top_content():
     """
     Update top content rankings.
@@ -223,7 +220,6 @@ def update_top_content():
     return "Updated top content rankings"
 
 
-@shared_task
 def record_system_health():
     """
     Record system health metrics.
@@ -267,7 +263,6 @@ def record_system_health():
     return "Recorded system health"
 
 
-@shared_task
 def cleanup_old_analytics():
     """
     Clean up old analytics data.
@@ -297,7 +292,6 @@ def cleanup_old_analytics():
     return f"Cleaned up: {deleted_analytics} analytics, {deleted_activity} activity logs, {deleted_health} health records"
 
 
-@shared_task
 def aggregate_geographic_analytics():
     """
     Aggregate geographic analytics from activity logs.

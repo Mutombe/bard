@@ -2,9 +2,7 @@
 Production Settings for Bardiq Journal
 """
 import sentry_sdk
-from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
 
 from .base import *  # noqa: F401,F403
 
@@ -118,8 +116,6 @@ if SENTRY_DSN:
         dsn=SENTRY_DSN,
         integrations=[
             DjangoIntegration(),
-            CeleryIntegration(),
-            RedisIntegration(),
         ],
         traces_sample_rate=0.1,
         profiles_sample_rate=0.1,
@@ -175,17 +171,9 @@ else:
     SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 # =========================
-# Celery (Production)
+# Django-Q2 (Production)
 # =========================
-if REDIS_URL:
-    CELERY_BROKER_URL = REDIS_URL
-else:
-    # Disable Celery tasks if no Redis
-    CELERY_TASK_ALWAYS_EAGER = True
-
-# Reduce Celery task timeout to prevent long-running tasks
-CELERY_TASK_TIME_LIMIT = 60 * 5  # 5 minutes max
-CELERY_TASK_SOFT_TIME_LIMIT = 60 * 4  # Soft limit at 4 minutes
+# Uses PostgreSQL ORM broker — no Redis needed for task queue
 
 # =========================
 # Logging (Production)
