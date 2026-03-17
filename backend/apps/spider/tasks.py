@@ -232,14 +232,9 @@ def fetch_serpapi_news():
                 content = item.get('content', '') or ''
                 excerpt = item.get('description', '') or ''
 
-                # Only publish articles with substantial content (full body)
-                # Articles with just snippets go to draft
-                has_full_body = len(content) >= 500
-                article_status = 'published' if has_full_body else 'draft'
-
-                if not has_full_body:
-                    # Use excerpt/description as content for draft articles
-                    content = excerpt or title
+                # Skip articles without substantial scraped body
+                if len(content) < 500:
+                    continue
 
                 # Always fetch HD image from Unsplash based on article context
                 image_data = image_service.get_image_for_article(
@@ -256,8 +251,8 @@ def fetch_serpapi_news():
                         excerpt=(excerpt or content[:300])[:500],
                         content=content,
                         category=category,
-                        status=article_status,
-                        published_at=timezone.now() if has_full_body else None,
+                        status='published',
+                        published_at=timezone.now(),
                         source='serpapi',
                         external_url=ext_url[:500],
                         external_source_name=item.get('source', 'Google News')[:100],
@@ -326,12 +321,9 @@ def fetch_african_news():
             content = item.get('content', '') or ''
             excerpt = item.get('description', '') or ''
 
-            # Only publish articles with substantial content (full body)
-            has_full_body = len(content) >= 500
-            article_status = 'published' if has_full_body else 'draft'
-
-            if not has_full_body:
-                content = excerpt or title
+            # Skip articles without substantial scraped body
+            if len(content) < 500:
+                continue
 
             # Assign category based on content keywords
             content_lower = (content + ' ' + title).lower()
@@ -357,8 +349,8 @@ def fetch_african_news():
                     excerpt=(excerpt or content[:300])[:500],
                     content=content,
                     category=category,
-                    status=article_status,
-                    published_at=timezone.now() if has_full_body else None,
+                    status='published',
+                    published_at=timezone.now(),
                     source='serpapi',
                     external_url=ext_url[:500],
                     external_source_name=item.get('source', 'African News')[:100],
@@ -1178,8 +1170,55 @@ def refresh_feed_content():
     except Exception as e:
         results.append(f"CNBC video failed: {e}")
 
+    # 5. Retry scraping draft articles that failed previously
+    try:
+        results.append(backfill_draft_articles())
+    except Exception as e:
+        results.append(f"Backfill failed: {e}")
+
     logger.info(f"Feed refresh complete: {results}")
     return results
+
+
+def backfill_draft_articles(batch_size: int = 50):
+    """
+    Re-attempt content extraction for draft articles with external URLs.
+
+    Many articles land in draft because trafilatura couldn't fetch their body
+    on the first try (403s, DNS failures, timeouts). This retries them.
+
+    Schedule: Part of refresh_feed_content cycle.
+    """
+    from apps.news.models import NewsArticle
+    from .providers import SerpAPIProvider
+    from django.db.models.functions import Length
+
+    drafts = (
+        NewsArticle.objects
+        .filter(status='draft')
+        .exclude(external_url='')
+        .exclude(external_url__isnull=True)
+        .annotate(clen=Length('content'))
+        .filter(clen__lt=500)
+        .order_by('-created_at')[:batch_size]
+    )
+
+    if not drafts:
+        return "No draft articles to backfill"
+
+    promoted = 0
+    for article in drafts:
+        content = SerpAPIProvider.extract_full_article(article.external_url)
+        if content and len(content) >= 500:
+            article.content = content
+            article.status = 'published'
+            article.published_at = article.published_at or timezone.now()
+            article.excerpt = article.excerpt or content[:300]
+            article.save(update_fields=['content', 'status', 'published_at', 'excerpt'])
+            promoted += 1
+
+    logger.info(f"Backfill: promoted {promoted}/{len(drafts)} draft articles to published")
+    return f"Backfill: promoted {promoted} articles"
 
 
 def fetch_alpha_vantage_quotes():
