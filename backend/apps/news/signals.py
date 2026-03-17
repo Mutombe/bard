@@ -81,6 +81,7 @@ def notify_subscribers_featured_article(sender, instance, created, **kwargs):
 
     if is_now_featured and is_published and not was_featured:
         # Send featured article emails via django-q2 worker
+        from django_q.tasks import async_task
         async_task(
             "apps.news.signals._send_featured_article_emails",
             str(instance.id),
