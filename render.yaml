@@ -95,7 +95,7 @@ services:
         value: "3000"
 
   # =========================
-  # CRON JOB - News Updates (every 2 hours)
+  # CRON JOB - News Feed Refresh (every 12 hours)
   # =========================
   - type: cron
     name: bardiq-news-updater
@@ -103,7 +103,7 @@ services:
     region: frankfurt
     plan: starter
     rootDir: backend
-    schedule: "0 * * * *"  # Every hour
+    schedule: "0 */12 * * *"  # Every 12 hours (midnight & noon UTC)
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py populate_data --news-only
     envVars:
@@ -128,6 +128,15 @@ services:
         sync: false
       - key: UNSPLASH_ACCESS_KEY_3
         sync: false
+      # Email (for featured article notifications)
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: "BGFI <publish@bgfi.global>"
+      - key: FRONTEND_URL
+        value: "https://bgfi.global"
 
   # =========================
   # CRON JOB - Video Updates (every 4 hours)
