@@ -598,7 +598,7 @@ export default function ArticlePage() {
 
               {/* Excerpt/Lede */}
               <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed prose-article">
-                {article.excerpt}
+                {article.excerpt}{article.excerpt && !article.excerpt.match(/[.!?]$/) ? ' [\u2026]' : ''}
               </p>
 
               {/* Author & Meta - Journal style */}
