@@ -16,17 +16,27 @@ const config: Config = {
       },
     },
     extend: {
-      // Brand color palette - Warm Burgundy (Swiss/HBR Style)
+      // Brand color palette - Plum / Violet / Coral (from logo)
       colors: {
-        // Primary brand colors - Burgundy/Crimson
         brand: {
-          burgundy: "#9b2335",
-          "burgundy-light": "#b83a4b",
-          "burgundy-dark": "#7a1c2a",
-          // Legacy support - map to burgundy
-          orange: "#9b2335",
-          "orange-light": "#b83a4b",
-          "orange-dark": "#7a1c2a",
+          plum: "#3b1042",
+          "plum-light": "#5a2667",
+          "plum-dark": "#2d0c33",
+          violet: "#9b70b5",
+          "violet-light": "#b58fcb",
+          "violet-dark": "#7d5a92",
+          "violet-accessible": "#7d5a92",
+          coral: "#e4603a",
+          "coral-light": "#ea7d5c",
+          "coral-dark": "#c44e2e",
+          blend: "#8b4a3d",
+          // Legacy aliases
+          burgundy: "#3b1042",
+          "burgundy-light": "#5a2667",
+          "burgundy-dark": "#2d0c33",
+          orange: "#e4603a",
+          "orange-light": "#ea7d5c",
+          "orange-dark": "#c44e2e",
         },
         // Terminal theme (adapts via CSS variables)
         terminal: {
@@ -86,10 +96,10 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-bricolage)", "system-ui", "sans-serif"],
-        serif: ["var(--font-bricolage)", "system-ui", "sans-serif"],
-        "serif-body": ["var(--font-bricolage)", "system-ui", "sans-serif"],
+        serif: ["var(--font-fraunces)", "Georgia", "serif"],
+        "serif-body": ["var(--font-newsreader)", "Georgia", "serif"],
         mono: ["var(--font-mono)", "Consolas", "Monaco", "monospace"],
-        headline: ["var(--font-bricolage)", "system-ui", "sans-serif"],
+        headline: ["var(--font-fraunces)", "Georgia", "serif"],
       },
       fontSize: {
         "2xs": ["0.625rem", { lineHeight: "0.875rem" }],

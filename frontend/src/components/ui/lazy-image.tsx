@@ -189,7 +189,7 @@ export function AvatarImage({
     return (
       <div
         className={cn(
-          "rounded-full bg-brand-burgundy text-white flex items-center justify-center font-medium",
+          "rounded-full bg-brand-plum text-white flex items-center justify-center font-medium",
           sizeClasses[size],
           className
         )}

@@ -5,19 +5,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-// Burgundy-themed gradient backgrounds for users without avatars
-// Variations on the brand burgundy for visual distinction
+// Brand-themed gradient backgrounds for users without avatars
+// Plum / violet / coral variations from the logo palette
 const AVATAR_GRADIENTS = [
-  "from-[#9b2335] via-[#7a1c2a] to-[#5e1520]",     // Deep burgundy
-  "from-[#b83a4b] via-[#9b2335] to-[#7a1c2a]",     // Light to dark burgundy
-  "from-[#9b2335] via-[#8a1f30] to-[#6b1825]",     // Classic burgundy
-  "from-[#a82d40] via-[#9b2335] to-[#6b1825]",     // Rose burgundy
-  "from-[#7a1c2a] via-[#9b2335] to-[#a82d40]",     // Inverted burgundy
-  "from-[#8a1f30] via-[#6b1825] to-[#4d111b]",     // Dark burgundy
-  "from-[#b83a4b] via-[#a82d40] to-[#9b2335]",     // Warm burgundy
-  "from-[#9b2335] via-[#a82d40] to-[#8a1f30]",     // Mid burgundy
-  "from-[#6b1825] via-[#7a1c2a] to-[#9b2335]",     // Deep to light
-  "from-[#a82d40] via-[#b83a4b] to-[#9b2335]",     // Bright burgundy
+  "from-[#3b1042] via-[#5a2667] to-[#7d5a92]",     // Plum to violet
+  "from-[#9b70b5] via-[#7d5a92] to-[#3b1042]",     // Violet to plum
+  "from-[#3b1042] via-[#8b4a3d] to-[#e4603a]",     // Plum to coral
+  "from-[#e4603a] via-[#8b4a3d] to-[#3b1042]",     // Coral to plum
+  "from-[#5a2667] via-[#9b70b5] to-[#b58fcb]",     // Deep to light violet
+  "from-[#2d0c33] via-[#3b1042] to-[#5a2667]",     // Darkest plum
+  "from-[#c44e2e] via-[#e4603a] to-[#ea7d5c]",     // Coral range
+  "from-[#7d5a92] via-[#9b70b5] to-[#e4603a]",     // Violet to coral
+  "from-[#3b1042] via-[#9b70b5] to-[#3b1042]",     // Plum-violet-plum
+  "from-[#8b4a3d] via-[#e4603a] to-[#9b70b5]",     // Warm blend
 ];
 
 // Geometric patterns for visual interest
