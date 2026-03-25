@@ -11,7 +11,7 @@
 @layer base {
   /* Light mode variables (DEFAULT) - Clean Editorial Theme */
   :root {
-    --background: 30 20% 98%;
+    --background: 20 25% 93%;
     --foreground: 0 0% 10%;
 
     --card: 30 15% 96%;
