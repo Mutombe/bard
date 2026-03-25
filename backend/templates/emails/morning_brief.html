@@ -47,14 +47,14 @@
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f0efeb; -webkit-font-smoothing: antialiased;">
+<body style="margin: 0; padding: 0; background-color: #f0ebe8; -webkit-font-smoothing: antialiased;">
 
   <!-- Preheader -->
-  <div style="display: none; font-size: 1px; color: #f0efeb; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
+  <div style="display: none; font-size: 1px; color: #f0ebe8; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
     African markets morning briefing for {{ date }} - Indices, top gainers, and market movers.
   </div>
 
-  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0efeb;" class="email-bg">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0ebe8;" class="email-bg">
     <tr>
       <td align="center" style="padding: 40px 16px;">
 
@@ -168,16 +168,16 @@
                 <!-- Index rows -->
                 {% for index in indices %}
                 <tr>
-                  <td style="padding: 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #f0efeb;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 13px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #f0ebe8;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ index.code }}
                   </td>
-                  <td style="padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 600; color: #1a1a1a; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ index.current_value|floatformat:2 }}
                   </td>
-                  <td style="padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %} {% if index.change >= 0 %}color: #16a34a;{% else %}color: #ef4444;{% endif %}" class="{% if index.change >= 0 %}text-gain{% else %}text-loss{% endif %}{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 600; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %} {% if index.change >= 0 %}color: #16a34a;{% else %}color: #ef4444;{% endif %}" class="{% if index.change >= 0 %}text-gain{% else %}text-loss{% endif %}{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {% if index.change >= 0 %}+{% endif %}{{ index.change|floatformat:2 }}
                   </td>
-                  <td style="padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %} {% if index.change_percent >= 0 %}color: #16a34a;{% else %}color: #ef4444;{% endif %}" class="{% if index.change_percent >= 0 %}text-gain{% else %}text-loss{% endif %}{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %} {% if index.change_percent >= 0 %}color: #16a34a;{% else %}color: #ef4444;{% endif %}" class="{% if index.change_percent >= 0 %}text-gain{% else %}text-loss{% endif %}{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {% if index.change_percent >= 0 %}+{% endif %}{{ index.change_percent|floatformat:2 }}%
                   </td>
                 </tr>
@@ -226,16 +226,16 @@
                 </tr>
                 {% for stock in top_gainers %}
                 <tr>
-                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #1a1a1a; border-bottom: 1px solid #f0efeb;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #1a1a1a; border-bottom: 1px solid #f0ebe8;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ stock.symbol }}
                   </td>
-                  <td style="padding: 11px 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #666666; border-bottom: 1px solid #f0efeb;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-secondary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %} hide-mobile">
+                  <td style="padding: 11px 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #666666; border-bottom: 1px solid #f0ebe8;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-secondary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %} hide-mobile">
                     {{ stock.display_name }}
                   </td>
-                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ stock.current_price|floatformat:2 }}
                   </td>
-                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #16a34a; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-gain{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #16a34a; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-gain{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     +{{ stock.price_change_percent|floatformat:2 }}%
                   </td>
                 </tr>
@@ -284,16 +284,16 @@
                 </tr>
                 {% for stock in top_losers %}
                 <tr>
-                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #1a1a1a; border-bottom: 1px solid #f0efeb;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #1a1a1a; border-bottom: 1px solid #f0ebe8;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ stock.symbol }}
                   </td>
-                  <td style="padding: 11px 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #666666; border-bottom: 1px solid #f0efeb;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-secondary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %} hide-mobile">
+                  <td style="padding: 11px 12px; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #666666; border-bottom: 1px solid #f0ebe8;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-secondary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %} hide-mobile">
                     {{ stock.display_name }}
                   </td>
-                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #1a1a1a; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-primary{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ stock.current_price|floatformat:2 }}
                   </td>
-                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #ef4444; border-bottom: 1px solid #f0efeb; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-loss{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
+                  <td style="padding: 11px 12px; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: 700; color: #ef4444; border-bottom: 1px solid #f0ebe8; text-align: right;{% if forloop.counter|divisibleby:2 %} background-color: #fafaf8;{% endif %}" class="text-loss{% if forloop.counter|divisibleby:2 %} bg-row-alt{% endif %}">
                     {{ stock.price_change_percent|floatformat:2 }}%
                   </td>
                 </tr>
