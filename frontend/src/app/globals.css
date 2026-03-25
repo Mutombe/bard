@@ -14,31 +14,38 @@
     --background: 20 25% 93%;
     --foreground: 0 0% 10%;
 
-    --card: 30 15% 96%;
+    --card: 18 20% 95%;
     --card-foreground: 0 0% 10%;
 
-    --popover: 30 15% 97%;
+    --popover: 18 20% 96%;
     --popover-foreground: 0 0% 10%;
 
-    /* Warm Burgundy/Crimson as primary (HBR-style) */
-    --primary: 355 70% 38%;
+    /* Dark Plum as primary (from logo) */
+    --primary: 292 63% 16%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 20% 94%;
+    /* Violet secondary accent */
+    --secondary-accent: 278 30% 57%;
+    /* Coral CTA accent */
+    --accent-cta: 14 75% 56%;
+    /* Warm blend */
+    --accent-warm: 8 39% 39%;
+
+    --secondary: 20 18% 93%;
     --secondary-foreground: 0 0% 10%;
 
-    --muted: 30 15% 92%;
+    --muted: 20 15% 90%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 30 20% 90%;
+    --accent: 20 18% 88%;
     --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 15% 88%;
-    --input: 30 15% 88%;
-    --ring: 355 70% 38%;
+    --border: 20 15% 85%;
+    --input: 20 15% 85%;
+    --ring: 278 30% 57%;
 
     /* Sharp corners - Swiss style */
     --radius: 0;
@@ -49,12 +56,12 @@
     --market-up-bg: 152 60% 92%;
     --market-down-bg: 0 80% 95%;
 
-    /* Terminal colors - light mode (warm peach tones) */
-    --terminal-bg: 28 60% 97%;
-    --terminal-bg-secondary: 28 50% 95%;
-    --terminal-bg-elevated: 28 45% 92%;
-    --terminal-border: 28 35% 85%;
-    --terminal-border-light: 28 30% 80%;
+    /* Terminal colors - light mode (warm neutral) */
+    --terminal-bg: 18 22% 96%;
+    --terminal-bg-secondary: 18 18% 94%;
+    --terminal-bg-elevated: 18 16% 90%;
+    --terminal-border: 18 14% 83%;
+    --terminal-border-light: 18 12% 78%;
   }
 
   /* Dark mode variables */
@@ -68,9 +75,13 @@
     --popover: 0 0% 8%;
     --popover-foreground: 0 0% 95%;
 
-    /* Warm Burgundy/Crimson (lighter for dark mode visibility) */
-    --primary: 355 75% 55%;
+    /* Lighter violet as primary for dark mode readability */
+    --primary: 280 35% 66%;
     --primary-foreground: 0 0% 100%;
+
+    --secondary-accent: 280 30% 78%;
+    --accent-cta: 14 72% 64%;
+    --accent-warm: 8 30% 55%;
 
     --secondary: 0 0% 12%;
     --secondary-foreground: 0 0% 95%;
@@ -86,7 +97,7 @@
 
     --border: 0 0% 18%;
     --input: 0 0% 18%;
-    --ring: 355 75% 55%;
+    --ring: 280 35% 66%;
 
     /* Market colors - dark mode */
     --market-up: 152 100% 42%;
@@ -473,7 +484,10 @@
 
   /* Gradient text */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+    background: linear-gradient(135deg, #3b1042, #9b70b5, #e4603a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* Glass effect */
@@ -525,7 +539,7 @@
 
   .reading-progress-bar {
     @apply h-full transition-all duration-150 ease-out;
-    background-color: hsl(var(--primary));
+    background: linear-gradient(to right, #3b1042, #9b70b5, #e4603a);
   }
 
   /* Drop cap - traditional journal style */
@@ -711,7 +725,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Card hover lift with burgundy left accent (inset shadow — zero layout shift) */
+  /* Card hover lift with violet left accent (inset shadow — zero layout shift) */
   .card-hover {
     @apply transition-all duration-300;
     box-shadow: inset 3px 0 0 0 transparent;
@@ -719,11 +733,11 @@
 
   .card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: inset 3px 0 0 0 hsl(var(--primary)), 0 8px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
+    box-shadow: inset 3px 0 0 0 #9b70b5, 0 8px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
   }
 
   .dark .card-hover:hover {
-    box-shadow: inset 3px 0 0 0 hsl(var(--primary)), 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.3);
+    box-shadow: inset 3px 0 0 0 #ad85c7, 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.3);
   }
 
   /* Headline underline-from-left on hover */
@@ -768,13 +782,13 @@
     background-color: hsl(0 0% 3%);
   }
 
-  /* Section media - CNBC navy blue for video section */
+  /* Section media - Brand plum for video section */
   .section-media {
-    background-color: hsl(215 60% 14%);
+    background-color: #3b1042;
   }
 
   .dark .section-media {
-    background-color: hsl(215 65% 10%);
+    background-color: #2d0c33;
   }
 
   /* Fade-in animation for scroll-triggered sections */

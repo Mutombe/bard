@@ -208,7 +208,7 @@ function ArticleImage({ article, fill = true, className = "" }: { article: NewsA
 }
 
 /** Consistent tag color for all topic tags — burgundy brand color */
-const TAG_COLOR = "text-primary";
+const TAG_COLOR = "text-brand-violet-accessible";
 
 /**
  * Smart keyword extraction: scans article title + excerpt for real
@@ -624,7 +624,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
 
         <div>
           {/* Burgundy rule */}
-          <div className="w-8 h-0.5 bg-primary mb-4" />
+          <div className="w-12 h-[3px] bg-gradient-to-r from-brand-plum to-brand-coral mb-4" />
 
           <div className="flex items-center gap-3 mb-3">
             <span className={cn("text-sm font-medium lowercase tracking-wide", TAG_COLOR)}>
@@ -849,10 +849,10 @@ function IndustryNavigation() {
             <Link
               key={industry.slug}
               href={`/industries/${industry.slug}`}
-              className="group flex items-center gap-3 p-4 bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border hover:border-l-2 hover:border-l-brand-burgundy transition-all"
+              className="group flex items-center gap-3 p-4 bg-terminal-bg/90 backdrop-blur-sm border border-terminal-border hover:border-l-2 hover:border-l-brand-coral transition-all"
             >
-              <industry.icon className="h-5 w-5 text-brand-burgundy" />
-              <span className="font-medium text-sm group-hover:text-brand-burgundy transition-colors">
+              <industry.icon className="h-5 w-5 text-brand-violet" />
+              <span className="font-medium text-sm group-hover:text-brand-plum transition-colors">
                 {industry.name}
               </span>
             </Link>
@@ -878,7 +878,7 @@ function FeaturedResearchSection() {
               className="group p-6 border-l-2 border-l-primary border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all card-hover"
             >
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-1 text-xs font-medium lowercase tracking-wide bg-primary/10 text-primary">
+                <span className="px-2 py-1 text-xs font-medium lowercase tracking-wide bg-brand-violet/10 text-brand-violet-accessible">
                   {report.category}
                 </span>
                 <span className="meta-line">{report.date}</span>
@@ -1020,7 +1020,7 @@ function PodcastSection({ video }: { video: any }) {
                   unoptimized
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors">
-                  <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-20 h-20 rounded-full bg-brand-coral flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Play className="h-10 w-10 text-white ml-1" weight="fill" />
                   </div>
                 </div>
@@ -1090,7 +1090,7 @@ function NewsletterSection() {
         <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.12] dark:opacity-[0.15]">
           <defs>
             <pattern id="newsletter-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1" />
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#9b70b5" strokeWidth="1" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#newsletter-grid)" />
@@ -1099,7 +1099,7 @@ function NewsletterSection() {
 
       <div className="relative max-w-[600px] mx-auto px-4 md:px-6 text-center">
         {/* Burgundy rule */}
-        <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
+        <div className="w-12 h-[3px] bg-gradient-to-r from-brand-plum to-brand-coral mx-auto mb-6" />
 
         <h2 className="font-serif text-2xl md:text-3xl font-bold mb-3">
           African markets, explained.
@@ -1126,7 +1126,7 @@ function NewsletterSection() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-3 bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 btn-press"
+                className="px-6 py-3 bg-brand-coral text-white font-medium hover:bg-brand-coral-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2 btn-press"
               >
                 {loading ? "..." : "Subscribe"}
                 <ArrowRight className="h-4 w-4" />
@@ -1318,7 +1318,7 @@ export default function HomePage() {
                   <path
                     d="M 40 0 L 0 0 0 40"
                     fill="none"
-                    stroke="hsl(355, 70%, 38%)"
+                    stroke="#9b70b5"
                     strokeWidth="1"
                   />
                 </pattern>
@@ -1456,7 +1456,7 @@ export default function HomePage() {
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.12] dark:opacity-[0.15]">
               <defs>
                 <pattern id="cta-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1" />
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#9b70b5" strokeWidth="1" />
                 </pattern>
               </defs>
               <rect width="100%" height="100%" fill="url(#cta-grid)" />
@@ -1464,7 +1464,7 @@ export default function HomePage() {
           </div>
 
           <div className="relative max-w-[600px] mx-auto px-4 md:px-6">
-            <div className="w-8 h-0.5 bg-primary mx-auto mb-6" />
+            <div className="w-12 h-[3px] bg-gradient-to-r from-brand-plum to-brand-coral mx-auto mb-6" />
             <h2 className="font-serif text-2xl md:text-3xl font-bold mb-4">
               Explore All Content
             </h2>
