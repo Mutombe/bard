@@ -549,7 +549,7 @@ export default function ArticlePage() {
         bookmarked={bookmarked}
       />
 
-      <article ref={articleRef} className="max-w-[1400px] mx-auto px-4 md:px-6 py-8">
+      <article ref={articleRef} className="max-w-[1400px] mx-auto px-2 sm:px-4 md:px-6 py-6 md:py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
           <Link href="/" className="hover:text-foreground">Home</Link>
@@ -559,9 +559,9 @@ export default function ArticlePage() {
           <span className="text-primary">{article.category?.name || "Article"}</span>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-8">
             {/* Header */}
             <header className="mb-8">
               {/* Category & Meta badges */}
@@ -685,7 +685,7 @@ export default function ArticlePage() {
                   href={article.external_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-brand-orange hover:text-brand-orange-light text-sm"
+                  className="inline-flex items-center gap-2 text-brand-coral hover:text-brand-coral-light text-sm"
                 >
                   Read original article <ArrowSquareOut className="h-4 w-4" />
                 </a>
@@ -739,55 +739,14 @@ export default function ArticlePage() {
               </button>
             </div>
 
-            {/* Related Insights */}
-            {relatedArticles.length > 0 && (
-              <section className="mb-8">
-                <h2 className="headline text-xl mb-6">Related Insights</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {relatedArticles.map((item) => {
-                    // Generate fallback image based on article ID for uniqueness
-                    const fallbackImage = `https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80&sig=${item.id}`;
-                    const imageUrl = item.featured_image || fallbackImage;
-
-                    return (
-                    <Link
-                      key={item.id}
-                      href={`/news/${item.slug}`}
-                      className="group block"
-                    >
-                      <div className="relative aspect-[16/10] rounded-lg overflow-hidden mb-3 bg-terminal-bg-elevated">
-                        <Image
-                          src={imageUrl}
-                          alt={item.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          unoptimized
-                        />
-                      </div>
-                      <span className="label-uppercase text-primary">
-                        {item.category?.name || "Analysis"}
-                      </span>
-                      <h3 className="headline text-lg mt-1 group-hover:text-primary transition-colors line-clamp-2">
-                        {item.title}
-                      </h3>
-                      <span className="text-sm text-muted-foreground mt-1 block">
-                        {formatDate(item.published_at)}
-                      </span>
-                    </Link>
-                  );
-                  })}
-                </div>
-              </section>
-            )}
-
             {/* Comments Section */}
             {article.id && (
               <CommentSection articleId={article.id} />
             )}
           </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-6 lg:sticky lg:top-24">
+          {/* Sidebar — sticky, follows reader */}
+          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:scrollbar-hide">
             {/* Author Bio - Enhanced Card */}
             <section className="author-card">
               <h3 className="label-uppercase mb-4">About the Author</h3>
@@ -822,7 +781,7 @@ export default function ArticlePage() {
 
             {/* Newsletter - Journal style */}
             <section className="relative overflow-hidden p-6 rounded-lg bg-primary/5 border border-primary/20">
-              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="article-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#article-sub-grid)"/></svg></div>
+              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="article-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#9b70b5" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#article-sub-grid)"/></svg></div>
               <h3 className="relative headline text-lg mb-2">African Finance Insights</h3>
               <p className="text-sm text-muted-foreground mb-4">
                 Weekly analysis and research on African markets, delivered to your inbox.
@@ -839,7 +798,7 @@ export default function ArticlePage() {
                 <button
                   type="submit"
                   disabled={subscribing}
-                  className="w-full px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full px-4 py-2.5 bg-brand-coral text-white text-sm font-medium rounded-md hover:bg-brand-coral-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {subscribing ? (
                     <>
@@ -876,6 +835,47 @@ export default function ArticlePage() {
                             {isUp ? <TrendUp className="h-3 w-3" /> : <TrendDown className="h-3 w-3" />}
                             {isUp ? "+" : ""}{Number(stock.price_change_percent).toFixed(2)}%
                           </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Related Insights — in sidebar */}
+            {relatedArticles.length > 0 && (
+              <section className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
+                <h3 className="label-uppercase mb-4">Related Insights</h3>
+                <div className="space-y-4">
+                  {relatedArticles.slice(0, 5).map((item) => {
+                    const fallbackImage = `https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80&sig=${item.id}`;
+                    const imageUrl = item.featured_image || fallbackImage;
+                    return (
+                      <Link
+                        key={item.id}
+                        href={`/news/${item.slug}`}
+                        className="group flex gap-3"
+                      >
+                        <div className="relative flex-shrink-0 w-16 h-16 rounded overflow-hidden bg-terminal-bg-elevated">
+                          <Image
+                            src={imageUrl}
+                            alt={item.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            unoptimized
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[10px] font-medium uppercase tracking-wider text-brand-violet">
+                            {item.category?.name || "Analysis"}
+                          </span>
+                          <h4 className="text-sm font-semibold leading-snug group-hover:text-primary transition-colors line-clamp-2 mt-0.5">
+                            {item.title}
+                          </h4>
+                          <span className="text-xs text-muted-foreground mt-1 block">
+                            {formatDate(item.published_at)}
+                          </span>
                         </div>
                       </Link>
                     );
