@@ -680,17 +680,17 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
             )}
           </motion.div>
 
-          <motion.h1 variants={fadeUp} className="headline-hero mb-4 group-hover:text-primary transition-colors">
+          <motion.h1 variants={fadeUp} className="headline-hero mb-4 group-hover:text-primary transition-colors line-clamp-3">
             {headline}
           </motion.h1>
 
           {subtitle && (
-            <motion.p variants={fadeUp} className="text-xl text-foreground/70 mb-4 leading-relaxed font-serif">
+            <motion.p variants={fadeUp} className="text-xl text-foreground/70 mb-3 leading-relaxed font-serif line-clamp-2">
               {subtitle}
             </motion.p>
           )}
 
-          <motion.p variants={fadeUp} className="text-lg text-muted-foreground/90 mb-4 leading-relaxed line-clamp-3 font-serif-body">
+          <motion.p variants={fadeUp} className="text-lg text-muted-foreground/90 mb-4 leading-relaxed line-clamp-2 font-serif-body">
             {article.excerpt}
           </motion.p>
 
@@ -1415,21 +1415,23 @@ export default function HomePage() {
               {loading ? (
                 <HeroSectionSkeleton />
               ) : featuredArticle ? (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:items-stretch">
                   {/* Main Featured Article — 7 cols */}
-                  <div className="lg:col-span-7">
+                  <div className="lg:col-span-7 flex flex-col">
                     <FeaturedInsight article={featuredArticle} />
                   </div>
-                  {/* Side Articles with ranks — 5 cols */}
-                  <div className="lg:col-span-5">
+                  {/* Side Articles with ranks — 5 cols, stretch to match hero */}
+                  <div className="lg:col-span-5 flex flex-col">
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                       Top Stories
                     </h3>
-                    {heroSideArticles.map((article, index) => (
-                      <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
-                        <SidebarInsight article={article} rank={index + 1} />
-                      </div>
-                    ))}
+                    <div className="flex-1 flex flex-col justify-between">
+                      {heroSideArticles.map((article, index) => (
+                        <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
+                          <SidebarInsight article={article} rank={index + 1} />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -1448,7 +1450,7 @@ export default function HomePage() {
         {/* ===== 3. LATEST INSIGHTS + SIDEBAR ===== */}
         <section className="py-10 md:py-14">
           <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 lg:items-stretch">
               {/* Main Content */}
               <div className="lg:col-span-8">
                 <SectionHeader title="Latest Insights" href="/news" label="View All" />
@@ -1475,23 +1477,23 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Sidebar */}
-              <aside className="lg:col-span-4">
+              {/* Sidebar — stretches to match main content */}
+              <aside className="lg:col-span-4 flex flex-col">
                 {loading ? (
                   <SidebarSkeleton />
                 ) : (
-                  <>
-                    <div className="mb-8">
-                      <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2 pb-2 border-b border-border">
-                        Most Read
-                      </h3>
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2 pb-2 border-b border-border">
+                      Most Read
+                    </h3>
+                    <div className="flex-1 flex flex-col justify-between">
                       {sidebarInsights.map((article, index) => (
                         <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
                           <SidebarInsight article={article} rank={index + 1} />
                         </div>
                       ))}
                     </div>
-                  </>
+                  </div>
                 )}
               </aside>
             </div>
