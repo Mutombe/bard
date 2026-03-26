@@ -40,6 +40,7 @@ import { useAuthModal } from "@/contexts/AuthModalContext";
 import { LiveSearch } from "@/components/search/LiveSearch";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ThemeLogo } from "@/components/ui/theme-logo";
+import { NewsTicker } from "./NewsTicker";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -349,6 +350,9 @@ export function MainLayout({ children }: MainLayoutProps) {
           </div>
         </div>
       </header>
+
+      {/* News Ticker Strip */}
+      <NewsTicker />
 
       {/* Main Content */}
       <main className="flex-1">{children}</main>
