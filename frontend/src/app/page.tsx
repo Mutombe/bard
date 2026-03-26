@@ -21,7 +21,9 @@ import {
   Heart,
   BookmarkSimple,
 } from "@phosphor-icons/react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { staggerContainer, fadeUp, scaleIn, lineGrow, cardHover, cardTap, imageZoom, likeTap, bookmarkTap } from "@/lib/motion";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
 import apiClient, { publicClient } from "@/services/api/client";
@@ -105,18 +107,20 @@ function ArticleActions({ articleId, compact = false }: { articleId: string; com
 
   return (
     <div className={cn("flex items-center", compact ? "gap-0.5" : "gap-1")} onClick={(e) => e.preventDefault()}>
-      <button
+      <motion.button
+        whileTap={likeTap}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); const s = toggleLike(articleId); setLiked(s); toast.success(s ? "Added to liked articles" : "Removed from liked articles"); }}
         className={cn("p-1.5 rounded-full transition-colors", liked ? "text-red-500 bg-red-500/10" : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10")}
       >
         <Heart className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} weight={liked ? "fill" : "regular"} />
-      </button>
-      <button
+      </motion.button>
+      <motion.button
+        whileTap={bookmarkTap}
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); const s = toggleBookmark(articleId); setBookmarked(s); toast.success(s ? "Saved to reading list" : "Removed from reading list"); }}
-        className={cn("p-1.5 rounded-full transition-colors", bookmarked ? "text-brand-orange bg-brand-orange/10" : "text-muted-foreground hover:text-brand-orange hover:bg-brand-orange/10")}
+        className={cn("p-1.5 rounded-full transition-colors", bookmarked ? "text-brand-coral bg-brand-coral/10" : "text-muted-foreground hover:text-brand-coral hover:bg-brand-coral/10")}
       >
         <BookmarkSimple className={cn(compact ? "h-3.5 w-3.5" : "h-4 w-4")} weight={bookmarked ? "fill" : "regular"} />
-      </button>
+      </motion.button>
     </div>
   );
 }
@@ -619,31 +623,52 @@ function splitTitle(title: string): [string, string] {
   return [candidate.trim(), match[2].trim()];
 }
 
-/** FeaturedInsight - Hero article with burgundy rule, headline-hero class */
+/** FeaturedInsight - Hero article with staggered Framer Motion entrance */
 function FeaturedInsight({ article }: { article: NewsArticle }) {
   const [headline, subtitle] = splitTitle(article.title);
 
   return (
     <Link href={`/news/${article.slug}`} className="group block">
-      <article>
-        <div className="relative aspect-[16/9] md:aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated">
-          <ArticleImage
-            article={article}
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+      <motion.article
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        {/* Image — scale-in entrance, zoom on hover */}
+        <motion.div
+          variants={scaleIn}
+          className="relative aspect-[16/9] md:aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated"
+        >
+          <motion.div
+            className="absolute inset-0"
+            whileHover={imageZoom}
+          >
+            <ArticleImage
+              article={article}
+              className="object-cover"
+            />
+          </motion.div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#3b1042]/60 via-transparent to-transparent" />
           {article.is_breaking && (
-            <div className="absolute top-4 left-4 badge-breaking">
+            <motion.div
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+              className="absolute top-4 left-4 badge-breaking"
+            >
               Breaking
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
 
         <div>
-          {/* Burgundy rule */}
-          <div className="w-12 h-[3px] bg-gradient-to-r from-brand-plum to-brand-coral mb-4" />
+          {/* Gradient rule — draws from left */}
+          <motion.div
+            variants={lineGrow}
+            className="w-12 h-[3px] bg-gradient-to-r from-brand-plum to-brand-coral mb-4"
+          />
 
-          <div className="flex items-center gap-3 mb-3">
+          <motion.div variants={fadeUp} className="flex items-center gap-3 mb-3">
             <span className={cn("text-sm font-medium lowercase tracking-wide", TAG_COLOR)}>
               {article.category?.name || "insight"}
             </span>
@@ -653,43 +678,49 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
                 <span className="meta-line">{article.read_time_minutes} min read</span>
               </>
             )}
-          </div>
+          </motion.div>
 
-          <h1 className="headline-hero mb-4 group-hover:text-primary transition-colors">
+          <motion.h1 variants={fadeUp} className="headline-hero mb-4 group-hover:text-primary transition-colors">
             {headline}
-          </h1>
+          </motion.h1>
 
           {subtitle && (
-            <p className="text-xl text-foreground/70 mb-4 leading-relaxed font-serif">
+            <motion.p variants={fadeUp} className="text-xl text-foreground/70 mb-4 leading-relaxed font-serif">
               {subtitle}
-            </p>
+            </motion.p>
           )}
 
-          <p className="text-lg text-muted-foreground/90 mb-4 leading-relaxed line-clamp-3">
+          <motion.p variants={fadeUp} className="text-lg text-muted-foreground/90 mb-4 leading-relaxed line-clamp-3 font-serif-body">
             {article.excerpt}
-          </p>
+          </motion.p>
 
-          <div className="flex items-center gap-3 meta-line">
+          <motion.div variants={fadeUp} className="flex items-center gap-3 meta-line">
             <span className="font-medium text-foreground/80">{article.author?.full_name || "BGFI Research"}</span>
             <span className="text-muted-foreground/50">·</span>
             <span>{formatDate(article.published_at)}</span>
-          </div>
+          </motion.div>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }
 
-/** InsightCard - Card with image, colored category, topic tags */
+/** InsightCard - Card with image, hover physics */
 function InsightCard({ article, featured = false }: { article: NewsArticle; featured?: boolean }) {
   return (
     <Link href={`/news/${article.slug}`} className="group block h-full">
-      <article className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden card-hover">
+      <motion.article
+        className="h-full bg-terminal-bg-secondary border border-terminal-border overflow-hidden"
+        whileHover={cardHover}
+        whileTap={cardTap}
+      >
         <div className="relative aspect-[16/10] overflow-hidden bg-terminal-bg-elevated">
-          <ArticleImage
-            article={article}
-            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-          />
+          <motion.div className="absolute inset-0" whileHover={imageZoom}>
+            <ArticleImage
+              article={article}
+              className="object-cover"
+            />
+          </motion.div>
         </div>
 
         <div className="p-4">
@@ -721,7 +752,7 @@ function InsightCard({ article, featured = false }: { article: NewsArticle; feat
             <TopicTags article={article} />
           </div>
         </div>
-      </article>
+      </motion.article>
     </Link>
   );
 }
@@ -1159,33 +1190,45 @@ function NewsletterSection() {
   );
 }
 
-/** Editor's Picks — 3 OverlayCards (the ONLY overlay section) */
+/** Editor's Picks — 3 OverlayCards with stagger */
 function EditorsPicks({ articles }: { articles: NewsArticle[] }) {
-  const fadeRef = useFadeIn();
   if (articles.length < 3) return null;
 
   return (
-    <section ref={fadeRef} className="py-10 md:py-14 bg-terminal-bg-secondary/30 fade-in-section">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={staggerContainer}
+      className="py-10 md:py-14 bg-terminal-bg-secondary/30"
+    >
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
         <SectionHeader title="Editor's Picks" href="/news?featured=true" label="All Featured" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {articles.slice(0, 3).map((article) => (
-            <OverlayCard key={article.id} article={article} size="medium" />
+            <motion.div key={article.id} variants={fadeUp}>
+              <OverlayCard article={article} size="medium" />
+            </motion.div>
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
-/** Trending Section - keep numbered layout (already great) */
+/** Trending Section — staggered numbered layout */
 function TrendingSection({ articles }: { articles: NewsArticle[] }) {
-  const fadeRef = useFadeIn();
   if (articles.length < 5) return null;
 
   return (
-    <section ref={fadeRef} className="relative py-10 md:py-14 border-y border-terminal-border fade-in-section overflow-hidden">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={staggerContainer}
+      className="relative py-10 md:py-14 border-y border-terminal-border overflow-hidden"
+    >
       {/* Newspaper background fading from right to middle */}
       <div
         className="absolute inset-0 pointer-events-none"
@@ -1202,19 +1245,19 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {articles.map((article, index) => (
-            <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
+            <motion.div key={article.id} variants={fadeUp}>
               <Link
                 href={`/news/${article.slug}`}
                 className="group flex gap-4"
               >
-                <span className="text-4xl font-serif font-bold text-primary/20 group-hover:text-primary transition-colors leading-none pt-1">
+                <span className="text-4xl font-serif font-bold text-brand-coral/20 group-hover:text-brand-coral transition-colors leading-none pt-1">
                   {(index + 1).toString().padStart(2, "0")}
                 </span>
                 <div className="flex-1">
                   <span className={cn("text-xs font-medium lowercase tracking-wide", TAG_COLOR)}>
                     {article.category?.name}
                   </span>
-                  <h3 className="font-serif font-semibold leading-snug group-hover:text-primary transition-colors mt-1 line-clamp-3">
+                  <h3 className="font-serif font-semibold leading-snug group-hover:text-brand-plum transition-colors mt-1 line-clamp-3">
                     {article.title}
                   </h3>
                   <span className="meta-line mt-2 block">
@@ -1222,31 +1265,38 @@ function TrendingSection({ articles }: { articles: NewsArticle[] }) {
                   </span>
                 </div>
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
-/** More Stories - Simple list of TextCards with border-b separators */
+/** More Stories - Staggered TextCard list */
 function MoreStories({ articles }: { articles: NewsArticle[] }) {
-  const fadeRef = useFadeIn();
   if (articles.length < 2) return null;
 
   return (
-    <section ref={fadeRef} className="py-10 md:py-14 fade-in-section">
+    <motion.section
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
+      variants={staggerContainer}
+      className="py-10 md:py-14"
+    >
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
         <SectionHeader title="More Stories" href="/news" label="Browse Archive" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12">
           {articles.map((article) => (
-            <TextCard key={article.id} article={article} />
+            <motion.div key={article.id} variants={fadeUp}>
+              <TextCard article={article} />
+            </motion.div>
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
