@@ -318,6 +318,42 @@ class ArticleImageService:
             "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
             "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&h=450&fit=crop",  # Road infrastructure
         ],
+        # Payments / Fintech
+        ("kenya", "payment"): [
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
+            "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop",  # Kenya
+        ],
+        ("kenya", "fintech"): [
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
+        ],
+        ("nigeria", "payment"): [
+            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos
+            "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
+        ],
+        ("nigeria", "fintech"): [
+            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos
+        ],
+        ("south africa", "payment"): [
+            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg
+        ],
+        (None, "payment"): [
+            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop",  # Mobile payment
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
+        ],
+        (None, "fintech"): [
+            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop",  # Mobile payment
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
+        ],
+        # Trade
+        (None, "trade"): [
+            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
+            "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&h=450&fit=crop",  # African skyline
+        ],
+        # Investment
+        (None, "investment"): [
+            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA financial
+            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
+        ],
     }
 
     # ── SUBJECT-FIRST visual concept map ──
@@ -800,7 +836,8 @@ class ArticleImageService:
 
         # Check curated images for common subjects
         for subject_check in ['stock exchange', 'bank', 'economy', 'infrastructure',
-                              'central bank', 'monetary policy', 'financial']:
+                              'central bank', 'monetary policy', 'financial',
+                              'payment', 'fintech', 'trade', 'investment']:
             if subject_check in text:
                 # Try country-specific curated first
                 if country_key:
