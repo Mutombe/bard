@@ -160,7 +160,7 @@ const navigationData: NavDropdown[] = [
     ],
   },
   {
-    label: "My Books",
+    label: "My Library",
     sections: [
       {
         title: "Saved Content",
@@ -244,8 +244,8 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
 function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number; savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number } }) {
   if (!isOpen) return null;
 
-  // Pass savedCounts to My Books dropdown
-  const showSavedCounts = dropdown.label === "My Books" ? savedCounts : undefined;
+  // Pass savedCounts to My Library dropdown
+  const showSavedCounts = dropdown.label === "My Library" ? savedCounts : undefined;
 
   return (
     <div
@@ -354,14 +354,14 @@ export function Navigation() {
     }, 150);
   };
 
-  // Check if My Books has any saved items
+  // Check if My Library has any saved items
   const hasBooksItems = savedCounts.totalCount > 0;
 
   return (
     <>
       <nav ref={navRef} className="hidden lg:flex items-center gap-2 relative">
         {navigationData.map((dropdown) => {
-          const showBadge = dropdown.label === "My Books" && hasBooksItems;
+          const showBadge = dropdown.label === "My Library" && hasBooksItems;
           return (
             <div
               key={dropdown.label}
