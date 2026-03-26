@@ -41,6 +41,7 @@ import { LiveSearch } from "@/components/search/LiveSearch";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ThemeLogo } from "@/components/ui/theme-logo";
 import { NewsTicker } from "./NewsTicker";
+import { PageTransition } from "@/components/providers/PageTransition";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -355,7 +356,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       <NewsTicker />
 
       {/* Main Content */}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <PageTransition>{children}</PageTransition>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-terminal-border bg-terminal-bg-secondary">

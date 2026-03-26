@@ -131,6 +131,36 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Ambient gradient — subtle living background */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.03;
+    background: radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      #9b70b5,
+      transparent
+    );
+    animation: ambient-shift 20s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  .dark body::before {
+    opacity: 0.04;
+    background: radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      #3b1042,
+      transparent
+    );
+  }
+
+  @keyframes ambient-shift {
+    0% { opacity: 0.03; transform: translateY(0); }
+    100% { opacity: 0.05; transform: translateY(5vh); }
+  }
+
   /* Editorial headline typography — Fraunces for authority */
   h1, h2, h3 {
     font-family: var(--font-fraunces), Georgia, serif;
@@ -482,6 +512,16 @@
     display: none;
   }
 
+  /* Image reveal — clip-path animation for loading images */
+  .image-reveal {
+    clip-path: inset(0 0 100% 0);
+    animation: image-clip-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes image-clip-reveal {
+    to { clip-path: inset(0 0 0% 0); }
+  }
+
   /* Gradient text */
   .gradient-text {
     background: linear-gradient(135deg, #3b1042, #9b70b5, #e4603a);
@@ -729,19 +769,25 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Card hover lift with violet left accent (inset shadow — zero layout shift) */
+  /* Card hover lift with plum-tinted depth shadows */
   .card-hover {
-    @apply transition-all duration-300;
-    box-shadow: inset 3px 0 0 0 transparent;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: inset 3px 0 0 0 #9b70b5, 0 8px 24px -4px rgb(0 0 0 / 0.1), 0 4px 8px -2px rgb(0 0 0 / 0.06);
+    transform: translateY(-3px);
+    box-shadow:
+      0 4px 6px -1px rgba(59, 16, 66, 0.06),
+      0 20px 40px -8px rgba(59, 16, 66, 0.12),
+      0 0 0 1px rgba(155, 112, 181, 0.08);
   }
 
   .dark .card-hover:hover {
-    box-shadow: inset 3px 0 0 0 #ad85c7, 0 8px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.3);
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.3),
+      0 20px 40px -8px rgba(155, 112, 181, 0.15),
+      0 0 0 1px rgba(155, 112, 181, 0.1);
   }
 
   /* Headline underline-from-left on hover */
