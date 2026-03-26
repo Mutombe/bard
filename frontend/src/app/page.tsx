@@ -1089,10 +1089,25 @@ function PodcastSection({ video }: { video: any }) {
             <p className="text-slate-300 mb-6 line-clamp-3 leading-relaxed">
               {video.description}
             </p>
-            <div className="flex items-center gap-3 text-sm text-slate-400">
+            <div className="flex items-center gap-3 text-sm text-slate-400 mb-6">
               <span>{video.channel_title}</span>
               <span className="text-slate-600">·</span>
               <span>{video.view_count?.toLocaleString()} views</span>
+            </div>
+
+            {/* Video actions */}
+            <div className="flex items-center gap-3">
+              <ArticleActions articleId={`video-${video.id || video.slug}`} />
+              {video.source_url && (
+                <a
+                  href={video.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white border border-white/20 hover:bg-white/10 transition-colors"
+                >
+                  Watch on YouTube <ArrowRight className="h-4 w-4" />
+                </a>
+              )}
             </div>
           </div>
         </div>
