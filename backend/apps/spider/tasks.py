@@ -143,17 +143,36 @@ def fetch_serpapi_news():
     import hashlib
 
     # Africa-focused economic and finance queries
+    # Covers all industry/topic pages to ensure no empty sections
     NEWS_QUERIES = [
+        # Core markets & economy
         'Africa economy finance news today',
         'South Africa economy JSE market',
         'Nigeria economy business finance',
         'Kenya East Africa business economy',
-        'Africa central bank monetary policy',
-        'Africa mining commodities resources',
-        'Africa infrastructure investment development',
-        'Africa fintech banking digital finance',
-        'African Development Bank economy',
-        'Africa trade AfCFTA economic growth',
+        # Banking & monetary policy
+        'Africa central bank monetary policy interest rates',
+        'African banking sector regulation fintech',
+        'Reserve Bank South Africa Nigeria Kenya central bank',
+        # Mining & commodities
+        'Africa mining commodities gold platinum resources',
+        'Africa oil gas energy prices',
+        # Infrastructure & development
+        'Africa infrastructure investment development construction',
+        'Africa energy renewable solar power',
+        # Technology
+        'Africa fintech banking digital finance mobile money',
+        'Africa technology startups venture capital',
+        # Trade & policy
+        'AfCFTA Africa free trade agreement continental',
+        'Africa trade policy exports imports',
+        'Africa foreign direct investment FDI',
+        # Agriculture
+        'Africa agriculture food security commodities',
+        # Development banks
+        'African Development Bank economy development',
+        # Global impact
+        'Africa emerging markets global economy',
     ]
 
     try:
@@ -168,6 +187,11 @@ def fetch_serpapi_news():
             ('technology', 'Technology', 'Technology news'),
             ('commodities', 'Commodities', 'Commodities and resources'),
             ('banking', 'Banking', 'Banking and finance'),
+            ('economy', 'Economy', 'Economic news and policy'),
+            ('trade', 'Trade', 'Trade policy and agreements'),
+            ('infrastructure', 'Infrastructure', 'Infrastructure and development'),
+            ('agriculture', 'Agriculture', 'Agriculture and food security'),
+            ('energy', 'Energy', 'Energy and resources'),
         ]:
             cat, _ = Category.objects.get_or_create(
                 slug=slug, defaults={'name': name, 'description': desc}
@@ -176,13 +200,13 @@ def fetch_serpapi_news():
 
         default_category = categories['africa']
 
-        # Rotate: pick 2 queries per cycle
+        # Rotate: pick 3 queries per cycle for broader coverage
         hour_hash = int(hashlib.md5(
             timezone.now().strftime('%Y-%m-%d-%H').encode()
         ).hexdigest(), 16)
 
         selected = []
-        for i in range(2):
+        for i in range(3):
             idx = (hour_hash + i) % len(NEWS_QUERIES)
             q = NEWS_QUERIES[idx]
             if q not in selected:
@@ -194,14 +218,23 @@ def fetch_serpapi_news():
         # Map queries to categories
         query_categories = {
             'South Africa economy JSE market': 'markets',
-            'Nigeria economy business finance': 'africa',
-            'Kenya East Africa business economy': 'africa',
-            'Africa central bank monetary policy': 'banking',
-            'Africa mining commodities resources': 'commodities',
-            'Africa infrastructure investment development': 'africa',
-            'Africa fintech banking digital finance': 'technology',
-            'African Development Bank economy': 'banking',
-            'Africa trade AfCFTA economic growth': 'markets',
+            'Nigeria economy business finance': 'economy',
+            'Kenya East Africa business economy': 'economy',
+            'Africa central bank monetary policy interest rates': 'banking',
+            'African banking sector regulation fintech': 'banking',
+            'Reserve Bank South Africa Nigeria Kenya central bank': 'banking',
+            'Africa mining commodities gold platinum resources': 'commodities',
+            'Africa oil gas energy prices': 'energy',
+            'Africa infrastructure investment development construction': 'infrastructure',
+            'Africa energy renewable solar power': 'energy',
+            'Africa fintech banking digital finance mobile money': 'technology',
+            'Africa technology startups venture capital': 'technology',
+            'AfCFTA Africa free trade agreement continental': 'trade',
+            'Africa trade policy exports imports': 'trade',
+            'Africa foreign direct investment FDI': 'economy',
+            'Africa agriculture food security commodities': 'agriculture',
+            'African Development Bank economy development': 'banking',
+            'Africa emerging markets global economy': 'markets',
         }
 
         for query in selected:
