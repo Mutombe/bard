@@ -148,11 +148,28 @@ class UnsplashService:
                     logger.info(f"No Unsplash results for: {query}")
                     return None
 
+                # Filter out obviously Western/American images for African queries
+                WESTERN_BLOCKLIST = [
+                    'wall street', 'new york', 'manhattan', 'times square',
+                    'bank of america', 'federal reserve', 'capitol hill',
+                    'london city', 'canary wharf', 'tokyo', 'shanghai',
+                ]
+                filtered = [
+                    p for p in results
+                    if not any(
+                        term in (p.get("alt_description", "") or "").lower()
+                        or term in (p.get("description", "") or "").lower()
+                        for term in WESTERN_BLOCKLIST
+                    )
+                ]
+                # Use filtered results if any remain, otherwise use all
+                pool = filtered if filtered else results
+
                 # Pick image — deterministic if article_id provided
                 if article_id:
                     seed = int(hashlib.md5(article_id.encode()).hexdigest()[:8], 16)
                     random.seed(seed)
-                photo = random.choice(results)
+                photo = random.choice(pool)
                 if article_id:
                     random.seed()
 
@@ -230,12 +247,85 @@ class ArticleImageService:
         "business": "business",
     }
 
+    # ── CURATED AFRICAN IMAGES ──
+    # Hand-picked Unsplash URLs verified to show ACTUAL African scenes.
+    # These bypass live Unsplash search to prevent NYC/Wall Street leakage.
+    # Key = (country_keyword, subject) or just (subject) for pan-African.
+    # Each entry has multiple URLs for variety.
+
+    CURATED_AFRICAN = {
+        # South Africa - verified Johannesburg/Cape Town scenes
+        ("south africa", "stock exchange"): [
+            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg skyline
+            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA business district
+            "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&h=450&fit=crop",  # Cape Town skyline
+        ],
+        ("south africa", "economy"): [
+            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg skyline
+            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA business
+            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Joburg
+        ],
+        ("south africa", "bank"): [
+            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA financial district
+            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg CBD
+        ],
+        ("south africa", "infrastructure"): [
+            "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&h=450&fit=crop",  # SA highway
+            "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&h=450&fit=crop",  # Cape Town
+        ],
+        # Nigeria - verified Lagos scenes
+        ("nigeria", "economy"): [
+            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos skyline
+            "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=450&fit=crop",  # Lagos business
+            "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
+        ],
+        ("nigeria", "stock exchange"): [
+            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos skyline
+            "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=450&fit=crop",  # Lagos business
+        ],
+        ("nigeria", "bank"): [
+            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos financial
+            "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
+        ],
+        # Kenya - verified Nairobi scenes
+        ("kenya", "economy"): [
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi skyline
+            "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop",  # Nairobi aerial
+        ],
+        ("kenya", "bank"): [
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
+            "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop",  # Kenya business
+        ],
+        ("kenya", "stock exchange"): [
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi skyline
+        ],
+        # Pan-African (no country specified) — generic African business/finance
+        (None, "stock exchange"): [
+            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # African business
+            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
+            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
+        ],
+        (None, "bank"): [
+            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA financial
+            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos
+        ],
+        (None, "economy"): [
+            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
+            "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=800&h=450&fit=crop",  # Africa landscape
+            "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&h=450&fit=crop",  # African skyline
+        ],
+        (None, "infrastructure"): [
+            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
+            "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&h=450&fit=crop",  # Road infrastructure
+        ],
+    }
+
     # ── SUBJECT-FIRST visual concept map ──
     # The key insight: Unsplash needs the *subject* of the photo, not the
     # *topic* of the article.  "Nigeria GDP" → bad photo.
     # "African currency notes" → great photo.
     #
-    # Priority order: specific subjects > industries > broad topics > country
+    # Priority order: curated African > specific subjects > industries > broad topics
     # Country is LAST because a city skyline tells you nothing about the story.
 
     # Phrases checked FIRST (multi-word, most specific)
@@ -608,6 +698,18 @@ class ArticleImageService:
             "photographer": None,
         }
 
+        # If curated image was selected, use it directly (no Unsplash API call)
+        if search_query.startswith("__curated__"):
+            curated_url = search_query.replace("__curated__", "")
+            result = {
+                "url": curated_url,
+                "attribution": None,
+                "source": "curated",
+                "photographer": None,
+            }
+            cache.set(cache_key, result, IMAGE_CACHE_DURATION)
+            return result
+
         # Try Unsplash — with fallback to category query if first search fails
         if use_unsplash and self.unsplash.is_configured:
             queries_to_try = [search_query]
@@ -687,6 +789,33 @@ class ArticleImageService:
         5. Fall back to category visual
         """
         text = f"{title} {excerpt}".lower()
+
+        # ── Step 0: Try curated African images FIRST ──
+        # This prevents NYC/Wall Street images appearing on African stories.
+        country_key = None
+        for kw in self.COUNTRY_MODIFIERS:
+            if kw in text:
+                country_key = kw
+                break
+
+        # Check curated images for common subjects
+        for subject_check in ['stock exchange', 'bank', 'economy', 'infrastructure',
+                              'central bank', 'monetary policy', 'financial']:
+            if subject_check in text:
+                # Try country-specific curated first
+                if country_key:
+                    curated = self.CURATED_AFRICAN.get((country_key, subject_check))
+                    if curated:
+                        # Return a special marker so get_image_for_article uses it directly
+                        url = curated[hash(title) % len(curated)]
+                        logger.debug(f"Curated: '{title[:40]}' -> ({country_key}, {subject_check})")
+                        return f"__curated__{url}"
+                # Try pan-African curated
+                curated = self.CURATED_AFRICAN.get((None, subject_check))
+                if curated:
+                    url = curated[hash(title) % len(curated)]
+                    logger.debug(f"Curated (pan-African): '{title[:40]}' -> {subject_check}")
+                    return f"__curated__{url}"
 
         # ── Step 1: Multi-word phrase matching (most precise) ──
         best_phrase = None
