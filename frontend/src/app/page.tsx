@@ -1325,8 +1325,8 @@ export default function HomePage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasLoadedMore, setHasLoadedMore] = useState(false);
 
-  // FAST initial load - only 15 articles for above-the-fold content
-  const { data: articlesData, isLoading: articlesLoading } = useArticles({ page_size: 15 });
+  // FAST initial load - 18 articles for above-the-fold content
+  const { data: articlesData, isLoading: articlesLoading } = useArticles({ page_size: 18 });
 
   const { data: cnbcVideoData, isLoading: videosLoading } = useCNBCAfricaVideo();
 
@@ -1340,7 +1340,7 @@ export default function HomePage() {
     setLoadingMore(true);
     try {
       const response = await apiClient.get("/news/articles/", {
-        params: { page_size: 85, offset: 15 }
+        params: { page_size: 82, offset: 18 }
       });
       setExtendedArticles(response.data?.results || []);
       setHasLoadedMore(true);
@@ -1365,16 +1365,16 @@ export default function HomePage() {
   }, [articlesLoading, initialArticles.length, hasLoadedMore, loadingMore, loadMoreArticles]);
 
   // ---- Article slicing ----
-  // Above the fold (initial 15)
+  // Above the fold (initial 18)
   const featuredArticle = initialArticles[0];
-  const heroSideArticles = initialArticles.slice(1, 5);
-  const mainInsights = initialArticles.slice(5, 9);   // 2 InsightCard + 2 TextCard
-  const sidebarInsights = initialArticles.slice(9, 14); // 5 Most Read with ranks
+  const heroSideArticles = initialArticles.slice(1, 7);    // 6 Top Stories (was 4)
+  const mainInsights = initialArticles.slice(7, 11);       // 2 InsightCard + 2 TextCard
+  const sidebarInsights = initialArticles.slice(11, 18);   // 7 Most Read with ranks (was 5)
 
   // Below the fold (extended)
-  const editorsPicksArticles = allArticles.slice(14, 17);
-  const trendingArticles = allArticles.slice(17, 22);
-  const moreStoriesArticles = allArticles.slice(22, 38); // 12-16 TextCards
+  const editorsPicksArticles = allArticles.slice(18, 21);
+  const trendingArticles = allArticles.slice(21, 26);
+  const moreStoriesArticles = allArticles.slice(26, 42); // 12-16 TextCards
 
   const featuredVideo = cnbcVideoData || null;
 
@@ -1425,7 +1425,7 @@ export default function HomePage() {
                     <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                       Top Stories
                     </h3>
-                    <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col">
                       {heroSideArticles.map((article, index) => (
                         <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
                           <SidebarInsight article={article} rank={index + 1} />
@@ -1486,7 +1486,7 @@ export default function HomePage() {
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground mb-2 pb-2 border-b border-border">
                       Most Read
                     </h3>
-                    <div className="flex-1 flex flex-col justify-between">
+                    <div className="flex-1 flex flex-col">
                       {sidebarInsights.map((article, index) => (
                         <div key={article.id} className="stagger-item" style={{ animationDelay: `${index * 80}ms` }}>
                           <SidebarInsight article={article} rank={index + 1} />
