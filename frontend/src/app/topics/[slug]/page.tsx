@@ -336,9 +336,9 @@ export default function TopicPage() {
         )}
 
         {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Main Content */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-8">
             {/* Featured Article */}
             {loading ? (
               <ArticleSkeleton featured />
@@ -398,11 +398,11 @@ export default function TopicPage() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-8">
+          {/* Sidebar — sticky, follows reader */}
+          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:scrollbar-hide">
             {/* Newsletter */}
             <div className="relative overflow-hidden p-6 rounded-lg bg-primary/5 border border-primary/20">
-              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="topic-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(355, 70%, 38%)" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#topic-sub-grid)"/></svg></div>
+              <div className="absolute inset-0 pointer-events-none"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" className="opacity-[0.07] dark:opacity-[0.10]"><defs><pattern id="topic-sub-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#9b70b5" strokeWidth="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#topic-sub-grid)"/></svg></div>
               <h3 className="relative headline text-lg mb-2">{topic.name} Updates</h3>
               <p className="relative text-sm text-muted-foreground mb-4">
                 Get the latest insights on {topic.name.toLowerCase()} delivered weekly.
