@@ -138,6 +138,23 @@ function timeAgo(dateString?: string): string {
   return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
+/** Returns true if article was published less than 1 hour ago */
+function isRecent(dateString?: string): boolean {
+  if (!dateString) return false;
+  return (Date.now() - new Date(dateString).getTime()) < 3600000;
+}
+
+/** Freshness indicator — pulse dot + time ago */
+function TimeBadge({ date }: { date?: string }) {
+  const recent = isRecent(date);
+  return (
+    <span className="meta-line inline-flex items-center gap-1.5">
+      {recent && <span className="h-1.5 w-1.5 rounded-full bg-brand-coral animate-pulse" />}
+      {timeAgo(date)}
+    </span>
+  );
+}
+
 function formatDate(dateString?: string): string {
   if (!dateString) return "";
   return new Date(dateString).toLocaleDateString("en-GB", {
@@ -495,7 +512,7 @@ function HeroSectionSkeleton() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-7">
-        <div className="skeleton-enhanced aspect-[21/9] mb-6" />
+        <div className="skeleton-enhanced aspect-[16/9] md:aspect-[21/9] mb-6" />
         <div className="max-w-4xl">
           <div className="flex items-center gap-3 mb-3">
             <div className="skeleton-enhanced h-4 w-24" />
@@ -609,7 +626,7 @@ function FeaturedInsight({ article }: { article: NewsArticle }) {
   return (
     <Link href={`/news/${article.slug}`} className="group block">
       <article>
-        <div className="relative aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated">
+        <div className="relative aspect-[16/9] md:aspect-[21/9] mb-6 overflow-hidden bg-terminal-bg-elevated">
           <ArticleImage
             article={article}
             className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"

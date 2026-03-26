@@ -48,7 +48,7 @@
     --ring: 278 30% 57%;
 
     /* Sharp corners - Swiss style */
-    --radius: 0;
+    --radius: 2px;
 
     /* Market colors - light mode */
     --market-up: 152 72% 30%;
@@ -66,14 +66,14 @@
 
   /* Dark mode variables */
   .dark {
-    --background: 0 0% 5%;
-    --foreground: 0 0% 95%;
+    --background: 290 5% 6%;
+    --foreground: 0 0% 93%;
 
-    --card: 0 0% 8%;
-    --card-foreground: 0 0% 95%;
+    --card: 290 4% 9%;
+    --card-foreground: 0 0% 93%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 290 4% 9%;
+    --popover-foreground: 0 0% 93%;
 
     /* Lighter violet as primary for dark mode readability */
     --primary: 280 35% 66%;
@@ -105,12 +105,12 @@
     --market-up-bg: 152 100% 10%;
     --market-down-bg: 0 100% 10%;
 
-    /* Terminal colors - dark mode */
-    --terminal-bg: 0 0% 5%;
-    --terminal-bg-secondary: 0 0% 8%;
-    --terminal-bg-elevated: 0 0% 12%;
-    --terminal-border: 0 0% 18%;
-    --terminal-border-light: 0 0% 25%;
+    /* Terminal colors - dark mode (warm plum tint) */
+    --terminal-bg: 290 5% 6%;
+    --terminal-bg-secondary: 290 4% 9%;
+    --terminal-bg-elevated: 290 3% 13%;
+    --terminal-border: 290 3% 19%;
+    --terminal-border-light: 290 2% 26%;
   }
 }
 
@@ -131,17 +131,17 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Professional headline typography */
+  /* Editorial headline typography — Fraunces for authority */
   h1, h2, h3 {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
   }
 
   h1 {
     font-size: 2.25rem;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   h2 {
@@ -152,12 +152,12 @@
     font-size: 1.375rem;
   }
 
-  /* Article body text - slightly larger, more readable */
+  /* Article body text — Newsreader for long-form reading */
   article p, .article-content p {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-newsreader), Georgia, serif;
     font-size: 1.125rem;
-    line-height: 1.8;
-    letter-spacing: 0.01em;
+    line-height: 1.85;
+    letter-spacing: 0.005em;
   }
 
   /* Improve link styling in articles */
@@ -423,39 +423,39 @@
     text-wrap: balance;
   }
 
-  /* Professional headline utilities */
+  /* Editorial headline utilities — Fraunces */
   .headline {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-
-  .headline-lg {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-fraunces), Georgia, serif;
     font-weight: 700;
-    font-size: 2.5rem;
     letter-spacing: -0.025em;
     line-height: 1.15;
   }
 
-  .headline-xl {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+  .headline-lg {
+    font-family: var(--font-fraunces), Georgia, serif;
     font-weight: 700;
-    font-size: 3rem;
-    letter-spacing: -0.03em;
+    font-size: 2.5rem;
+    letter-spacing: -0.025em;
     line-height: 1.1;
   }
 
-  /* Article/reading typography */
-  .prose-article {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
-    font-size: 1.125rem;
-    line-height: 1.8;
-    letter-spacing: 0.01em;
+  .headline-xl {
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-weight: 800;
+    font-size: 3rem;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
   }
 
-  /* Subtle uppercase labels like Bloomberg/FT style */
+  /* Article/reading typography — Newsreader */
+  .prose-article {
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-size: 1.125rem;
+    line-height: 1.85;
+    letter-spacing: 0.005em;
+  }
+
+  /* Subtle uppercase labels — Bricolage (UI font) */
   .label-uppercase {
     @apply text-xs font-medium uppercase tracking-wider text-muted-foreground;
     font-family: var(--font-bricolage), system-ui, sans-serif;
@@ -466,7 +466,7 @@
     @apply font-mono tabular-nums font-medium tracking-tight;
   }
 
-  /* Byline/metadata styling */
+  /* Byline/metadata styling — Bricolage (UI font) */
   .byline {
     @apply text-sm text-muted-foreground;
     font-family: var(--font-bricolage), system-ui, sans-serif;
@@ -544,22 +544,26 @@
 
   /* Drop cap - traditional journal style */
   .drop-cap::first-letter {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-fraunces), Georgia, serif;
     float: left;
     font-size: 4.5rem;
     line-height: 0.8;
-    font-weight: 700;
+    font-weight: 800;
     margin-right: 0.75rem;
     margin-top: 0.25rem;
-    color: hsl(var(--primary));
+    color: #3b1042;
   }
 
-  /* Article prose styling for journal feel */
+  .dark .drop-cap::first-letter {
+    color: #c4a7d9;
+  }
+
+  /* Article prose styling — Newsreader for reading */
   .prose-journal {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-newsreader), Georgia, serif;
     font-size: 1.125rem;
     line-height: 1.85;
-    letter-spacing: 0.01em;
+    letter-spacing: 0.005em;
     color: hsl(var(--foreground));
   }
 
@@ -568,25 +572,25 @@
   }
 
   .prose-journal h2 {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-fraunces), Georgia, serif;
     font-size: 1.75rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 2.5rem;
     margin-bottom: 1rem;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
 
   .prose-journal h3 {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-fraunces), Georgia, serif;
     font-size: 1.375rem;
-    font-weight: 600;
+    font-weight: 700;
     margin-top: 2rem;
     margin-bottom: 0.75rem;
   }
 
   .prose-journal blockquote {
     font-style: italic;
-    border-left: 3px solid hsl(var(--primary));
+    border-left: 3px solid #9b70b5;
     padding-left: 1.5rem;
     margin: 2rem 0;
     color: hsl(var(--muted-foreground));
@@ -687,11 +691,11 @@
   }
 
   .keyword-link[data-type="topic"] {
-    color: hsl(var(--primary));
+    color: #9b70b5;
   }
 
   .keyword-link[data-type="industry"] {
-    color: hsl(210 70% 50%);
+    color: #3b1042;
   }
 
   .keyword-link[data-type="region"] {
@@ -699,7 +703,7 @@
   }
 
   .keyword-link[data-type="company"] {
-    color: hsl(30 80% 50%);
+    color: #e4603a;
   }
 
   /* =========================
@@ -708,15 +712,15 @@
 
   /* Hero headline - Fraunces weight 800, fluid size */
   .headline-hero {
-    font-family: var(--font-bricolage), system-ui, sans-serif;
+    font-family: var(--font-fraunces), Georgia, serif;
     font-weight: 800;
     font-size: clamp(2rem, 4vw, 3.5rem);
     letter-spacing: -0.03em;
-    line-height: 1.1;
+    line-height: 1.08;
     text-wrap: balance;
   }
 
-  /* Meta line - Inter, tiny muted */
+  /* Meta line - Bricolage (UI font), tiny muted */
   .meta-line {
     font-family: var(--font-bricolage), system-ui, sans-serif;
     @apply text-xs text-muted-foreground;
