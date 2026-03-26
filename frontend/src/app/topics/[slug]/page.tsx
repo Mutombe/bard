@@ -266,14 +266,26 @@ export default function TopicPage() {
     const fetchArticles = async () => {
       setLoading(true);
       try {
-        // Fetch articles filtered by topic (tag)
-        const response = await apiClient.get("/news/articles/", {
-          params: {
-            tag: slug, // Filter by topic slug as tag
-            page_size: 12,
-          },
+        // Try tag-based filter first
+        const tagResponse = await apiClient.get("/news/articles/", {
+          params: { tag: slug, page_size: 12 },
         });
-        setArticles(response.data.results || []);
+        let results = tagResponse.data.results || [];
+
+        // If not enough, search by topic name
+        if (results.length < 6) {
+          const topicName = topic?.name || slug.replace(/-/g, " ");
+          try {
+            const searchResponse = await apiClient.get("/news/articles/", {
+              params: { search: topicName, page_size: 12 },
+            });
+            for (const r of (searchResponse.data.results || [])) {
+              if (!results.find((a: any) => a.id === r.id)) results.push(r);
+            }
+          } catch { /* skip search fallback */ }
+        }
+
+        setArticles(results.slice(0, 12));
       } catch (error) {
         console.error("Failed to fetch articles:", error);
       } finally {

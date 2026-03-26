@@ -199,15 +199,37 @@ export default function IndustryPage() {
     const fetchArticles = async () => {
       setLoading(true);
       try {
-        // Fetch articles matching industry categories
-        // Pass the first category as the main filter, backend will match
-        const response = await apiClient.get("/news/articles/", {
-          params: {
-            category: industry.categories[0], // Primary category filter
-            page_size: 12,
-          },
-        });
-        setArticles(response.data.results || []);
+        // Try category match first, then fall back to keyword search
+        let results: Article[] = [];
+
+        // Try each category slug
+        for (const cat of industry.categories) {
+          if (results.length >= 12) break;
+          try {
+            const response = await apiClient.get("/news/articles/", {
+              params: { category: cat, page_size: 12 },
+            });
+            const catResults = response.data.results || [];
+            // Add without duplicates
+            for (const r of catResults) {
+              if (!results.find(a => a.id === r.id)) results.push(r);
+            }
+          } catch { /* skip this category */ }
+        }
+
+        // If still not enough, search by industry name keywords
+        if (results.length < 6) {
+          try {
+            const response = await apiClient.get("/news/articles/", {
+              params: { search: industry.name.split("&")[0].trim(), page_size: 12 },
+            });
+            for (const r of (response.data.results || [])) {
+              if (!results.find(a => a.id === r.id)) results.push(r);
+            }
+          } catch { /* skip */ }
+        }
+
+        setArticles(results.slice(0, 12));
       } catch (error) {
         console.error("Failed to fetch articles:", error);
       } finally {
