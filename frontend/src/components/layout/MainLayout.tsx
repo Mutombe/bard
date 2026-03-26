@@ -352,8 +352,8 @@ export function MainLayout({ children }: MainLayoutProps) {
         </div>
       </header>
 
-      {/* News Ticker Strip */}
-      <NewsTicker />
+      {/* News Ticker Strip — disabled for McKinsey-style research feel */}
+      {/* <NewsTicker /> */}
 
       {/* Main Content */}
       <main className="flex-1">
