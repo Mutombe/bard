@@ -224,7 +224,34 @@ class ArticleImageService:
 
     Provides relevant images for articles that don't have featured images
     by analyzing article content and category.
+
+    Tracks used URLs within a session to prevent duplicate images in the same feed.
     """
+
+    # Class-level URL tracker — shared across all instances within a process
+    # Reset with ArticleImageService.reset_session() at the start of each feed cycle
+    _session_used_urls: set[str] = set()
+
+    def __init__(self):
+        self._used_urls = ArticleImageService._session_used_urls
+
+    @classmethod
+    def reset_session(cls):
+        """Reset the used URL tracker. Call at the start of each feed refresh."""
+        cls._session_used_urls.clear()
+
+    def _pick_unused(self, urls: list[str], title: str) -> str | None:
+        """Pick a URL from the list that hasn't been used yet in this session."""
+        unused = [u for u in urls if u not in self._used_urls]
+        if unused:
+            picked = unused[hash(title) % len(unused)]
+        elif urls:
+            # All used — pick by hash anyway (better than nothing)
+            picked = urls[hash(title) % len(urls)]
+        else:
+            return None
+        self._used_urls.add(picked)
+        return picked
 
     # Category fallback queries — short and effective
     CATEGORY_QUERIES = {
@@ -737,6 +764,7 @@ class ArticleImageService:
         # If curated image was selected, use it directly (no Unsplash API call)
         if search_query.startswith("__curated__"):
             curated_url = search_query.replace("__curated__", "")
+            self._used_urls.add(curated_url)
             result = {
                 "url": curated_url,
                 "attribution": None,
@@ -761,8 +789,17 @@ class ArticleImageService:
                     per_page=10,
                 )
                 if unsplash_result and unsplash_result.get("url"):
+                    # Try to pick an unused URL from results
+                    chosen_url = unsplash_result["url"]
+                    all_results = unsplash_result.get("all_results", [])
+                    if all_results and chosen_url in self._used_urls:
+                        unused = [r["url"] for r in all_results if r["url"] not in self._used_urls]
+                        if unused:
+                            chosen_url = unused[0]
+
+                    self._used_urls.add(chosen_url)
                     result = {
-                        "url": unsplash_result["url"],
+                        "url": chosen_url,
                         "attribution": unsplash_result["attribution"],
                         "source": "unsplash",
                         "photographer": unsplash_result["photographer"],
@@ -843,16 +880,17 @@ class ArticleImageService:
                 if country_key:
                     curated = self.CURATED_AFRICAN.get((country_key, subject_check))
                     if curated:
-                        # Return a special marker so get_image_for_article uses it directly
-                        url = curated[hash(title) % len(curated)]
-                        logger.debug(f"Curated: '{title[:40]}' -> ({country_key}, {subject_check})")
-                        return f"__curated__{url}"
+                        url = self._pick_unused(curated, title)
+                        if url:
+                            logger.debug(f"Curated: '{title[:40]}' -> ({country_key}, {subject_check})")
+                            return f"__curated__{url}"
                 # Try pan-African curated
                 curated = self.CURATED_AFRICAN.get((None, subject_check))
                 if curated:
-                    url = curated[hash(title) % len(curated)]
-                    logger.debug(f"Curated (pan-African): '{title[:40]}' -> {subject_check}")
-                    return f"__curated__{url}"
+                    url = self._pick_unused(curated, title)
+                    if url:
+                        logger.debug(f"Curated (pan-African): '{title[:40]}' -> {subject_check}")
+                        return f"__curated__{url}"
 
         # ── Step 1: Multi-word phrase matching (most precise) ──
         best_phrase = None

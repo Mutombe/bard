@@ -1167,6 +1167,10 @@ def refresh_feed_content():
     """
     from datetime import timedelta
     from apps.media.models import Video
+    from apps.media.image_service import ArticleImageService
+
+    # Reset image dedup tracker for this cycle
+    ArticleImageService.reset_session()
 
     results = []
 
