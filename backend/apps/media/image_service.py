@@ -232,9 +232,6 @@ class ArticleImageService:
     # Reset with ArticleImageService.reset_session() at the start of each feed cycle
     _session_used_urls: set[str] = set()
 
-    def __init__(self):
-        self._used_urls = ArticleImageService._session_used_urls
-
     @classmethod
     def reset_session(cls):
         """Reset the used URL tracker. Call at the start of each feed refresh."""
@@ -679,6 +676,7 @@ class ArticleImageService:
 
     def __init__(self):
         self.unsplash = UnsplashService()
+        self._used_urls = ArticleImageService._session_used_urls
 
     def _extract_keywords(self, text: str, max_keywords: int = 5) -> list[str]:
         """
