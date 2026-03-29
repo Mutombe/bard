@@ -7,9 +7,70 @@ Includes integration with Polygon.io and NewsAPI.org
 Tasks are plain functions — called by django-q2 scheduler or management commands.
 """
 import logging
+import re
+from datetime import timedelta
+from dateutil import parser as dateparser
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
+
+# Maximum age for articles — skip anything older than this
+MAX_ARTICLE_AGE_DAYS = 7
+
+
+def parse_article_date(date_str: str):
+    """
+    Parse article date from SerpAPI (e.g., '2 days ago', 'Mar 15, 2026', '3 hours ago').
+    Returns a timezone-aware datetime or None if unparsable.
+    """
+    if not date_str:
+        return None
+
+    now = timezone.now()
+    text = date_str.lower().strip()
+
+    # Relative dates: "X hours/minutes/days ago"
+    relative = re.match(r'(\d+)\s+(minute|hour|day|week|month)s?\s+ago', text)
+    if relative:
+        amount = int(relative.group(1))
+        unit = relative.group(2)
+        deltas = {
+            'minute': timedelta(minutes=amount),
+            'hour': timedelta(hours=amount),
+            'day': timedelta(days=amount),
+            'week': timedelta(weeks=amount),
+            'month': timedelta(days=amount * 30),
+        }
+        return now - deltas.get(unit, timedelta())
+
+    # "just now" / "today" / "yesterday"
+    if 'just now' in text or 'moment' in text:
+        return now
+    if text == 'today':
+        return now
+    if text == 'yesterday':
+        return now - timedelta(days=1)
+
+    # Try standard date parsing
+    try:
+        parsed = dateparser.parse(date_str, fuzzy=True)
+        if parsed:
+            if timezone.is_naive(parsed):
+                parsed = timezone.make_aware(parsed)
+            return parsed
+    except (ValueError, OverflowError):
+        pass
+
+    return None
+
+
+def is_article_fresh(date_str: str) -> bool:
+    """Check if an article is within MAX_ARTICLE_AGE_DAYS. Unknown dates pass."""
+    parsed = parse_article_date(date_str)
+    if not parsed:
+        return True  # Unknown date — let it through
+    age = timezone.now() - parsed
+    return age.days <= MAX_ARTICLE_AGE_DAYS
 
 
 def fetch_polygon_news():
@@ -256,6 +317,11 @@ def fetch_serpapi_news():
                     continue
                 seen_titles.add(title[:500])
 
+                # Skip old articles (> 7 days)
+                date_str = item.get('published_at', '')
+                if not is_article_fresh(date_str):
+                    continue
+
                 ext_url = item.get('url', '')
                 if NewsArticle.objects.filter(title=title[:500]).exists():
                     continue
@@ -268,6 +334,9 @@ def fetch_serpapi_news():
                 # Skip articles without substantial scraped body
                 if len(content) < 500:
                     continue
+
+                # Use real publish date, fallback to now
+                pub_date = parse_article_date(date_str) or timezone.now()
 
                 # Always fetch HD image from Unsplash based on article context
                 image_data = image_service.get_image_for_article(
@@ -285,7 +354,7 @@ def fetch_serpapi_news():
                         content=content,
                         category=category,
                         status='published',
-                        published_at=timezone.now(),
+                        published_at=pub_date,
                         source='serpapi',
                         external_url=ext_url[:500],
                         external_source_name=item.get('source', 'Google News')[:100],
@@ -345,6 +414,11 @@ def fetch_african_news():
                 continue
             seen_titles.add(title[:500])
 
+            # Skip old articles (> 7 days)
+            date_str = item.get('published_at', '')
+            if not is_article_fresh(date_str):
+                continue
+
             ext_url = item.get('url', '')
             if NewsArticle.objects.filter(title=title[:500]).exists():
                 continue
@@ -357,6 +431,9 @@ def fetch_african_news():
             # Skip articles without substantial scraped body
             if len(content) < 500:
                 continue
+
+            # Use real publish date, fallback to now
+            pub_date = parse_article_date(date_str) or timezone.now()
 
             # Assign category based on content keywords
             content_lower = (content + ' ' + title).lower()
@@ -383,7 +460,7 @@ def fetch_african_news():
                     content=content,
                     category=category,
                     status='published',
-                    published_at=timezone.now(),
+                    published_at=pub_date,
                     source='serpapi',
                     external_url=ext_url[:500],
                     external_source_name=item.get('source', 'African News')[:100],
