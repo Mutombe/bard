@@ -176,9 +176,11 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
             # Regular users see published articles
             queryset = queryset.filter(status=NewsArticle.Status.PUBLISHED)
 
-        # For feed listings: only show articles with scraped body and real images
+        # For feed listings: only show articles with substantial body (500+ chars) and real images
         if self.action == "list":
-            queryset = queryset.exclude(content__isnull=True).exclude(content="")
+            from django.db.models.functions import Length
+            queryset = queryset.annotate(_content_len=Length("content"))
+            queryset = queryset.filter(_content_len__gte=500)
             queryset = queryset.filter(
                 Q(featured_image__gt="") | Q(featured_image_url__gt="")
             )
