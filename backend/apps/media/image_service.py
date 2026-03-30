@@ -302,14 +302,18 @@ class ArticleImageService:
             "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos skyline
             "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=450&fit=crop",  # Lagos business
             "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
+            "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=450&fit=crop",  # Lagos Island aerial
+            "https://images.unsplash.com/photo-1563396983906-b3795482a59a?w=800&h=450&fit=crop",  # Lagos cityscape
         ],
         ("nigeria", "stock exchange"): [
             "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos skyline
             "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=450&fit=crop",  # Lagos business
+            "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=450&fit=crop",  # Lagos Island aerial
         ],
         ("nigeria", "bank"): [
             "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos financial
             "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
+            "https://images.unsplash.com/photo-1563396983906-b3795482a59a?w=800&h=450&fit=crop",  # Lagos cityscape
         ],
         # Kenya - verified Nairobi scenes
         ("kenya", "economy"): [
