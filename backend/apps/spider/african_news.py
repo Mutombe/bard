@@ -102,7 +102,11 @@ def parse_rss_feed(source: dict) -> list[dict]:
         response.raise_for_status()
         client.close()
 
-        soup = BeautifulSoup(response.text, "html.parser")
+        # Use lxml if available, otherwise html.parser
+        try:
+            soup = BeautifulSoup(response.text, "xml")
+        except Exception:
+            soup = BeautifulSoup(response.text, "html.parser")
 
         # RSS items
         items = soup.find_all("item")
@@ -114,17 +118,19 @@ def parse_rss_feed(source: dict) -> list[dict]:
             title_el = item.find("title")
             link_el = item.find("link")
             desc_el = item.find("description") or item.find("summary") or item.find("content")
-            pub_date_el = item.find("pubdate") or item.find("published") or item.find("updated")
+            pub_date_el = item.find("pubDate") or item.find("pubdate") or item.find("published") or item.find("updated")
 
             title = title_el.get_text(strip=True) if title_el else ""
             if not title or len(title) < 15:
                 continue
 
-            # Get link - handle both RSS and Atom formats
+            # Get link — RSS <link> is tricky with html.parser (self-closing)
+            url = ""
             if link_el:
                 url = link_el.get_text(strip=True) or link_el.get("href", "")
-            else:
-                url = ""
+                # html.parser makes <link/> self-closing — URL is in next_sibling
+                if not url and link_el.next_sibling:
+                    url = str(link_el.next_sibling).strip()
             if not url:
                 continue
 
