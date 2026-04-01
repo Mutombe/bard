@@ -29,45 +29,33 @@ logger = logging.getLogger(__name__)
 # Reliable African financial news sources with their feed/index URLs
 AFRICAN_NEWS_SOURCES = [
     {
-        "name": "CNBC Africa",
-        "url": "https://www.cnbcafrica.com/feed/",
-        "type": "rss",
-        "category": "markets",
-    },
-    {
         "name": "Moneyweb",
         "url": "https://www.moneyweb.co.za/feed/",
-        "type": "rss",
         "category": "markets",
     },
     {
-        "name": "Business Day SA",
-        "url": "https://www.businesslive.co.za/bd/rss",
-        "type": "rss",
+        "name": "BusinessTech",
+        "url": "https://businesstech.co.za/news/feed/",
         "category": "economy",
-    },
-    {
-        "name": "Nairametrics",
-        "url": "https://nairametrics.com/feed/",
-        "type": "rss",
-        "category": "economy",
-    },
-    {
-        "name": "Business Daily Africa",
-        "url": "https://www.businessdailyafrica.com/rss",
-        "type": "rss",
-        "category": "economy",
-    },
-    {
-        "name": "African Business",
-        "url": "https://african.business/feed/",
-        "type": "rss",
-        "category": "africa",
     },
     {
         "name": "How We Made It In Africa",
         "url": "https://www.howwemadeitinafrica.com/feed/",
-        "type": "rss",
+        "category": "africa",
+    },
+    {
+        "name": "Disrupt Africa",
+        "url": "https://disrupt-africa.com/feed/",
+        "category": "technology",
+    },
+    {
+        "name": "TechCabal",
+        "url": "https://techcabal.com/feed/",
+        "category": "technology",
+    },
+    {
+        "name": "Mail & Guardian",
+        "url": "https://mg.co.za/feed/",
         "category": "africa",
     },
 ]
