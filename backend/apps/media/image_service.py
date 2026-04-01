@@ -2,10 +2,11 @@
 Dynamic Image Service for Article Previews
 
 Provides intelligent image selection for articles without featured images:
-1. Searches Unsplash for relevant images based on article content
-2. Falls back to category-based default images
-3. Uses intelligent caching to minimize API calls
-4. Ensures image variety using article-based randomization
+1. Uses Gemini LLM to generate contextual Unsplash search queries
+2. Falls back to curated African images for known subjects
+3. Searches Unsplash for relevant images
+4. Falls back to category-based default images
+5. Ensures image variety using session-level dedup
 """
 import hashlib
 import logging
@@ -18,6 +19,94 @@ from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
+
+
+class GeminiImageQueryService:
+    """
+    Uses Google Gemini to generate contextually perfect Unsplash search queries.
+
+    Given an article title, excerpt, and category, Gemini returns a short
+    Unsplash search query that describes the VISUAL SUBJECT of the photo —
+    not the topic. This prevents generic/wrong images.
+    """
+
+    GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+
+    PROMPT = """You are an image researcher for an African financial news platform.
+Given an article title and excerpt, generate a SHORT Unsplash search query (3-6 words)
+that describes the VISUAL SUBJECT of a photo that would illustrate this article.
+
+Rules:
+- Describe what the PHOTO shows, not the article topic
+- If the article is about a specific African country, include that country name
+- NEVER suggest "stock market chart" or "graph" — those look bad as photos
+- Prefer real-world scenes: city skylines, buildings, people, infrastructure, nature
+- For banking/finance: "modern bank building [country]" or "[city] financial district"
+- For economy: "[city] skyline aerial" or "[country] business district"
+- For mining: "open pit mine" or specific mineral
+- For agriculture: specific crop or farm scene
+- For trade: "shipping port containers [country]"
+- Keep it under 6 words
+
+Article title: {title}
+Excerpt: {excerpt}
+Category: {category}
+
+Respond with ONLY the search query, nothing else."""
+
+    def __init__(self):
+        self._api_key = getattr(settings, "GEMINI_API_KEY", "")
+
+    @property
+    def is_configured(self) -> bool:
+        return bool(self._api_key)
+
+    def generate_query(self, title: str, excerpt: str = "", category: str = "") -> Optional[str]:
+        """Generate an Unsplash search query using Gemini."""
+        if not self.is_configured:
+            return None
+
+        try:
+            prompt = self.PROMPT.format(
+                title=title[:200],
+                excerpt=(excerpt or "")[:300],
+                category=category,
+            )
+
+            response = requests.post(
+                f"{self.GEMINI_URL}?key={self._api_key}",
+                json={
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "generationConfig": {
+                        "temperature": 0.3,
+                        "maxOutputTokens": 30,
+                    },
+                },
+                timeout=10,
+            )
+
+            if response.status_code != 200:
+                logger.warning(f"Gemini API error: {response.status_code}")
+                return None
+
+            data = response.json()
+            query = (
+                data.get("candidates", [{}])[0]
+                .get("content", {})
+                .get("parts", [{}])[0]
+                .get("text", "")
+                .strip()
+                .strip('"\'')
+            )
+
+            if query and 5 < len(query) < 80:
+                logger.debug(f"Gemini query: '{title[:40]}' -> '{query}'")
+                return query
+
+        except Exception as e:
+            logger.warning(f"Gemini query generation failed: {e}")
+
+        return None
 
 # Cache duration: 7 days for images (they don't change often)
 IMAGE_CACHE_DURATION = 7 * 24 * 60 * 60
@@ -680,6 +769,7 @@ class ArticleImageService:
 
     def __init__(self):
         self.unsplash = UnsplashService()
+        self.gemini = GeminiImageQueryService()
         self._used_urls = ArticleImageService._session_used_urls
 
     def _extract_keywords(self, text: str, max_keywords: int = 5) -> list[str]:
@@ -753,8 +843,13 @@ class ArticleImageService:
         if cached is not None:
             return cached
 
-        # Build search query
-        search_query = self._build_search_query(title, excerpt, category_slug, content)
+        # Step 1: Try Gemini LLM for a contextually perfect query
+        gemini_query = None
+        if use_unsplash and self.gemini.is_configured:
+            gemini_query = self.gemini.generate_query(title, excerpt, category_slug)
+
+        # Step 2: Fall back to keyword/curated system
+        search_query = gemini_query or self._build_search_query(title, excerpt, category_slug, content)
 
         result = {
             "url": None,

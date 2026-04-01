@@ -337,6 +337,11 @@ GOOGLE_OAUTH_CLIENT_ID = env("GOOGLE_OAUTH_CLIENT_ID", default="")
 GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 
 # =========================
+# Gemini AI (Image Query Generation)
+# =========================
+GEMINI_API_KEY = env("GEMINI_API_KEY", default="AIzaSyBdMzAwO99Rwz68xDTq0EQzrkwy4f0z6zg")
+
+# =========================
 # Logging Configuration
 # =========================
 LOGGING = {

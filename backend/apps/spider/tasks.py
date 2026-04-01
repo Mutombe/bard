@@ -1251,6 +1251,13 @@ def refresh_feed_content():
 
     results = []
 
+    # 0. Direct scrape from African RSS feeds + trafilatura
+    try:
+        from .african_news import scrape_and_save_african_news
+        results.append(f"Direct scrape: saved {scrape_and_save_african_news()} articles")
+    except Exception as e:
+        results.append(f"Direct scrape failed: {e}")
+
     # 1. Fetch Africa-focused news from SerpAPI
     try:
         results.append(fetch_serpapi_news())
