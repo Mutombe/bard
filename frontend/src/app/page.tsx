@@ -197,24 +197,31 @@ async function fetchUnsplashImage(query: string): Promise<string> {
   return `https://source.unsplash.com/800x450/?${encodeURIComponent(query + " finance")}`;
 }
 
-/** Image component that guarantees HD images — never shows broken images */
+/** Image component — retries original URL before falling back */
 function ArticleImage({ article, fill = true, className = "" }: { article: NewsArticle; fill?: boolean; className?: string }) {
   const primarySrc = getArticleImage(article);
   const [src, setSrc] = useState(primarySrc);
-  const [hasErrored, setHasErrored] = useState(false);
+  const [errorCount, setErrorCount] = useState(0);
 
-  // If primary image fails, fetch a contextual Unsplash image
   const handleError = useCallback(async () => {
-    if (hasErrored) return;
-    setHasErrored(true);
-    const cat = article.category?.slug || "business";
-    const keywords = article.title.split(" ").slice(0, 3).join(" ");
-    const query = `${keywords} ${cat}`;
-    const fallbackUrl = await fetchUnsplashImage(query);
-    setSrc(fallbackUrl);
-  }, [hasErrored, article.title, article.category?.slug]);
+    if (errorCount === 0) {
+      // First error: retry the same URL (might be a transient load failure)
+      setErrorCount(1);
+      setSrc("");
+      setTimeout(() => setSrc(primarySrc), 500);
+    } else if (errorCount === 1) {
+      // Second error: try fetching a contextual fallback
+      setErrorCount(2);
+      const cat = article.category?.slug || "business";
+      const keywords = article.title.split(" ").slice(0, 3).join(" ");
+      const query = `${keywords} ${cat}`;
+      const fallbackUrl = await fetchUnsplashImage(query);
+      setSrc(fallbackUrl);
+    }
+    // Third+ error: give up, keep whatever we have
+  }, [errorCount, primarySrc, article.title, article.category?.slug]);
 
-  if (!src) return <div className={cn("bg-muted", className)} />;
+  if (!src) return <div className={cn("bg-terminal-bg-elevated", className)} />;
 
   return (
     <Image
