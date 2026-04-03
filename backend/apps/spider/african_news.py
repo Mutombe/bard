@@ -181,6 +181,25 @@ def scrape_and_save_african_news() -> int:
             for item in articles:
                 title = item["title"][:500]
 
+                # Filter non-finance articles from general news sources
+                FINANCE_KEYWORDS = [
+                    'bank', 'economy', 'finance', 'market', 'stock', 'invest',
+                    'trade', 'mining', 'oil', 'gold', 'currency', 'rand', 'naira',
+                    'gdp', 'inflation', 'interest rate', 'budget', 'tax', 'debt',
+                    'fintech', 'crypto', 'payment', 'insurance', 'pension',
+                    'infrastructure', 'energy', 'agriculture', 'export', 'import',
+                    'startup', 'venture', 'fund', 'ipo', 'merger', 'acquisition',
+                    'revenue', 'profit', 'billion', 'million', 'trillion',
+                    'central bank', 'reserve bank', 'treasury', 'fiscal',
+                    'commodity', 'petroleum', 'diesel', 'petrol', 'fuel',
+                    'business', 'corporate', 'commercial', 'industrial',
+                ]
+                title_lower = title.lower()
+                excerpt_lower = (item.get("excerpt", "") or "").lower()
+                text_check = f"{title_lower} {excerpt_lower}"
+                if not any(kw in text_check for kw in FINANCE_KEYWORDS):
+                    continue
+
                 # Skip if already exists
                 if NewsArticle.objects.filter(title=title).exists():
                     continue
