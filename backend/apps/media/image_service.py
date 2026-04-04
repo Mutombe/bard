@@ -54,6 +54,8 @@ Category: {category}
 
 Respond with ONLY the search query, nothing else."""
 
+    _disabled_until = None  # Class-level circuit breaker
+
     def __init__(self):
         self._api_key = getattr(settings, "GEMINI_API_KEY", "")
 
@@ -64,6 +66,11 @@ Respond with ONLY the search query, nothing else."""
     def generate_query(self, title: str, excerpt: str = "", category: str = "") -> Optional[str]:
         """Generate an Unsplash search query using Gemini."""
         if not self.is_configured:
+            return None
+
+        # Circuit breaker — skip if recently rate-limited
+        import time
+        if GeminiImageQueryService._disabled_until and time.time() < GeminiImageQueryService._disabled_until:
             return None
 
         try:
@@ -87,6 +94,11 @@ Respond with ONLY the search query, nothing else."""
 
             if response.status_code != 200:
                 logger.warning(f"Gemini API error: {response.status_code}")
+                # Disable for 1 hour on rate limit or auth errors
+                if response.status_code in (403, 429):
+                    import time
+                    GeminiImageQueryService._disabled_until = time.time() + 3600
+                    logger.warning("Gemini disabled for 1 hour (rate limit/auth)")
                 return None
 
             data = response.json()
