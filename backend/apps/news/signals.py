@@ -87,6 +87,12 @@ def notify_subscribers_featured_article(sender, instance, created, **kwargs):
             str(instance.id),
             task_name=f"featured-article-{instance.slug}",
         )
+        # Auto-post to LinkedIn
+        async_task(
+            "apps.engagement.linkedin.post_featured_to_linkedin",
+            str(instance.id),
+            task_name=f"linkedin-{instance.slug}",
+        )
 
 
 def _send_featured_article_emails(article_id: str):

@@ -342,6 +342,15 @@ GOOGLE_OAUTH_CLIENT_SECRET = env("GOOGLE_OAUTH_CLIENT_SECRET", default="")
 GEMINI_API_KEY = env("GEMINI_API_KEY", default="")
 
 # =========================
+# LinkedIn Auto-Posting
+# =========================
+LINKEDIN_CLIENT_ID = env("LINKEDIN_CLIENT_ID", default="77ijgi1i5t4v36")
+LINKEDIN_CLIENT_SECRET = env("LINKEDIN_CLIENT_SECRET", default="")
+LINKEDIN_REDIRECT_URI = env("LINKEDIN_REDIRECT_URI", default="https://bgfi.global/api/v1/auth/linkedin/callback")
+LINKEDIN_ORG_ID = env("LINKEDIN_ORG_ID", default="")  # Company page ID
+LINKEDIN_ACCESS_TOKEN = env("LINKEDIN_ACCESS_TOKEN", default="")
+
+# =========================
 # Logging Configuration
 # =========================
 LOGGING = {
