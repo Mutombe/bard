@@ -48,7 +48,7 @@ class LinkedInService:
 
     def get_auth_url(self, state: str = "bgfi_linkedin_auth") -> str:
         """Generate the OAuth authorization URL. User visits this once."""
-        scopes = "w_member_social w_organization_social r_organization_social"
+        scopes = "w_member_social"
         return (
             f"{self.AUTH_URL}?"
             f"response_type=code&"
@@ -162,12 +162,24 @@ class LinkedInService:
             logger.warning("No LinkedIn access token available — skipping post")
             return False
 
-        # Determine the author URN — prefer org page, fallback to person
+        # Determine the author URN
+        # w_member_social only supports posting as a person, not org
+        # We need to get the person URN from the /me endpoint
         if not author_urn:
-            if self.org_id:
-                author_urn = f"urn:li:organization:{self.org_id}"
-            else:
-                logger.error("No LinkedIn org ID configured — set LINKEDIN_ORG_ID")
+            try:
+                me_response = requests.get(
+                    f"{self.API_BASE}/me",
+                    headers={"Authorization": f"Bearer {access_token}"},
+                    timeout=10,
+                )
+                if me_response.status_code == 200:
+                    person_id = me_response.json().get("id", "")
+                    author_urn = f"urn:li:person:{person_id}"
+                else:
+                    logger.error(f"LinkedIn /me failed: {me_response.status_code}")
+                    return False
+            except Exception as e:
+                logger.error(f"LinkedIn /me error: {e}")
                 return False
 
         # Build the post payload
