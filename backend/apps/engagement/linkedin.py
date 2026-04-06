@@ -14,6 +14,7 @@ Usage:
     post_featured_to_linkedin(article_id)
 """
 import logging
+import os
 from typing import Optional
 
 import requests
@@ -24,6 +25,7 @@ logger = logging.getLogger(__name__)
 
 LINKEDIN_TOKEN_CACHE_KEY = "linkedin_access_token"
 LINKEDIN_TOKEN_DURATION = 55 * 24 * 60 * 60  # 55 days (tokens last 60 days)
+LINKEDIN_TOKEN_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".linkedin_token")
 
 
 class LinkedInService:
@@ -85,41 +87,43 @@ class LinkedInService:
         return None
 
     def get_access_token(self) -> Optional[str]:
-        """Get the access token — checks cache first, then env/settings, then DB."""
+        """Get the access token — checks cache, file, env var."""
         # 1. Cache (fastest)
         token = cache.get(LINKEDIN_TOKEN_CACHE_KEY)
         if token:
             return token
 
-        # 2. Settings/env var (persistent across restarts)
+        # 2. Token file (persists across process restarts)
+        try:
+            if os.path.exists(LINKEDIN_TOKEN_FILE):
+                with open(LINKEDIN_TOKEN_FILE) as f:
+                    token = f.read().strip()
+                if token:
+                    cache.set(LINKEDIN_TOKEN_CACHE_KEY, token, LINKEDIN_TOKEN_DURATION)
+                    return token
+        except Exception:
+            pass
+
+        # 3. Settings/env var
         token = getattr(settings, "LINKEDIN_ACCESS_TOKEN", "")
         if token:
             cache.set(LINKEDIN_TOKEN_CACHE_KEY, token, LINKEDIN_TOKEN_DURATION)
             return token
 
-        # 3. Database (most persistent)
-        try:
-            from django.contrib.sites.models import Site
-            # Use a simple key-value approach via cache table
-            from django.core.cache import caches
-            db_cache = caches.get("default", cache)
-            token = db_cache.get(LINKEDIN_TOKEN_CACHE_KEY)
-            if token:
-                return token
-        except Exception:
-            pass
-
         return None
 
     def set_access_token(self, token: str):
-        """Save access token to cache AND print it for env var setup."""
+        """Save access token to cache + file for persistence."""
         cache.set(LINKEDIN_TOKEN_CACHE_KEY, token, LINKEDIN_TOKEN_DURATION)
-        # Also print for manual env var setup
-        logger.info(f"LinkedIn token obtained. Set LINKEDIN_ACCESS_TOKEN env var on Render for persistence.")
-        print(f"\n{'='*60}")
-        print(f"IMPORTANT: Add this to your Render env vars:")
-        print(f"LINKEDIN_ACCESS_TOKEN={token}")
-        print(f"{'='*60}\n")
+        # Save to file
+        try:
+            with open(LINKEDIN_TOKEN_FILE, "w") as f:
+                f.write(token)
+            logger.info(f"LinkedIn token saved to {LINKEDIN_TOKEN_FILE}")
+        except Exception as e:
+            logger.warning(f"Could not save token file: {e}")
+        # Print for Render env var
+        print(f"\nLINKEDIN_ACCESS_TOKEN={token}\n")
 
     def get_user_profile(self, access_token: str) -> Optional[dict]:
         """Get the authenticated user's LinkedIn profile."""
