@@ -25,7 +25,9 @@ logger = logging.getLogger(__name__)
 
 LINKEDIN_TOKEN_CACHE_KEY = "linkedin_access_token"
 LINKEDIN_TOKEN_DURATION = 55 * 24 * 60 * 60  # 55 days (tokens last 60 days)
-LINKEDIN_TOKEN_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), ".linkedin_token")
+LINKEDIN_TOKEN_FILE = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", ".linkedin_token")
+)
 
 
 class LinkedInService:
