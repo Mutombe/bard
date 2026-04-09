@@ -249,15 +249,17 @@ class UnsplashService:
                     logger.info(f"No Unsplash results for: {query}")
                     return None
 
-                # Filter out obviously Western/American images for African queries
+                # Filter out blocked images and Western/American images
                 WESTERN_BLOCKLIST = [
                     'wall street', 'new york', 'manhattan', 'times square',
                     'bank of america', 'federal reserve', 'capitol hill',
                     'london city', 'canary wharf', 'tokyo', 'shanghai',
                 ]
+                blocked_ids = getattr(ArticleImageService, 'BLOCKED_IMAGE_IDS', set())
                 filtered = [
                     p for p in results
-                    if not any(
+                    if not any(bid in p.get("id", "") for bid in blocked_ids)
+                    and not any(
                         term in (p.get("alt_description", "") or "").lower()
                         or term in (p.get("description", "") or "").lower()
                         for term in WESTERN_BLOCKLIST
@@ -372,117 +374,10 @@ class ArticleImageService:
         "business": "business",
     }
 
-    # ── CURATED AFRICAN IMAGES ──
-    # Hand-picked Unsplash URLs verified to show ACTUAL African scenes.
-    # These bypass live Unsplash search to prevent NYC/Wall Street leakage.
-    # Key = (country_keyword, subject) or just (subject) for pan-African.
-    # Each entry has multiple URLs for variety.
-
-    CURATED_AFRICAN = {
-        # South Africa - verified Johannesburg/Cape Town scenes
-        ("south africa", "stock exchange"): [
-            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg skyline
-            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA business district
-            "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&h=450&fit=crop",  # Cape Town skyline
-        ],
-        ("south africa", "economy"): [
-            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg skyline
-            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA business
-            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Joburg
-        ],
-        ("south africa", "bank"): [
-            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA financial district
-            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg CBD
-        ],
-        ("south africa", "infrastructure"): [
-            "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&h=450&fit=crop",  # SA highway
-            "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=800&h=450&fit=crop",  # Cape Town
-        ],
-        # Nigeria - verified Lagos scenes
-        ("nigeria", "economy"): [
-            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos skyline
-            "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=450&fit=crop",  # Lagos business
-            "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
-            "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=450&fit=crop",  # Lagos Island aerial
-            "https://images.unsplash.com/photo-1563396983906-b3795482a59a?w=800&h=450&fit=crop",  # Lagos cityscape
-        ],
-        ("nigeria", "stock exchange"): [
-            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos skyline
-            "https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=800&h=450&fit=crop",  # Lagos business
-            "https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=800&h=450&fit=crop",  # Lagos Island aerial
-        ],
-        ("nigeria", "bank"): [
-            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos financial
-            "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
-            "https://images.unsplash.com/photo-1563396983906-b3795482a59a?w=800&h=450&fit=crop",  # Lagos cityscape
-        ],
-        # Kenya - verified Nairobi scenes
-        ("kenya", "economy"): [
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi skyline
-            "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop",  # Nairobi aerial
-        ],
-        ("kenya", "bank"): [
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
-            "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop",  # Kenya business
-        ],
-        ("kenya", "stock exchange"): [
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi skyline
-        ],
-        # Pan-African (no country specified) — generic African business/finance
-        (None, "stock exchange"): [
-            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # African business
-            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
-        ],
-        (None, "bank"): [
-            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA financial
-            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos
-        ],
-        (None, "economy"): [
-            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
-            "https://images.unsplash.com/photo-1489392191049-fc10c97e64b6?w=800&h=450&fit=crop",  # Africa landscape
-            "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&h=450&fit=crop",  # African skyline
-        ],
-        (None, "infrastructure"): [
-            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
-            "https://images.unsplash.com/photo-1540553016722-983e48a2cd10?w=800&h=450&fit=crop",  # Road infrastructure
-        ],
-        # Payments / Fintech
-        ("kenya", "payment"): [
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
-            "https://images.unsplash.com/photo-1523805009345-7448845a9e53?w=800&h=450&fit=crop",  # Kenya
-        ],
-        ("kenya", "fintech"): [
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
-        ],
-        ("nigeria", "payment"): [
-            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos
-            "https://images.unsplash.com/photo-1572883454114-efb48e2e8cd6?w=800&h=450&fit=crop",  # Lagos aerial
-        ],
-        ("nigeria", "fintech"): [
-            "https://images.unsplash.com/photo-1618828665011-0abd973f7bb8?w=800&h=450&fit=crop",  # Lagos
-        ],
-        ("south africa", "payment"): [
-            "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=450&fit=crop",  # Johannesburg
-        ],
-        (None, "payment"): [
-            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop",  # Mobile payment
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
-        ],
-        (None, "fintech"): [
-            "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=450&fit=crop",  # Mobile payment
-            "https://images.unsplash.com/photo-1611348524140-53c9a25263d6?w=800&h=450&fit=crop",  # Nairobi
-        ],
-        # Trade
-        (None, "trade"): [
-            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
-            "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=800&h=450&fit=crop",  # African skyline
-        ],
-        # Investment
-        (None, "investment"): [
-            "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?w=800&h=450&fit=crop",  # SA financial
-            "https://images.unsplash.com/photo-1547658719-da2b51169166?w=800&h=450&fit=crop",  # African city
-        ],
+    # ── BLOCKED IMAGES ──
+    # Images that should NEVER be used (wrong context, bad quality, etc.)
+    BLOCKED_IMAGE_IDS = {
+        'photo-1577495508048',  # Moss in forest — NOT business
     }
 
     # ── SUBJECT-FIRST visual concept map ──
@@ -870,19 +765,6 @@ class ArticleImageService:
             "photographer": None,
         }
 
-        # If curated image was selected, use it directly (no Unsplash API call)
-        if search_query.startswith("__curated__"):
-            curated_url = search_query.replace("__curated__", "")
-            self._used_urls.add(curated_url)
-            result = {
-                "url": curated_url,
-                "attribution": None,
-                "source": "curated",
-                "photographer": None,
-            }
-            cache.set(cache_key, result, IMAGE_CACHE_DURATION)
-            return result
-
         # Try Unsplash — with fallback to category query if first search fails
         if use_unsplash and self.unsplash.is_configured:
             queries_to_try = [search_query]
@@ -972,34 +854,12 @@ class ArticleImageService:
         """
         text = f"{title} {excerpt}".lower()
 
-        # ── Step 0: Try curated African images FIRST ──
-        # This prevents NYC/Wall Street images appearing on African stories.
+        # ── Step 0: Detect country for query modifier ──
         country_key = None
         for kw in self.COUNTRY_MODIFIERS:
             if kw in text:
                 country_key = kw
                 break
-
-        # Check curated images for common subjects
-        for subject_check in ['stock exchange', 'bank', 'economy', 'infrastructure',
-                              'central bank', 'monetary policy', 'financial',
-                              'payment', 'fintech', 'trade', 'investment']:
-            if subject_check in text:
-                # Try country-specific curated first
-                if country_key:
-                    curated = self.CURATED_AFRICAN.get((country_key, subject_check))
-                    if curated:
-                        url = self._pick_unused(curated, title)
-                        if url:
-                            logger.debug(f"Curated: '{title[:40]}' -> ({country_key}, {subject_check})")
-                            return f"__curated__{url}"
-                # Try pan-African curated
-                curated = self.CURATED_AFRICAN.get((None, subject_check))
-                if curated:
-                    url = self._pick_unused(curated, title)
-                    if url:
-                        logger.debug(f"Curated (pan-African): '{title[:40]}' -> {subject_check}")
-                        return f"__curated__{url}"
 
         # ── Step 1: Multi-word phrase matching (most precise) ──
         best_phrase = None

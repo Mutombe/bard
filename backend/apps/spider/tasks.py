@@ -963,15 +963,6 @@ def set_article_images():
                 logger.info(f"Rate limit reached after {api_calls} API calls, {saved} saved")
                 break
 
-            # Handle curated images — no API call needed
-            if query.startswith("__curated__"):
-                curated_url = query.replace("__curated__", "")
-                for article in articles:
-                    article.featured_image_url = curated_url
-                    article.save(update_fields=['featured_image_url'])
-                    saved += 1
-                continue
-
             # Fetch 10 results for this query
             results = None
             if unsplash.is_configured:
