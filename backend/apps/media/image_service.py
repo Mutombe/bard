@@ -872,10 +872,10 @@ class ArticleImageService:
             logger.debug(f"Phrase: '{title[:40]}' -> '{best_phrase[1]}'")
             return best_phrase[1]
 
-        # ── Step 2: Single-word subject matching ──
+        # ── Step 2: Single-word subject matching (word boundaries to prevent substring matches) ──
         best_subject = None
         for keyword, visual in self.SUBJECT_VISUALS.items():
-            if keyword in text:
+            if re.search(rf'\b{re.escape(keyword)}\b', text):
                 if not best_subject or len(keyword) > len(best_subject[0]):
                     best_subject = (keyword, visual)
 
