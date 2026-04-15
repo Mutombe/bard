@@ -157,14 +157,25 @@ export default function PublicationDetailPage() {
 
   return (
     <MainLayout>
-      <article className="max-w-6xl mx-auto px-4 md:px-6 py-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Link href="/" className="hover:text-foreground">Home</Link>
-          <span>·</span>
-          <Link href={pubInfo.backHref} className="hover:text-foreground">{pubInfo.label}</Link>
-          <span>·</span>
-          <span className="text-foreground line-clamp-1">{report.title}</span>
+      <article className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
+        {/* Breadcrumb — mobile shows compact back link, desktop shows full path */}
+        <nav className="mb-5 md:mb-6 text-sm text-muted-foreground">
+          {/* Mobile: just back link */}
+          <Link
+            href={pubInfo.backHref}
+            className="md:hidden inline-flex items-center gap-1.5 hover:text-foreground"
+          >
+            <CaretLeft className="h-4 w-4" />
+            <span className="truncate">{pubInfo.label}</span>
+          </Link>
+          {/* Desktop: full breadcrumb */}
+          <div className="hidden md:flex items-center gap-2">
+            <Link href="/" className="hover:text-foreground">Home</Link>
+            <span>·</span>
+            <Link href={pubInfo.backHref} className="hover:text-foreground">{pubInfo.label}</Link>
+            <span>·</span>
+            <span className="text-foreground line-clamp-1">{report.title}</span>
+          </div>
         </nav>
 
         {/* Header */}
@@ -172,10 +183,10 @@ export default function PublicationDetailPage() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12"
+          className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mb-10 md:mb-12"
         >
-          {/* Cover */}
-          <div className="md:col-span-4">
+          {/* Cover — smaller and centered on mobile */}
+          <div className="md:col-span-4 mx-auto md:mx-0 max-w-[240px] md:max-w-none w-full">
             <div className="relative aspect-[3/4] bg-terminal-bg-elevated overflow-hidden border border-terminal-border">
               {coverUrl ? (
                 <Image src={coverUrl} alt={report.title} fill className="object-cover" unoptimized />
@@ -197,34 +208,34 @@ export default function PublicationDetailPage() {
 
           {/* Meta + actions */}
           <div className="md:col-span-8 flex flex-col">
-            <div className={cn("text-xs font-medium uppercase tracking-[0.15em] mb-3", pubInfo.accent)}>
+            <div className={cn("text-[10px] md:text-xs font-medium uppercase tracking-[0.15em] mb-3 text-center md:text-left", pubInfo.accent)}>
               {pubInfo.label}
             </div>
-            <h1 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-4 leading-tight">
+            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3 md:mb-4 leading-tight text-center md:text-left">
               {report.title}
             </h1>
             {report.subtitle && (
-              <p className="text-lg text-muted-foreground mb-6 font-serif-body leading-relaxed">
+              <p className="text-base md:text-lg text-muted-foreground mb-5 md:mb-6 font-serif-body leading-relaxed text-center md:text-left">
                 {report.subtitle}
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-3 gap-y-2 text-xs md:text-sm text-muted-foreground mb-6 md:mb-8">
               {report.published_at && (
                 <span className="flex items-center gap-1.5">
-                  <CalendarBlank className="h-4 w-4" />
+                  <CalendarBlank className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   {formatDate(report.published_at)}
                 </span>
               )}
               {report.read_time_minutes ? (
                 <span className="flex items-center gap-1.5">
-                  <Clock className="h-4 w-4" />
+                  <Clock className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   {report.read_time_minutes} min read
                 </span>
               ) : null}
               {report.page_count ? (
                 <span className="flex items-center gap-1.5">
-                  <FileText className="h-4 w-4" />
+                  <FileText className="h-3.5 w-3.5 md:h-4 md:w-4" />
                   {report.page_count} pages
                 </span>
               ) : null}
@@ -234,12 +245,12 @@ export default function PublicationDetailPage() {
               )}
             </div>
 
-            {/* Action buttons */}
-            <div className="flex flex-wrap gap-3 mt-auto">
+            {/* Action buttons — full-width stacked on mobile, inline on desktop */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mt-auto">
               {pdfUrl && (
                 <button
                   onClick={handleDownload}
-                  className="flex items-center gap-2 px-5 py-3 bg-brand-coral text-white text-sm font-semibold uppercase tracking-wider hover:bg-brand-coral-dark transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 bg-brand-coral text-white text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-brand-coral-dark transition-colors"
                 >
                   <Download className="h-4 w-4" weight="bold" />
                   Download PDF
@@ -250,15 +261,16 @@ export default function PublicationDetailPage() {
                   href={pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-5 py-3 bg-brand-plum text-white text-sm font-semibold uppercase tracking-wider hover:bg-brand-plum-dark transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 bg-brand-plum text-white text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-brand-plum-dark transition-colors"
                 >
                   <ArrowSquareOut className="h-4 w-4" weight="bold" />
-                  Open in new tab
+                  <span className="sm:hidden">Open</span>
+                  <span className="hidden sm:inline">Open in new tab</span>
                 </a>
               )}
               <button
                 onClick={handleCopyLink}
-                className="flex items-center gap-2 px-5 py-3 border border-terminal-border text-foreground text-sm font-semibold uppercase tracking-wider hover:bg-terminal-bg-elevated transition-colors"
+                className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 border border-terminal-border text-foreground text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-terminal-bg-elevated transition-colors"
               >
                 {copied ? <Check className="h-4 w-4 text-brand-coral" weight="bold" /> : <LinkIcon className="h-4 w-4" />}
                 {copied ? "Copied" : "Share"}
