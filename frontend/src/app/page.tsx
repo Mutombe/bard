@@ -918,37 +918,92 @@ function IndustryNavigation() {
   );
 }
 
-/** Featured Research with left burgundy border treatment */
+/** Featured Research with real data + NEW badges */
 function FeaturedResearchSection() {
+  const [reports, setReports] = useState<any[]>([]);
+
+  useEffect(() => {
+    import("@/services/api/research").then(({ researchService }) => {
+      researchService
+        .getReports({ is_featured: true, page_size: 4, ordering: "-published_at" })
+        .then((r) => setReports(r.results || []))
+        .catch(() => {});
+    });
+  }, []);
+
+  if (reports.length === 0) {
+    // Fallback to mock data if no real reports yet
+    return (
+      <section className="py-10 md:py-14 border-b border-terminal-border">
+        <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+          <SectionHeader title="Featured Research" href="/research" label="All Publications" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {featuredResearch.map((report) => (
+              <Link
+                key={report.id}
+                href={`/research/${report.slug}`}
+                className="group p-6 border-l-2 border-l-primary border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all card-hover"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-1 text-xs font-medium lowercase tracking-wide bg-brand-violet/10 text-brand-violet-accessible">
+                    {report.category}
+                  </span>
+                  <span className="meta-line">{report.date}</span>
+                </div>
+                <h3 className="font-serif text-xl font-bold mb-2 group-hover:text-primary transition-colors">
+                  {report.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{report.description}</p>
+                <div className="mt-4 flex items-center text-sm text-primary font-medium">
+                  Read Report <ArrowRight className="ml-1 h-4 w-4 cta-arrow" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-10 md:py-14 border-b border-terminal-border">
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
-        <SectionHeader title="Featured Research" href="/research" label="All Publications" />
+        <SectionHeader title="Featured Research" href="/publications/finance-africa-quarterly" label="All Publications" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredResearch.map((report) => (
-            <Link
-              key={report.id}
-              href={`/research/${report.slug}`}
-              className="group p-6 border-l-2 border-l-primary border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all card-hover"
-            >
-              <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-1 text-xs font-medium lowercase tracking-wide bg-brand-violet/10 text-brand-violet-accessible">
-                  {report.category}
-                </span>
-                <span className="meta-line">{report.date}</span>
-              </div>
-              <h3 className="font-serif text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                {report.title}
-              </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {report.description}
-              </p>
-              <div className="mt-4 flex items-center text-sm text-primary font-medium">
-                Read Report <ArrowRight className="ml-1 h-4 w-4 cta-arrow" />
-              </div>
-            </Link>
-          ))}
+          {reports.slice(0, 4).map((report) => {
+            const pubPath = `/publications/${report.report_type}/${report.slug}`;
+            return (
+              <Link
+                key={report.id}
+                href={pubPath}
+                className="relative group p-6 border-l-2 border-l-primary border border-terminal-border bg-terminal-bg-secondary/50 hover:border-primary/50 transition-all card-hover"
+              >
+                {report.is_new && (
+                  <span className="absolute top-0 right-0 bg-brand-coral text-white text-[10px] font-bold uppercase tracking-[0.1em] px-2 py-1">
+                    NEW
+                  </span>
+                )}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-1 text-xs font-medium lowercase tracking-wide bg-brand-violet/10 text-brand-violet-accessible">
+                    {report.report_type}
+                  </span>
+                  <span className="meta-line">
+                    {report.published_at ? new Date(report.published_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+                  </span>
+                </div>
+                <h3 className="font-serif text-xl font-bold mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                  {report.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+                  {report.abstract}
+                </p>
+                <div className="mt-4 flex items-center text-sm text-primary font-medium">
+                  Read Report <ArrowRight className="ml-1 h-4 w-4 cta-arrow" />
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

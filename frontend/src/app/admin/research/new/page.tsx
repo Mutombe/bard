@@ -25,14 +25,13 @@ import { ModernEditor } from "@/components/editor/ModernEditor";
 import { toast } from "sonner";
 
 const REPORT_TYPES = [
-  { value: "analysis", label: "Market Analysis" },
-  { value: "forecast", label: "Economic Forecast" },
-  { value: "sector", label: "Sector Report" },
-  { value: "company", label: "Company Research" },
-  { value: "policy", label: "Policy Analysis" },
-  { value: "quarterly", label: "Quarterly Review" },
+  { value: "quarterly", label: "Finance Africa Quarterly (Flagship Journal)" },
+  { value: "analysis", label: "Finance Africa Insights (Editorial)" },
+  { value: "outlook", label: "AfriFin Analytics (Data Intelligence)" },
   { value: "annual", label: "Annual Report" },
+  { value: "country", label: "Country Report" },
   { value: "special", label: "Special Report" },
+  { value: "whitepaper", label: "Whitepaper" },
 ];
 
 const STATUS_OPTIONS = [
@@ -59,6 +58,7 @@ export default function NewResearchReportPage() {
   const [reportType, setReportType] = useState("analysis");
   const [status, setStatus] = useState("draft");
   const [coverImage, setCoverImage] = useState("");
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [isFeatured, setIsFeatured] = useState(false);
   const [isPremium, setIsPremium] = useState(false);
   const [readTimeMinutes, setReadTimeMinutes] = useState(15);
@@ -135,28 +135,53 @@ export default function NewResearchReportPage() {
     return result.url;
   }, []);
 
+  const submitReport = async (publishStatus: string) => {
+    const baseData: Record<string, any> = {
+      title,
+      subtitle,
+      abstract,
+      content,
+      key_findings: keyFindings.filter(f => f.trim()),
+      methodology,
+      data_sources: dataSources,
+      report_type: reportType,
+      status: publishStatus,
+      cover_image_url: coverImage || undefined,
+      is_featured: isFeatured,
+      is_premium: isPremium,
+      read_time_minutes: readTimeMinutes,
+      page_count: pageCount,
+      meta_title: metaTitle || undefined,
+      meta_description: metaDescription || undefined,
+    };
+
+    if (pdfFile) {
+      // Multipart upload when PDF attached
+      const formData = new FormData();
+      Object.entries(baseData).forEach(([k, v]) => {
+        if (v === undefined || v === null) return;
+        if (Array.isArray(v)) {
+          v.forEach(item => formData.append(k, item));
+        } else if (typeof v === "boolean") {
+          formData.append(k, v ? "true" : "false");
+        } else {
+          formData.append(k, String(v));
+        }
+      });
+      formData.append("pdf_file", pdfFile);
+      await researchService.createReportMultipart(formData);
+    } else {
+      await researchService.createReport({
+        ...baseData,
+        external_authors: externalAuthors.filter(a => a.name.trim()),
+      } as any);
+    }
+  };
+
   const handleSaveDraft = async () => {
     setIsSaving(true);
     try {
-      await researchService.createReport({
-        title,
-        subtitle,
-        abstract,
-        content,
-        key_findings: keyFindings.filter(f => f.trim()),
-        methodology,
-        data_sources: dataSources,
-        report_type: reportType,
-        status: "draft",
-        cover_image: coverImage || undefined,
-        is_featured: isFeatured,
-        is_premium: isPremium,
-        read_time_minutes: readTimeMinutes,
-        page_count: pageCount,
-        meta_title: metaTitle || undefined,
-        meta_description: metaDescription || undefined,
-        external_authors: externalAuthors.filter(a => a.name.trim()),
-      });
+      await submitReport("draft");
       toast.success("Draft saved successfully");
       router.push("/admin/research");
     } catch (error: any) {
@@ -183,25 +208,7 @@ export default function NewResearchReportPage() {
 
     setIsLoading(true);
     try {
-      await researchService.createReport({
-        title,
-        subtitle,
-        abstract,
-        content,
-        key_findings: keyFindings.filter(f => f.trim()),
-        methodology,
-        data_sources: dataSources,
-        report_type: reportType,
-        status: "published",
-        cover_image: coverImage || undefined,
-        is_featured: isFeatured,
-        is_premium: isPremium,
-        read_time_minutes: readTimeMinutes,
-        page_count: pageCount,
-        meta_title: metaTitle || undefined,
-        meta_description: metaDescription || undefined,
-        external_authors: externalAuthors.filter(a => a.name.trim()),
-      });
+      await submitReport("published");
       toast.success("Research report published!");
       router.push("/admin/research");
     } catch (error: any) {
@@ -305,6 +312,46 @@ export default function NewResearchReportPage() {
                   <ImageIcon className="h-10 w-10 mb-2" />
                   <span className="text-sm font-medium">Add cover image</span>
                 </button>
+              )}
+            </div>
+
+            {/* PDF Upload */}
+            <div>
+              <label className="block text-sm font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+                PDF Document
+              </label>
+              {pdfFile ? (
+                <div className="flex items-center justify-between p-4 bg-terminal-bg-elevated border border-terminal-border">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-8 w-8 text-brand-coral" />
+                    <div>
+                      <div className="font-medium text-sm">{pdfFile.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setPdfFile(null)}
+                    className="px-3 py-1.5 bg-red-500 text-white text-xs font-medium"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="block w-full p-8 border-2 border-dashed border-terminal-border hover:border-brand-violet cursor-pointer text-center transition-colors">
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
+                    className="hidden"
+                  />
+                  <FileText className="h-10 w-10 mx-auto mb-2 text-muted-foreground" />
+                  <div className="text-sm font-medium">Click to upload PDF</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Optional · for downloadable reports
+                  </div>
+                </label>
               )}
             </div>
 

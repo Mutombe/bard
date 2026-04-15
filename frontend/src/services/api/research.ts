@@ -64,10 +64,12 @@ export interface ResearchReport {
   cover_image_url?: string;
   image_url?: string;
   pdf_file?: string;
+  pdf_url?: string;
   status: string;
   published_at?: string;
   is_featured?: boolean;
   is_premium?: boolean;
+  is_new?: boolean;
   view_count?: number;
   download_count?: number;
   read_time_minutes?: number;
@@ -166,14 +168,31 @@ export const researchService = {
     return response.data;
   },
 
+  async getCounts(): Promise<{
+    by_type: Record<string, number>;
+    total: number;
+    has_new: boolean;
+    new_count: number;
+  }> {
+    const response = await publicClient.get("/research/reports/counts/");
+    return response.data;
+  },
+
   async downloadReport(slug: string): Promise<{ message: string; pdf_url?: string }> {
-    const response = await authClient.post(`/research/reports/${slug}/download/`);
+    const response = await publicClient.post(`/research/reports/${slug}/download/`);
     return response.data;
   },
 
   // Admin endpoints
   async createReport(data: Partial<ResearchReport>): Promise<ResearchReport> {
     const response = await authClient.post("/research/reports/", data);
+    return response.data;
+  },
+
+  async createReportMultipart(formData: FormData): Promise<ResearchReport> {
+    const response = await authClient.post("/research/reports/", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 

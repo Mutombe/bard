@@ -3,10 +3,13 @@ Research API Views
 """
 from django.db import models
 from django.db.models import Count, Sum
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Topic, Industry, ResearchReport, ResearchDownload
@@ -109,6 +112,7 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
         "topics", "industries", "countries", "contributing_authors"
     )
     permission_classes = [IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
     lookup_field = "slug"
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ["report_type", "status", "is_featured", "is_premium"]
@@ -164,6 +168,26 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
         featured = self.get_queryset().filter(is_featured=True, status="published")[:6]
         serializer = ResearchReportListSerializer(featured, many=True, context={"request": request})
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], permission_classes=[])
+    def counts(self, request):
+        """Counts per report_type + has_new flag for nav badges."""
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+        published = ResearchReport.objects.filter(status="published")
+
+        type_counts = {}
+        for report_type, _ in ResearchReport.ReportType.choices:
+            type_counts[report_type] = published.filter(report_type=report_type).count()
+
+        has_new = published.filter(published_at__gte=thirty_days_ago).exists()
+        new_count = published.filter(published_at__gte=thirty_days_ago).count()
+
+        return Response({
+            "by_type": type_counts,
+            "total": published.count(),
+            "has_new": has_new,
+            "new_count": new_count,
+        })
 
     @action(detail=True, methods=["post"])
     def download(self, request, slug=None):

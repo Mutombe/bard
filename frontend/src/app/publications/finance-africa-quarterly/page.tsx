@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Books,
@@ -15,6 +15,8 @@ import {
 } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { publicClient } from "@/services/api/client";
+import { researchService, type ResearchReport } from "@/services/api/research";
+import { PublicationListItem } from "@/components/publications/PublicationListItem";
 import { toast } from "sonner";
 
 // Deep Indigo accent: #2D3A8C light, #6272C1 dark
@@ -66,6 +68,16 @@ export default function FinanceAfricaQuarterlyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [reports, setReports] = useState<ResearchReport[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    researchService
+      .getReports({ report_type: "quarterly", page_size: 20, ordering: "-published_at" })
+      .then((r) => setReports(r.results || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -179,23 +191,39 @@ export default function FinanceAfricaQuarterlyPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-bold mb-6">Recent Issues</h2>
-              <div className="space-y-4">
-                {pastIssues.map((issue) => (
-                  <div
-                    key={issue.title}
-                    className="p-4 bg-terminal-bg-secondary border border-terminal-border border-l-[3px] border-l-[#2D3A8C] dark:border-l-[#6272C1]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <Scroll className={`h-5 w-5 ${ACCENT} flex-shrink-0 mt-0.5`} />
-                      <div>
-                        <h3 className="font-semibold mb-1">{issue.title}</h3>
-                        <p className="text-sm text-muted-foreground">{issue.description}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex items-baseline justify-between mb-6">
+                <h2 className="text-2xl font-bold">Issues</h2>
+                {reports.length > 0 && (
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {reports.length} {reports.length === 1 ? "issue" : "issues"}
+                  </span>
+                )}
               </div>
+
+              {loading ? (
+                <div className="space-y-4">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="h-64 bg-terminal-bg-secondary animate-pulse" />
+                  ))}
+                </div>
+              ) : reports.length === 0 ? (
+                <div className="p-8 bg-terminal-bg-secondary border border-terminal-border text-center text-muted-foreground">
+                  No issues published yet. The first quarterly report is coming soon.
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Latest issue as featured */}
+                  <PublicationListItem report={reports[0]} featured />
+                  {/* Archive grid */}
+                  {reports.length > 1 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                      {reports.slice(1).map((r) => (
+                        <PublicationListItem key={r.id} report={r} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
 
             <section>
