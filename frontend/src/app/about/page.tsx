@@ -10,15 +10,48 @@ import {
   BookOpen,
   FileText,
   Envelope,
-  Shield,
   Lightbulb,
-  Scales,
   ChartLineUp,
   Briefcase,
   MapPin,
-  Phone,
+  TreeStructure,
+  Factory,
+  UsersThree,
+  CirclesFour,
+  Cpu,
+  GraduationCap,
+  Scales,
 } from "@phosphor-icons/react";
 import { MainLayout } from "@/components/layout/MainLayout";
+
+const researchThemes = [
+  {
+    icon: <Factory className="h-6 w-6" />,
+    title: "Productivity and Prosperity",
+    description: "Creating and harnessing the world's assets most productively.",
+  },
+  {
+    icon: <TreeStructure className="h-6 w-6" />,
+    title: "Resources of the World",
+    description: "Building, powering, and feeding the world sustainably.",
+  },
+  {
+    icon: <UsersThree className="h-6 w-6" />,
+    title: "Human Potential",
+    description: "Maximising and achieving the potential of human talent.",
+  },
+  {
+    icon: <CirclesFour className="h-6 w-6" />,
+    title: "Global Connections",
+    description:
+      "Exploring how flows of goods, services, people, capital, and ideas shape economies.",
+  },
+  {
+    icon: <Cpu className="h-6 w-6" />,
+    title: "Technologies and Markets of the Future",
+    description: "Discussing the next big arenas of value and competition.",
+  },
+];
 
 const publications = [
   {
@@ -26,7 +59,7 @@ const publications = [
     title: "Finance Africa Quarterly",
     tagline: "Flagship quarterly journal",
     description:
-      "In-depth quarterly analysis of African markets, featuring long-form investigative pieces, sector deep-dives, and economic outlook reports. The journal through which we interpret investable frontiers.",
+      "In-depth quarterly analysis of African markets, sector deep-dives, and economic outlook reports. The journal through which we interpret investable frontiers.",
     href: "/publications/finance-africa-quarterly",
   },
   {
@@ -47,64 +80,32 @@ const publications = [
   },
 ];
 
-const values = [
+const leadership = [
   {
-    icon: <Shield className="h-6 w-6" />,
-    title: "Deep, Reliable Research",
-    description:
-      "Fundamental and technical interpretations that help readers make strategic, high-yield investment decisions grounded in the realities of African markets.",
+    name: "Shephard Mphambela",
+    role: "CEO, Co-Founder · Publisher & Editor-in-Chief",
+    email: "shephard@bgfi.global",
+    isLead: true,
   },
   {
-    icon: <Globe className="h-6 w-6" />,
-    title: "Africa-Based, Globally Minded",
-    description:
-      "We are rooted on the continent and speak to both global capital seeking emerging-market exposure and African entities expanding across jurisdictions.",
-  },
-  {
-    icon: <Scales className="h-6 w-6" />,
-    title: "Editorial Independence",
-    description:
-      "Our research sits independent of commercial interests. Our mandate is to surface opportunities, not to promote them.",
-  },
-  {
-    icon: <Lightbulb className="h-6 w-6" />,
-    title: "Contextualised Risk",
-    description:
-      "We do not minimise frontier-market risks — we contextualise them. Informed capital is transformative capital.",
+    name: "Senziwani Sikhosana",
+    role: "Chair of the Board · Co-Founder",
+    email: "sikhosana@bardsantner.com",
+    isLead: true,
   },
 ];
 
-const team = [
-  { name: "Shep Mpambela", role: "Founder, Publisher & Editor-in-Chief", email: "shephard@bgfi.global" },
-  { name: "Chris Muronzi", role: "Editor", email: "chris@bgfi.global" },
-  { name: "Mollen Chamisa", role: "Sub Editor · Production & Layout", email: "mollen@bgfi.global" },
-  { name: "Farai Mabeza", role: "Contributor", email: "farai@bgfi.global" },
-  { name: "Belinda Chiroodza", role: "Contributor", email: "belinda@bgfi.global" },
-  { name: "Tinashe Kaduwo", role: "Contributor", email: "tinashe@bgfi.global" },
-];
-
-const serves = [
-  {
-    title: "Offshore Institutional Investors",
-    description:
-      "Funds, pension plans, and sovereign wealth vehicles seeking exposure to emerging and frontier African markets need nuanced, sector-specific intelligence — not generalised risk narratives.",
-  },
-  {
-    title: "Continental Entities",
-    description:
-      "African corporates, family offices, and financial institutions expanding across jurisdictions on the continent need specialist macroeconomic advisory to navigate differing regulatory, tax, and market conditions.",
-  },
-  {
-    title: "Policy Makers & Development Partners",
-    description:
-      "Decision-makers shaping continental policy — AfCFTA implementation, monetary policy, industrialisation strategy — benefit from rigorous, impartial research into outcomes across jurisdictions.",
-  },
+const editorialTeam = [
+  { name: "Mollen Chamisa", role: "Sub-Editing · Research & Analysis", email: "mollen@bgfi.global" },
+  { name: "Farai Mabeza", role: "Research & Analysis", email: "farai@bgfi.global" },
+  { name: "Belinda Chiroodza", role: "Research & Analysis", email: "belinda@bgfi.global" },
+  { name: "Tinashe Kaduwo", role: "Research & Analysis", email: "tinashe@bgfi.global" },
 ];
 
 export default function AboutPage() {
   return (
     <MainLayout>
-      {/* Hero Section */}
+      {/* Hero */}
       <section className="relative py-16 md:py-24 overflow-hidden bg-brand-plum text-white">
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-r from-brand-plum via-brand-plum/95 to-brand-plum/70" />
@@ -127,7 +128,7 @@ export default function AboutPage() {
               The Imperative of <span className="text-brand-coral">Informed Capital</span>
             </h1>
             <p className="text-lg md:text-xl text-white/85 mb-8 leading-relaxed font-serif-body">
-              BGFI is an Africa-based global finance research and consulting institute. Our mandate: to interpret African economic conditions and surface actionable investment opportunities for the global investor.
+              An Africa-based global finance research and consulting institute established in January 2026. We deliver research, advisory, and insights on the critical economic and business issues affecting Africa&apos;s companies, economic sectors, and policy leaders.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link
@@ -164,49 +165,66 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Why We Exist */}
+        {/* What is BGFI */}
         <section className="py-16 md:py-20 border-b border-terminal-border">
-          <div className="max-w-4xl">
-            <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-4">
-              Why We Exist
+          <div className="grid md:grid-cols-12 gap-10">
+            <div className="md:col-span-4">
+              <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-3">
+                About
+              </div>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold leading-tight">
+                What is BGFI?
+              </h2>
             </div>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-8 leading-tight">
-              Bridging the information asymmetry between global capital and African opportunity
-            </h2>
-            <div className="space-y-5 text-lg md:text-xl text-muted-foreground leading-relaxed font-serif-body">
+            <div className="md:col-span-8 space-y-5 text-base md:text-lg text-muted-foreground leading-relaxed font-serif-body">
               <p>
-                The narrative surrounding African economic development and investment has long been characterised by profound <span className="text-foreground font-semibold">information asymmetry</span>.
+                The Bard Global Finance Institute was established in <span className="text-foreground font-semibold">January 2026</span>. We interpret African economic conditions and surface actionable investment opportunities for the global investor — whether an offshore institutional investor seeking exposure to emerging markets or a continental entity expanding across African jurisdictions.
               </p>
               <p>
-                For decades, global capital has viewed the continent through a lens of generalised risk, often overlooking the nuanced, sector-specific, and highly lucrative opportunities that define the modern African economic landscape.
+                BGFI benefits from the full range of <span className="text-foreground font-semibold">Bard Santner&apos;s</span> regional, sectoral, and functional knowledge, as well as leveraging some of its skills and expertise. However, <span className="text-foreground font-semibold">editorial direction and decisions are solely the responsibility of BGFI&apos;s executive directors and partners</span>.
               </p>
               <p>
-                BGFI was established to bridge this critical knowledge gap — providing deep, reliable, and incisive interpretations of fundamental and technical realities to help our readers make strategic, high-yield investments that drive the continent&apos;s economic evolution.
+                We aim for <span className="text-foreground font-semibold">independent, fact-based research</span> that does not glorify or misinform any entity. While we engage multiple distinguished external advisers to contribute to our work, the analyses presented in our publications are BGFI&apos;s alone — and any errors are our own.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Who We Serve */}
+        {/* Research Themes */}
         <section className="py-16 md:py-20 border-b border-terminal-border">
           <div className="mb-12">
             <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-3">
-              Who We Serve
+              Research Focus
             </div>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold">
-              Built for decision-makers who move capital across Africa
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 max-w-3xl">
+              Five themes organise our research
             </h2>
+            <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
+              Globally originated, with a locus of focus on promoting the application of financial resource allocation in Africa.
+            </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {serves.map((item) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {researchThemes.map((theme, idx) => (
               <div
-                key={item.title}
-                className="p-6 md:p-8 bg-terminal-bg-secondary border border-terminal-border"
+                key={theme.title}
+                className="p-6 bg-terminal-bg-secondary border border-terminal-border hover:border-brand-violet/40 transition-colors"
               >
-                <h3 className="font-serif text-xl font-bold mb-3">{item.title}</h3>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-                  {item.description}
-                </p>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="h-12 w-12 bg-brand-plum/10 text-brand-plum flex items-center justify-center">
+                      {theme.icon}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-brand-coral mb-1">
+                      {String(idx + 1).padStart(2, "0")}
+                    </div>
+                    <h3 className="font-serif text-lg font-bold mb-2 leading-tight">{theme.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {theme.description}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -218,7 +236,7 @@ export default function AboutPage() {
             <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-3">
               Our Publications
             </div>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4 max-w-3xl">
               A three-tiered publication strategy
             </h2>
             <p className="text-base md:text-lg text-muted-foreground max-w-2xl">
@@ -253,58 +271,95 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Values */}
-        <section className="py-16 md:py-20 border-b border-terminal-border">
-          <div className="text-center mb-12 max-w-2xl mx-auto">
-            <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-3">
-              How We Work
-            </div>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-4">
-              The principles that govern our research
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {values.map((value) => (
-              <div
-                key={value.title}
-                className="p-6 bg-terminal-bg-secondary border border-terminal-border"
-              >
-                <div className="h-12 w-12 bg-brand-coral/10 text-brand-coral flex items-center justify-center mb-4">
-                  {value.icon}
-                </div>
-                <h3 className="font-serif text-lg font-bold mb-2">{value.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Editorial Team */}
+        {/* Leadership */}
         <section className="py-16 md:py-20 border-b border-terminal-border">
           <div className="mb-12">
             <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-3">
-              Editorial Team
+              Leadership
             </div>
-            <h2 className="font-serif text-3xl md:text-4xl font-bold">
-              The people behind the research
+            <h2 className="font-serif text-3xl md:text-4xl font-bold max-w-3xl">
+              Led by the founders
             </h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {team.map((person) => (
+
+          {/* Co-founders — prominent */}
+          <div className="grid md:grid-cols-2 gap-6 mb-10">
+            {leadership.map((person) => (
               <div
                 key={person.email}
-                className="p-5 bg-terminal-bg-secondary border border-terminal-border"
+                className="p-8 bg-brand-plum text-white relative overflow-hidden"
               >
-                <h3 className="font-serif text-lg font-bold mb-1">{person.name}</h3>
-                <p className="text-sm text-brand-coral mb-2">{person.role}</p>
+                <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-coral mb-4">
+                  Co-Founder
+                </div>
+                <h3 className="font-serif text-2xl md:text-3xl font-bold mb-2">{person.name}</h3>
+                <p className="text-base text-white/80 mb-5">{person.role}</p>
                 <a
                   href={`mailto:${person.email}`}
-                  className="text-xs text-muted-foreground hover:text-foreground"
+                  className="inline-flex items-center gap-2 text-sm text-brand-coral hover:text-white transition-colors"
                 >
+                  <Envelope className="h-4 w-4" />
                   {person.email}
                 </a>
               </div>
             ))}
+          </div>
+
+          {/* Editorial team */}
+          <div>
+            <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-brand-violet mb-5">
+              Editorial Team
+            </h3>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {editorialTeam.map((person) => (
+                <div
+                  key={person.email}
+                  className="p-5 bg-terminal-bg-secondary border border-terminal-border"
+                >
+                  <h4 className="font-serif text-lg font-bold mb-1">{person.name}</h4>
+                  <p className="text-xs text-brand-coral mb-2">{person.role}</p>
+                  <a
+                    href={`mailto:${person.email}`}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                  >
+                    {person.email}
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Advisers */}
+        <section className="py-16 md:py-20 border-b border-terminal-border">
+          <div className="max-w-4xl">
+            <div className="text-xs font-medium uppercase tracking-[0.15em] text-brand-violet mb-3">
+              Advisory Network
+            </div>
+            <h2 className="font-serif text-3xl md:text-4xl font-bold mb-6 leading-tight">
+              A network of premier development finance and investment experts
+            </h2>
+            <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-serif-body mb-8">
+              BGFI collaborates with a diverse group of specialists across disciplines who serve as advisers to our projects — economists, public policy specialists, Chartered Financial Analysts, and banking professionals.
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { icon: <ChartLineUp className="h-5 w-5" />, label: "Economists" },
+                { icon: <Scales className="h-5 w-5" />, label: "Public Policy Specialists" },
+                { icon: <GraduationCap className="h-5 w-5" />, label: "Chartered Financial Analysts" },
+                { icon: <Briefcase className="h-5 w-5" />, label: "Banking Professionals" },
+              ].map((adv) => (
+                <div
+                  key={adv.label}
+                  className="p-5 bg-terminal-bg-secondary border border-terminal-border text-center"
+                >
+                  <div className="h-10 w-10 mx-auto bg-brand-violet/10 text-brand-violet-accessible flex items-center justify-center mb-3">
+                    {adv.icon}
+                  </div>
+                  <div className="text-sm font-semibold">{adv.label}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
