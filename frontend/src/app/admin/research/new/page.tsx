@@ -201,8 +201,9 @@ export default function NewResearchReportPage() {
       toast.error("Please enter an abstract");
       return;
     }
-    if (!content.trim()) {
-      toast.error("Please enter content");
+    // Content only required when no PDF attached
+    if (!pdfFile && !content.trim()) {
+      toast.error("Please add either body content or a PDF document");
       return;
     }
 
@@ -438,12 +439,15 @@ export default function NewResearchReportPage() {
             {/* Full Content with Modern Editor */}
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">
-                Full Report Content *
+                Full Report Content
+                <span className="ml-2 text-xs text-muted-foreground/70 normal-case font-normal">
+                  Optional — leave empty if the research is contained in the PDF above
+                </span>
               </label>
               <ModernEditor
                 content={content}
                 onChange={setContent}
-                placeholder="Write your comprehensive research report here..."
+                placeholder="Optional. If you only have a PDF, skip this field..."
                 onImageUpload={handleImageUpload}
               />
             </div>

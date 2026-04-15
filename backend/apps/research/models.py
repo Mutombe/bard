@@ -223,7 +223,8 @@ class ResearchReport(BaseModel):
     )
     content = RichTextUploadingField(
         "Full Content",
-        help_text="Full research report content",
+        blank=True,
+        help_text="Optional — leave empty if the research is contained in the PDF",
     )
 
     # =========================
