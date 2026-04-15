@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     template: "%s | Bard Global Finance Institute",
   },
   description:
-    "BGFI is an Africa-based global finance research and consulting institute. We interpret African economic conditions and surface actionable investment opportunities for the global investor — from offshore institutions seeking emerging-market exposure to continental entities expanding across African jurisdictions. Publishers of Finance Africa Quarterly, Africa Finance Insights, and AfriFin Analytics.",
+    "Bard Global Finance Institute delivers comprehensive global research, advisory services, insights, and a factual foundation to facilitate investment allocation and strategic decision-making on the most critical economic and business issues affecting Africa's companies, economic sectors, and policy leaders. Publishers of Finance Africa Quarterly, Africa Finance Insights, and AfriFin Analytics.",
   keywords: [
     "African finance research",
     "African investment opportunities",
@@ -84,7 +84,7 @@ export const metadata: Metadata = {
     siteName: "Bard Global Finance Institute",
     title: "Bard Global Finance Institute | The Imperative of Informed Capital",
     description:
-      "Africa-based global finance research and consulting institute bridging the information asymmetry between global capital and African investment opportunities. Specialist macroeconomic advisory and the Finance Africa Quarterly journal.",
+      "Comprehensive research, advisory, and insights on the critical economic and business issues affecting Africa's companies, economic sectors, and policy leaders. Publisher of the Finance Africa Quarterly.",
     images: [
       {
         url: "/images/fav.png",
