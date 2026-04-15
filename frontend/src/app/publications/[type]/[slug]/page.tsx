@@ -291,11 +291,13 @@ export default function PublicationDetailPage() {
           </section>
         )}
 
-        {/* PDF inline viewer */}
+        {/* PDF viewer — iframe on desktop, mobile-optimized card on phones */}
         {pdfUrl && (
           <section className="mb-10">
-            <h2 className="text-2xl font-serif font-bold mb-4">Read Full Report</h2>
-            <div className="relative w-full bg-terminal-bg-elevated border border-terminal-border" style={{ height: "85vh" }}>
+            <h2 className="text-xl md:text-2xl font-serif font-bold mb-4">Read Full Report</h2>
+
+            {/* Desktop: native iframe (works on Chrome/Firefox/Edge desktop) */}
+            <div className="hidden md:block relative w-full bg-terminal-bg-elevated border border-terminal-border" style={{ height: "85vh" }}>
               <iframe
                 src={pdfUrl}
                 title={report.title}
@@ -303,7 +305,41 @@ export default function PublicationDetailPage() {
                 allow="fullscreen"
               />
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">
+
+            {/* Mobile: Google Docs viewer iframe (works on iOS Safari + Android) */}
+            <div className="md:hidden relative w-full bg-terminal-bg-elevated border border-terminal-border" style={{ height: "70vh" }}>
+              <iframe
+                src={`https://docs.google.com/gview?url=${encodeURIComponent(pdfUrl)}&embedded=true`}
+                title={report.title}
+                className="w-full h-full"
+                allow="fullscreen"
+              />
+            </div>
+
+            {/* Mobile prompt card — call out the actions clearly */}
+            <div className="md:hidden mt-4 p-4 bg-terminal-bg-secondary border border-terminal-border">
+              <p className="text-sm font-medium mb-3">Best read on a larger screen — or grab the PDF for offline reading:</p>
+              <div className="flex flex-col gap-2">
+                <a
+                  href={pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-brand-plum text-white text-xs font-semibold uppercase tracking-wider"
+                >
+                  <ArrowSquareOut className="h-4 w-4" weight="bold" />
+                  Open PDF in new tab
+                </a>
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-brand-coral text-white text-xs font-semibold uppercase tracking-wider"
+                >
+                  <Download className="h-4 w-4" weight="bold" />
+                  Download PDF
+                </button>
+              </div>
+            </div>
+
+            <p className="hidden md:block mt-3 text-xs text-muted-foreground">
               PDF not loading? <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-brand-coral hover:underline">Open in new tab</a> or <button onClick={handleDownload} className="text-brand-coral hover:underline">download directly</button>.
             </p>
           </section>
