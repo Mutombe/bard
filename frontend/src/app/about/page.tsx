@@ -150,6 +150,20 @@ export default function AboutPage() {
       </section>
 
       <div className="max-w-[1400px] mx-auto px-4 md:px-6">
+        {/* Mission Statement */}
+        <section className="py-16 md:py-20 border-b border-terminal-border">
+          <div className="max-w-4xl">
+            <div className="text-xs font-medium uppercase tracking-[0.2em] text-brand-coral mb-5">
+              Our Mission
+            </div>
+            <div className="relative pl-6 md:pl-8 border-l-[3px] border-l-brand-coral">
+              <p className="font-serif text-2xl md:text-3xl lg:text-4xl leading-[1.3] md:leading-[1.25] font-medium text-foreground">
+                To deliver comprehensive global research, advisory services, insights, and a factual foundation to facilitate investment allocation and strategic decision-making on the most critical economic and business issues affecting Africa&apos;s companies, economic sectors, and policy leaders.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Why We Exist */}
         <section className="py-16 md:py-20 border-b border-terminal-border">
           <div className="max-w-4xl">
