@@ -444,28 +444,66 @@ class ResearchDownload(TimeStampedModel):
         blank=True,
         related_name="research_downloads",
     )
-    session_key = models.CharField(
-        "Session Key",
-        max_length=40,
-        blank=True,
-    )
-    ip_address = models.GenericIPAddressField(
-        "IP Address",
-        null=True,
-        blank=True,
-    )
-    user_agent = models.TextField(
-        "User Agent",
-        blank=True,
-    )
+    session_key = models.CharField("Session Key", max_length=40, blank=True)
+    ip_address = models.GenericIPAddressField("IP Address", null=True, blank=True)
+    user_agent = models.TextField("User Agent", blank=True)
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+    country_name = models.CharField("Country Name", max_length=80, blank=True)
+    city = models.CharField("City", max_length=120, blank=True)
 
     class Meta:
         verbose_name = "Research Download"
         verbose_name_plural = "Research Downloads"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["report", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"Download: {self.report.title[:50]}"
+
+
+class ResearchView(TimeStampedModel):
+    """
+    Track research report page views (separate from downloads).
+    """
+
+    report = models.ForeignKey(
+        ResearchReport,
+        on_delete=models.CASCADE,
+        related_name="views",
+    )
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="research_views",
+    )
+    session_key = models.CharField("Session Key", max_length=40, blank=True)
+    ip_address = models.GenericIPAddressField("IP Address", null=True, blank=True)
+    user_agent = models.TextField("User Agent", blank=True)
+    referrer = models.URLField("Referrer", blank=True)
+    time_on_page = models.PositiveIntegerField("Time on Page (seconds)", default=0)
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+    country_name = models.CharField("Country Name", max_length=80, blank=True)
+    city = models.CharField("City", max_length=120, blank=True)
+    region = models.CharField("Region", max_length=120, blank=True)
+    source = models.CharField("Source", max_length=40, blank=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Research View"
+        verbose_name_plural = "Research Views"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["report", "-created_at"]),
+            models.Index(fields=["country", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"View: {self.report.title[:50]}"
 
 
 class ResearchRelated(TimeStampedModel):

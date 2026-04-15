@@ -412,11 +412,23 @@ class ArticleView(TimeStampedModel):
         "Time on Page (seconds)",
         default=0,
     )
+    # Geo data — populated from IP at tracking time
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+    country_name = models.CharField("Country Name", max_length=80, blank=True)
+    city = models.CharField("City", max_length=120, blank=True)
+    region = models.CharField("Region", max_length=120, blank=True)
+    # Source: where they came from (search, social, direct, internal)
+    source = models.CharField("Source", max_length=40, blank=True, db_index=True)
 
     class Meta:
         verbose_name = "Article View"
         verbose_name_plural = "Article Views"
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["article", "-created_at"]),
+            models.Index(fields=["country", "-created_at"]),
+        ]
 
     def __str__(self):
         return f"View: {self.article.title[:50]}"

@@ -159,6 +159,32 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         # Increment view count
         instance.increment_view_count()
+
+        # Track view with geo + user info (silent fail)
+        try:
+            from .models import ResearchView
+            from apps.analytics.geoip import get_client_ip, lookup_geo, detect_source
+
+            ip = get_client_ip(request)
+            geo = lookup_geo(ip)
+            referrer = request.META.get("HTTP_REFERER", "")
+
+            ResearchView.objects.create(
+                report=instance,
+                user=request.user if request.user.is_authenticated else None,
+                session_key=request.session.session_key or "",
+                ip_address=ip or None,
+                user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+                referrer=referrer[:200],
+                country=geo["country"],
+                country_name=geo["country_name"],
+                city=geo["city"],
+                region=geo["region"],
+                source=detect_source(referrer),
+            )
+        except Exception:
+            pass
+
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
@@ -189,25 +215,31 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
             "new_count": new_count,
         })
 
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=[])
     def download(self, request, slug=None):
         """Track research report download."""
+        from apps.analytics.geoip import get_client_ip, lookup_geo
         report = self.get_object()
 
         # Check premium access
-        if report.is_premium and not (request.user.is_authenticated and hasattr(request.user, "has_premium")):
+        if report.is_premium and not (request.user.is_authenticated and getattr(request.user, "has_premium", False)):
             return Response(
                 {"error": "Premium subscription required to download this report."},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Track download
+        # Track download with geo
+        ip = get_client_ip(request)
+        geo = lookup_geo(ip)
         ResearchDownload.objects.create(
             report=report,
             user=request.user if request.user.is_authenticated else None,
             session_key=request.session.session_key or "",
-            ip_address=self.get_client_ip(request),
-            user_agent=request.META.get("HTTP_USER_AGENT", ""),
+            ip_address=ip or None,
+            user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+            country=geo["country"],
+            country_name=geo["country_name"],
+            city=geo["city"],
         )
 
         # Increment download count
@@ -215,7 +247,7 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
 
         return Response({
             "message": "Download tracked",
-            "pdf_url": report.pdf_file.url if report.pdf_file else None,
+            "pdf_url": report.pdf_file.url if report.pdf_file else (report.pdf_url if hasattr(report, 'pdf_url') else None),
         })
 
     def get_client_ip(self, request):
