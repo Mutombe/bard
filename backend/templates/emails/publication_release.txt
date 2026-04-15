@@ -1,0 +1,29 @@
+BARD GLOBAL FINANCE INSTITUTE
+{% if is_new %}NEW PUBLICATION{% else %}PUBLICATION{% endif %}
+
+{{ publication_label }} — {{ report.published_at|date:"F j, Y" }}
+
+{{ report.title }}
+{% if report.subtitle %}
+{{ report.subtitle }}
+{% endif %}
+─────────────────────────────────────
+
+{{ report.abstract }}
+
+{% if report.page_count or report.read_time_minutes %}
+{% if report.page_count %}{{ report.page_count }} pages{% endif %}{% if report.page_count and report.read_time_minutes %} · {% endif %}{% if report.read_time_minutes %}{{ report.read_time_minutes }} min read{% endif %} · PDF
+{% endif %}
+
+→ Read the full report:
+   {{ report_url }}
+
+{% if pdf_url %}→ Download PDF:
+   {{ pdf_url }}
+{% endif %}
+─────────────────────────────────────
+
+You're receiving this because you subscribe to BGFI publications.
+Manage subscriptions: {{ unsubscribe_url|default:"https://bgfi.global/subscribe" }}
+
+© Bard Global Finance Institute · bgfi.global
