@@ -39,6 +39,8 @@ import {
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { useSavedCounts } from "@/hooks/use-saved-counts";
+import useSWR from "swr";
+import { researchService } from "@/services/api/research";
 
 interface NavItem {
   label: string;
@@ -181,16 +183,34 @@ const navigationData: NavDropdown[] = [
   },
 ];
 
-function DropdownSection({ section, savedCounts }: { section: NavSection; savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number } }) {
-  // Map hrefs to their saved counts
+function DropdownSection({ section, savedCounts, publicationCounts }: {
+  section: NavSection;
+  savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number };
+  publicationCounts?: { quarterly: number; analysis: number; outlook: number };
+}) {
+  // Map hrefs to their counts
   const getItemBadge = (href: string | undefined) => {
-    if (!savedCounts || !href) return null;
+    if (!href) return null;
 
-    if (href === "/saved" && savedCounts.savedArticlesCount > 0) {
-      return savedCounts.savedArticlesCount;
+    if (savedCounts) {
+      if (href === "/saved" && savedCounts.savedArticlesCount > 0) {
+        return savedCounts.savedArticlesCount;
+      }
+      if (href === "/saved?tab=liked" && savedCounts.likesCount > 0) {
+        return savedCounts.likesCount;
+      }
     }
-    if (href === "/saved?tab=liked" && savedCounts.likesCount > 0) {
-      return savedCounts.likesCount;
+
+    if (publicationCounts) {
+      if (href === "/publications/finance-africa-quarterly" && publicationCounts.quarterly > 0) {
+        return publicationCounts.quarterly;
+      }
+      if (href === "/publications/finance-africa-insights" && publicationCounts.analysis > 0) {
+        return publicationCounts.analysis;
+      }
+      if (href === "/publications/afrifin-analytics" && publicationCounts.outlook > 0) {
+        return publicationCounts.outlook;
+      }
     }
     return null;
   };
@@ -241,11 +261,17 @@ function DropdownSection({ section, savedCounts }: { section: NavSection; savedC
   );
 }
 
-function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdown: NavDropdown; isOpen: boolean; topOffset: number; savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number } }) {
+function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts, publicationCounts }: {
+  dropdown: NavDropdown;
+  isOpen: boolean;
+  topOffset: number;
+  savedCounts?: { watchlistCount: number; savedArticlesCount: number; likesCount: number };
+  publicationCounts?: { quarterly: number; analysis: number; outlook: number };
+}) {
   if (!isOpen) return null;
 
-  // Pass savedCounts to My Library dropdown
   const showSavedCounts = dropdown.label === "My Library" ? savedCounts : undefined;
+  const showPubCounts = dropdown.label === "Publications" ? publicationCounts : undefined;
 
   return (
     <div
@@ -257,7 +283,12 @@ function NavDropdownMenu({ dropdown, isOpen, topOffset, savedCounts }: { dropdow
           {/* Sections */}
           <div className="flex-1 grid grid-cols-3 gap-6">
             {dropdown.sections.map((section) => (
-              <DropdownSection key={section.title} section={section} savedCounts={showSavedCounts} />
+              <DropdownSection
+                key={section.title}
+                section={section}
+                savedCounts={showSavedCounts}
+                publicationCounts={showPubCounts}
+              />
             ))}
           </div>
 
@@ -297,6 +328,19 @@ export function Navigation() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
   const savedCounts = useSavedCounts();
+
+  // Publication counts from /research/reports/counts/
+  const { data: pubCountsData } = useSWR(
+    "publication-counts",
+    () => researchService.getCounts(),
+    { revalidateOnFocus: false, dedupingInterval: 60000, refreshInterval: 300000 }
+  );
+  const publicationCounts = {
+    quarterly: pubCountsData?.by_type?.quarterly || 0,
+    analysis: pubCountsData?.by_type?.analysis || 0,
+    outlook: pubCountsData?.by_type?.outlook || 0,
+  };
+  const hasNewPublications = pubCountsData?.has_new || false;
 
   // Calculate dropdown position based on header
   const updatePosition = () => {
@@ -361,7 +405,9 @@ export function Navigation() {
     <>
       <nav ref={navRef} className="hidden lg:flex items-center gap-2 relative">
         {navigationData.map((dropdown) => {
-          const showBadge = dropdown.label === "My Library" && hasBooksItems;
+          const showBadge =
+            (dropdown.label === "My Library" && hasBooksItems) ||
+            (dropdown.label === "Publications" && hasNewPublications);
           return (
             <div
               key={dropdown.label}
@@ -405,6 +451,7 @@ export function Navigation() {
             isOpen={openDropdown === dropdown.label}
             topOffset={dropdownTop}
             savedCounts={savedCounts}
+            publicationCounts={publicationCounts}
           />
         </div>
       ))}

@@ -1,12 +1,21 @@
 """
 Research API Serializers
 """
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.users.serializers import UserMinimalSerializer
 from apps.geography.serializers import CountryMinimalSerializer
 
 from .models import Topic, Industry, ResearchReport, ResearchDownload
+
+
+def _is_new(obj) -> bool:
+    """Return True if report was published less than 30 days ago."""
+    if not obj.published_at:
+        return False
+    return obj.published_at >= timezone.now() - timedelta(days=30)
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -68,6 +77,8 @@ class ResearchReportListSerializer(serializers.ModelSerializer):
     topics = TopicMinimalSerializer(many=True, read_only=True)
     industries = IndustryMinimalSerializer(many=True, read_only=True)
     image_url = serializers.SerializerMethodField()
+    pdf_url = serializers.SerializerMethodField()
+    is_new = serializers.SerializerMethodField()
 
     class Meta:
         model = ResearchReport
@@ -81,6 +92,7 @@ class ResearchReportListSerializer(serializers.ModelSerializer):
             "cover_image",
             "cover_image_url",
             "image_url",
+            "pdf_url",
             "lead_author",
             "topics",
             "industries",
@@ -88,11 +100,23 @@ class ResearchReportListSerializer(serializers.ModelSerializer):
             "published_at",
             "is_featured",
             "is_premium",
+            "is_new",
             "view_count",
             "download_count",
             "read_time_minutes",
             "page_count",
         ]
+
+    def get_is_new(self, obj):
+        return _is_new(obj)
+
+    def get_pdf_url(self, obj):
+        if obj.pdf_file:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.pdf_file.url)
+            return obj.pdf_file.url
+        return None
 
     def get_image_url(self, obj):
         """Return the best available image URL."""
@@ -114,6 +138,8 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
     countries = CountryMinimalSerializer(many=True, read_only=True)
     related_reports = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
+    pdf_url = serializers.SerializerMethodField()
+    is_new = serializers.SerializerMethodField()
 
     class Meta:
         model = ResearchReport
@@ -142,6 +168,7 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
             "published_at",
             "is_featured",
             "is_premium",
+            "is_new",
             "view_count",
             "download_count",
             "read_time_minutes",
@@ -149,6 +176,7 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
             "meta_title",
             "meta_description",
             "related_reports",
+            "pdf_url",
             "created_at",
             "updated_at",
         ]
@@ -161,6 +189,17 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.cover_image.url)
             return obj.cover_image.url
         return obj.cover_image_url or None
+
+    def get_is_new(self, obj):
+        return _is_new(obj)
+
+    def get_pdf_url(self, obj):
+        if obj.pdf_file:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.pdf_file.url)
+            return obj.pdf_file.url
+        return None
 
     def get_related_reports(self, obj):
         related = obj.related_from.select_related("related_report__lead_author").all()[:5]

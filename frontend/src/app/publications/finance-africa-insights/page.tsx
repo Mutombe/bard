@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { researchService, type ResearchReport } from "@/services/api/research";
+import { PublicationListItem } from "@/components/publications/PublicationListItem";
 import {
   Feather,
   Check,
@@ -72,6 +74,16 @@ export default function FinanceAfricaInsightsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [reports, setReports] = useState<ResearchReport[]>([]);
+  const [loadingReports, setLoadingReports] = useState(true);
+
+  useEffect(() => {
+    researchService
+      .getReports({ report_type: "analysis", page_size: 20, ordering: "-published_at" })
+      .then((r) => setReports(r.results || []))
+      .catch(() => {})
+      .finally(() => setLoadingReports(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,6 +187,27 @@ export default function FinanceAfricaInsightsPage() {
                 ))}
               </ul>
             </section>
+
+            {!loadingReports && reports.length > 0 && (
+              <section>
+                <div className="flex items-baseline justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Recent Publications</h2>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {reports.length} {reports.length === 1 ? "report" : "reports"}
+                  </span>
+                </div>
+                <div className="space-y-6">
+                  <PublicationListItem report={reports[0]} featured />
+                  {reports.length > 1 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                      {reports.slice(1).map((r) => (
+                        <PublicationListItem key={r.id} report={r} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
 
           <div>
