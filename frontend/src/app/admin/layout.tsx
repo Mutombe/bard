@@ -40,6 +40,7 @@ const sidebarItems = [
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/research", label: "Research", icon: BookOpen },
   { href: "/admin/analytics", label: "Analytics", icon: ChartBar },
+  { href: "/admin/insights", label: "Insights", icon: ChartBar },
   { href: "/admin/tasks", label: "Tasks", icon: ClipboardText },
   { href: "/admin/topics", label: "Topics", icon: Tag },
   { href: "/admin/industries", label: "Industries", icon: Factory },

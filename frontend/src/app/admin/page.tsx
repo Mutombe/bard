@@ -184,62 +184,59 @@ export default function AdminDashboard() {
   });
 
   const fetchDashboardData = async (showRefreshIndicator = false) => {
-    try {
-      if (showRefreshIndicator) {
-        setRefreshing(true);
-      }
+    if (showRefreshIndicator) setRefreshing(true);
 
-      // Fetch articles - run in parallel for speed
-      const [articlesResponse, userStats, newsletterStats] = await Promise.all([
-        editorialService.getArticles({ page_size: 5 }),
-        adminService.getUserStats().catch(() => ({ total_users: 0, premium_users: 0, admin_count: 0, new_today: 0 })),
-        adminService.getNewsletterStats().catch(() => ({ total_subscribers: 0, active_subscribers: 0, open_rate: 0, click_rate: 0 })),
-      ]);
+    // Fire ALL requests in parallel — no sequential blocking
+    const [
+      articlesRes,
+      userStatsRes,
+      newsletterStatsRes,
+      pendingAsgnRes,
+      inProgressAsgnRes,
+      adminStatsRes,
+    ] = await Promise.allSettled([
+      editorialService.getArticles({ page_size: 5 }),
+      adminService.getUserStats(),
+      adminService.getNewsletterStats(),
+      editorialService.getAllAssignments({ status: "PENDING" }),
+      editorialService.getAllAssignments({ status: "IN_PROGRESS" }),
+      editorialService.getAdminStats(),
+    ]);
 
-      setArticles(articlesResponse.results || []);
+    // Articles
+    if (articlesRes.status === "fulfilled") {
+      setArticles(articlesRes.value.results || []);
+      setStats(prev => ({ ...prev, totalArticles: articlesRes.value.count || 0 }));
+    }
+
+    // User stats
+    if (userStatsRes.status === "fulfilled") {
+      setStats(prev => ({ ...prev, totalUsers: userStatsRes.value.total_users || 0 }));
+    }
+
+    // Newsletter stats
+    if (newsletterStatsRes.status === "fulfilled") {
+      setStats(prev => ({ ...prev, newsletterSubs: newsletterStatsRes.value.total_subscribers || 0 }));
+    }
+
+    // Assignments (combine pending + in-progress)
+    const pending = pendingAsgnRes.status === "fulfilled" ? pendingAsgnRes.value : [];
+    const inProgress = inProgressAsgnRes.status === "fulfilled" ? inProgressAsgnRes.value : [];
+    setAssignments([...pending, ...inProgress].slice(0, 10));
+
+    // Admin stats override
+    if (adminStatsRes.status === "fulfilled") {
       setStats(prev => ({
         ...prev,
-        totalArticles: articlesResponse.count || 0,
-        totalUsers: userStats.total_users || 0,
-        newsletterSubs: newsletterStats.total_subscribers || 0,
+        totalArticles: adminStatsRes.value.articles_count || prev.totalArticles,
+        publishedToday: adminStatsRes.value.published_today || 0,
+        pendingReview: adminStatsRes.value.pending_review || 0,
+        draftCount: adminStatsRes.value.draft_count || 0,
       }));
-
-      // Fetch all assignments for admin view (not just user's)
-      try {
-        const allAssignments = await editorialService.getAllAssignments({ status: "PENDING" });
-        // Also get in-progress assignments
-        const inProgressAssignments = await editorialService.getAllAssignments({ status: "IN_PROGRESS" });
-        setAssignments([...allAssignments, ...inProgressAssignments].slice(0, 10) || []);
-      } catch {
-        // Fall back to user's assignments if all assignments not available
-        try {
-          const myAssignments = await editorialService.getMyAssignments();
-          setAssignments(myAssignments || []);
-        } catch {
-          setAssignments([]);
-        }
-      }
-
-      // Fetch admin stats for article counts (all articles, not just user's)
-      try {
-        const adminStats = await editorialService.getAdminStats();
-        setStats(prev => ({
-          ...prev,
-          totalArticles: adminStats.articles_count || prev.totalArticles,
-          publishedToday: adminStats.published_today || 0,
-          pendingReview: adminStats.pending_review || 0,
-          draftCount: adminStats.draft_count || 0,
-        }));
-      } catch {
-        // Admin stats endpoint may not be available
-      }
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-      toast.error("Failed to load dashboard data");
-    } finally {
-      setIsLoading(false);
-      setRefreshing(false);
     }
+
+    setIsLoading(false);
+    setRefreshing(false);
   };
 
   useEffect(() => {

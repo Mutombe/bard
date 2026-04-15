@@ -227,6 +227,31 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         # Increment view count
         instance.increment_view_count()
 
+        # Track view with geo + user info (silent fail — analytics shouldn't break reading)
+        try:
+            from .models import ArticleView
+            from apps.analytics.geoip import get_client_ip, lookup_geo, detect_source
+
+            ip = get_client_ip(request)
+            geo = lookup_geo(ip)
+            referrer = request.META.get("HTTP_REFERER", "")
+
+            ArticleView.objects.create(
+                article=instance,
+                user=request.user if request.user.is_authenticated else None,
+                session_key=request.session.session_key or "",
+                ip_address=ip or None,
+                user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+                referrer=referrer[:200],
+                country=geo["country"],
+                country_name=geo["country_name"],
+                city=geo["city"],
+                region=geo["region"],
+                source=detect_source(referrer),
+            )
+        except Exception:
+            pass
+
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 

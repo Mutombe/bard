@@ -5,6 +5,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .insights_views import content_insights
 
 app_name = "analytics"
 
@@ -19,6 +20,7 @@ router.register(r"geographic", views.GeographicAnalyticsViewSet, basename="geogr
 
 urlpatterns = [
     path("dashboard/", views.AdminDashboardView.as_view(), name="dashboard"),
+    path("insights/", content_insights, name="content-insights"),
     path("comprehensive/", views.ComprehensiveAnalyticsView.as_view(), name="comprehensive"),
     path("track/", views.TrackEventView.as_view(), name="track"),
     path("", include(router.urls)),
