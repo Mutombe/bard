@@ -232,6 +232,7 @@ class ResearchReportCreateSerializer(serializers.ModelSerializer):
             "contributing_authors",
             "external_authors",
             "cover_image",
+            "cover_image_url",
             "pdf_file",
             "status",
             "is_featured",
