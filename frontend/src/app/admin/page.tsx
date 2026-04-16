@@ -19,6 +19,7 @@ import {
   DownloadSimple,
   Headphones,
   ChartBar,
+  Envelope,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { LoadingSkeleton, Skeleton } from "@/components/ui/loading";
@@ -33,43 +34,26 @@ interface DashboardStats {
   totalUsers: number;
   newsletterSubs: number;
   draftCount: number;
+  // Research
+  totalResearch: number;
+  researchThisMonth: number;
+  totalDownloads: number;
+  // Coverage
+  topicsCount: number;
+  industriesCount: number;
+  regionsCount: number;
+  countriesCount: number;
+  // Podcasts (defaults to 0 if not fetched)
+  podcastEpisodes: number;
 }
 
-// Mock research institute metrics - to be replaced with API calls
-const mockResearchStats = {
-  totalReports: 47,
-  reportsThisMonth: 3,
-  totalDownloads: 12450,
-  avgReadTime: "12 min",
-};
-
-const mockPodcastStats = {
-  totalEpisodes: 368,
-  totalListens: 198000,
-  activeShows: 3,
-  newThisWeek: 5,
-};
-
-const mockCoverageStats = {
-  regions: 5,
-  countries: 54,
-  industries: 12,
-  topics: 24,
-};
-
-// Recent research reports mock data
-const recentReports = [
-  { id: "1", title: "African Banking Sector Outlook 2025", downloads: 1234, status: "published" },
-  { id: "2", title: "Mobile Money Revolution Analysis", downloads: 987, status: "published" },
-  { id: "3", title: "ESG Investment Trends in Africa", downloads: 0, status: "review" },
-];
-
-// Top performing content
-const topContent = [
-  { title: "Central Bank Policy Changes", type: "Article", views: 8934 },
-  { title: "African Banking Outlook 2025", type: "Research", views: 5678 },
-  { title: "JSE Rally Analysis", type: "Podcast", views: 3456 },
-];
+interface RecentReport {
+  id: string;
+  title: string;
+  slug: string;
+  download_count: number;
+  status: string;
+}
 
 function getStatusColor(status: string) {
   switch (status?.toLowerCase()) {
@@ -181,10 +165,23 @@ export default function AdminDashboard() {
     totalUsers: 0,
     newsletterSubs: 0,
     draftCount: 0,
+    totalResearch: 0,
+    researchThisMonth: 0,
+    totalDownloads: 0,
+    topicsCount: 0,
+    industriesCount: 0,
+    regionsCount: 0,
+    countriesCount: 0,
+    podcastEpisodes: 0,
   });
+  const [recentReports, setRecentReports] = useState<RecentReport[]>([]);
+  const [topContent, setTopContent] = useState<Array<{ title: string; type: string; views: number; href?: string }>>([]);
 
   const fetchDashboardData = async (showRefreshIndicator = false) => {
     if (showRefreshIndicator) setRefreshing(true);
+
+    const { researchService } = await import("@/services/api/research");
+    const apiClient = (await import("@/services/api/client")).default;
 
     // Fire ALL requests in parallel — no sequential blocking
     const [
@@ -194,6 +191,12 @@ export default function AdminDashboard() {
       pendingAsgnRes,
       inProgressAsgnRes,
       adminStatsRes,
+      researchListRes,
+      researchCountsRes,
+      topicsRes,
+      industriesRes,
+      regionsRes,
+      topArticlesRes,
     ] = await Promise.allSettled([
       editorialService.getArticles({ page_size: 5 }),
       adminService.getUserStats(),
@@ -201,6 +204,12 @@ export default function AdminDashboard() {
       editorialService.getAllAssignments({ status: "PENDING" }),
       editorialService.getAllAssignments({ status: "IN_PROGRESS" }),
       editorialService.getAdminStats(),
+      researchService.getReports({ page_size: 5, ordering: "-published_at" }),
+      researchService.getCounts(),
+      apiClient.get("/research/topics/").catch(() => ({ data: [] })),
+      apiClient.get("/research/industries/").catch(() => ({ data: [] })),
+      apiClient.get("/geography/countries/").catch(() => ({ data: { results: [], count: 0 } })),
+      editorialService.getArticles({ page_size: 3, ordering: "-view_count" } as any),
     ]);
 
     // Articles
@@ -233,6 +242,62 @@ export default function AdminDashboard() {
         pendingReview: adminStatsRes.value.pending_review || 0,
         draftCount: adminStatsRes.value.draft_count || 0,
       }));
+    }
+
+    // Research stats — total, this month, downloads sum
+    if (researchListRes.status === "fulfilled") {
+      const list = researchListRes.value.results || [];
+      setRecentReports(list.slice(0, 5).map((r: any) => ({
+        id: r.id,
+        title: r.title,
+        slug: r.slug,
+        download_count: r.download_count || 0,
+        status: r.status,
+      })));
+    }
+
+    if (researchCountsRes.status === "fulfilled") {
+      const counts = researchCountsRes.value;
+      setStats(prev => ({
+        ...prev,
+        totalResearch: counts.total || 0,
+        researchThisMonth: counts.new_count || 0,
+      }));
+    }
+
+    // Topics, industries, countries counts
+    if (topicsRes.status === "fulfilled") {
+      const data = topicsRes.value.data;
+      const count = Array.isArray(data) ? data.length : (data.count || data.results?.length || 0);
+      setStats(prev => ({ ...prev, topicsCount: count }));
+    }
+    if (industriesRes.status === "fulfilled") {
+      const data = industriesRes.value.data;
+      const count = Array.isArray(data) ? data.length : (data.count || data.results?.length || 0);
+      setStats(prev => ({ ...prev, industriesCount: count }));
+    }
+    if (regionsRes.status === "fulfilled") {
+      const data = regionsRes.value.data;
+      const count = data.count || (Array.isArray(data) ? data.length : data.results?.length) || 0;
+      // Calculate regions (5 standard) and countries
+      setStats(prev => ({ ...prev, countriesCount: count, regionsCount: 5 }));
+    }
+
+    // Total downloads — sum from research list (best effort, will be approximate)
+    if (researchListRes.status === "fulfilled") {
+      const totalDl = (researchListRes.value.results || [])
+        .reduce((sum: number, r: any) => sum + (r.download_count || 0), 0);
+      setStats(prev => ({ ...prev, totalDownloads: totalDl }));
+    }
+
+    // Top performing content — articles with highest views
+    if (topArticlesRes.status === "fulfilled") {
+      setTopContent((topArticlesRes.value.results || []).slice(0, 3).map((a: any) => ({
+        title: a.title,
+        type: "Article",
+        views: a.view_count || 0,
+        href: `/news/${a.slug}`,
+      })));
     }
 
     setIsLoading(false);
@@ -453,49 +518,51 @@ export default function AdminDashboard() {
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
           >
             <BookOpen className="h-5 w-5 text-blue-400 mb-2" />
-            <div className="text-xl font-bold">{mockResearchStats.totalReports}</div>
+            <div className="text-xl font-bold">{stats.totalResearch}</div>
             <div className="text-sm text-muted-foreground">Research Reports</div>
-            <div className="text-xs text-blue-400 mt-1">
-              {mockResearchStats.reportsThisMonth} this month
-            </div>
-          </Link>
-
-          {/* Podcast Episodes */}
-          <Link
-            href="/admin/podcasts"
-            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
-          >
-            <Microphone className="h-5 w-5 text-purple-400 mb-2" />
-            <div className="text-xl font-bold">{mockPodcastStats.totalEpisodes}</div>
-            <div className="text-sm text-muted-foreground">Podcast Episodes</div>
-            <div className="text-xs text-purple-400 mt-1">
-              {mockPodcastStats.newThisWeek} new this week
-            </div>
+            {stats.researchThisMonth > 0 && (
+              <div className="text-xs text-blue-400 mt-1">
+                {stats.researchThisMonth} new (last 30 days)
+              </div>
+            )}
           </Link>
 
           {/* Total Downloads */}
           <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
             <DownloadSimple className="h-5 w-5 text-green-400 mb-2" />
-            <div className="text-xl font-bold">{mockResearchStats.totalDownloads.toLocaleString()}</div>
+            <div className="text-xl font-bold">{stats.totalDownloads.toLocaleString()}</div>
             <div className="text-sm text-muted-foreground">Report Downloads</div>
           </div>
 
-          {/* Total Listens */}
-          <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4">
-            <Headphones className="h-5 w-5 text-amber-400 mb-2" />
-            <div className="text-xl font-bold">{mockPodcastStats.totalListens.toLocaleString()}</div>
-            <div className="text-sm text-muted-foreground">Podcast Listens</div>
-          </div>
+          {/* Subscribers */}
+          <Link
+            href="/admin/newsletters"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
+          >
+            <Envelope className="h-5 w-5 text-purple-400 mb-2" />
+            <div className="text-xl font-bold">{stats.newsletterSubs.toLocaleString()}</div>
+            <div className="text-sm text-muted-foreground">Newsletter Subscribers</div>
+          </Link>
+
+          {/* Total Articles */}
+          <Link
+            href="/admin/articles"
+            className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-4 hover:border-primary transition-colors"
+          >
+            <FileText className="h-5 w-5 text-amber-400 mb-2" />
+            <div className="text-xl font-bold">{stats.totalArticles.toLocaleString()}</div>
+            <div className="text-sm text-muted-foreground">Articles in Library</div>
+          </Link>
         </div>
 
         {/* Coverage Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Link
             href="/admin/regions"
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
           >
             <Globe className="h-4 w-4 text-primary mx-auto mb-1" />
-            <div className="text-lg font-bold">{mockCoverageStats.regions}</div>
+            <div className="text-lg font-bold">{stats.regionsCount || "—"}</div>
             <div className="text-xs text-muted-foreground">Regions</div>
           </Link>
           <Link
@@ -503,7 +570,7 @@ export default function AdminDashboard() {
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
           >
             <Globe className="h-4 w-4 text-blue-400 mx-auto mb-1" />
-            <div className="text-lg font-bold">{mockCoverageStats.countries}</div>
+            <div className="text-lg font-bold">{stats.countriesCount || "—"}</div>
             <div className="text-xs text-muted-foreground">Countries</div>
           </Link>
           <Link
@@ -511,7 +578,7 @@ export default function AdminDashboard() {
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
           >
             <Factory className="h-4 w-4 text-amber-400 mx-auto mb-1" />
-            <div className="text-lg font-bold">{mockCoverageStats.industries}</div>
+            <div className="text-lg font-bold">{stats.industriesCount || "—"}</div>
             <div className="text-xs text-muted-foreground">Industries</div>
           </Link>
           <Link
@@ -519,7 +586,7 @@ export default function AdminDashboard() {
             className="bg-terminal-bg-secondary rounded-lg border border-terminal-border p-3 hover:border-primary transition-colors text-center"
           >
             <Tag className="h-4 w-4 text-green-400 mx-auto mb-1" />
-            <div className="text-lg font-bold">{mockCoverageStats.topics}</div>
+            <div className="text-lg font-bold">{stats.topicsCount || "—"}</div>
             <div className="text-xs text-muted-foreground">Topics</div>
           </Link>
         </div>
@@ -542,29 +609,35 @@ export default function AdminDashboard() {
             </Link>
           </div>
           <div className="divide-y divide-terminal-border">
-            {recentReports.map((report) => (
-              <Link
-                key={report.id}
-                href={`/admin/research/${report.id}`}
-                className="flex items-center justify-between p-4 hover:bg-terminal-bg-elevated transition-colors"
-              >
-                <div className="flex-1 min-w-0 mr-4">
-                  <div className="font-medium truncate text-sm">{report.title}</div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                    <DownloadSimple className="h-3 w-3" />
-                    {report.downloads.toLocaleString()} downloads
-                  </div>
-                </div>
-                <span
-                  className={cn(
-                    "px-2 py-1 rounded text-xs font-medium capitalize",
-                    getStatusColor(report.status)
-                  )}
+            {recentReports.length === 0 ? (
+              <div className="p-6 text-center text-sm text-muted-foreground">
+                No research reports yet. <Link href="/admin/research/new" className="text-brand-coral hover:underline">Upload your first report →</Link>
+              </div>
+            ) : (
+              recentReports.map((report) => (
+                <Link
+                  key={report.id}
+                  href={`/admin/research/${report.slug}/edit`}
+                  className="flex items-center justify-between p-4 hover:bg-terminal-bg-elevated transition-colors"
                 >
-                  {report.status}
-                </span>
-              </Link>
-            ))}
+                  <div className="flex-1 min-w-0 mr-4">
+                    <div className="font-medium truncate text-sm">{report.title}</div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                      <DownloadSimple className="h-3 w-3" />
+                      {report.download_count.toLocaleString()} downloads
+                    </div>
+                  </div>
+                  <span
+                    className={cn(
+                      "px-2 py-1 rounded text-xs font-medium capitalize",
+                      getStatusColor(report.status)
+                    )}
+                  >
+                    {report.status}
+                  </span>
+                </Link>
+              ))
+            )}
           </div>
         </div>
 
@@ -577,26 +650,34 @@ export default function AdminDashboard() {
             </h2>
           </div>
           <div className="divide-y divide-terminal-border">
-            {topContent.map((content, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-4"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded bg-terminal-bg flex items-center justify-center text-sm font-medium text-muted-foreground">
-                    {index + 1}
-                  </div>
-                  <div>
-                    <div className="font-medium text-sm">{content.title}</div>
-                    <div className="text-xs text-muted-foreground">{content.type}</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Eye className="h-3 w-3" />
-                  {content.views.toLocaleString()}
-                </div>
+            {topContent.length === 0 ? (
+              <div className="p-6 text-center text-sm text-muted-foreground">
+                No view data yet — readers haven&apos;t engaged with content.
               </div>
-            ))}
+            ) : (
+              topContent.map((content, index) => (
+                <Link
+                  key={index}
+                  href={content.href || "#"}
+                  target="_blank"
+                  className="flex items-center justify-between p-4 hover:bg-terminal-bg-elevated transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded bg-terminal-bg flex items-center justify-center text-sm font-medium text-muted-foreground">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <div className="font-medium text-sm">{content.title}</div>
+                      <div className="text-xs text-muted-foreground">{content.type}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Eye className="h-3 w-3" />
+                    {content.views.toLocaleString()}
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </div>
       </div>

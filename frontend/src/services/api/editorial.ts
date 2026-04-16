@@ -39,6 +39,8 @@ export interface Article {
   is_premium: boolean;
   view_count: number;
   read_time_minutes: number;
+  source?: string; // editorial | serpapi | scraped | polygon
+  external_source_name?: string;
   meta_title?: string;
   meta_description?: string;
   created_at: string;

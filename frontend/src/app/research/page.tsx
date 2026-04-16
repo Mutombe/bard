@@ -448,29 +448,28 @@ export default function ResearchPage() {
           </section>
         ) : null}
 
-        {/* Our Analysts */}
+        {/* Our Research Team */}
         <section className="mt-12 pt-12 border-t border-terminal-border">
           <h2 className="headline text-2xl mb-6">Our Research Team</h2>
           <p className="text-muted-foreground mb-8 max-w-2xl">
-            Our research is produced by a team of experienced analysts with deep
-            expertise in African markets, economies, and industries.
+            BGFI&apos;s research is produced by an editorial team grounded in the African continent and supported by an advisory network of economists, public policy specialists, Chartered Financial Analysts, and banking professionals.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {[
-              { name: "Dr. Fatima Hassan", title: "Chief Economist", focus: "Macro, Banking" },
-              { name: "Thabo Mokoena", title: "Senior Analyst", focus: "Equity, Strategy" },
-              { name: "Chidi Okonkwo", title: "West Africa Correspondent", focus: "Nigeria, Ghana" },
-              { name: "Sarah Mulondo", title: "Mining Analyst", focus: "Resources, ESG" },
-            ].map((analyst) => (
-              <div key={analyst.name} className="text-center p-4 rounded-lg bg-terminal-bg-secondary">
-                <div className="h-16 w-16 rounded-full bg-terminal-bg-elevated mx-auto mb-3 flex items-center justify-center">
-                  <span className="text-lg font-semibold text-primary">
-                    {analyst.name.split(" ").map((n) => n[0]).join("")}
-                  </span>
+              { name: "Shephard Mphambela", title: "CEO · Editor-in-Chief", focus: "Co-Founder" },
+              { name: "Senziwani Sikhosana", title: "Chair of the Board", focus: "Co-Founder" },
+              { name: "Mollen Chamisa", title: "Sub-Editor", focus: "Production · Research" },
+              { name: "Farai Mabeza", title: "Research & Analysis", focus: "Markets" },
+              { name: "Belinda Chiroodza", title: "Research & Analysis", focus: "Sectors" },
+              { name: "Tinashe Kaduwo", title: "Research & Analysis", focus: "Economics" },
+            ].map((person) => (
+              <div key={person.name} className="text-center p-4 bg-terminal-bg-secondary border border-terminal-border">
+                <div className="h-16 w-16 bg-brand-plum text-white mx-auto mb-3 flex items-center justify-center text-lg font-serif font-bold">
+                  {person.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                 </div>
-                <div className="font-semibold text-sm">{analyst.name}</div>
-                <div className="text-xs text-primary">{analyst.title}</div>
-                <div className="text-xs text-muted-foreground mt-1">{analyst.focus}</div>
+                <div className="font-semibold text-sm">{person.name}</div>
+                <div className="text-xs text-brand-coral mt-0.5">{person.title}</div>
+                <div className="text-xs text-muted-foreground mt-1">{person.focus}</div>
               </div>
             ))}
           </div>
