@@ -374,9 +374,11 @@ export default function NewsPage() {
   const { data: articlesData, isLoading: loading } = useArticles(articleParams);
   const articles = articlesData?.results || [];
 
-  // Fetch trending articles via SWR
+  // Fetch trending articles by view count — only show those with actual views
   const { data: trendingData } = useArticles({ ordering: "-view_count", page_size: 5 });
-  const trendingArticles = trendingData?.results || [];
+  const trendingArticles = (trendingData?.results || []).filter(
+    (a: any) => (a.view_count || 0) > 0
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -444,9 +446,9 @@ export default function NewsPage() {
         </div>
 
         {/* Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-8 space-y-6">
             {loading ? (
               <>
                 <FeaturedSkeleton />
@@ -493,8 +495,8 @@ export default function NewsPage() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <aside className="space-y-6">
+          {/* Sidebar — sticky, follows reader */}
+          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:scrollbar-hide">
             {/* Trending */}
             <section className="p-4 rounded-lg bg-terminal-bg-secondary border border-terminal-border">
               <h2 className="font-bold flex items-center gap-2 mb-4">
