@@ -43,7 +43,14 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return User.objects.filter(id=self.request.user.id)
+        user = self.request.user
+        # Admins/staff/superusers see all users for management
+        if user.is_authenticated and (
+            user.is_staff or user.is_superuser or getattr(user, "role", None) == "super_admin"
+        ):
+            return User.objects.all().order_by("-date_joined")
+        # Regular users only see their own record
+        return User.objects.filter(id=user.id)
 
     def get_serializer_class(self):
         if self.action == "create":
