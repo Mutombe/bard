@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
 import { store } from "@/store";
 import { refreshToken, clearAuth } from "@/store/slices/authSlice";
+import { getVisitorId } from "@/lib/visitor";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -19,12 +20,16 @@ const apiClient: AxiosInstance = axios.create({
   timeout: 60000, // 60 seconds to handle cold starts
 });
 
-// Request interceptor - add auth token
+// Request interceptor - add auth token + visitor id
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("access_token");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    const visitorId = getVisitorId();
+    if (visitorId && config.headers) {
+      config.headers["X-Visitor-Id"] = visitorId;
     }
     return config;
   },
@@ -121,6 +126,24 @@ export const publicClient: AxiosInstance = axios.create({
   },
   timeout: 60000, // 60 seconds to handle cold starts
 });
+
+// Attach visitor id + optional auth token on every public request
+publicClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      const visitorId = getVisitorId();
+      if (visitorId && config.headers) {
+        config.headers["X-Visitor-Id"] = visitorId;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Add retry interceptor for network errors (cold starts)
 publicClient.interceptors.response.use(

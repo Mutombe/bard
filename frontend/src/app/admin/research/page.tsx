@@ -121,6 +121,10 @@ export default function AdminResearchPage() {
     published: reports.filter((r) => r.status === "published").length,
     drafts: reports.filter((r) => r.status === "draft").length,
     inReview: reports.filter((r) => r.status === "review").length,
+    totalViews: reports.reduce((sum, r) => sum + (r.view_count || 0), 0),
+    totalLikes: reports.reduce((sum, r) => sum + ((r as any).likes_count || 0), 0),
+    totalSaves: reports.reduce((sum, r) => sum + ((r as any).saves_count || 0), 0),
+    totalDownloads: reports.reduce((sum, r) => sum + (r.download_count || 0), 0),
   };
 
   return (
@@ -141,7 +145,7 @@ export default function AdminResearchPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
         <div className="bg-terminal-bg-secondary border border-terminal-border p-4">
           <div className="text-2xl font-bold">{stats.total}</div>
           <div className="text-sm text-muted-foreground">Total Reports</div>
@@ -157,6 +161,26 @@ export default function AdminResearchPage() {
         <div className="bg-terminal-bg-secondary border border-terminal-border p-4">
           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.inReview}</div>
           <div className="text-sm text-muted-foreground">In Review</div>
+        </div>
+      </div>
+
+      {/* Engagement stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-terminal-bg-secondary border border-terminal-border p-4">
+          <div className="text-2xl font-bold tabular-nums">{stats.totalViews.toLocaleString()}</div>
+          <div className="text-sm text-muted-foreground">Total Views</div>
+        </div>
+        <div className="bg-terminal-bg-secondary border border-terminal-border p-4">
+          <div className="text-2xl font-bold text-brand-coral tabular-nums">{stats.totalLikes.toLocaleString()}</div>
+          <div className="text-sm text-muted-foreground">Total Likes</div>
+        </div>
+        <div className="bg-terminal-bg-secondary border border-terminal-border p-4">
+          <div className="text-2xl font-bold text-brand-plum tabular-nums">{stats.totalSaves.toLocaleString()}</div>
+          <div className="text-sm text-muted-foreground">Total Saves</div>
+        </div>
+        <div className="bg-terminal-bg-secondary border border-terminal-border p-4">
+          <div className="text-2xl font-bold tabular-nums">{stats.totalDownloads.toLocaleString()}</div>
+          <div className="text-sm text-muted-foreground">Total Downloads</div>
         </div>
       </div>
 
@@ -205,6 +229,8 @@ export default function AdminResearchPage() {
               <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground">Status</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">PDF</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">Views</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">Likes</th>
+              <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden lg:table-cell">Saves</th>
               <th className="text-left px-4 py-3 text-sm font-medium text-muted-foreground hidden sm:table-cell">Downloads</th>
               <th className="text-right px-4 py-3 text-sm font-medium text-muted-foreground">Actions</th>
             </tr>
@@ -212,11 +238,11 @@ export default function AdminResearchPage() {
           <tbody className="divide-y divide-terminal-border">
             {loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">Loading reports…</td>
+                <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">Loading reports…</td>
               </tr>
             ) : filteredReports.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                <td colSpan={9} className="px-4 py-12 text-center text-muted-foreground">
                   <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p>No research reports found</p>
                   <Link href="/admin/research/new" className="inline-block mt-3 text-brand-coral hover:underline text-sm">
@@ -267,6 +293,12 @@ export default function AdminResearchPage() {
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell text-sm text-muted-foreground tabular-nums">
                     {(report.view_count || 0).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell text-sm text-muted-foreground tabular-nums">
+                    {((report as any).likes_count || 0).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3 hidden lg:table-cell text-sm text-muted-foreground tabular-nums">
+                    {((report as any).saves_count || 0).toLocaleString()}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell text-sm text-muted-foreground tabular-nums">
                     {(report.download_count || 0).toLocaleString()}

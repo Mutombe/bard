@@ -13,6 +13,8 @@ import {
   Clock,
   FileText,
   ArrowSquareOut,
+  Heart,
+  BookmarkSimple,
 } from "@phosphor-icons/react";
 import { motion } from "framer-motion";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -57,16 +59,54 @@ export default function PublicationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
     researchService
       .getReport(slug)
-      .then((r) => setReport(r))
+      .then((r) => {
+        setReport(r);
+        setLiked(Boolean((r as any).is_liked));
+        setSaved(Boolean((r as any).is_saved));
+        setLikesCount((r as any).likes_count || 0);
+      })
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  const handleLike = async () => {
+    if (!report) return;
+    const prev = liked;
+    setLiked(!prev);
+    setLikesCount((c) => c + (prev ? -1 : 1));
+    try {
+      const res = await researchService.toggleLike(report.slug);
+      setLiked(res.liked);
+      setLikesCount(res.likes_count);
+    } catch {
+      setLiked(prev);
+      setLikesCount((c) => c + (prev ? 1 : -1));
+      toast.error("Couldn't update like");
+    }
+  };
+
+  const handleSave = async () => {
+    if (!report) return;
+    const prev = saved;
+    setSaved(!prev);
+    try {
+      const res = await researchService.toggleSave(report.slug);
+      setSaved(res.saved);
+      toast.success(res.saved ? "Saved to reading list" : "Removed from reading list");
+    } catch {
+      setSaved(prev);
+      toast.error("Couldn't update save");
+    }
+  };
 
   const pubInfo = PUBLICATION_LABELS[type] || {
     label: "Publication",
@@ -268,6 +308,31 @@ export default function PublicationDetailPage() {
                   <span className="hidden sm:inline">Open in new tab</span>
                 </a>
               )}
+              <button
+                onClick={handleLike}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 sm:px-5 py-3 border text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors",
+                  liked
+                    ? "bg-brand-coral/10 border-brand-coral text-brand-coral"
+                    : "border-terminal-border text-foreground hover:bg-terminal-bg-elevated"
+                )}
+              >
+                <Heart className="h-4 w-4" weight={liked ? "fill" : "regular"} />
+                {liked ? "Liked" : "Like"}
+                {likesCount > 0 && <span className="opacity-70">· {likesCount}</span>}
+              </button>
+              <button
+                onClick={handleSave}
+                className={cn(
+                  "flex items-center justify-center gap-2 px-4 sm:px-5 py-3 border text-xs sm:text-sm font-semibold uppercase tracking-wider transition-colors",
+                  saved
+                    ? "bg-brand-plum/10 border-brand-plum text-brand-plum"
+                    : "border-terminal-border text-foreground hover:bg-terminal-bg-elevated"
+                )}
+              >
+                <BookmarkSimple className="h-4 w-4" weight={saved ? "fill" : "regular"} />
+                {saved ? "Saved" : "Save"}
+              </button>
               <button
                 onClick={handleCopyLink}
                 className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 border border-terminal-border text-foreground text-xs sm:text-sm font-semibold uppercase tracking-wider hover:bg-terminal-bg-elevated transition-colors"

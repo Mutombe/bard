@@ -108,6 +108,9 @@ export interface ResearchStats {
   in_review: number;
   this_month: number;
   total_downloads: number;
+  total_views?: number;
+  total_likes?: number;
+  total_saves?: number;
 }
 
 // API Service
@@ -207,6 +210,16 @@ export const researchService = {
 
   async getStats(): Promise<ResearchStats> {
     const response = await authClient.get("/research/reports/stats/");
+    return response.data;
+  },
+
+  async toggleLike(slug: string): Promise<{ liked: boolean; likes_count: number }> {
+    const response = await publicClient.post(`/research/reports/${slug}/like/`);
+    return response.data;
+  },
+
+  async toggleSave(slug: string): Promise<{ saved: boolean; saves_count: number }> {
+    const response = await publicClient.post(`/research/reports/${slug}/save/`);
     return response.data;
   },
 

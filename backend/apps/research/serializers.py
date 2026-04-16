@@ -103,6 +103,8 @@ class ResearchReportListSerializer(serializers.ModelSerializer):
             "is_new",
             "view_count",
             "download_count",
+            "likes_count",
+            "saves_count",
             "read_time_minutes",
             "page_count",
         ]
@@ -140,6 +142,8 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
     pdf_url = serializers.SerializerMethodField()
     is_new = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = ResearchReport
@@ -171,6 +175,10 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
             "is_new",
             "view_count",
             "download_count",
+            "likes_count",
+            "saves_count",
+            "is_liked",
+            "is_saved",
             "read_time_minutes",
             "page_count",
             "meta_title",
@@ -180,6 +188,38 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return False
+        from .models import ResearchLike
+        from apps.analytics.geoip import get_visitor_key
+
+        if request.user.is_authenticated:
+            return ResearchLike.objects.filter(report=obj, user=request.user).exists()
+        vid = get_visitor_key(request)
+        if not vid:
+            return False
+        return ResearchLike.objects.filter(
+            report=obj, user__isnull=True, session_key=vid
+        ).exists()
+
+    def get_is_saved(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return False
+        from .models import ResearchSave
+        from apps.analytics.geoip import get_visitor_key
+
+        if request.user.is_authenticated:
+            return ResearchSave.objects.filter(report=obj, user=request.user).exists()
+        vid = get_visitor_key(request)
+        if not vid:
+            return False
+        return ResearchSave.objects.filter(
+            report=obj, user__isnull=True, session_key=vid
+        ).exists()
 
     def get_image_url(self, obj):
         """Return the best available image URL."""

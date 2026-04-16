@@ -30,59 +30,10 @@ import { Skeleton } from "@/components/ui/loading";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { CommentSection } from "@/components/news";
 import { publicClient } from "@/services/api/client";
+import { editorialService } from "@/services/api/editorial";
 import { toast } from "sonner";
 import { addKeywordLinks } from "@/lib/keyword-linker";
 import { useArticle, useArticles } from "@/hooks";
-
-// LocalStorage utilities
-const LIKES_KEY = "bardiq_likes";
-const BOOKMARKS_KEY = "bardiq_bookmarks";
-
-function getLikes(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(LIKES_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function getBookmarks(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function toggleLike(articleId: string): boolean {
-  const likes = getLikes();
-  const index = likes.indexOf(articleId);
-  if (index > -1) {
-    likes.splice(index, 1);
-    localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
-    return false;
-  } else {
-    likes.push(articleId);
-    localStorage.setItem(LIKES_KEY, JSON.stringify(likes));
-    return true;
-  }
-}
-
-function toggleBookmark(articleId: string): boolean {
-  const bookmarks = getBookmarks();
-  const index = bookmarks.indexOf(articleId);
-  if (index > -1) {
-    bookmarks.splice(index, 1);
-    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
-    return false;
-  } else {
-    bookmarks.push(articleId);
-    localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(bookmarks));
-    return true;
-  }
-}
 
 // Types
 interface Article {
@@ -115,6 +66,10 @@ interface Article {
   is_breaking?: boolean;
   is_premium?: boolean;
   view_count?: number;
+  likes_count?: number;
+  saves_count?: number;
+  is_liked?: boolean;
+  is_saved?: boolean;
   read_time_minutes?: number;
   source?: string;
   external_url?: string;
@@ -360,13 +315,13 @@ export default function ArticlePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
 
-  // Update likes/bookmarks when article loads
+  // Sync like/save state from server on article load
   useEffect(() => {
-    if (mounted && slug) {
-      setLiked(getLikes().includes(`article-${slug}`));
-      setBookmarked(getBookmarks().includes(`article-${slug}`));
+    if (article) {
+      setLiked(Boolean(article.is_liked));
+      setBookmarked(Boolean(article.is_saved));
     }
-  }, [mounted, slug]);
+  }, [article]);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -391,16 +346,32 @@ export default function ArticlePage() {
     }
   };
 
-  const handleLike = () => {
-    const newState = toggleLike(`article-${slug}`);
-    setLiked(newState);
-    toast.success(newState ? "Added to liked articles" : "Removed from liked articles");
+  const handleLike = async () => {
+    if (!slug) return;
+    const prev = liked;
+    setLiked(!prev);
+    try {
+      const res = await editorialService.toggleLike(slug);
+      setLiked(res.liked);
+      toast.success(res.liked ? "Added to liked articles" : "Removed from liked articles");
+    } catch {
+      setLiked(prev);
+      toast.error("Couldn't update like — try again");
+    }
   };
 
-  const handleBookmark = () => {
-    const newState = toggleBookmark(`article-${slug}`);
-    setBookmarked(newState);
-    toast.success(newState ? "Saved to reading list" : "Removed from reading list");
+  const handleBookmark = async () => {
+    if (!slug) return;
+    const prev = bookmarked;
+    setBookmarked(!prev);
+    try {
+      const res = await editorialService.toggleSave(slug);
+      setBookmarked(res.saved);
+      toast.success(res.saved ? "Saved to reading list" : "Removed from reading list");
+    } catch {
+      setBookmarked(prev);
+      toast.error("Couldn't update save — try again");
+    }
   };
 
   const handleShare = async (platform: string) => {

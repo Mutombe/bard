@@ -299,6 +299,14 @@ class NewsArticle(BaseModel):
         "View Count",
         default=0,
     )
+    likes_count = models.PositiveIntegerField(
+        "Likes Count",
+        default=0,
+    )
+    saves_count = models.PositiveIntegerField(
+        "Saves Count",
+        default=0,
+    )
     read_time_minutes = models.PositiveIntegerField(
         "Read Time (minutes)",
         default=5,
@@ -373,6 +381,16 @@ class NewsArticle(BaseModel):
         """Increment the view count atomically."""
         NewsArticle.objects.filter(pk=self.pk).update(
             view_count=models.F("view_count") + 1
+        )
+
+    def recount_likes(self):
+        NewsArticle.objects.filter(pk=self.pk).update(
+            likes_count=self.likes.count()
+        )
+
+    def recount_saves(self):
+        NewsArticle.objects.filter(pk=self.pk).update(
+            saves_count=self.saves.count()
         )
 
 
@@ -526,3 +544,100 @@ class CommentLike(TimeStampedModel):
 
     def __str__(self):
         return f"{self.user.full_name} liked comment {self.comment.id}"
+
+
+class ArticleLike(TimeStampedModel):
+    """
+    Track likes on articles. Works for both registered users and anonymous
+    visitors (identified by session key). One like per (article, user) for
+    logged-in users; one like per (article, session_key) for anonymous.
+    """
+
+    article = models.ForeignKey(
+        NewsArticle,
+        on_delete=models.CASCADE,
+        related_name="likes",
+    )
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="article_likes",
+    )
+    session_key = models.CharField("Session Key", max_length=40, blank=True)
+    ip_address = models.GenericIPAddressField("IP Address", null=True, blank=True)
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Article Like"
+        verbose_name_plural = "Article Likes"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["article", "user"],
+                condition=models.Q(user__isnull=False),
+                name="unique_article_like_per_user",
+            ),
+            models.UniqueConstraint(
+                fields=["article", "session_key"],
+                condition=models.Q(user__isnull=True) & ~models.Q(session_key=""),
+                name="unique_article_like_per_session",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["article", "-created_at"]),
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        who = self.user.full_name if self.user else f"anon/{self.session_key[:8]}"
+        return f"{who} liked {self.article.title[:40]}"
+
+
+class ArticleSave(TimeStampedModel):
+    """
+    Track saves/bookmarks on articles. Mirrors ArticleLike — supports both
+    registered and anonymous visitors.
+    """
+
+    article = models.ForeignKey(
+        NewsArticle,
+        on_delete=models.CASCADE,
+        related_name="saves",
+    )
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="article_saves",
+    )
+    session_key = models.CharField("Session Key", max_length=40, blank=True)
+    ip_address = models.GenericIPAddressField("IP Address", null=True, blank=True)
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Article Save"
+        verbose_name_plural = "Article Saves"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["article", "user"],
+                condition=models.Q(user__isnull=False),
+                name="unique_article_save_per_user",
+            ),
+            models.UniqueConstraint(
+                fields=["article", "session_key"],
+                condition=models.Q(user__isnull=True) & ~models.Q(session_key=""),
+                name="unique_article_save_per_session",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["article", "-created_at"]),
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        who = self.user.full_name if self.user else f"anon/{self.session_key[:8]}"
+        return f"{who} saved {self.article.title[:40]}"
