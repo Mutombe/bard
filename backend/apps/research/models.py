@@ -187,6 +187,7 @@ class ResearchReport(BaseModel):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         REVIEW = "review", "In Review"
+        SCHEDULED = "scheduled", "Scheduled"
         PUBLISHED = "published", "Published"
         ARCHIVED = "archived", "Archived"
 

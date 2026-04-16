@@ -206,17 +206,22 @@ export default function NewArticlePage() {
       .trim()
       .slice(0, 200) + "...";
 
+    if (saveStatus === "scheduled" && !scheduledDate) {
+      toast.error("Please pick a date & time to schedule this article");
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
     try {
-      const articleData = {
+      const articleData: any = {
         title: title.trim(),
         subtitle: subtitle.trim() || undefined,
         excerpt: finalExcerpt,
         content: content.trim(),
         category: category,
-        status: saveStatus === "published" ? "published" : "draft",
+        status: saveStatus,
         is_featured: featured,
         is_premium: premium,
         featured_image_url: featuredImage || undefined,
@@ -224,6 +229,13 @@ export default function NewArticlePage() {
         content_type: contentType,
         tags: tags.map(t => t.slug),
       };
+
+      // When scheduling, send the future published_at datetime
+      if (saveStatus === "scheduled" && scheduledDate) {
+        articleData.published_at = new Date(scheduledDate).toISOString();
+      } else if (saveStatus === "published") {
+        articleData.published_at = new Date().toISOString();
+      }
 
       const result = await editorialService.createArticle(articleData);
 
@@ -341,6 +353,27 @@ export default function NewArticlePage() {
             >
               {isSaving ? <CircleNotch className="h-4 w-4 animate-spin" /> : <FloppyDisk className="h-4 w-4" />}
               <span className="hidden sm:inline">Save</span>
+            </button>
+
+            {/* Schedule input + button */}
+            <div className="relative">
+              <input
+                type="datetime-local"
+                value={scheduledDate}
+                onChange={(e) => setScheduledDate(e.target.value)}
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+                className="hidden lg:block px-3 py-1.5 border border-terminal-border rounded-md bg-transparent text-sm focus:outline-none focus:border-brand-coral"
+                title="Schedule publish date"
+              />
+            </div>
+            <button
+              onClick={() => handleSave("scheduled")}
+              disabled={isSaving || success || !scheduledDate}
+              className="px-3 py-1.5 border border-brand-violet text-brand-violet-accessible rounded-md hover:bg-brand-violet/5 transition-colors text-sm font-medium flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              title={!scheduledDate ? "Pick a date first" : "Schedule for later"}
+            >
+              <Clock className="h-4 w-4" />
+              <span className="hidden sm:inline">Schedule</span>
             </button>
 
             <button

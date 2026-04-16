@@ -121,6 +121,10 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
     ordering = ["-is_featured", "-published_at"]
 
     def get_queryset(self):
+        # Scheduled-content gate
+        from apps.editorial.scheduler import run_scheduler_if_due
+        run_scheduler_if_due()
+
         queryset = super().get_queryset()
         # Non-staff users only see published reports
         if not self.request.user.is_staff:
