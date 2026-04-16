@@ -546,8 +546,18 @@ export default function ArticlesPage() {
                     )}
                     {article.title}
                   </Link>
-                  <div className="text-sm text-muted-foreground mt-1 truncate">
-                    By {article.author?.full_name || "Unknown"}
+                  <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+                    <span className="truncate">By {article.author?.full_name || "Unknown"}</span>
+                    {/* Source badge — In-House vs Scraped */}
+                    {article.source === "editorial" ? (
+                      <span className="flex-shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-brand-plum/10 text-brand-plum">
+                        In-House
+                      </span>
+                    ) : article.source ? (
+                      <span className="flex-shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-brand-violet/10 text-brand-violet-accessible">
+                        Scraped
+                      </span>
+                    ) : null}
                   </div>
                 </div>
                 <div className="col-span-2">

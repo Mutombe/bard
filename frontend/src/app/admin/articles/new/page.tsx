@@ -374,15 +374,20 @@ export default function NewArticlePage() {
         </div>
       )}
 
-      <div className="max-w-screen-2xl mx-auto px-4 py-8">
+      <div className={cn(
+        "mx-auto px-4 py-8",
+        isFullscreen ? "max-w-none" : "max-w-screen-2xl"
+      )}>
         <div className={cn(
           "flex gap-8",
           showSettings ? "flex-col lg:flex-row" : ""
         )}>
-          {/* Main Editor Area */}
+          {/* Main Editor Area — wider in fullscreen */}
           <div className={cn(
             "flex-1 min-w-0",
-            showSettings ? "lg:max-w-4xl" : "max-w-4xl mx-auto"
+            isFullscreen
+              ? "max-w-none mx-auto"
+              : showSettings ? "lg:max-w-4xl" : "max-w-4xl mx-auto"
           )}>
             {/* Featured Image */}
             <div className="mb-8">

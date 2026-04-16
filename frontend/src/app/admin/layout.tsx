@@ -61,6 +61,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { openLogin } = useAuthModal();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  // Fetch unread notification count, refresh every 60s
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchUnread = async () => {
+      try {
+        const { userService } = await import("@/services/api/user");
+        const data = await userService.getUnreadNotificationCount();
+        setUnreadNotifications(data.count || 0);
+      } catch {
+        setUnreadNotifications(0);
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 60000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   // Check if user has admin access
   // Accept super_admin, editor roles, or any staff user
@@ -320,7 +338,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               className="relative p-2 text-muted-foreground hover:text-foreground hover:bg-terminal-bg-elevated rounded-md"
             >
               <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full" />
+              {unreadNotifications > 0 && (
+                <span className="absolute top-0.5 right-0.5 min-w-[16px] h-4 px-1 text-[10px] font-bold bg-brand-coral text-white rounded-full flex items-center justify-center">
+                  {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                </span>
+              )}
             </Link>
           </div>
         </div>
