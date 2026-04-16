@@ -95,6 +95,9 @@ export default function MediaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 48;
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [selectedType, setSelectedType] = useState("all");
   const [isUploading, setIsUploading] = useState(false);
@@ -113,22 +116,26 @@ export default function MediaPage() {
   }>({ open: false, type: "single" });
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  // Fetch files
+  // Fetch files (paginated for scalability — 48 per page = nice 6/8/12 grid)
   const fetchFiles = useCallback(async () => {
     try {
-      const params: Record<string, string> = {};
+      const params: Record<string, string | number> = {
+        page,
+        page_size: 48,
+      };
       if (selectedType !== "all") params.file_type = selectedType;
       if (searchQuery) params.search = searchQuery;
 
-      const response = await mediaService.getFiles(params);
+      const response = await mediaService.getFiles(params as any);
       setFiles(response.results);
+      setTotalCount(response.count || 0);
     } catch (error) {
       console.error("Failed to fetch files:", error);
       toast.error("Failed to load media files");
     } finally {
       setIsLoading(false);
     }
-  }, [selectedType, searchQuery]);
+  }, [selectedType, searchQuery, page]);
 
   // Fetch stats
   const fetchStats = useCallback(async () => {
@@ -144,6 +151,11 @@ export default function MediaPage() {
     fetchFiles();
     fetchStats();
   }, [fetchFiles, fetchStats]);
+
+  // Reset to page 1 on filter/search change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedType]);
 
   // Debounced search
   useEffect(() => {
@@ -620,6 +632,34 @@ export default function MediaPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && totalCount > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-6 pt-6 border-t border-terminal-border">
+          <p className="text-sm text-muted-foreground">
+            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} of {totalCount.toLocaleString()} files
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-muted-foreground tabular-nums">
+              Page {page} of {Math.ceil(totalCount / PAGE_SIZE)}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * PAGE_SIZE >= totalCount}
+              className="px-3 py-2 text-sm border border-terminal-border rounded-md hover:bg-terminal-bg-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
           </div>
         </div>
       )}
