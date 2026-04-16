@@ -88,6 +88,7 @@ export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedSource, setSelectedSource] = useState<"all" | "editorial" | "scraped">("all");
   const [selectedArticles, setSelectedArticles] = useState<string[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
   const [pagination, setPagination] = useState({
@@ -134,6 +135,12 @@ export default function ArticlesPage() {
       if (selectedStatus !== "all") {
         params.status = selectedStatus;
       }
+      // Source filter: editorial = in-house, scraped = serpapi/scraped/polygon
+      if (selectedSource === "editorial") {
+        params.source = "editorial";
+      } else if (selectedSource === "scraped") {
+        params.source__in = "serpapi,scraped,polygon";
+      }
 
       const response = await editorialService.getArticles(params);
       setArticles(response.results || []);
@@ -148,7 +155,7 @@ export default function ArticlesPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [pagination.page, pagination.pageSize, searchQuery, selectedCategory, selectedStatus]);
+  }, [pagination.page, pagination.pageSize, searchQuery, selectedCategory, selectedStatus, selectedSource]);
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
@@ -336,6 +343,31 @@ export default function ArticlesPage() {
             New Article
           </Link>
         </div>
+      </div>
+
+      {/* Source Tabs — In-house vs Scraped */}
+      <div className="flex border-b border-terminal-border mb-5 overflow-x-auto scrollbar-hide">
+        {[
+          { value: "all", label: "All Articles" },
+          { value: "editorial", label: "In-House Editorial" },
+          { value: "scraped", label: "Scraped (RSS / SerpAPI)" },
+        ].map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => {
+              setSelectedSource(tab.value as any);
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
+            className={cn(
+              "px-4 py-2.5 text-sm font-semibold uppercase tracking-wider whitespace-nowrap border-b-2 transition-colors",
+              selectedSource === tab.value
+                ? "border-brand-coral text-brand-plum"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Filters */}

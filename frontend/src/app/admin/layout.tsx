@@ -2,6 +2,7 @@
 
 import { ReactNode, useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   SquaresFour,
@@ -149,10 +150,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="h-16 flex items-center justify-between px-4 border-b border-terminal-border">
           {!sidebarCollapsed && (
             <Link href="/admin" className="flex items-center gap-2">
-              <div className="h-8 w-8 bg-primary rounded-sm flex items-center justify-center">
-                <span className="font-bold text-white text-sm">BS</span>
-              </div>
-              <span className="font-bold">Admin</span>
+              <Image
+                src="/images/fav.png"
+                alt="BGFI"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+                priority
+              />
+              <span className="font-serif font-bold text-base">BGFI Admin</span>
+            </Link>
+          )}
+          {sidebarCollapsed && (
+            <Link href="/admin" className="flex items-center justify-center w-full">
+              <Image
+                src="/images/fav.png"
+                alt="BGFI"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+              />
             </Link>
           )}
           <button

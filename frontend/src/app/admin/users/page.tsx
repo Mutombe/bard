@@ -478,14 +478,36 @@ export default function UsersPage() {
                   </div>
                 </div>
                 <div className="col-span-2">
-                  <span
+                  <select
+                    value={user.role || "subscriber"}
+                    onChange={async (e) => {
+                      const newRole = e.target.value as any;
+                      const oldRole = user.role;
+                      // Optimistic update
+                      setUsers((prev) =>
+                        prev.map((u) => (u.id === user.id ? { ...u, role: newRole } : u))
+                      );
+                      try {
+                        await adminService.updateUser(user.id, { role: newRole });
+                        toast.success(`Role updated to ${newRole.replace("_", " ")}`);
+                      } catch {
+                        // Rollback on failure
+                        setUsers((prev) =>
+                          prev.map((u) => (u.id === user.id ? { ...u, role: oldRole } : u))
+                        );
+                        toast.error("Could not update role");
+                      }
+                    }}
                     className={cn(
-                      "px-2 py-1 rounded text-xs font-medium capitalize",
+                      "px-2 py-1 rounded text-xs font-medium capitalize bg-transparent border border-terminal-border focus:outline-none focus:border-brand-coral cursor-pointer",
                       getRoleColor(user.role)
                     )}
                   >
-                    {user.role?.replace("_", " ") || "subscriber"}
-                  </span>
+                    <option value="super_admin">Super Admin</option>
+                    <option value="editor">Editor</option>
+                    <option value="analyst">Analyst</option>
+                    <option value="subscriber">Subscriber</option>
+                  </select>
                 </div>
                 <div className="col-span-2">
                   <span className={cn("text-sm capitalize", getTierColor(user.subscription_tier))}>
