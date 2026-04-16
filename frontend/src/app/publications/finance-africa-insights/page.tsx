@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { researchService, type ResearchReport } from "@/services/api/research";
+import { newsService } from "@/services/api/news";
 import { PublicationListItem } from "@/components/publications/PublicationListItem";
 import {
   Feather,
@@ -75,13 +77,22 @@ export default function FinanceAfricaInsightsPage() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [error, setError] = useState("");
   const [reports, setReports] = useState<ResearchReport[]>([]);
+  const [insightsArticles, setInsightsArticles] = useState<any[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
 
   useEffect(() => {
-    researchService
-      .getReports({ report_type: "analysis", page_size: 20, ordering: "-published_at" })
-      .then((r) => setReports(r.results || []))
-      .catch(() => {})
+    Promise.allSettled([
+      researchService.getReports({ report_type: "analysis", page_size: 20, ordering: "-published_at" }),
+      newsService.getArticles({ content_type: "insights", page_size: 20 } as any),
+    ])
+      .then(([researchRes, newsRes]) => {
+        if (researchRes.status === "fulfilled") {
+          setReports(researchRes.value.results || []);
+        }
+        if (newsRes.status === "fulfilled") {
+          setInsightsArticles((newsRes.value as any).results || []);
+        }
+      })
       .finally(() => setLoadingReports(false));
   }, []);
 
@@ -188,10 +199,53 @@ export default function FinanceAfricaInsightsPage() {
               </ul>
             </section>
 
+            {/* Insights articles — editorial pieces tagged content_type=insights */}
+            {!loadingReports && insightsArticles.length > 0 && (
+              <section>
+                <div className="flex items-baseline justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Recent Insights</h2>
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {insightsArticles.length} {insightsArticles.length === 1 ? "piece" : "pieces"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {insightsArticles.map((article) => (
+                    <Link key={article.id} href={`/news/${article.slug}`} className="group">
+                      <article className="bg-terminal-bg-secondary border border-terminal-border h-full hover:border-brand-violet/40 transition-colors overflow-hidden">
+                        {(article.featured_image_url || article.featured_image) && (
+                          <div className="relative aspect-[16/10] bg-terminal-bg-elevated overflow-hidden">
+                            <Image
+                              src={article.featured_image_url || article.featured_image}
+                              alt={article.title}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                              unoptimized
+                            />
+                          </div>
+                        )}
+                        <div className="p-5">
+                          <div className="text-xs font-medium uppercase tracking-wider text-brand-violet mb-2">
+                            {article.category?.name || "Insights"}
+                          </div>
+                          <h3 className="font-serif text-lg font-bold mb-2 leading-snug group-hover:text-brand-coral transition-colors line-clamp-2">
+                            {article.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2 font-serif-body">
+                            {article.excerpt}
+                          </p>
+                        </div>
+                      </article>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Long-form research reports if any */}
             {!loadingReports && reports.length > 0 && (
               <section>
                 <div className="flex items-baseline justify-between mb-6">
-                  <h2 className="text-2xl font-bold">Recent Publications</h2>
+                  <h2 className="text-2xl font-bold">Research Reports</h2>
                   <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {reports.length} {reports.length === 1 ? "report" : "reports"}
                   </span>

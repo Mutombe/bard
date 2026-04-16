@@ -52,6 +52,7 @@ class NewsArticleFilter(filters.FilterSet):
     author_name = filters.CharFilter(method="filter_by_author_name")
     is_featured = filters.BooleanFilter()
     is_premium = filters.BooleanFilter()
+    source = filters.CharFilter(method="filter_by_source")
     published_after = filters.DateTimeFilter(
         field_name="published_at", lookup_expr="gte"
     )
@@ -61,7 +62,23 @@ class NewsArticleFilter(filters.FilterSet):
 
     class Meta:
         model = NewsArticle
-        fields = ["category", "content_type", "is_featured", "is_premium"]
+        fields = ["category", "content_type", "is_featured", "is_premium", "source"]
+
+    def filter_by_source(self, queryset, name, value):
+        """
+        Filter by source. Supports:
+        - source=editorial (in-house articles)
+        - source=scraped (anything from automated scrapers)
+        """
+        if not value:
+            return queryset
+        if value == "editorial":
+            return queryset.filter(source="editorial")
+        if value == "scraped":
+            # Anything NOT editorial = scraped (catches serpapi, scraped, polygon, etc.)
+            return queryset.exclude(source="editorial")
+        # Exact match for any other value
+        return queryset.filter(source=value)
 
     def filter_by_author_name(self, queryset, name, value):
         """Filter articles by author's name or email (case-insensitive)."""
