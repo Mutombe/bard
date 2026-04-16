@@ -1,4 +1,4 @@
-import { authClient } from "./client";
+import { authClient, publicClient } from "./client";
 import type { PaginatedResponse } from "@/types";
 
 // =========================
@@ -257,6 +257,16 @@ export const editorialService = {
 
   async getFeaturedArticles(): Promise<Article[]> {
     const response = await authClient.get<Article[]>("/news/articles/featured/");
+    return response.data;
+  },
+
+  async toggleLike(slug: string): Promise<{ liked: boolean; likes_count: number }> {
+    const response = await publicClient.post(`/news/articles/${slug}/like/`);
+    return response.data;
+  },
+
+  async toggleSave(slug: string): Promise<{ saved: boolean; saves_count: number }> {
+    const response = await publicClient.post(`/news/articles/${slug}/save/`);
     return response.data;
   },
 

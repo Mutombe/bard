@@ -358,6 +358,14 @@ class ResearchReport(BaseModel):
         "Download Count",
         default=0,
     )
+    likes_count = models.PositiveIntegerField(
+        "Likes Count",
+        default=0,
+    )
+    saves_count = models.PositiveIntegerField(
+        "Saves Count",
+        default=0,
+    )
     read_time_minutes = models.PositiveIntegerField(
         "Read Time (minutes)",
         default=15,
@@ -425,6 +433,16 @@ class ResearchReport(BaseModel):
         """Increment the download count atomically."""
         ResearchReport.objects.filter(pk=self.pk).update(
             download_count=models.F("download_count") + 1
+        )
+
+    def recount_likes(self):
+        ResearchReport.objects.filter(pk=self.pk).update(
+            likes_count=self.likes.count()
+        )
+
+    def recount_saves(self):
+        ResearchReport.objects.filter(pk=self.pk).update(
+            saves_count=self.saves.count()
         )
 
 
@@ -538,6 +556,101 @@ class ResearchRelated(TimeStampedModel):
         verbose_name_plural = "Related Research"
         unique_together = [["report", "related_report"]]
         ordering = ["order"]
+
+
+class ResearchLike(TimeStampedModel):
+    """
+    Track likes on research reports. Supports both registered users and
+    anonymous visitors (identified by session key).
+    """
+
+    report = models.ForeignKey(
+        ResearchReport,
+        on_delete=models.CASCADE,
+        related_name="likes",
+    )
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="research_likes",
+    )
+    session_key = models.CharField("Session Key", max_length=40, blank=True)
+    ip_address = models.GenericIPAddressField("IP Address", null=True, blank=True)
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Research Like"
+        verbose_name_plural = "Research Likes"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["report", "user"],
+                condition=models.Q(user__isnull=False),
+                name="unique_research_like_per_user",
+            ),
+            models.UniqueConstraint(
+                fields=["report", "session_key"],
+                condition=models.Q(user__isnull=True) & ~models.Q(session_key=""),
+                name="unique_research_like_per_session",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["report", "-created_at"]),
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        who = self.user.full_name if self.user else f"anon/{self.session_key[:8]}"
+        return f"{who} liked {self.report.title[:40]}"
+
+
+class ResearchSave(TimeStampedModel):
+    """
+    Track saves/bookmarks on research reports. Mirrors ResearchLike.
+    """
+
+    report = models.ForeignKey(
+        ResearchReport,
+        on_delete=models.CASCADE,
+        related_name="saves",
+    )
+    user = models.ForeignKey(
+        "users.User",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="research_saves",
+    )
+    session_key = models.CharField("Session Key", max_length=40, blank=True)
+    ip_address = models.GenericIPAddressField("IP Address", null=True, blank=True)
+    country = models.CharField("Country", max_length=2, blank=True, db_index=True)
+
+    class Meta:
+        verbose_name = "Research Save"
+        verbose_name_plural = "Research Saves"
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["report", "user"],
+                condition=models.Q(user__isnull=False),
+                name="unique_research_save_per_user",
+            ),
+            models.UniqueConstraint(
+                fields=["report", "session_key"],
+                condition=models.Q(user__isnull=True) & ~models.Q(session_key=""),
+                name="unique_research_save_per_session",
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["report", "-created_at"]),
+            models.Index(fields=["user", "-created_at"]),
+        ]
+
+    def __str__(self):
+        who = self.user.full_name if self.user else f"anon/{self.session_key[:8]}"
+        return f"{who} saved {self.report.title[:40]}"
 
     def __str__(self):
         return f"{self.report.title} -> {self.related_report.title}"

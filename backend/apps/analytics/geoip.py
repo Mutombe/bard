@@ -20,6 +20,25 @@ def get_client_ip(request) -> str:
     return request.META.get("REMOTE_ADDR", "")
 
 
+def get_visitor_key(request) -> str:
+    """
+    Stable per-visitor identifier for anonymous tracking.
+
+    Prefers the X-Visitor-Id header (client-generated UUID persisted in
+    localStorage) since JWT-only apps don't carry cookies. Falls back to
+    Django session key, then IP.
+    """
+    header_id = request.META.get("HTTP_X_VISITOR_ID", "").strip()
+    if header_id:
+        return header_id[:40]
+    if not request.session.session_key:
+        try:
+            request.session.save()
+        except Exception:
+            pass
+    return request.session.session_key or get_client_ip(request) or ""
+
+
 def lookup_geo(ip: str) -> dict:
     """
     Look up geo data for an IP. Returns dict with country, country_name,

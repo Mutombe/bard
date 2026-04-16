@@ -18,7 +18,15 @@ from apps.core.cache import (
 from apps.core.pagination import InfiniteScrollPagination
 from apps.users.models import UserRole
 
-from .models import Category, NewsArticle, Tag, Comment, CommentLike
+from .models import (
+    ArticleLike,
+    ArticleSave,
+    Category,
+    NewsArticle,
+    Tag,
+    Comment,
+    CommentLike,
+)
 from .serializers import (
     CategorySerializer,
     NewsArticleCreateSerializer,
@@ -246,36 +254,119 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                 data["requires_subscription"] = True
                 return Response(data)
 
-        # Increment view count
-        instance.increment_view_count()
+        # Dedup views per visitor for 30 minutes so refresh spam doesn't
+        # inflate the counter. Same (article, visitor) counted at most once
+        # per window — both in the aggregate counter and the ArticleView log.
+        from django.core.cache import cache
+        from apps.analytics.geoip import (
+            get_client_ip,
+            get_visitor_key,
+            lookup_geo,
+            detect_source,
+        )
 
-        # Track view with geo + user info (silent fail — analytics shouldn't break reading)
-        try:
-            from .models import ArticleView
-            from apps.analytics.geoip import get_client_ip, lookup_geo, detect_source
+        ip = get_client_ip(request)
+        visitor_id = get_visitor_key(request) or ip or "unknown"
+        dedup_key = f"viewed:article:{instance.pk}:{visitor_id}"
+        already_counted = cache.get(dedup_key)
 
-            ip = get_client_ip(request)
-            geo = lookup_geo(ip)
-            referrer = request.META.get("HTTP_REFERER", "")
+        if not already_counted:
+            cache.set(dedup_key, True, 60 * 30)  # 30 min TTL
+            instance.increment_view_count()
 
-            ArticleView.objects.create(
-                article=instance,
-                user=request.user if request.user.is_authenticated else None,
-                session_key=request.session.session_key or "",
-                ip_address=ip or None,
-                user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
-                referrer=referrer[:200],
-                country=geo["country"],
-                country_name=geo["country_name"],
-                city=geo["city"],
-                region=geo["region"],
-                source=detect_source(referrer),
-            )
-        except Exception:
-            pass
+            # Track view with geo + user info (silent fail — analytics shouldn't break reading)
+            try:
+                from .models import ArticleView
+
+                geo = lookup_geo(ip)
+                referrer = request.META.get("HTTP_REFERER", "")
+
+                ArticleView.objects.create(
+                    article=instance,
+                    user=request.user if request.user.is_authenticated else None,
+                    session_key=visitor_id[:40],
+                    ip_address=ip or None,
+                    user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+                    referrer=referrer[:200],
+                    country=geo["country"],
+                    country_name=geo["country_name"],
+                    city=geo["city"],
+                    region=geo["region"],
+                    source=detect_source(referrer),
+                )
+            except Exception:
+                pass
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], permission_classes=[AllowAny])
+    def like(self, request, slug=None):
+        """Toggle like on an article. Works for both registered and anonymous."""
+        from apps.analytics.geoip import get_client_ip, get_visitor_key, lookup_geo
+
+        article = self.get_object()
+        ip = get_client_ip(request)
+        visitor_id = get_visitor_key(request)
+        geo = lookup_geo(ip)
+
+        lookup = (
+            {"user": request.user}
+            if request.user.is_authenticated
+            else {"user__isnull": True, "session_key": visitor_id}
+        )
+        existing = ArticleLike.objects.filter(article=article, **lookup).first()
+
+        if existing:
+            existing.delete()
+            liked = False
+        else:
+            ArticleLike.objects.create(
+                article=article,
+                user=request.user if request.user.is_authenticated else None,
+                session_key=visitor_id[:40],
+                ip_address=ip or None,
+                country=geo["country"],
+            )
+            liked = True
+
+        article.recount_likes()
+        article.refresh_from_db(fields=["likes_count"])
+        return Response({"liked": liked, "likes_count": article.likes_count})
+
+    @action(detail=True, methods=["post"], permission_classes=[AllowAny], url_path="save")
+    def save_article(self, request, slug=None):
+        """Toggle save/bookmark on an article. Works for both registered and anonymous."""
+        from apps.analytics.geoip import get_client_ip, get_visitor_key, lookup_geo
+
+        article = self.get_object()
+        ip = get_client_ip(request)
+        visitor_id = get_visitor_key(request)
+        geo = lookup_geo(ip)
+
+        lookup = (
+            {"user": request.user}
+            if request.user.is_authenticated
+            else {"user__isnull": True, "session_key": visitor_id}
+        )
+        existing = ArticleSave.objects.filter(article=article, **lookup).first()
+
+        if existing:
+            existing.delete()
+            saved = False
+        else:
+            ArticleSave.objects.create(
+                article=article,
+                user=request.user if request.user.is_authenticated else None,
+                session_key=visitor_id[:40],
+                ip_address=ip or None,
+                country=geo["country"],
+            )
+            saved = True
+
+        article.recount_saves()
+        article.refresh_from_db(fields=["saves_count"])
+        return Response({"saved": saved, "saves_count": article.saves_count})
 
     @action(detail=False, methods=["get"])
     @cache_response(ttl=CacheTTL.SHORT, key_prefix="news_featured")

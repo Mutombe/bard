@@ -12,7 +12,14 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django_filters.rest_framework import DjangoFilterBackend
 
-from .models import Topic, Industry, ResearchReport, ResearchDownload
+from .models import (
+    Industry,
+    ResearchDownload,
+    ResearchLike,
+    ResearchReport,
+    ResearchSave,
+    Topic,
+)
 from .serializers import (
     TopicSerializer,
     TopicMinimalSerializer,
@@ -161,36 +168,118 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        # Increment view count
-        instance.increment_view_count()
 
-        # Track view with geo + user info (silent fail)
-        try:
-            from .models import ResearchView
-            from apps.analytics.geoip import get_client_ip, lookup_geo, detect_source
+        # Dedup views per visitor for 30 min so refresh spam doesn't inflate
+        # the counter. Same (report, visitor) counted at most once per window.
+        from django.core.cache import cache
+        from apps.analytics.geoip import (
+            get_client_ip,
+            get_visitor_key,
+            lookup_geo,
+            detect_source,
+        )
 
-            ip = get_client_ip(request)
-            geo = lookup_geo(ip)
-            referrer = request.META.get("HTTP_REFERER", "")
+        ip = get_client_ip(request)
+        visitor_id = get_visitor_key(request) or ip or "unknown"
+        dedup_key = f"viewed:report:{instance.pk}:{visitor_id}"
+        already_counted = cache.get(dedup_key)
 
-            ResearchView.objects.create(
-                report=instance,
-                user=request.user if request.user.is_authenticated else None,
-                session_key=request.session.session_key or "",
-                ip_address=ip or None,
-                user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
-                referrer=referrer[:200],
-                country=geo["country"],
-                country_name=geo["country_name"],
-                city=geo["city"],
-                region=geo["region"],
-                source=detect_source(referrer),
-            )
-        except Exception:
-            pass
+        if not already_counted:
+            cache.set(dedup_key, True, 60 * 30)  # 30 min TTL
+            instance.increment_view_count()
+
+            try:
+                from .models import ResearchView
+
+                geo = lookup_geo(ip)
+                referrer = request.META.get("HTTP_REFERER", "")
+
+                ResearchView.objects.create(
+                    report=instance,
+                    user=request.user if request.user.is_authenticated else None,
+                    session_key=visitor_id[:40],
+                    ip_address=ip or None,
+                    user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+                    referrer=referrer[:200],
+                    country=geo["country"],
+                    country_name=geo["country_name"],
+                    city=geo["city"],
+                    region=geo["region"],
+                    source=detect_source(referrer),
+                )
+            except Exception:
+                pass
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
+    @action(detail=True, methods=["post"], permission_classes=[])
+    def like(self, request, slug=None):
+        """Toggle like on a research report. Works for both registered and anonymous."""
+        from apps.analytics.geoip import get_client_ip, get_visitor_key, lookup_geo
+
+        report = self.get_object()
+        ip = get_client_ip(request)
+        visitor_id = get_visitor_key(request)
+        geo = lookup_geo(ip)
+
+        lookup = (
+            {"user": request.user}
+            if request.user.is_authenticated
+            else {"user__isnull": True, "session_key": visitor_id}
+        )
+        existing = ResearchLike.objects.filter(report=report, **lookup).first()
+
+        if existing:
+            existing.delete()
+            liked = False
+        else:
+            ResearchLike.objects.create(
+                report=report,
+                user=request.user if request.user.is_authenticated else None,
+                session_key=visitor_id[:40],
+                ip_address=ip or None,
+                country=geo["country"],
+            )
+            liked = True
+
+        report.recount_likes()
+        report.refresh_from_db(fields=["likes_count"])
+        return Response({"liked": liked, "likes_count": report.likes_count})
+
+    @action(detail=True, methods=["post"], permission_classes=[], url_path="save")
+    def save_report(self, request, slug=None):
+        """Toggle save/bookmark on a research report. Works for both registered and anonymous."""
+        from apps.analytics.geoip import get_client_ip, get_visitor_key, lookup_geo
+
+        report = self.get_object()
+        ip = get_client_ip(request)
+        visitor_id = get_visitor_key(request)
+        geo = lookup_geo(ip)
+
+        lookup = (
+            {"user": request.user}
+            if request.user.is_authenticated
+            else {"user__isnull": True, "session_key": visitor_id}
+        )
+        existing = ResearchSave.objects.filter(report=report, **lookup).first()
+
+        if existing:
+            existing.delete()
+            saved = False
+        else:
+            ResearchSave.objects.create(
+                report=report,
+                user=request.user if request.user.is_authenticated else None,
+                session_key=visitor_id[:40],
+                ip_address=ip or None,
+                country=geo["country"],
+            )
+            saved = True
+
+        report.recount_saves()
+        report.refresh_from_db(fields=["saves_count"])
+        return Response({"saved": saved, "saves_count": report.saves_count})
 
     @action(detail=False, methods=["get"])
     def featured(self, request):
@@ -284,10 +373,13 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
             published_at__gte=month_start
         ).count()
 
-        # Total downloads
-        total_downloads = ResearchReport.objects.aggregate(
-            total=models.Sum("download_count")
-        )["total"] or 0
+        # Total downloads / likes / saves / views
+        agg = ResearchReport.objects.aggregate(
+            total_downloads=models.Sum("download_count"),
+            total_views=models.Sum("view_count"),
+            total_likes=models.Sum("likes_count"),
+            total_saves=models.Sum("saves_count"),
+        )
 
         return Response({
             "total": total,
@@ -295,5 +387,8 @@ class ResearchReportViewSet(viewsets.ModelViewSet):
             "drafts": drafts,
             "in_review": in_review,
             "this_month": this_month,
-            "total_downloads": total_downloads,
+            "total_downloads": agg["total_downloads"] or 0,
+            "total_views": agg["total_views"] or 0,
+            "total_likes": agg["total_likes"] or 0,
+            "total_saves": agg["total_saves"] or 0,
         })

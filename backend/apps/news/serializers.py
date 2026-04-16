@@ -89,6 +89,8 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
             "is_breaking",
             "is_premium",
             "view_count",
+            "likes_count",
+            "saves_count",
             "read_time_minutes",
             "related_companies",
         ]
@@ -126,6 +128,8 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
     featured_image = serializers.SerializerMethodField()
     image_attribution = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+    is_saved = serializers.SerializerMethodField()
 
     class Meta:
         model = NewsArticle
@@ -151,12 +155,48 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
             "is_breaking",
             "is_premium",
             "view_count",
+            "likes_count",
+            "saves_count",
+            "is_liked",
+            "is_saved",
             "read_time_minutes",
             "meta_title",
             "meta_description",
             "created_at",
             "updated_at",
         ]
+
+    def get_is_liked(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return False
+        from .models import ArticleLike
+        from apps.analytics.geoip import get_visitor_key
+
+        if request.user.is_authenticated:
+            return ArticleLike.objects.filter(article=obj, user=request.user).exists()
+        vid = get_visitor_key(request)
+        if not vid:
+            return False
+        return ArticleLike.objects.filter(
+            article=obj, user__isnull=True, session_key=vid
+        ).exists()
+
+    def get_is_saved(self, obj):
+        request = self.context.get("request")
+        if not request:
+            return False
+        from .models import ArticleSave
+        from apps.analytics.geoip import get_visitor_key
+
+        if request.user.is_authenticated:
+            return ArticleSave.objects.filter(article=obj, user=request.user).exists()
+        vid = get_visitor_key(request)
+        if not vid:
+            return False
+        return ArticleSave.objects.filter(
+            article=obj, user__isnull=True, session_key=vid
+        ).exists()
 
     def get_featured_image(self, obj):
         """Return image URL — never null, never 404."""
