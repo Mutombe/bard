@@ -60,19 +60,31 @@ export default function AdminResearchPage() {
   const [reports, setReports] = useState<ResearchReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 25;
 
   const fetchReports = () => {
     setLoading(true);
     researchService
-      .getReports({ page_size: 100, ordering: "-created_at" })
-      .then((r) => setReports(r.results || []))
+      .getReports({ page, page_size: PAGE_SIZE, ordering: "-created_at" })
+      .then((r) => {
+        setReports(r.results || []);
+        setTotalCount(r.count || 0);
+      })
       .catch(() => toast.error("Failed to load reports"))
       .finally(() => setLoading(false));
   };
 
+  // Reset to page 1 on filter/search change
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, selectedType, selectedStatus]);
+
   useEffect(() => {
     fetchReports();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   const handleDelete = async (slug: string, title: string) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
@@ -310,6 +322,34 @@ export default function AdminResearchPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {!loading && totalCount > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} of {totalCount.toLocaleString()} reports
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 text-sm border border-terminal-border hover:bg-terminal-bg-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-muted-foreground tabular-nums px-2">
+              Page {page} of {Math.ceil(totalCount / PAGE_SIZE)}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * PAGE_SIZE >= totalCount}
+              className="px-3 py-2 text-sm border border-terminal-border hover:bg-terminal-bg-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

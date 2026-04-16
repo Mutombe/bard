@@ -124,9 +124,9 @@ class NewsArticle(BaseModel):
     class ContentType(models.TextChoices):
         NEWS = "news", "News"
         ANALYSIS = "analysis", "Analysis"
+        INSIGHTS = "insights", "Insights"
         RESEARCH = "research", "Research Report"
         OPINION = "opinion", "Opinion"
-        MARKET_UPDATE = "market_update", "Market Update"
         EARNINGS = "earnings", "Earnings Report"
 
     class Source(models.TextChoices):

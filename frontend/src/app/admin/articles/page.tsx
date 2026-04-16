@@ -135,11 +135,9 @@ export default function ArticlesPage() {
       if (selectedStatus !== "all") {
         params.status = selectedStatus;
       }
-      // Source filter: editorial = in-house, scraped = serpapi/scraped/polygon
-      if (selectedSource === "editorial") {
-        params.source = "editorial";
-      } else if (selectedSource === "scraped") {
-        params.source__in = "serpapi,scraped,polygon";
+      // Source filter — backend handles editorial vs scraped (anything non-editorial)
+      if (selectedSource === "editorial" || selectedSource === "scraped") {
+        params.source = selectedSource;
       }
 
       const response = await editorialService.getArticles(params);

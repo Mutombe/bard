@@ -65,8 +65,8 @@ const availableTags = [
 const contentTypes = [
   { value: "news", label: "News", icon: FileText },
   { value: "analysis", label: "Analysis", icon: Sparkle },
+  { value: "insights", label: "Insights", icon: Globe },
   { value: "opinion", label: "Opinion", icon: BookmarkSimple },
-  { value: "market_update", label: "Market Update", icon: Globe },
 ];
 
 export default function NewArticlePage() {

@@ -64,13 +64,24 @@ export default function AdminNotificationsPage() {
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; id?: string }>({ open: false });
   const [markingRead, setMarkingRead] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 20;
 
   const fetchNotifications = async () => {
     try {
-      const response = await authClient.get("/engagement/notifications/", {
-        params: filter === "unread" ? { is_read: false } : undefined,
-      });
-      setNotifications(response.data.results || response.data || []);
+      const params: Record<string, any> = { page, page_size: PAGE_SIZE };
+      if (filter === "unread") params.is_read = false;
+      const response = await authClient.get("/engagement/notifications/", { params });
+      const data = response.data;
+      // Handle both paginated and non-paginated responses
+      if (data.results) {
+        setNotifications(data.results);
+        setTotalCount(data.count || data.results.length);
+      } else {
+        setNotifications(Array.isArray(data) ? data : []);
+        setTotalCount(Array.isArray(data) ? data.length : 0);
+      }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
       toast.error("Failed to load notifications");
@@ -80,8 +91,13 @@ export default function AdminNotificationsPage() {
   };
 
   useEffect(() => {
-    fetchNotifications();
+    setPage(1);
   }, [filter]);
+
+  useEffect(() => {
+    fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, page]);
 
   const markAsRead = async (id: string) => {
     setMarkingRead(id);
@@ -276,6 +292,34 @@ export default function AdminNotificationsPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && totalCount > PAGE_SIZE && (
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-muted-foreground">
+            Showing {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, totalCount)} of {totalCount.toLocaleString()}
+          </p>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 text-sm border border-terminal-border hover:bg-terminal-bg-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-muted-foreground tabular-nums px-2">
+              Page {page} of {Math.ceil(totalCount / PAGE_SIZE)}
+            </span>
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * PAGE_SIZE >= totalCount}
+              className="px-3 py-2 text-sm border border-terminal-border hover:bg-terminal-bg-elevated transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
         </div>
       )}
 
