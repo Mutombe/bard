@@ -16,6 +16,7 @@ import {
   Tag,
   GearSix,
   Image as ImageIcon,
+  Clock,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { researchService, type Topic, type Industry } from "@/services/api/research";
@@ -44,6 +45,8 @@ export default function NewResearchReportPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [showSettings, setShowSettings] = useState(true);
 
@@ -155,6 +158,12 @@ export default function NewResearchReportPage() {
       meta_description: metaDescription || undefined,
     };
 
+    if (publishStatus === "scheduled" && scheduledDate) {
+      baseData.published_at = new Date(scheduledDate).toISOString();
+    } else if (publishStatus === "published") {
+      baseData.published_at = new Date().toISOString();
+    }
+
     if (pdfFile) {
       // Multipart upload when PDF attached
       const formData = new FormData();
@@ -220,6 +229,41 @@ export default function NewResearchReportPage() {
     }
   };
 
+  const handleSchedule = async () => {
+    if (!scheduledDate) {
+      toast.error("Please pick a date & time to schedule this report");
+      return;
+    }
+    if (new Date(scheduledDate) <= new Date()) {
+      toast.error("Scheduled date must be in the future");
+      return;
+    }
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+    if (!abstract.trim()) {
+      toast.error("Please enter an abstract");
+      return;
+    }
+    if (!pdfFile && !content.trim()) {
+      toast.error("Please add either body content or a PDF document");
+      return;
+    }
+
+    setIsScheduling(true);
+    try {
+      await submitReport("scheduled");
+      toast.success(`Report scheduled for ${new Date(scheduledDate).toLocaleString()}`);
+      router.push("/admin/research");
+    } catch (error: any) {
+      console.error("Failed to schedule:", error);
+      toast.error(error.response?.data?.error || "Failed to schedule report");
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   // Word count from HTML content
   const wordCount = content.replace(/<[^>]*>/g, ' ').trim().split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
@@ -261,6 +305,21 @@ export default function NewResearchReportPage() {
             >
               {isSaving ? <CircleNotch className="h-4 w-4 animate-spin" /> : <FloppyDisk className="h-4 w-4" />}
               Save Draft
+            </button>
+            <input
+              type="datetime-local"
+              value={scheduledDate}
+              onChange={(e) => setScheduledDate(e.target.value)}
+              className="px-2 py-2 border border-terminal-border rounded-md bg-terminal-bg text-sm"
+              title="Schedule publication date"
+            />
+            <button
+              onClick={handleSchedule}
+              disabled={isScheduling || !scheduledDate}
+              className="px-4 py-2 border border-brand-violet text-brand-violet rounded-md hover:bg-brand-violet/10 transition-colors text-sm flex items-center gap-2 disabled:opacity-50"
+            >
+              {isScheduling ? <CircleNotch className="h-4 w-4 animate-spin" /> : <Clock className="h-4 w-4" />}
+              Schedule
             </button>
             <button
               onClick={handlePublish}

@@ -184,6 +184,11 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     lookup_field = "slug"
 
     def get_queryset(self):
+        # Scheduled-content gate: promote any articles/research whose
+        # scheduled time has passed (cache-gated, runs max 1x/2min)
+        from apps.editorial.scheduler import run_scheduler_if_due
+        run_scheduler_if_due()
+
         queryset = super().get_queryset()
 
         # Non-authenticated users only see published articles

@@ -10,6 +10,7 @@ import {
   FileText,
   Image as ImageIcon,
   Trash,
+  Clock,
 } from "@phosphor-icons/react";
 import { ImagePicker } from "@/components/editor/ImagePicker";
 import { ModernEditor } from "@/components/editor/ModernEditor";
@@ -44,6 +45,7 @@ export default function EditResearchPage() {
   const [content, setContent] = useState("");
   const [reportType, setReportType] = useState("quarterly");
   const [status, setStatus] = useState("published");
+  const [scheduledDate, setScheduledDate] = useState("");
   const [coverImage, setCoverImage] = useState("");
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [existingPdfUrl, setExistingPdfUrl] = useState<string | null>(null);
@@ -96,6 +98,11 @@ export default function EditResearchPage() {
       return;
     }
 
+    if (newStatus === "scheduled" && !scheduledDate) {
+      toast.error("Please pick a date & time to schedule");
+      return;
+    }
+
     setSaving(true);
     try {
       const finalStatus = newStatus || status;
@@ -112,6 +119,13 @@ export default function EditResearchPage() {
         read_time_minutes: readTimeMinutes,
         page_count: pageCount,
       };
+
+      // Set published_at when scheduling or publishing
+      if (finalStatus === "scheduled" && scheduledDate) {
+        baseData.published_at = new Date(scheduledDate).toISOString();
+      } else if (finalStatus === "published") {
+        baseData.published_at = new Date().toISOString();
+      }
 
       // If a new PDF is attached, use multipart
       if (pdfFile) {
@@ -209,6 +223,26 @@ export default function EditResearchPage() {
             {saving ? <CircleNotch className="h-4 w-4 animate-spin" /> : <FloppyDisk className="h-4 w-4" />}
             Save
           </button>
+
+          {/* Schedule */}
+          <input
+            type="datetime-local"
+            value={scheduledDate}
+            onChange={(e) => setScheduledDate(e.target.value)}
+            min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+            className="hidden lg:block px-3 py-2 border border-terminal-border bg-transparent text-sm focus:outline-none focus:border-brand-violet"
+            title="Schedule publish date"
+          />
+          <button
+            onClick={() => handleSave("scheduled")}
+            disabled={saving || !scheduledDate}
+            className="flex items-center gap-2 px-4 py-2 border border-brand-violet text-brand-violet-accessible hover:bg-brand-violet/5 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+            title={!scheduledDate ? "Pick a date first" : "Schedule for later"}
+          >
+            <Clock className="h-4 w-4" />
+            Schedule
+          </button>
+
           <button
             onClick={() => handleSave("published")}
             disabled={saving}

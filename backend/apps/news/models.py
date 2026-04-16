@@ -118,6 +118,7 @@ class NewsArticle(BaseModel):
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
         PENDING_REVIEW = "pending", "Pending Review"
+        SCHEDULED = "scheduled", "Scheduled"
         PUBLISHED = "published", "Published"
         ARCHIVED = "archived", "Archived"
 
