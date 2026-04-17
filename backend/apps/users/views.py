@@ -318,6 +318,7 @@ class WriterViewSet(viewsets.ModelViewSet):
 
     queryset = Writer.objects.filter(is_active=True)
     serializer_class = WriterSerializer
+    pagination_class = None
     lookup_field = "slug"
     permission_classes = [IsAuthenticated]
 
