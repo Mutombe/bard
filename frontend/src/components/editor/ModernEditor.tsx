@@ -629,13 +629,39 @@ export function ModernEditor({
           )}
         </div>
 
-        {/* Table */}
-        <ToolbarButton
-          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-          title="Insert Table"
-        >
-          <TableIcon className="h-4 w-4" />
-        </ToolbarButton>
+        {/* Table controls */}
+        {editor.isActive("table") ? (
+          <div className="flex items-center gap-0.5 bg-terminal-bg-elevated rounded-md px-1">
+            <ToolbarButton onClick={() => editor.chain().focus().addColumnBefore().run()} title="Add column before">
+              <Plus className="h-3 w-3" /><Columns className="h-3 w-3" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().addColumnAfter().run()} title="Add column after">
+              <Columns className="h-3 w-3" /><Plus className="h-3 w-3" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().addRowBefore().run()} title="Add row before">
+              <Plus className="h-3 w-3" /><Rows className="h-3 w-3" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().addRowAfter().run()} title="Add row after">
+              <Rows className="h-3 w-3" /><Plus className="h-3 w-3" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().deleteColumn().run()} title="Delete column">
+              <Trash className="h-3 w-3 text-red-400" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().deleteRow().run()} title="Delete row">
+              <Trash className="h-3 w-3 text-red-400" />
+            </ToolbarButton>
+            <ToolbarButton onClick={() => editor.chain().focus().deleteTable().run()} title="Delete table">
+              <X className="h-3 w-3 text-red-400" />
+            </ToolbarButton>
+          </div>
+        ) : (
+          <ToolbarButton
+            onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+            title="Insert Table"
+          >
+            <TableIcon className="h-4 w-4" />
+          </ToolbarButton>
+        )}
 
         <ToolbarDivider />
 
@@ -888,6 +914,26 @@ export function ModernEditor({
 
         .ProseMirror .selectedCell {
           background: hsl(var(--primary) / 0.1);
+        }
+
+        .ProseMirror .column-resize-handle {
+          position: absolute;
+          right: -2px;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: hsl(var(--primary));
+          cursor: col-resize;
+          z-index: 20;
+        }
+
+        .ProseMirror.resize-cursor {
+          cursor: col-resize;
+        }
+
+        .ProseMirror .tableWrapper {
+          overflow-x: auto;
+          margin: 1rem 0;
         }
 
         .ProseMirror hr {

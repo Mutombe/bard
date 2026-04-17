@@ -360,7 +360,19 @@ export default function EditArticlePage() {
       toast.success("Article saved successfully");
     } catch (err: any) {
       console.error("Failed to save article:", err);
-      const errorMessage = err.response?.data?.detail || err.response?.data?.message || "Failed to save article";
+      const data = err.response?.data;
+      let errorMessage = "Failed to save article";
+      if (data) {
+        if (typeof data === "string") errorMessage = data;
+        else if (data.detail) errorMessage = data.detail;
+        else if (data.message) errorMessage = data.message;
+        else {
+          const fieldErrors = Object.entries(data)
+            .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+            .join(" | ");
+          if (fieldErrors) errorMessage = fieldErrors;
+        }
+      }
       toast.error(errorMessage);
     } finally {
       setIsSaving(false);

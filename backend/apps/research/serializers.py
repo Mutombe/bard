@@ -253,6 +253,8 @@ class ResearchReportDetailSerializer(serializers.ModelSerializer):
 class ResearchReportCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating/updating research reports."""
 
+    published_at = serializers.DateTimeField(required=False, allow_null=True)
+
     class Meta:
         model = ResearchReport
         fields = [
@@ -275,6 +277,7 @@ class ResearchReportCreateSerializer(serializers.ModelSerializer):
             "cover_image_url",
             "pdf_file",
             "status",
+            "published_at",
             "is_featured",
             "is_premium",
             "page_count",
