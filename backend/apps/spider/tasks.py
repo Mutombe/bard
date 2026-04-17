@@ -916,12 +916,14 @@ def set_article_images():
         from django.db.models import Q
 
         # Get articles needing contextual images (generic fallback = no ixid param)
+        # Skip articles with intentional images (DO Spaces uploads, etc.)
         needs_image = list(
             NewsArticle.objects.filter(
                 status='published',
+            ).exclude(
+                featured_image_url__contains='digitaloceanspaces.com',
             ).filter(
                 Q(featured_image_url='') |
-                ~Q(featured_image_url__contains='images.unsplash.com') |
                 (
                     Q(featured_image_url__contains='images.unsplash.com') &
                     ~Q(featured_image_url__contains='ixid=')
