@@ -47,6 +47,24 @@ export interface Article {
   updated_at?: string;
 }
 
+export interface Writer {
+  id: string;
+  full_name: string;
+  slug: string;
+  email?: string;
+  bio?: string;
+  title?: string;
+  organization?: string;
+  avatar?: string;
+  avatar_url?: string;
+  avatar_display?: string;
+  twitter?: string;
+  linkedin?: string;
+  is_active?: boolean;
+  article_count?: number;
+  created_at?: string;
+}
+
 export interface ContentBucket {
   id: number;
   name: string;
@@ -468,5 +486,33 @@ export const editorialService = {
       article_ids: articleIds,
       ...extraData,
     });
+  },
+
+  // =========================
+  // Writers
+  // =========================
+
+  async getWriters(params?: { search?: string }): Promise<Writer[]> {
+    const response = await authClient.get<Writer[]>("/users/writers/", { params });
+    return response.data;
+  },
+
+  async getWriter(slug: string): Promise<Writer> {
+    const response = await authClient.get<Writer>(`/users/writers/${slug}/`);
+    return response.data;
+  },
+
+  async createWriter(data: Partial<Writer>): Promise<Writer> {
+    const response = await authClient.post<Writer>("/users/writers/", data);
+    return response.data;
+  },
+
+  async updateWriter(slug: string, data: Partial<Writer>): Promise<Writer> {
+    const response = await authClient.patch<Writer>(`/users/writers/${slug}/`, data);
+    return response.data;
+  },
+
+  async deleteWriter(slug: string): Promise<void> {
+    await authClient.delete(`/users/writers/${slug}/`);
   },
 };

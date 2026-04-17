@@ -252,6 +252,14 @@ class NewsArticle(BaseModel):
         null=True,
         related_name="articles",
     )
+    writer = models.ForeignKey(
+        "users.Writer",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="articles",
+        help_text="Credit goes to this writer instead of the uploading user",
+    )
     editor = models.ForeignKey(
         "users.User",
         on_delete=models.SET_NULL,

@@ -9,8 +9,9 @@ from . import views
 app_name = "users"
 
 router = DefaultRouter()
-router.register(r"", views.UserViewSet, basename="users")
+router.register(r"writers", views.WriterViewSet, basename="writers")
 router.register(r"registration", views.UserRegistrationView, basename="registration")
+router.register(r"", views.UserViewSet, basename="users")
 
 urlpatterns = [
     path("", include(router.urls)),
