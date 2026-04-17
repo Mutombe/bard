@@ -274,7 +274,9 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         queryset=Writer.objects.all(),
         required=False,
         allow_null=True,
+        allow_empty=True,
     )
+    published_at = serializers.DateTimeField(required=False, allow_null=True)
 
     class Meta:
         model = NewsArticle
@@ -292,12 +294,18 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
             "related_companies",
             "writer",
             "status",
+            "published_at",
             "is_featured",
             "is_breaking",
             "is_premium",
             "meta_title",
             "meta_description",
         ]
+
+    def validate_writer(self, value):
+        if value == "" or value is None:
+            return None
+        return value
 
     def create(self, validated_data):
         tag_slugs = validated_data.pop("tags", [])

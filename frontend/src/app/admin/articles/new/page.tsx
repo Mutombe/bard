@@ -272,6 +272,11 @@ export default function NewArticlePage() {
         errorMsg = typeof errorData.error === "string" ? errorData.error : JSON.stringify(errorData.error);
       } else if (errorData?.detail) {
         errorMsg = errorData.detail;
+      } else if (errorData && typeof errorData === "object") {
+        const fieldErrors = Object.entries(errorData)
+          .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
+          .join(" | ");
+        if (fieldErrors) errorMsg = fieldErrors;
       }
 
       setError(errorMsg);
