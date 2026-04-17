@@ -5,7 +5,8 @@ from rest_framework import serializers
 
 from apps.markets.models import Company
 from apps.markets.serializers import CompanyMinimalSerializer
-from apps.users.serializers import UserSerializer
+from apps.users.models import Writer
+from apps.users.serializers import UserSerializer, WriterMinimalSerializer
 
 from .models import Category, NewsArticle, Tag, Comment, CommentLike
 
@@ -96,7 +97,16 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
         ]
 
     def get_author(self, obj):
-        """Return author data with full_name and avatar."""
+        """Return byline: writer profile if attached, else uploading user."""
+        if obj.writer:
+            return {
+                "id": str(obj.writer.id),
+                "full_name": obj.writer.full_name,
+                "avatar": obj.writer.display_avatar,
+                "title": obj.writer.title,
+                "organization": obj.writer.organization,
+                "is_writer": True,
+            }
         if obj.author:
             avatar_url = None
             if hasattr(obj.author, 'profile') and obj.author.profile and obj.author.profile.avatar:
@@ -106,6 +116,7 @@ class NewsArticleListSerializer(serializers.ModelSerializer):
                 "email": obj.author.email,
                 "full_name": obj.author.full_name or obj.author.email,
                 "avatar": avatar_url,
+                "is_writer": False,
             }
         return None
 
@@ -123,7 +134,8 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
 
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
-    author = UserSerializer(read_only=True)
+    author = serializers.SerializerMethodField()
+    writer = WriterMinimalSerializer(read_only=True)
     editor = UserSerializer(read_only=True)
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
     featured_image = serializers.SerializerMethodField()
@@ -148,6 +160,7 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
             "content_type",
             "related_companies",
             "author",
+            "writer",
             "editor",
             "status",
             "published_at",
@@ -198,6 +211,30 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
             article=obj, user__isnull=True, session_key=vid
         ).exists()
 
+    def get_author(self, obj):
+        """Return byline: writer profile if attached, else uploading user."""
+        if obj.writer:
+            return {
+                "id": str(obj.writer.id),
+                "full_name": obj.writer.full_name,
+                "avatar": obj.writer.display_avatar,
+                "title": obj.writer.title,
+                "organization": obj.writer.organization,
+                "is_writer": True,
+            }
+        if obj.author:
+            avatar_url = None
+            if hasattr(obj.author, 'profile') and obj.author.profile and obj.author.profile.avatar:
+                avatar_url = obj.author.profile.avatar.url
+            return {
+                "id": str(obj.author.id),
+                "email": obj.author.email,
+                "full_name": obj.author.full_name or obj.author.email,
+                "avatar": avatar_url,
+                "is_writer": False,
+            }
+        return None
+
     def get_featured_image(self, obj):
         """Return image URL — never null, never 404."""
         return _get_featured_image(obj, self.context)
@@ -232,6 +269,13 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         allow_blank=True,
     )
 
+    writer = serializers.SlugRelatedField(
+        slug_field="slug",
+        queryset=Writer.objects.all(),
+        required=False,
+        allow_null=True,
+    )
+
     class Meta:
         model = NewsArticle
         fields = [
@@ -246,6 +290,7 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
             "tags",
             "content_type",
             "related_companies",
+            "writer",
             "status",
             "is_featured",
             "is_breaking",

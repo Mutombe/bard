@@ -925,18 +925,34 @@ export function ModernEditor({
           padding: 0;
         }
 
-        .ProseMirror ul,
-        .ProseMirror ol {
+        .ProseMirror ul {
+          list-style-type: disc;
           padding-left: 1.5rem;
-          margin: 0.5rem 0;
+          margin: 0.75rem 0;
+        }
+
+        .ProseMirror ol {
+          list-style-type: decimal;
+          padding-left: 1.5rem;
+          margin: 0.75rem 0;
+        }
+
+        .ProseMirror ul ul {
+          list-style-type: circle;
+        }
+
+        .ProseMirror ul ul ul {
+          list-style-type: square;
         }
 
         .ProseMirror li {
           margin: 0.25rem 0;
+          display: list-item;
         }
 
         .ProseMirror li p {
           margin: 0;
+          display: inline;
         }
 
         .ProseMirror h1 {

@@ -15,7 +15,7 @@ from rest_framework.response import Response
 
 from apps.markets.models import Company
 
-from .models import User, UserProfile
+from .models import User, UserProfile, Writer
 from .serializers import (
     UserCreateSerializer,
     UserPreferencesSerializer,
@@ -23,6 +23,7 @@ from .serializers import (
     UserSerializer,
     UserUpdateSerializer,
     WatchlistSerializer,
+    WriterSerializer,
 )
 
 
@@ -308,3 +309,26 @@ class UserRegistrationView(viewsets.GenericViewSet):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class WriterViewSet(viewsets.ModelViewSet):
+    """
+    CRUD for Writer profiles. Admin-only for write ops, public for reads.
+    """
+
+    queryset = Writer.objects.filter(is_active=True)
+    serializer_class = WriterSerializer
+    lookup_field = "slug"
+    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            return [AllowAny()]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        qs = Writer.objects.all() if self.request.user.is_staff else Writer.objects.filter(is_active=True)
+        search = self.request.query_params.get("search")
+        if search:
+            qs = qs.filter(full_name__icontains=search)
+        return qs

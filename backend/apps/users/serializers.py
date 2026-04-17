@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from apps.markets.serializers import CompanyMinimalSerializer
 
-from .models import User, UserProfile
+from .models import User, UserProfile, Writer
 
 
 class UserMinimalSerializer(serializers.ModelSerializer):
@@ -122,6 +122,64 @@ class WatchlistSerializer(serializers.Serializer):
     """Serializer for watchlist operations."""
 
     company_id = serializers.UUIDField()
+
+
+class WriterSerializer(serializers.ModelSerializer):
+    """Full writer serializer for CRUD operations."""
+
+    avatar_display = serializers.SerializerMethodField()
+    article_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Writer
+        fields = [
+            "id",
+            "full_name",
+            "slug",
+            "email",
+            "bio",
+            "title",
+            "organization",
+            "avatar",
+            "avatar_url",
+            "avatar_display",
+            "twitter",
+            "linkedin",
+            "is_active",
+            "user",
+            "article_count",
+            "created_at",
+        ]
+        read_only_fields = ["id", "slug", "created_at"]
+
+    def get_avatar_display(self, obj):
+        if obj.avatar:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return obj.avatar_url or None
+
+    def get_article_count(self, obj):
+        return obj.articles.count()
+
+
+class WriterMinimalSerializer(serializers.ModelSerializer):
+    """Minimal writer serializer for article references."""
+
+    avatar_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Writer
+        fields = ["id", "full_name", "slug", "title", "organization", "avatar_display"]
+
+    def get_avatar_display(self, obj):
+        if obj.avatar:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return obj.avatar_url or None
 
 
 class UserPreferencesSerializer(serializers.Serializer):

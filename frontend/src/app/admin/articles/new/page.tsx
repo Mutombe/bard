@@ -32,7 +32,7 @@ import {
   Star,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
-import { editorialService } from "@/services/api/editorial";
+import { editorialService, type Writer } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
 import { ImagePicker } from "@/components/editor/ImagePicker";
 import { ModernEditor } from "@/components/editor/ModernEditor";
@@ -87,6 +87,8 @@ export default function NewArticlePage() {
   const [scheduledDate, setScheduledDate] = useState("");
   const [featured, setFeatured] = useState(false);
   const [premium, setPremium] = useState(false);
+  const [selectedWriter, setSelectedWriter] = useState<string>("");
+  const [writers, setWriters] = useState<Writer[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [showImagePicker, setShowImagePicker] = useState(false);
@@ -98,7 +100,7 @@ export default function NewArticlePage() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
-  // Fetch categories on mount
+  // Fetch categories + writers on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -113,7 +115,14 @@ export default function NewArticlePage() {
         setLoadingCategories(false);
       }
     };
+    const fetchWriters = async () => {
+      try {
+        const data = await editorialService.getWriters();
+        setWriters(data);
+      } catch {}
+    };
     fetchCategories();
+    fetchWriters();
   }, []);
 
   // Auto-focus title on mount
@@ -228,6 +237,7 @@ export default function NewArticlePage() {
         featured_image_caption: imageCaption || undefined,
         content_type: contentType,
         tags: tags.map(t => t.slug),
+        writer: selectedWriter || null,
       };
 
       // When scheduling, send the future published_at datetime
@@ -577,6 +587,26 @@ export default function NewArticlePage() {
                         </>
                       )}
                     </select>
+                  </div>
+
+                  {/* Writer (Byline Credit) */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2 text-muted-foreground">Writer (Byline)</label>
+                    <select
+                      value={selectedWriter}
+                      onChange={(e) => setSelectedWriter(e.target.value)}
+                      className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-lg text-sm focus:outline-none focus:border-primary"
+                    >
+                      <option value="">Default (you)</option>
+                      {writers.map((w) => (
+                        <option key={w.id} value={w.slug}>
+                          {w.full_name}{w.title ? ` — ${w.title}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-muted-foreground mt-1">
+                      Credit goes to the selected writer on the feed and detail page.
+                    </p>
                   </div>
 
                   {/* Toggles */}

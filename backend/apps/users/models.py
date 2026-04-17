@@ -324,3 +324,52 @@ class UserProfile(TimeStampedModel):
             prefs = prefs.setdefault(k, {})
         prefs[keys[-1]] = value
         self.save(update_fields=["preferences"])
+
+
+class Writer(TimeStampedModel):
+    """
+    External writer/contributor profile. Writers may or may not have a
+    platform account. When a Writer is attached to an article, credit
+    (byline, avatar, bio) goes to the Writer instead of the uploading user.
+    """
+
+    full_name = models.CharField("Full Name", max_length=200)
+    slug = models.SlugField("Slug", max_length=200, unique=True, db_index=True)
+    email = models.EmailField("Email", blank=True)
+    bio = models.TextField("Bio", max_length=1000, blank=True)
+    title = models.CharField("Title / Role", max_length=200, blank=True)
+    organization = models.CharField("Organization", max_length=200, blank=True)
+    avatar = models.ImageField("Avatar", upload_to="writers/", null=True, blank=True)
+    avatar_url = models.URLField("Avatar URL", max_length=500, blank=True)
+    twitter = models.CharField("X / Twitter Handle", max_length=100, blank=True)
+    linkedin = models.URLField("LinkedIn URL", max_length=300, blank=True)
+    is_active = models.BooleanField("Active", default=True)
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="writer_profile",
+        help_text="Link to platform account if the writer has one",
+    )
+
+    class Meta:
+        verbose_name = "Writer"
+        verbose_name_plural = "Writers"
+        ordering = ["full_name"]
+
+    def __str__(self):
+        return self.full_name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.full_name)
+        super().save(*args, **kwargs)
+
+    @property
+    def display_avatar(self):
+        if self.avatar:
+            return self.avatar.url
+        return self.avatar_url or None

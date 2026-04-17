@@ -25,6 +25,7 @@ import {
   Factory,
   Globe,
   ChartBar,
+  PenNib,
 } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -48,6 +49,7 @@ const sidebarItems = [
   { href: "/admin/regions", label: "Regions", icon: Globe },
   { href: "/admin/newsletters", label: "Newsletters", icon: Envelope },
   { href: "/admin/notifications", label: "Notifications", icon: Bell },
+  { href: "/admin/writers", label: "Writers", icon: PenNib },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/media", label: "Media Library", icon: ImageIcon },
   { href: "/admin/settings", label: "Settings", icon: GearSix },
