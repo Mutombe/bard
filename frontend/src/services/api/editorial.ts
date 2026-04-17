@@ -493,8 +493,9 @@ export const editorialService = {
   // =========================
 
   async getWriters(params?: { search?: string }): Promise<Writer[]> {
-    const response = await authClient.get<Writer[]>("/users/writers/", { params });
-    return response.data;
+    const response = await authClient.get("/users/writers/", { params });
+    const data = response.data;
+    return Array.isArray(data) ? data : data.results ?? [];
   },
 
   async getWriter(slug: string): Promise<Writer> {
