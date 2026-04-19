@@ -145,6 +145,24 @@ publicClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// If a public request gets 401 (expired token), retry WITHOUT auth — data is public
+publicClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const config = error.config as InternalAxiosRequestConfig & { _retryCount?: number; _authRetried?: boolean };
+
+    if (error.response?.status === 401 && config && !config._authRetried) {
+      config._authRetried = true;
+      if (config.headers) {
+        delete config.headers.Authorization;
+      }
+      return publicClient(config);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
 // Add retry interceptor for network errors (cold starts)
 publicClient.interceptors.response.use(
   (response) => response,
