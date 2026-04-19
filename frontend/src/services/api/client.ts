@@ -129,11 +129,13 @@ export const publicClient: AxiosInstance = axios.create({
 
 // Attach visitor id + optional auth token on every public request
 publicClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig & { _skipAuth?: boolean }) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("access_token");
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (!config._skipAuth) {
+        const token = localStorage.getItem("access_token");
+        if (token && config.headers) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
       const visitorId = getVisitorId();
       if (visitorId && config.headers) {
@@ -149,10 +151,11 @@ publicClient.interceptors.request.use(
 publicClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const config = error.config as InternalAxiosRequestConfig & { _retryCount?: number; _authRetried?: boolean };
+    const config = error.config as InternalAxiosRequestConfig & { _retryCount?: number; _skipAuth?: boolean; _authRetried?: boolean };
 
     if (error.response?.status === 401 && config && !config._authRetried) {
       config._authRetried = true;
+      config._skipAuth = true;
       if (config.headers) {
         delete config.headers.Authorization;
       }
