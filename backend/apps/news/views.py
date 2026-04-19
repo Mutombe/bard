@@ -178,7 +178,8 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     queryset = NewsArticle.objects.select_related(
         "category",
         "author",
-        "author__profile",  # Needed to access author's avatar in profile
+        "author__profile",
+        "writer",
         "editor",
     ).prefetch_related(
         "tags",
@@ -206,11 +207,14 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
             # Regular users see published articles
             queryset = queryset.filter(status=NewsArticle.Status.PUBLISHED)
 
-        # For feed listings: only show articles with substantial body (500+ chars) and real images
+        # For feed listings: scraped articles need 500+ chars to filter stubs,
+        # but editorial (in-house) articles always show regardless of length
         if self.action == "list":
             from django.db.models.functions import Length
             queryset = queryset.annotate(_content_len=Length("content"))
-            queryset = queryset.filter(_content_len__gte=500)
+            queryset = queryset.filter(
+                Q(source="editorial") | Q(_content_len__gte=500)
+            )
             queryset = queryset.filter(
                 Q(featured_image__gt="") | Q(featured_image_url__gt="")
             )
