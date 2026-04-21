@@ -42,6 +42,16 @@ import type { Category } from "@/types";
 // Helper to convert tag name to slug
 const toSlug = (text: string) => text.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
 
+// Field limits — MUST match backend/apps/news/models.py
+const LIMITS = {
+  title: 300,
+  subtitle: 500,
+  excerpt: 500,
+  imageCaption: 300,
+  metaTitle: 70,
+  metaDescription: 160,
+} as const;
+
 const availableTags = [
   { name: "JSE", slug: "jse" },
   { name: "NGX", slug: "ngx" },
@@ -197,6 +207,15 @@ export default function NewArticlePage() {
       titleRef.current?.focus();
       return;
     }
+    if (title.length > LIMITS.title) {
+      toast.error(`Title is ${title.length} chars — max ${LIMITS.title}. Please shorten it.`);
+      return;
+    }
+
+    if (subtitle.length > LIMITS.subtitle) {
+      toast.error(`Subtitle is ${subtitle.length} chars — max ${LIMITS.subtitle}. Please shorten it.`);
+      return;
+    }
 
     if (!content.trim() || content === "<p></p>") {
       toast.error("Please write some content");
@@ -208,12 +227,25 @@ export default function NewArticlePage() {
       return;
     }
 
-    // Auto-generate excerpt if not provided
-    const finalExcerpt = excerpt.trim() || content
-      .replace(/<[^>]*>/g, " ")
-      .replace(/&nbsp;/g, " ")
-      .trim()
-      .slice(0, 200) + "...";
+    // Auto-generate excerpt if not provided — cap at backend limit
+    const finalExcerpt = (
+      excerpt.trim() ||
+      content
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .trim()
+        .slice(0, 200) + "..."
+    ).slice(0, LIMITS.excerpt);
+
+    if (finalExcerpt.length > LIMITS.excerpt) {
+      toast.error(`Excerpt is ${finalExcerpt.length} chars — max ${LIMITS.excerpt}.`);
+      return;
+    }
+
+    if (imageCaption.length > LIMITS.imageCaption) {
+      toast.error(`Image caption is ${imageCaption.length} chars — max ${LIMITS.imageCaption}.`);
+      return;
+    }
 
     if (saveStatus === "scheduled" && !scheduledDate) {
       toast.error("Please pick a date & time to schedule this article");
@@ -263,20 +295,29 @@ export default function NewArticlePage() {
     } catch (err: any) {
       console.error("Failed to save article:", err);
 
+      const status = err.response?.status;
       const errorData = err.response?.data;
       let errorMsg = "Something went wrong. Please try again.";
 
-      if (typeof errorData === "string") {
+      // Server returned an HTML error page (Django 500 with DEBUG=False)
+      if (typeof errorData === "string" && errorData.includes("<!doctype html")) {
+        errorMsg =
+          status === 500
+            ? "The server rejected this article (500). This is usually a duplicate title or a field exceeding its length limit. Try shortening the title or adding a word to make it unique."
+            : `Server returned an HTML error page (${status}).`;
+      } else if (typeof errorData === "string") {
         errorMsg = errorData;
+      } else if (errorData?.detail) {
+        errorMsg = typeof errorData.detail === "string" ? errorData.detail : JSON.stringify(errorData.detail);
       } else if (errorData?.error) {
         errorMsg = typeof errorData.error === "string" ? errorData.error : JSON.stringify(errorData.error);
-      } else if (errorData?.detail) {
-        errorMsg = errorData.detail;
       } else if (errorData && typeof errorData === "object") {
         const fieldErrors = Object.entries(errorData)
           .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`)
           .join(" | ");
         if (fieldErrors) errorMsg = fieldErrors;
+      } else if (!err.response) {
+        errorMsg = "Network error — could not reach the server. Check your connection and try again.";
       }
 
       setError(errorMsg);
@@ -494,6 +535,7 @@ export default function NewArticlePage() {
                   value={imageCaption}
                   onChange={(e) => setImageCaption(e.target.value)}
                   placeholder="Add a caption for your image..."
+                  maxLength={LIMITS.imageCaption}
                   className="w-full mt-2 px-3 py-2 bg-transparent border-b border-transparent hover:border-terminal-border focus:border-primary text-sm text-muted-foreground focus:text-foreground outline-none transition-colors text-center"
                 />
               )}
@@ -506,9 +548,17 @@ export default function NewArticlePage() {
               onChange={handleTitleChange}
               placeholder="Your headline here..."
               rows={1}
+              maxLength={LIMITS.title}
               className="w-full text-4xl md:text-5xl font-bold bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground/50 leading-tight"
               style={{ overflow: "hidden" }}
             />
+            <p className={cn(
+              "text-xs mt-1 text-right",
+              title.length > LIMITS.title * 0.9 ? "text-amber-500" : "text-muted-foreground/60",
+              title.length >= LIMITS.title && "text-red-500"
+            )}>
+              {title.length}/{LIMITS.title}
+            </p>
 
             {/* Subtitle */}
             <textarea
@@ -520,9 +570,19 @@ export default function NewArticlePage() {
               }}
               placeholder="Add a subtitle to give more context..."
               rows={1}
+              maxLength={LIMITS.subtitle}
               className="w-full mt-4 text-xl text-muted-foreground bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground/40 leading-relaxed"
               style={{ overflow: "hidden" }}
             />
+            {subtitle.length > 0 && (
+              <p className={cn(
+                "text-xs mt-1 text-right",
+                subtitle.length > LIMITS.subtitle * 0.9 ? "text-amber-500" : "text-muted-foreground/60",
+                subtitle.length >= LIMITS.subtitle && "text-red-500"
+              )}>
+                {subtitle.length}/{LIMITS.subtitle}
+              </p>
+            )}
 
             {/* Divider */}
             <div className="h-px bg-terminal-border my-8" />
@@ -673,11 +733,15 @@ export default function NewArticlePage() {
                   onChange={(e) => setExcerpt(e.target.value)}
                   placeholder="Write a compelling summary..."
                   rows={4}
-                  maxLength={300}
+                  maxLength={LIMITS.excerpt}
                   className="w-full px-3 py-2 bg-terminal-bg-elevated border border-terminal-border rounded-lg text-sm focus:outline-none focus:border-primary resize-none"
                 />
-                <p className="text-xs text-muted-foreground mt-2 text-right">
-                  {excerpt.length}/300
+                <p className={cn(
+                  "text-xs mt-2 text-right",
+                  excerpt.length > LIMITS.excerpt * 0.9 ? "text-amber-500" : "text-muted-foreground",
+                  excerpt.length >= LIMITS.excerpt && "text-red-500"
+                )}>
+                  {excerpt.length}/{LIMITS.excerpt}
                 </p>
               </div>
 
