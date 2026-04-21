@@ -560,12 +560,16 @@ export default function ArticlePage() {
                 {article.title}
               </h1>
 
-              {/* Subtitle/Deck */}
-              {article.subtitle && (
-                <h2 className="text-xl md:text-2xl text-muted-foreground mb-5 font-serif leading-relaxed">
-                  {article.subtitle}
-                </h2>
-              )}
+              {/* Deck — show subtitle only when it meaningfully differs from
+                  the excerpt. Editors often paste the same text into both, so
+                  identical copy is deduped to the lede. */}
+              {article.subtitle &&
+                article.subtitle.trim().toLowerCase() !==
+                  (article.excerpt || "").trim().toLowerCase() && (
+                  <h2 className="text-xl md:text-2xl text-muted-foreground mb-5 font-serif leading-relaxed">
+                    {article.subtitle}
+                  </h2>
+                )}
 
               {/* Excerpt/Lede */}
               <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed prose-article">

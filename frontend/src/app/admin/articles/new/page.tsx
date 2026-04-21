@@ -31,7 +31,7 @@ import {
   Lock,
   Star,
 } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+import { cn, slugify as toUrlSlug } from "@/lib/utils";
 import { editorialService, type Writer } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
 import { ImagePicker } from "@/components/editor/ImagePicker";
@@ -82,6 +82,8 @@ const contentTypes = [
 export default function NewArticlePage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [customSlug, setCustomSlug] = useState("");
+  const [editingSlug, setEditingSlug] = useState(false);
   const [subtitle, setSubtitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
@@ -271,6 +273,13 @@ export default function NewArticlePage() {
         tags: tags.map(t => t.slug),
         writer: selectedWriter || null,
       };
+
+      // Only send a custom slug if the editor explicitly set one.
+      // Empty string means "let the backend auto-generate from title".
+      const trimmedCustomSlug = customSlug.trim();
+      if (trimmedCustomSlug) {
+        articleData.slug = trimmedCustomSlug;
+      }
 
       // When scheduling, send the future published_at datetime
       if (saveStatus === "scheduled" && scheduledDate) {
@@ -559,6 +568,55 @@ export default function NewArticlePage() {
             )}>
               {title.length}/{LIMITS.title}
             </p>
+
+            {/* URL slug preview / editor */}
+            {title.trim() && (
+              <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="opacity-60">URL:</span>
+                {editingSlug ? (
+                  <>
+                    <span className="opacity-60">/news/</span>
+                    <input
+                      type="text"
+                      value={customSlug}
+                      onChange={(e) => setCustomSlug(toUrlSlug(e.target.value))}
+                      onBlur={() => {
+                        if (!customSlug.trim()) setEditingSlug(false);
+                      }}
+                      placeholder={toUrlSlug(title)}
+                      autoFocus
+                      className="flex-1 max-w-md bg-terminal-bg-elevated border border-terminal-border rounded px-2 py-1 text-foreground focus:outline-none focus:border-primary"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomSlug("");
+                        setEditingSlug(false);
+                      }}
+                      className="text-muted-foreground hover:text-foreground underline"
+                    >
+                      reset
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="opacity-80">
+                      /news/<span className="text-foreground">{customSlug || toUrlSlug(title)}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingSlug(true)}
+                      className="text-primary hover:underline"
+                    >
+                      edit
+                    </button>
+                    {!customSlug && (
+                      <span className="opacity-50">(auto — will add -2 if taken)</span>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Subtitle */}
             <textarea

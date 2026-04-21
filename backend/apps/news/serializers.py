@@ -277,11 +277,19 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         allow_empty=True,
     )
     published_at = serializers.DateTimeField(required=False, allow_null=True)
+    # Optional — editors can set/override the URL slug. Empty string or
+    # omitted means "auto-generate from title".
+    slug = serializers.CharField(
+        max_length=300,
+        required=False,
+        allow_blank=True,
+    )
 
     class Meta:
         model = NewsArticle
         fields = [
             "title",
+            "slug",
             "subtitle",
             "excerpt",
             "content",

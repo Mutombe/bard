@@ -138,6 +138,7 @@ export interface EditorialAssignment {
 // Input type for creating/updating articles (accepts slug strings instead of objects)
 export interface ArticleInput {
   title?: string;
+  /** URL slug. Omit or send empty string to auto-generate from title. */
   slug?: string;
   subtitle?: string;
   excerpt?: string;
@@ -237,6 +238,7 @@ export const editorialService = {
     content: string;
     category: string; // slug
     subtitle?: string;
+    slug?: string; // URL slug — omit for auto-generation from title
     tags?: string[]; // slugs
     content_type?: string;
     status?: string;

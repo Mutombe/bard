@@ -30,7 +30,7 @@ import {
   ArrowsIn,
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
-import { cn } from "@/lib/utils";
+import { cn, slugify as toUrlSlug } from "@/lib/utils";
 import { editorialService, type Article, type Writer } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
 import { toast } from "sonner";
@@ -379,8 +379,9 @@ export default function EditArticlePage() {
 
     setIsSaving(true);
     try {
-      await editorialService.updateArticle(slug, {
+      const updated = await editorialService.updateArticle(slug, {
         title,
+        slug: slug, // send current slug so edits survive the round-trip
         subtitle,
         excerpt,
         content,
@@ -397,6 +398,15 @@ export default function EditArticlePage() {
         meta_description: metaDescription,
         writer: selectedWriter || null,
       });
+
+      // If the slug changed (user renamed the URL or dedup kicked in),
+      // update local state so subsequent saves hit the right record.
+      if (updated?.slug && updated.slug !== slug) {
+        setSlug(updated.slug);
+        // Swap the URL in-place without a full navigation, so the editor
+        // doesn't lose their scroll/focus position.
+        window.history.replaceState(null, "", `/admin/articles/${updated.slug}`);
+      }
 
       setLastSaved(new Date());
       toast.success("Article saved successfully");
@@ -601,13 +611,26 @@ export default function EditArticlePage() {
               maxLength={LIMITS.title}
               className="w-full text-2xl font-bold bg-transparent border-none outline-none placeholder:text-muted-foreground"
             />
-            <p className={cn(
-              "text-xs mt-2 text-right",
-              title.length > LIMITS.title * 0.9 ? "text-amber-500" : "text-muted-foreground",
-              title.length >= LIMITS.title && "text-red-500"
-            )}>
-              {title.length}/{LIMITS.title}
-            </p>
+            <div className="mt-2 flex items-center justify-between gap-4 text-xs">
+              <div className="flex items-center gap-2 text-muted-foreground min-w-0">
+                <span className="opacity-60 flex-shrink-0">URL:</span>
+                <span className="opacity-60 flex-shrink-0">/news/</span>
+                <input
+                  type="text"
+                  value={slug}
+                  onChange={(e) => setSlug(toUrlSlug(e.target.value))}
+                  placeholder={toUrlSlug(title) || "article-url"}
+                  className="flex-1 min-w-0 bg-transparent border-b border-transparent hover:border-terminal-border focus:border-primary text-foreground outline-none transition-colors"
+                />
+              </div>
+              <span className={cn(
+                "flex-shrink-0",
+                title.length > LIMITS.title * 0.9 ? "text-amber-500" : "text-muted-foreground",
+                title.length >= LIMITS.title && "text-red-500"
+              )}>
+                {title.length}/{LIMITS.title}
+              </span>
+            </div>
           </div>
 
           {/* Subtitle */}
