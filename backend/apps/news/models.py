@@ -352,16 +352,18 @@ class NewsArticle(BaseModel):
         return self.title
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            base = slugify(self.title)[:290] or "article"
-            slug = base
-            i = 2
-            qs = NewsArticle.objects.exclude(pk=self.pk) if self.pk else NewsArticle.objects.all()
-            while qs.filter(slug=slug).exists():
-                suffix = f"-{i}"
-                slug = f"{base[:290 - len(suffix)]}{suffix}"
-                i += 1
-            self.slug = slug
+        # Normalize: use explicit slug if provided, else derive from title.
+        # Always run through slugify so user-entered slugs with spaces/symbols
+        # get cleaned ("My URL!" → "my-url"), then dedupe on collision.
+        base = slugify(self.slug or self.title)[:290] or "article"
+        qs = NewsArticle.objects.exclude(pk=self.pk) if self.pk else NewsArticle.objects.all()
+        slug = base
+        i = 2
+        while qs.filter(slug=slug).exists():
+            suffix = f"-{i}"
+            slug = f"{base[:290 - len(suffix)]}{suffix}"
+            i += 1
+        self.slug = slug
 
         # Auto-set published_at when status changes to published
         if self.status == self.Status.PUBLISHED and not self.published_at:

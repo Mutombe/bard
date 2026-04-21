@@ -165,3 +165,19 @@ export function debounce<T extends (...args: any[]) => any>(
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
 }
+
+/**
+ * Slugify a string — mirrors Django's slugify() with allow_unicode=False.
+ * Strips accents via NFKD, keeps only ASCII letters/digits/hyphens, lowercases,
+ * collapses whitespace to single hyphens. Safe for URL preview on article pages.
+ */
+export function slugify(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "") // strip combining diacritics
+    .replace(/[^\w\s-]/g, "") // drop everything except word chars, spaces, hyphens
+    .trim()
+    .toLowerCase()
+    .replace(/[-\s]+/g, "-") // collapse to single hyphen
+    .replace(/^-+|-+$/g, ""); // trim hyphens
+}
