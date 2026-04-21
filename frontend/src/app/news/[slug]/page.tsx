@@ -560,21 +560,38 @@ export default function ArticlePage() {
                 {article.title}
               </h1>
 
-              {/* Deck — show subtitle only when it meaningfully differs from
-                  the excerpt. Editors often paste the same text into both, so
-                  identical copy is deduped to the lede. */}
-              {article.subtitle &&
-                article.subtitle.trim().toLowerCase() !==
-                  (article.excerpt || "").trim().toLowerCase() && (
-                  <h2 className="text-xl md:text-2xl text-muted-foreground mb-5 font-serif leading-relaxed">
-                    {article.subtitle}
-                  </h2>
-                )}
-
-              {/* Excerpt/Lede */}
-              <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed prose-article">
-                {article.excerpt}{article.excerpt && !article.excerpt.match(/[.!?]$/) ? ' [\u2026]' : ''}
-              </p>
+              {/* Deck + lede.
+                  - Both present and identical: show subtitle only (editors
+                    often paste the same text into both — dedupe to one).
+                  - Both present and distinct: show subtitle then excerpt.
+                  - Only subtitle: show subtitle.
+                  - Only excerpt: show excerpt.
+                  - Neither: render nothing — we never manufacture a lede
+                    from the body for editorial articles. */}
+              {(() => {
+                const subtitle = article.subtitle?.trim() || "";
+                const excerpt = article.excerpt?.trim() || "";
+                const sameCopy =
+                  subtitle.length > 0 &&
+                  excerpt.length > 0 &&
+                  subtitle.toLowerCase() === excerpt.toLowerCase();
+                const showSubtitle = subtitle.length > 0;
+                const showExcerpt = excerpt.length > 0 && !sameCopy;
+                return (
+                  <>
+                    {showSubtitle && (
+                      <h2 className="text-xl md:text-2xl text-muted-foreground mb-5 font-serif leading-relaxed">
+                        {subtitle}
+                      </h2>
+                    )}
+                    {showExcerpt && (
+                      <p className="text-lg md:text-xl text-muted-foreground mb-6 leading-relaxed prose-article">
+                        {excerpt}
+                      </p>
+                    )}
+                  </>
+                );
+              })()}
 
               {/* Author & Meta - Journal style */}
               <div className="flex items-start justify-between flex-wrap gap-4 pb-6 border-b border-terminal-border">

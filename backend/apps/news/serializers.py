@@ -284,6 +284,18 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_blank=True,
     )
+    # Optional for editorial articles. Scrapers populate this automatically;
+    # editors can leave it blank and the detail page will use the subtitle.
+    excerpt = serializers.CharField(
+        max_length=500,
+        required=False,
+        allow_blank=True,
+    )
+    subtitle = serializers.CharField(
+        max_length=500,
+        required=False,
+        allow_blank=True,
+    )
 
     class Meta:
         model = NewsArticle
