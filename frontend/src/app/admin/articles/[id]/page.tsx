@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -9,30 +9,17 @@ import {
   Eye,
   Clock,
   Image as ImageIcon,
-  Link as LinkIcon,
-  TextB,
-  TextItalic,
-  ListBullets,
-  ListNumbers,
-  Quotes,
-  Code,
-  TextHOne,
-  TextHTwo,
   Plus,
   X,
-  UploadSimple,
   Trash,
   CircleNotch,
   WarningCircle,
-  ArrowCounterClockwise,
-  ArrowClockwise,
-  ArrowsOut,
-  ArrowsIn,
 } from "@phosphor-icons/react";
-import ReactMarkdown from "react-markdown";
 import { cn, slugify as toUrlSlug } from "@/lib/utils";
 import { editorialService, type Article, type Writer } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
+import { mediaService } from "@/services/api/media";
+import { ModernEditor } from "@/components/editor/ModernEditor";
 import { toast } from "sonner";
 
 // Field limits — MUST match backend/apps/news/models.py
@@ -129,12 +116,7 @@ export default function EditArticlePage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [undoStack, setUndoStack] = useState<string[]>([]);
-  const [redoStack, setRedoStack] = useState<string[]>([]);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch article data
   useEffect(() => {
@@ -177,7 +159,6 @@ export default function EditArticlePage() {
         setMetaDescription(article.meta_description || "");
         setSelectedWriter(article.writer?.slug || "");
         setLastSaved(article.updated_at ? new Date(article.updated_at) : null);
-        setUndoStack([article.content || ""]);
       } catch (err) {
         console.error("Failed to fetch article:", err);
         setError("Failed to load article. It may not exist or you may not have permission to edit it.");
@@ -189,138 +170,34 @@ export default function EditArticlePage() {
     fetchData();
   }, [articleId]);
 
-  // Auto-save content to undo stack
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (content !== undoStack[undoStack.length - 1]) {
-        setUndoStack((prev) => [...prev.slice(-19), content]);
-        setRedoStack([]);
-      }
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [content]);
-
-  // Undo/Redo
-  const handleUndo = useCallback(() => {
-    if (undoStack.length > 1) {
-      const current = undoStack[undoStack.length - 1];
-      const previous = undoStack[undoStack.length - 2];
-      setRedoStack((prev) => [...prev, current]);
-      setUndoStack((prev) => prev.slice(0, -1));
-      setContent(previous);
-    }
-  }, [undoStack]);
-
-  const handleRedo = useCallback(() => {
-    if (redoStack.length > 0) {
-      const next = redoStack[redoStack.length - 1];
-      setUndoStack((prev) => [...prev, next]);
-      setRedoStack((prev) => prev.slice(0, -1));
-      setContent(next);
-    }
-  }, [redoStack]);
-
-  // Keyboard shortcuts
+  // Ctrl/Cmd+S to save. Undo/redo and formatting are now handled inside
+  // the TipTap editor, so we don't register those shortcuts here anymore.
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        handleUndo();
-      } else if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
-        e.preventDefault();
-        handleRedo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
         e.preventDefault();
         handleSave();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleUndo, handleRedo]);
-
-  // Markdown formatting
-  const wrapSelection = useCallback((prefix: string, suffix: string = prefix) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const text = textarea.value;
-    const selectedText = text.substring(start, end);
-
-    if (start === end) {
-      const newText = text.substring(0, start) + prefix + suffix + text.substring(end);
-      setContent(newText);
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + prefix.length, start + prefix.length);
-      }, 0);
-    } else {
-      const newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
-      setContent(newText);
-      setTimeout(() => {
-        textarea.focus();
-        textarea.setSelectionRange(start + prefix.length, end + prefix.length);
-      }, 0);
-    }
   }, []);
 
-  const insertAtCursor = useCallback((insertText: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const text = textarea.value;
-    const newText = text.substring(0, start) + insertText + text.substring(start);
-    setContent(newText);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + insertText.length, start + insertText.length);
-    }, 0);
-  }, []);
-
-  const insertLinePrefix = useCallback((prefix: string) => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart;
-    const text = textarea.value;
-
-    let lineStart = start;
-    while (lineStart > 0 && text[lineStart - 1] !== "\n") {
-      lineStart--;
-    }
-
-    const newText = text.substring(0, lineStart) + prefix + text.substring(lineStart);
-    setContent(newText);
-
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, start + prefix.length);
-    }, 0);
-  }, []);
-
-  const formatBold = () => wrapSelection("**");
-  const formatItalic = () => wrapSelection("*");
-  const formatHeading1 = () => insertLinePrefix("# ");
-  const formatHeading2 = () => insertLinePrefix("## ");
-  const formatQuote = () => insertLinePrefix("> ");
-  const formatCode = () => wrapSelection("`");
-  const formatBulletList = () => insertLinePrefix("- ");
-  const formatNumberedList = () => insertLinePrefix("1. ");
-  const formatLink = () => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    const selectedText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
-    if (selectedText) {
-      wrapSelection("[", "](url)");
-    } else {
-      insertAtCursor("[link text](url)");
+  // Inline image upload hook for the WYSIWYG editor — stores uploads in the
+  // media library and inserts an <img> tag referencing the returned URL.
+  const handleInlineImageUpload = async (file: File): Promise<string> => {
+    try {
+      const mediaFile = await mediaService.uploadFile(file, {
+        name: file.name,
+        alt_text: title || "",
+      });
+      return mediaFile.url;
+    } catch (err) {
+      console.error("Inline image upload failed:", err);
+      toast.error("Failed to upload image. Please try again.");
+      throw err;
     }
   };
-  const formatImage = () => insertAtCursor("![alt text](image-url)");
 
   // Tag management
   const addTag = (tagName: string) => {
@@ -480,7 +357,7 @@ export default function EditArticlePage() {
   }
 
   return (
-    <div className={cn("max-w-6xl mx-auto", isFullscreen && "fixed inset-0 z-50 bg-terminal-bg p-6 overflow-auto max-w-none")}>
+    <div className="max-w-6xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -585,13 +462,15 @@ export default function EditArticlePage() {
               </button>
             </div>
             <div className="flex-1 overflow-auto p-6">
-              <article className="prose prose-invert max-w-none">
+              <article className="prose-journal max-w-none">
                 <h1 className="text-3xl font-bold mb-2">{title || "Untitled Article"}</h1>
                 {subtitle && <p className="text-xl text-muted-foreground mb-4">{subtitle}</p>}
                 {featuredImageUrl && (
                   <img src={featuredImageUrl} alt={title} className="w-full rounded-lg mb-6" />
                 )}
-                <ReactMarkdown>{content}</ReactMarkdown>
+                {/* Content is HTML (from the WYSIWYG editor) — render as-is so
+                    the preview matches the reader view. */}
+                <div dangerouslySetInnerHTML={{ __html: content }} />
               </article>
             </div>
           </div>
@@ -673,81 +552,20 @@ export default function EditArticlePage() {
             </p>
           </div>
 
-          {/* Content Editor */}
-          <div className="bg-terminal-bg-secondary rounded-lg border border-terminal-border overflow-hidden">
-            {/* Toolbar */}
-            <div className="flex flex-wrap items-center gap-1 p-2 border-b border-terminal-border bg-terminal-bg">
-              <button onClick={formatBold} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Bold (Ctrl+B)">
-                <TextB className="h-4 w-4" />
-              </button>
-              <button onClick={formatItalic} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Italic (Ctrl+I)">
-                <TextItalic className="h-4 w-4" />
-              </button>
-              <div className="w-px h-6 bg-terminal-border mx-1" />
-              <button onClick={formatHeading1} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Heading 1">
-                <TextHOne className="h-4 w-4" />
-              </button>
-              <button onClick={formatHeading2} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Heading 2">
-                <TextHTwo className="h-4 w-4" />
-              </button>
-              <div className="w-px h-6 bg-terminal-border mx-1" />
-              <button onClick={formatBulletList} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Bullet List">
-                <ListBullets className="h-4 w-4" />
-              </button>
-              <button onClick={formatNumberedList} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Numbered List">
-                <ListNumbers className="h-4 w-4" />
-              </button>
-              <button onClick={formatQuote} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Quote">
-                <Quotes className="h-4 w-4" />
-              </button>
-              <button onClick={formatCode} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Code">
-                <Code className="h-4 w-4" />
-              </button>
-              <div className="w-px h-6 bg-terminal-border mx-1" />
-              <button onClick={formatLink} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Link (Ctrl+K)">
-                <LinkIcon className="h-4 w-4" />
-              </button>
-              <button onClick={formatImage} className="p-2 hover:bg-terminal-bg-secondary rounded" title="Image">
-                <ImageIcon className="h-4 w-4" />
-              </button>
-              <div className="flex-1" />
-              <button
-                onClick={handleUndo}
-                disabled={undoStack.length <= 1}
-                className="p-2 hover:bg-terminal-bg-secondary rounded disabled:opacity-30"
-                title="Undo (Ctrl+Z)"
-              >
-                <ArrowCounterClockwise className="h-4 w-4" />
-              </button>
-              <button
-                onClick={handleRedo}
-                disabled={redoStack.length === 0}
-                className="p-2 hover:bg-terminal-bg-secondary rounded disabled:opacity-30"
-                title="Redo (Ctrl+Y)"
-              >
-                <ArrowClockwise className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setIsFullscreen(!isFullscreen)}
-                className="p-2 hover:bg-terminal-bg-secondary rounded"
-                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-              >
-                {isFullscreen ? <ArrowsIn className="h-4 w-4" /> : <ArrowsOut className="h-4 w-4" />}
-              </button>
-            </div>
-            {/* Textarea */}
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Write your article content in Markdown..."
-              className="w-full h-96 p-4 bg-transparent border-none outline-none resize-none font-mono text-sm leading-relaxed placeholder:text-muted-foreground"
-            />
-            {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-2 border-t border-terminal-border text-xs text-muted-foreground">
-              <span>{wordCount} words ({readTime} min read)</span>
-              <span>Markdown supported</span>
-            </div>
+          {/* Content Editor — same TipTap WYSIWYG as the new-article page so
+              formatting (bold, lists, headings, images, tables) round-trips
+              cleanly. The textarea+markdown toolbar was replaced because it
+              left raw markdown in the HTML, which the reader view didn't
+              render as formatted output. */}
+          <ModernEditor
+            content={content}
+            onChange={setContent}
+            onImageUpload={handleInlineImageUpload}
+            placeholder="Write your article..."
+            className="min-h-[500px]"
+          />
+          <div className="flex items-center justify-end px-1 text-xs text-muted-foreground">
+            <span>{wordCount} words · {readTime} min read</span>
           </div>
         </div>
 

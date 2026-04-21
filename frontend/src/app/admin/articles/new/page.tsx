@@ -34,6 +34,7 @@ import {
 import { cn, slugify as toUrlSlug } from "@/lib/utils";
 import { editorialService, type Writer } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
+import { mediaService } from "@/services/api/media";
 import { ImagePicker } from "@/components/editor/ImagePicker";
 import { ModernEditor } from "@/components/editor/ModernEditor";
 import { toast } from "sonner";
@@ -189,18 +190,22 @@ export default function NewArticlePage() {
     setTags(tags.filter((t) => t.slug !== slug));
   };
 
-  // Handle image upload for editor
+  // Upload inline image to the media library and return the public URL.
+  // TipTap inserts <img src={url}> at the cursor so the image is stored by
+  // reference (not base64) — this keeps article HTML small and the image
+  // reusable across the library.
   const handleImageUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    // TODO: Implement actual image upload to your backend/storage
-    // For now, return a base64 preview
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.readAsDataURL(file);
-    });
+    try {
+      const mediaFile = await mediaService.uploadFile(file, {
+        name: file.name,
+        alt_text: title || "",
+      });
+      return mediaFile.url;
+    } catch (err) {
+      console.error("Inline image upload failed:", err);
+      toast.error("Failed to upload image. Please try again.");
+      throw err;
+    }
   };
 
   const handleSave = async (saveStatus: typeof status) => {
@@ -229,20 +234,11 @@ export default function NewArticlePage() {
       return;
     }
 
-    // Auto-generate excerpt if not provided — cap at backend limit
-    const finalExcerpt = (
-      excerpt.trim() ||
-      content
-        .replace(/<[^>]*>/g, " ")
-        .replace(/&nbsp;/g, " ")
-        .trim()
-        .slice(0, 200) + "..."
-    ).slice(0, LIMITS.excerpt);
-
-    if (finalExcerpt.length > LIMITS.excerpt) {
-      toast.error(`Excerpt is ${finalExcerpt.length} chars — max ${LIMITS.excerpt}.`);
-      return;
-    }
+    // Excerpt is OPTIONAL for editorial articles. If the editor leaves it
+    // blank, we send an empty string and the detail page will fall back to
+    // the subtitle (or render nothing if neither is set). We don't
+    // manufacture text from the body — that behaviour is for scrapers only.
+    const finalExcerpt = excerpt.trim().slice(0, LIMITS.excerpt);
 
     if (imageCaption.length > LIMITS.imageCaption) {
       toast.error(`Image caption is ${imageCaption.length} chars — max ${LIMITS.imageCaption}.`);
