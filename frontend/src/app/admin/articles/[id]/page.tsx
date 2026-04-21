@@ -31,9 +31,19 @@ import {
 } from "@phosphor-icons/react";
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
-import { editorialService, type Article } from "@/services/api/editorial";
+import { editorialService, type Article, type Writer } from "@/services/api/editorial";
 import { newsService } from "@/services/api/news";
 import { toast } from "sonner";
+
+// Field limits — MUST match backend/apps/news/models.py
+const LIMITS = {
+  title: 300,
+  subtitle: 500,
+  excerpt: 500,
+  imageCaption: 300,
+  metaTitle: 70,
+  metaDescription: 160,
+} as const;
 
 // Content type options
 const contentTypes = [
@@ -111,6 +121,8 @@ export default function EditArticlePage() {
   const [isPremium, setIsPremium] = useState(false);
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
+  const [selectedWriter, setSelectedWriter] = useState<string>("");
+  const [writers, setWriters] = useState<Writer[]>([]);
 
   // UI states
   const [isSaving, setIsSaving] = useState(false);
@@ -131,9 +143,13 @@ export default function EditArticlePage() {
         setIsLoading(true);
         setError(null);
 
-        // Fetch categories first
-        const cats = await newsService.getCategories();
+        // Fetch categories + writers in parallel
+        const [cats, writersList] = await Promise.all([
+          newsService.getCategories(),
+          editorialService.getWriters().catch(() => [] as Writer[]),
+        ]);
         setCategories(cats);
+        setWriters(writersList);
 
         // Fetch article by ID
         const article = await editorialService.getArticle(articleId);
@@ -159,6 +175,7 @@ export default function EditArticlePage() {
         setIsPremium(article.is_premium || false);
         setMetaTitle(article.meta_title || "");
         setMetaDescription(article.meta_description || "");
+        setSelectedWriter(article.writer?.slug || "");
         setLastSaved(article.updated_at ? new Date(article.updated_at) : null);
         setUndoStack([article.content || ""]);
       } catch (err) {
@@ -327,6 +344,30 @@ export default function EditArticlePage() {
       toast.error("Title is required");
       return;
     }
+    if (title.length > LIMITS.title) {
+      toast.error(`Title is ${title.length} chars — max ${LIMITS.title}.`);
+      return;
+    }
+    if (subtitle.length > LIMITS.subtitle) {
+      toast.error(`Subtitle is ${subtitle.length} chars — max ${LIMITS.subtitle}.`);
+      return;
+    }
+    if (excerpt.length > LIMITS.excerpt) {
+      toast.error(`Excerpt is ${excerpt.length} chars — max ${LIMITS.excerpt}.`);
+      return;
+    }
+    if (featuredImageCaption.length > LIMITS.imageCaption) {
+      toast.error(`Image caption is ${featuredImageCaption.length} chars — max ${LIMITS.imageCaption}.`);
+      return;
+    }
+    if (metaTitle.length > LIMITS.metaTitle) {
+      toast.error(`Meta title is ${metaTitle.length} chars — max ${LIMITS.metaTitle}.`);
+      return;
+    }
+    if (metaDescription.length > LIMITS.metaDescription) {
+      toast.error(`Meta description is ${metaDescription.length} chars — max ${LIMITS.metaDescription}.`);
+      return;
+    }
     if (!category) {
       toast.error("Category is required");
       return;
@@ -354,17 +395,24 @@ export default function EditArticlePage() {
         is_premium: isPremium,
         meta_title: metaTitle,
         meta_description: metaDescription,
+        writer: selectedWriter || null,
       });
 
       setLastSaved(new Date());
       toast.success("Article saved successfully");
     } catch (err: any) {
       console.error("Failed to save article:", err);
+      const httpStatus = err.response?.status;
       const data = err.response?.data;
       let errorMessage = "Failed to save article";
-      if (data) {
+      if (typeof data === "string" && data.includes("<!doctype html")) {
+        errorMessage =
+          httpStatus === 500
+            ? "The server rejected this article (500). Usually a duplicate title or a field exceeding its length limit."
+            : `Server returned an HTML error page (${httpStatus}).`;
+      } else if (data) {
         if (typeof data === "string") errorMessage = data;
-        else if (data.detail) errorMessage = data.detail;
+        else if (data.detail) errorMessage = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
         else if (data.message) errorMessage = data.message;
         else {
           const fieldErrors = Object.entries(data)
@@ -372,6 +420,8 @@ export default function EditArticlePage() {
             .join(" | ");
           if (fieldErrors) errorMessage = fieldErrors;
         }
+      } else if (!err.response) {
+        errorMessage = "Network error — could not reach the server.";
       }
       toast.error(errorMessage);
     } finally {
@@ -548,8 +598,16 @@ export default function EditArticlePage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Article title..."
+              maxLength={LIMITS.title}
               className="w-full text-2xl font-bold bg-transparent border-none outline-none placeholder:text-muted-foreground"
             />
+            <p className={cn(
+              "text-xs mt-2 text-right",
+              title.length > LIMITS.title * 0.9 ? "text-amber-500" : "text-muted-foreground",
+              title.length >= LIMITS.title && "text-red-500"
+            )}>
+              {title.length}/{LIMITS.title}
+            </p>
           </div>
 
           {/* Subtitle */}
@@ -560,8 +618,16 @@ export default function EditArticlePage() {
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
               placeholder="Optional subtitle..."
+              maxLength={LIMITS.subtitle}
               className="w-full bg-transparent border-none outline-none placeholder:text-muted-foreground"
             />
+            <p className={cn(
+              "text-xs mt-2 text-right",
+              subtitle.length > LIMITS.subtitle * 0.9 ? "text-amber-500" : "text-muted-foreground",
+              subtitle.length >= LIMITS.subtitle && "text-red-500"
+            )}>
+              {subtitle.length}/{LIMITS.subtitle}
+            </p>
           </div>
 
           {/* Excerpt */}
@@ -572,8 +638,16 @@ export default function EditArticlePage() {
               onChange={(e) => setExcerpt(e.target.value)}
               placeholder="Brief summary for article listings..."
               rows={3}
+              maxLength={LIMITS.excerpt}
               className="w-full bg-transparent border-none outline-none resize-none placeholder:text-muted-foreground"
             />
+            <p className={cn(
+              "text-xs mt-2 text-right",
+              excerpt.length > LIMITS.excerpt * 0.9 ? "text-amber-500" : "text-muted-foreground",
+              excerpt.length >= LIMITS.excerpt && "text-red-500"
+            )}>
+              {excerpt.length}/{LIMITS.excerpt}
+            </p>
           </div>
 
           {/* Content Editor */}
@@ -702,6 +776,24 @@ export default function EditArticlePage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-sm text-muted-foreground mb-2">Writer (Byline)</label>
+              <select
+                value={selectedWriter}
+                onChange={(e) => setSelectedWriter(e.target.value)}
+                className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
+              >
+                <option value="">Default (uploading user)</option>
+                {writers.map((w) => (
+                  <option key={w.id} value={w.slug}>
+                    {w.full_name}{w.title ? ` — ${w.title}` : ""}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Credit shown on feed and detail page. Clear to restore your own byline.
+              </p>
+            </div>
             <div className="space-y-2">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -768,6 +860,7 @@ export default function EditArticlePage() {
               value={featuredImageCaption}
               onChange={(e) => setFeaturedImageCaption(e.target.value)}
               placeholder="Image caption..."
+              maxLength={LIMITS.imageCaption}
               className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
             />
           </div>
@@ -819,21 +912,41 @@ export default function EditArticlePage() {
             <h3 className="font-semibold mb-4">SEO</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-muted-foreground mb-2">Meta Title</label>
+                <label className="block text-sm text-muted-foreground mb-2">
+                  Meta Title
+                  <span className={cn(
+                    "ml-2 text-xs",
+                    metaTitle.length > LIMITS.metaTitle * 0.9 ? "text-amber-500" : "text-muted-foreground",
+                    metaTitle.length >= LIMITS.metaTitle && "text-red-500"
+                  )}>
+                    ({metaTitle.length}/{LIMITS.metaTitle})
+                  </span>
+                </label>
                 <input
                   type="text"
                   value={metaTitle}
                   onChange={(e) => setMetaTitle(e.target.value)}
                   placeholder={title || "Meta title..."}
+                  maxLength={LIMITS.metaTitle}
                   className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
                 />
               </div>
               <div>
-                <label className="block text-sm text-muted-foreground mb-2">Meta Description</label>
+                <label className="block text-sm text-muted-foreground mb-2">
+                  Meta Description
+                  <span className={cn(
+                    "ml-2 text-xs",
+                    metaDescription.length > LIMITS.metaDescription * 0.9 ? "text-amber-500" : "text-muted-foreground",
+                    metaDescription.length >= LIMITS.metaDescription && "text-red-500"
+                  )}>
+                    ({metaDescription.length}/{LIMITS.metaDescription})
+                  </span>
+                </label>
                 <textarea
                   value={metaDescription}
                   onChange={(e) => setMetaDescription(e.target.value)}
                   placeholder={excerpt || "Meta description..."}
+                  maxLength={LIMITS.metaDescription}
                   rows={3}
                   className="w-full px-3 py-2 bg-terminal-bg border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary resize-none"
                 />

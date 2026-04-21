@@ -1,12 +1,17 @@
 """
 News Views
 """
+import logging
+
+from django.db import IntegrityError
 from django.db.models import Q
 from django_filters import rest_framework as filters
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
+
+logger = logging.getLogger(__name__)
 
 from apps.core.cache import (
     CacheTTL,
@@ -236,6 +241,54 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
     @cache_news_list
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        """Create article with specific error messages instead of 500 HTML."""
+        try:
+            return super().create(request, *args, **kwargs)
+        except IntegrityError as e:
+            msg = str(e).lower()
+            if "slug" in msg:
+                return Response(
+                    {"title": "An article with a similar title already exists. "
+                              "Please change the title to make it unique."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            logger.exception("IntegrityError on article create")
+            return Response(
+                {"detail": "Database conflict. A field value collides with an "
+                           "existing record.", "error": str(e)[:200]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.exception("Unexpected error on article create")
+            return Response(
+                {"detail": f"{type(e).__name__}: {str(e)[:300]}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def update(self, request, *args, **kwargs):
+        """Update article with specific error messages instead of 500 HTML."""
+        try:
+            return super().update(request, *args, **kwargs)
+        except IntegrityError as e:
+            msg = str(e).lower()
+            if "slug" in msg:
+                return Response(
+                    {"title": "Another article already uses this slug/title."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            logger.exception("IntegrityError on article update")
+            return Response(
+                {"detail": "Database conflict.", "error": str(e)[:200]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            logger.exception("Unexpected error on article update")
+            return Response(
+                {"detail": f"{type(e).__name__}: {str(e)[:300]}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
     def retrieve(self, request, *args, **kwargs):
         """Get article and increment view count."""

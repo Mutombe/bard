@@ -353,7 +353,15 @@ class NewsArticle(BaseModel):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            base = slugify(self.title)[:290] or "article"
+            slug = base
+            i = 2
+            qs = NewsArticle.objects.exclude(pk=self.pk) if self.pk else NewsArticle.objects.all()
+            while qs.filter(slug=slug).exists():
+                suffix = f"-{i}"
+                slug = f"{base[:290 - len(suffix)]}{suffix}"
+                i += 1
+            self.slug = slug
 
         # Auto-set published_at when status changes to published
         if self.status == self.Status.PUBLISHED and not self.published_at:

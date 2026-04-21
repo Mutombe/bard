@@ -32,6 +32,14 @@ export interface Article {
     email: string;
     full_name: string;
   } | null;
+  writer?: {
+    id: string;
+    slug: string;
+    full_name: string;
+    title?: string;
+    organization?: string;
+    avatar_display?: string | null;
+  } | null;
   status: string;
   published_at?: string;
   is_featured: boolean;
@@ -145,6 +153,8 @@ export interface ArticleInput {
   is_premium?: boolean;
   meta_title?: string;
   meta_description?: string;
+  writer?: string | null; // Writer slug, or null to clear the byline
+  published_at?: string | null;
 }
 
 export interface ContentCalendarItem {
