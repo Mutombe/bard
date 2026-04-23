@@ -357,6 +357,63 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="send-featured-email",
+        permission_classes=[IsAuthenticated, IsEditorOrReadOnly],
+    )
+    def send_featured_email(self, request, slug=None):
+        """
+        Manually trigger the featured-article email blast to all verified
+        breaking-news subscribers. Editors can re-send even if the automatic
+        signal already fired (e.g. after fixing a typo or swapping the image).
+        """
+        article = self.get_object()
+
+        if not article.is_featured:
+            return Response(
+                {"detail": "Article must be marked as featured before sending."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if article.status != NewsArticle.Status.PUBLISHED:
+            return Response(
+                {"detail": "Article must be published before sending."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        from apps.engagement.models import NewsletterSubscription
+        subscriber_count = NewsletterSubscription.objects.filter(
+            newsletter_type=NewsletterSubscription.NewsletterType.BREAKING_NEWS,
+            is_active=True,
+            is_verified=True,
+        ).count()
+
+        if subscriber_count == 0:
+            return Response(
+                {"detail": "No verified breaking-news subscribers to notify.",
+                 "sent": 0},
+                status=status.HTTP_200_OK,
+            )
+
+        # Dispatch to the existing worker so the request returns immediately.
+        from django_q.tasks import async_task
+        async_task(
+            "apps.news.signals._send_featured_article_emails",
+            str(article.id),
+            task_name=f"featured-article-manual-{article.slug}",
+        )
+
+        return Response(
+            {
+                "detail": f"Sending featured-article email to {subscriber_count} "
+                          "subscriber(s). Delivery runs in the background.",
+                "sent": subscriber_count,
+                "article": article.slug,
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )
+
     @action(detail=True, methods=["post"], permission_classes=[AllowAny])
     def like(self, request, slug=None):
         """Toggle like on an article. Works for both registered and anonymous."""
