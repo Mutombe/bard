@@ -159,15 +159,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="min-h-screen bg-terminal-bg flex">
-      {/* Sidebar */}
+      {/* Sidebar — flex column so the nav scrolls independently when the
+          item list exceeds viewport height. The old layout used
+          `absolute bottom-0` for the user panel, which clobbered nav items
+          on short screens and made the list feel clustered. */}
       <aside
         className={cn(
-          "fixed left-0 top-0 bottom-0 z-40 bg-terminal-bg-secondary border-r border-terminal-border transition-all duration-300 hidden lg:block",
+          "fixed left-0 top-0 bottom-0 z-40 bg-terminal-bg-secondary border-r border-terminal-border transition-all duration-300 hidden lg:flex lg:flex-col",
           sidebarCollapsed ? "w-16" : "w-64"
         )}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-terminal-border">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-terminal-border flex-shrink-0">
           {!sidebarCollapsed && (
             <Link href="/admin" className="flex items-center gap-2">
               <Image
@@ -204,8 +207,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="p-2 space-y-1">
+        {/* Navigation — flex-1 + overflow-y-auto so long item lists scroll
+            independently of the header/footer on short screens. */}
+        <nav className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1 sidebar-scroll">
           {sidebarItems.map((item) => {
             const isActive = pathname === item.href ||
               (item.href !== "/admin" && pathname.startsWith(item.href));
@@ -214,6 +218,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                title={sidebarCollapsed ? item.label : undefined}
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors",
                   isActive
@@ -222,14 +227,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 )}
               >
                 <item.icon className="h-5 w-5 flex-shrink-0" />
-                {!sidebarCollapsed && <span>{item.label}</span>}
+                {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {/* User Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-terminal-border">
+        {/* User Info — now a regular flex child at the bottom of the column,
+            no longer absolutely positioned. Stays visible while the nav
+            scrolls above it. */}
+        <div className="p-4 border-t border-terminal-border flex-shrink-0">
           {!sidebarCollapsed ? (
             <div className="flex items-center gap-3">
               <UserAvatar
@@ -245,26 +252,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <button
                 onClick={handleLogout}
                 className="p-2 text-muted-foreground hover:text-foreground"
+                title="Sign out"
               >
                 <SignOut className="h-4 w-4" />
               </button>
             </div>
           ) : (
-            <UserAvatar
-              src={user?.profile?.avatar}
-              name={user?.full_name}
-              identifier={user?.id}
-              size="sm"
-              className="mx-auto mb-2"
-            />
-          )}
-          {sidebarCollapsed && (
-            <button
-              onClick={handleLogout}
-              className="w-full flex justify-center p-2 text-muted-foreground hover:text-foreground"
-            >
-              <SignOut className="h-5 w-5" />
-            </button>
+            <div className="flex flex-col items-center gap-2">
+              <UserAvatar
+                src={user?.profile?.avatar}
+                name={user?.full_name}
+                identifier={user?.id}
+                size="sm"
+              />
+              <button
+                onClick={handleLogout}
+                className="w-full flex justify-center p-2 text-muted-foreground hover:text-foreground"
+                title="Sign out"
+              >
+                <SignOut className="h-5 w-5" />
+              </button>
+            </div>
           )}
         </div>
       </aside>
@@ -287,10 +295,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {mobileMenuOpen && (
-          <div className="border-t border-terminal-border bg-terminal-bg-secondary">
+          <div className="border-t border-terminal-border bg-terminal-bg-secondary max-h-[calc(100vh-4rem)] overflow-y-auto sidebar-scroll">
             <nav className="p-2 space-y-1">
               {sidebarItems.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive = pathname === item.href ||
+                  (item.href !== "/admin" && pathname.startsWith(item.href));
                 return (
                   <Link
                     key={item.href}
