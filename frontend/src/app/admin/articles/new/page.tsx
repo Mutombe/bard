@@ -195,19 +195,14 @@ export default function NewArticlePage() {
   // Upload inline image to the media library and return the public URL.
   // TipTap inserts <img src={url}> at the cursor so the image is stored by
   // reference (not base64) — this keeps article HTML small and the image
-  // reusable across the library.
+  // reusable across the library. Errors propagate to the editor, which owns
+  // the loading/success/failure toasts so we don't double-toast.
   const handleImageUpload = async (file: File): Promise<string> => {
-    try {
-      const mediaFile = await mediaService.uploadFile(file, {
-        name: file.name,
-        alt_text: title || "",
-      });
-      return mediaFile.url;
-    } catch (err) {
-      console.error("Inline image upload failed:", err);
-      toast.error("Failed to upload image. Please try again.");
-      throw err;
-    }
+    const mediaFile = await mediaService.uploadFile(file, {
+      name: file.name,
+      alt_text: title || "",
+    });
+    return mediaFile.url;
   };
 
   const handleSave = async (saveStatus: typeof status) => {

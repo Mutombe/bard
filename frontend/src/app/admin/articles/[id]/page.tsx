@@ -187,18 +187,13 @@ export default function EditArticlePage() {
 
   // Inline image upload hook for the WYSIWYG editor — stores uploads in the
   // media library and inserts an <img> tag referencing the returned URL.
+  // Errors propagate to the editor which owns the loading/error toasts.
   const handleInlineImageUpload = async (file: File): Promise<string> => {
-    try {
-      const mediaFile = await mediaService.uploadFile(file, {
-        name: file.name,
-        alt_text: title || "",
-      });
-      return mediaFile.url;
-    } catch (err) {
-      console.error("Inline image upload failed:", err);
-      toast.error("Failed to upload image. Please try again.");
-      throw err;
-    }
+    const mediaFile = await mediaService.uploadFile(file, {
+      name: file.name,
+      alt_text: title || "",
+    });
+    return mediaFile.url;
   };
 
   // Tag management

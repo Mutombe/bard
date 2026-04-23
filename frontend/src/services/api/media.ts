@@ -69,10 +69,23 @@ export const mediaService = {
     if (data?.alt_text) formData.append("alt_text", data.alt_text);
     if (data?.caption) formData.append("caption", data.caption);
 
+    // CRITICAL: The shared authClient has `Content-Type: application/json` as
+    // its default header. Axios 1.6's transformRequest sees FormData + JSON
+    // Content-Type and silently converts the FormData to a JSON object — the
+    // file payload becomes the literal string "[object File]" and Django's
+    // MultiPartParser sees an empty request. We must strip Content-Type for
+    // this call so the browser/XHR layer can set
+    // `multipart/form-data; boundary=…` with a valid boundary.
     const response = await authClient.post<MediaFile>("/media/library/", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      transformRequest: [
+        (payload, headers) => {
+          if (headers) {
+            delete (headers as Record<string, unknown>)["Content-Type"];
+            delete (headers as Record<string, unknown>)["content-type"];
+          }
+          return payload;
+        },
+      ],
     });
     return response.data;
   },
