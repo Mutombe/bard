@@ -296,6 +296,14 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_blank=True,
     )
+    # Write-only editor control. When False, suppresses the automatic
+    # featured-article email blast even if is_featured transitions True.
+    # Defaults to True to preserve the existing behaviour.
+    send_subscriber_email = serializers.BooleanField(
+        required=False,
+        write_only=True,
+        default=True,
+    )
 
     class Meta:
         model = NewsArticle
@@ -320,6 +328,7 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
             "is_premium",
             "meta_title",
             "meta_description",
+            "send_subscriber_email",
         ]
 
     def validate_writer(self, value):
@@ -330,9 +339,15 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tag_slugs = validated_data.pop("tags", [])
         companies = validated_data.pop("related_companies", [])
+        send_email = validated_data.pop("send_subscriber_email", True)
         validated_data["author"] = self.context["request"].user
 
-        article = super().create(validated_data)
+        # Attach the opt-out flag to the in-memory instance before super().create()
+        # triggers save() → post_save signals, so notify_subscribers_featured_article
+        # can read it.
+        article = NewsArticle(**validated_data)
+        article._send_subscriber_email = send_email
+        article.save()
 
         # Get or create tags by slug
         if tag_slugs:
@@ -355,9 +370,11 @@ class NewsArticleCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         tag_slugs = validated_data.pop("tags", None)
         companies = validated_data.pop("related_companies", None)
+        send_email = validated_data.pop("send_subscriber_email", True)
 
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
+        instance._send_subscriber_email = send_email
         instance.save()
 
         # Get or create tags by slug
