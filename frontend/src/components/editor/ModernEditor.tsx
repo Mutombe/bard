@@ -331,18 +331,42 @@ export function ModernEditor({
       toast.success("Image uploaded.", { id: toastId });
     } catch (error: any) {
       const status = error?.response?.status;
+      const responseData = error?.response?.data;
       const serverDetail =
-        error?.response?.data?.detail ||
-        error?.response?.data?.file?.[0] ||
-        error?.response?.data?.error;
-      const msg = serverDetail
-        ? `Upload failed: ${serverDetail}`
-        : status === 401
-        ? "Upload failed — your session may have expired. Please sign in again."
-        : status === 413
-        ? "Image is too large for the server. Try a smaller file."
-        : `Upload failed${status ? ` (${status})` : ""}. Check your connection and try again.`;
-      console.error("Inline image upload failed:", error);
+        (typeof responseData === "string" && !responseData.includes("<!doctype")
+          ? responseData
+          : null) ||
+        responseData?.detail ||
+        responseData?.file?.[0] ||
+        responseData?.error;
+
+      // Helpful, specific messages for the failure modes editors actually hit.
+      let msg: string;
+      if (serverDetail) {
+        msg = `Upload failed: ${serverDetail}`;
+      } else if (status === 401 || status === 403) {
+        msg = "Upload failed — your session expired. Sign in again and retry.";
+      } else if (status === 413) {
+        msg = "Image is too large for the server. Try a smaller file.";
+      } else if (status === 500) {
+        msg = "Upload failed — the server errored out. Try a smaller file or retry in a minute.";
+      } else if (status) {
+        msg = `Upload failed (HTTP ${status}).`;
+      } else if (error?.code === "ECONNABORTED" || /timeout/i.test(error?.message || "")) {
+        msg = "Upload timed out. The image may be too large or the connection too slow.";
+      } else if (error?.message === "Network Error") {
+        msg = "Upload failed — couldn't reach the server. Check the network tab in devtools for the /media/library/ request.";
+      } else {
+        msg = `Upload failed: ${error?.message || "unknown error"}. Check devtools for details.`;
+      }
+
+      console.error("Inline image upload failed:", {
+        status,
+        code: error?.code,
+        message: error?.message,
+        responseData,
+        error,
+      });
       toast.error(msg, { id: toastId });
     } finally {
       setIsUploading(false);
@@ -425,9 +449,15 @@ export function ModernEditor({
   }
 
   return (
-    <div className={cn("rounded-lg border border-terminal-border overflow-hidden bg-terminal-bg-secondary", className)}>
+    /* overflow-visible on the root is intentional — absolutely-positioned
+       popovers inside the toolbar (image picker, link editor) need to escape
+       the editor bounds. overflow-hidden used to clip the image-upload card
+       so only half of it was visible. Rounded corners are preserved via the
+       rounded-lg class on the root plus the first-child rounded-t-lg on the
+       toolbar and the EditorContent wrapper handling its own overflow. */
+    <div className={cn("rounded-lg border border-terminal-border bg-terminal-bg-secondary", className)}>
       {/* Main Toolbar */}
-      <div className="flex items-center gap-0.5 p-2 border-b border-terminal-border bg-terminal-bg flex-wrap">
+      <div className="flex items-center gap-0.5 p-2 border-b border-terminal-border bg-terminal-bg flex-wrap rounded-t-lg">
         {/* Undo/Redo */}
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}
@@ -607,7 +637,7 @@ export function ModernEditor({
             )}
           </ToolbarButton>
           {showImagePopup && (
-            <div className="absolute top-full left-0 mt-2 z-50 p-3 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-xl w-72">
+            <div className="absolute top-full left-0 mt-2 z-[60] p-3 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-72">
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium mb-1.5 text-muted-foreground">Image URL</label>
