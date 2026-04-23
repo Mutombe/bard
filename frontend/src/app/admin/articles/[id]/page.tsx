@@ -14,6 +14,7 @@ import {
   Trash,
   CircleNotch,
   WarningCircle,
+  PaperPlaneTilt,
 } from "@phosphor-icons/react";
 import { cn, slugify as toUrlSlug } from "@/lib/utils";
 import { editorialService, type Article, type Writer } from "@/services/api/editorial";
@@ -117,6 +118,7 @@ export default function EditArticlePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   // Fetch article data
   useEffect(() => {
@@ -313,6 +315,29 @@ export default function EditArticlePage() {
       toast.error(errorMessage);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Send featured-article email to subscribers (manual re-send)
+  const handleSendFeaturedEmail = async () => {
+    if (!confirm(
+      `Send "${title}" to all verified breaking-news subscribers?\n\n` +
+      `This queues an email to every subscriber on the list. The automatic ` +
+      `signal already fires when an article first becomes featured — use this ` +
+      `button only if you need to re-send.`
+    )) return;
+
+    setIsSendingEmail(true);
+    try {
+      const result = await editorialService.sendFeaturedEmail(slug);
+      toast.success(result.detail || `Queued to ${result.sent} subscriber(s).`);
+    } catch (err: any) {
+      console.error("Failed to send featured email:", err);
+      const data = err.response?.data;
+      const msg = data?.detail || "Failed to send featured-article email.";
+      toast.error(msg);
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -664,6 +689,36 @@ export default function EditArticlePage() {
                 <span className="text-sm">Premium Content</span>
               </label>
             </div>
+
+            {/* Manual email blast — sends the featured-article template to all
+                verified breaking-news subscribers. The backend signal sends
+                this automatically the first time an article becomes featured;
+                this button is for re-sends (fixed typo, new image, etc.). */}
+            {isFeatured && status === "published" && (
+              <div className="pt-4 border-t border-terminal-border">
+                <button
+                  type="button"
+                  onClick={handleSendFeaturedEmail}
+                  disabled={isSendingEmail}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSendingEmail ? (
+                    <>
+                      <CircleNotch className="h-4 w-4 animate-spin" />
+                      Queuing...
+                    </>
+                  ) : (
+                    <>
+                      <PaperPlaneTilt className="h-4 w-4" />
+                      Email to subscribers
+                    </>
+                  )}
+                </button>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  Sends this featured article to all verified breaking-news subscribers.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Featured Image */}

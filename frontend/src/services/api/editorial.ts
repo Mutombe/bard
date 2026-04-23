@@ -285,6 +285,18 @@ export const editorialService = {
     return response.data;
   },
 
+  /**
+   * Queue the featured-article email blast to all verified breaking-news
+   * subscribers. Article must be featured AND published. Delivery runs in the
+   * background via django-q.
+   */
+  async sendFeaturedEmail(slug: string): Promise<{ detail: string; sent: number; article?: string }> {
+    const response = await authClient.post<{ detail: string; sent: number; article?: string }>(
+      `/news/articles/${slug}/send-featured-email/`
+    );
+    return response.data;
+  },
+
   async getFeaturedArticles(): Promise<Article[]> {
     const response = await authClient.get<Article[]>("/news/articles/featured/");
     return response.data;
