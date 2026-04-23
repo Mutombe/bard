@@ -79,7 +79,13 @@ def notify_subscribers_featured_article(sender, instance, created, **kwargs):
     is_now_featured = instance.is_featured
     is_published = instance.status == NewsArticle.Status.PUBLISHED
 
-    if is_now_featured and is_published and not was_featured:
+    # Editor-controlled opt-out: the serializer sets this to False when the
+    # editor unchecks "Email subscribers on publish" in the admin UI. Default
+    # (attribute absent) = send, preserving the existing automatic behaviour
+    # for scrapers and any path that doesn't touch the flag.
+    send_subscriber_email = getattr(instance, "_send_subscriber_email", True)
+
+    if is_now_featured and is_published and not was_featured and send_subscriber_email:
         # Send featured article emails via django-q2 worker
         from django_q.tasks import async_task
         async_task(

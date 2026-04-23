@@ -156,6 +156,11 @@ export interface ArticleInput {
   meta_description?: string;
   writer?: string | null; // Writer slug, or null to clear the byline
   published_at?: string | null;
+  /**
+   * Suppress the automatic featured-article email when false. Defaults
+   * to true on the backend — omit for normal publishing behavior.
+   */
+  send_subscriber_email?: boolean;
 }
 
 export interface ContentCalendarItem {
@@ -249,6 +254,7 @@ export const editorialService = {
     featured_image_caption?: string;
     meta_title?: string;
     meta_description?: string;
+    send_subscriber_email?: boolean;
   }): Promise<Article> {
     // Ensure status is lowercase for backend
     const payload = {

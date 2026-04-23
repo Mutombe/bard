@@ -30,6 +30,7 @@ import {
   Globe,
   Lock,
   Star,
+  PaperPlaneTilt,
 } from "@phosphor-icons/react";
 import { cn, slugify as toUrlSlug } from "@/lib/utils";
 import { editorialService, type Writer } from "@/services/api/editorial";
@@ -100,6 +101,7 @@ export default function NewArticlePage() {
   const [scheduledDate, setScheduledDate] = useState("");
   const [featured, setFeatured] = useState(false);
   const [premium, setPremium] = useState(false);
+  const [sendSubscriberEmail, setSendSubscriberEmail] = useState(true);
   const [selectedWriter, setSelectedWriter] = useState<string>("");
   const [writers, setWriters] = useState<Writer[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -268,6 +270,10 @@ export default function NewArticlePage() {
         content_type: contentType,
         tags: tags.map(t => t.slug),
         writer: selectedWriter || null,
+        // The backend post_save signal auto-sends the featured-article email
+        // when is_featured transitions False → True on publish. Respect the
+        // editor's toggle: only pass True when featured AND they opted in.
+        send_subscriber_email: featured && sendSubscriberEmail,
       };
 
       // Only send a custom slug if the editor explicitly set one.
@@ -290,13 +296,27 @@ export default function NewArticlePage() {
       setHasUnsavedChanges(false);
       setLastSaved(new Date());
 
-      toast.success(
-        saveStatus === "published"
-          ? "Your article is now live!"
-          : "Draft saved successfully"
-      );
+      const willEmailSubscribers =
+        saveStatus === "published" && featured && sendSubscriberEmail;
 
-      setTimeout(() => router.replace("/admin/articles"), 1500);
+      if (willEmailSubscribers) {
+        toast.success("Published — email blast queued to breaking-news subscribers.");
+      } else if (saveStatus === "published") {
+        toast.success("Your article is now live!");
+      } else {
+        toast.success("Draft saved successfully");
+      }
+
+      // After publishing, land the editor on the edit page (not the list) so
+      // they can fix typos and re-trigger the email blast in one place. Drafts
+      // still go to the list.
+      setTimeout(() => {
+        if (saveStatus === "published" && result?.slug) {
+          router.replace(`/admin/articles/${result.slug}`);
+        } else {
+          router.replace("/admin/articles");
+        }
+      }, 1500);
     } catch (err: any) {
       console.error("Failed to save article:", err);
 
@@ -749,6 +769,38 @@ export default function NewArticlePage() {
                       />
                     </button>
                   </div>
+
+                  {/* Subscriber email — only relevant for featured articles.
+                      When checked (default), publishing emails the article
+                      to every verified breaking-news subscriber. Uncheck to
+                      suppress the blast — e.g. for a quiet soft-launch. */}
+                  {featured && (
+                    <div className="flex items-start justify-between gap-2 py-2 pl-6">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <PaperPlaneTilt className="h-4 w-4 text-primary" />
+                          <span className="text-sm">Email to subscribers on publish</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Sends this article to all verified breaking-news subscribers when Publish is clicked.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setSendSubscriberEmail(!sendSubscriberEmail)}
+                        className={cn(
+                          "flex-shrink-0 relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
+                          sendSubscriberEmail ? "bg-primary" : "bg-terminal-border"
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform",
+                            sendSubscriberEmail ? "translate-x-5" : "translate-x-0.5"
+                          )}
+                        />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between py-2">
                     <div className="flex items-center gap-2">
