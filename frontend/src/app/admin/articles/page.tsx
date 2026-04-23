@@ -248,9 +248,21 @@ export default function ArticlesPage() {
       setSelectedArticles([]);
       // Refresh to get accurate counts
       fetchArticles(true);
-    } catch (err) {
+    } catch (err: any) {
       console.error(`Failed to ${action} articles:`, err);
-      toast.error(`Failed to ${action} articles. Please try again.`);
+      // Surface the actual server detail (e.g. "Bulk action failed:
+      // IntegrityError: …") so editors — and we — can see what broke
+      // instead of staring at a generic "Please try again" toast.
+      const data = err?.response?.data;
+      const serverDetail =
+        typeof data === "string" && !data.includes("<!doctype")
+          ? data
+          : data?.detail || data?.error || data?.message;
+      toast.error(
+        serverDetail
+          ? `Failed to ${action} articles: ${serverDetail}`
+          : `Failed to ${action} articles. Please try again.`
+      );
       // Revert optimistic update
       setArticles(previousArticles);
     } finally {

@@ -3,8 +3,10 @@ Editorial Views
 
 Editor dashboard and workflow management endpoints.
 """
+import logging
 from datetime import timedelta
 
+from django.db import transaction
 from django.db.models import Count, Q
 from django.utils import timezone
 from rest_framework import viewsets, status
@@ -12,6 +14,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+logger = logging.getLogger(__name__)
 
 from apps.core.permissions import IsEditor, IsAdmin
 from apps.news.models import NewsArticle
@@ -619,58 +623,102 @@ class BulkActionView(APIView):
         serializer.is_valid(raise_exception=True)
 
         action = serializer.validated_data["action"]
-        article_ids = serializer.validated_data["article_ids"]
+        # Normalize UUIDs to strings — they're UUID objects after
+        # serializer validation, and passing UUIDs into a JSONField's
+        # metadata dict used to break DjangoJSONEncoder in some edge
+        # cases. Strings are always safe for both `filter(id__in=...)`
+        # and JSON serialisation.
+        article_ids = [str(aid) for aid in serializer.validated_data["article_ids"]]
 
-        articles = NewsArticle.objects.filter(id__in=article_ids)
-        count = articles.count()
+        try:
+            with transaction.atomic():
+                articles = NewsArticle.objects.filter(id__in=article_ids)
+                count = articles.count()
 
-        if action == "publish":
-            articles.update(status="published", published_at=timezone.now())
-            message = f"Published {count} articles"
+                if count == 0:
+                    return Response(
+                        {"message": "No articles matched the provided IDs.", "affected": 0},
+                        status=status.HTTP_200_OK,
+                    )
 
-        elif action == "unpublish":
-            articles.update(status="draft", published_at=None)
-            message = f"Unpublished {count} articles"
+                if action == "publish":
+                    articles.update(status="published", published_at=timezone.now())
+                    message = f"Published {count} articles"
 
-        elif action == "delete":
-            articles.delete()
-            message = f"Deleted {count} articles"
+                elif action == "unpublish":
+                    articles.update(status="draft", published_at=None)
+                    message = f"Unpublished {count} articles"
 
-        elif action == "add_to_bucket":
-            bucket_id = serializer.validated_data["bucket_id"]
-            for article in articles:
-                BucketArticle.objects.get_or_create(
-                    bucket_id=bucket_id,
-                    article=article,
-                    defaults={"added_by": request.user}
+                elif action == "delete":
+                    # Delete the queryset row-by-row instead of
+                    # queryset.delete() so Django fires per-instance
+                    # delete signals and handles cascade cleanly even for
+                    # complex FK graphs (ArticleLike, Save, Views,
+                    # Comments, Revisions, Notes, Assignments, etc.).
+                    # queryset.delete() was returning a 500 in production
+                    # for some article rows — the instance-level delete
+                    # is slower but far more tolerant.
+                    for article in articles:
+                        article.delete()
+                    message = f"Deleted {count} articles"
+
+                elif action == "add_to_bucket":
+                    bucket_id = str(serializer.validated_data["bucket_id"])
+                    for article in articles:
+                        BucketArticle.objects.get_or_create(
+                            bucket_id=bucket_id,
+                            article=article,
+                            defaults={"added_by": request.user}
+                        )
+                    message = f"Added {count} articles to bucket"
+
+                elif action == "remove_from_bucket":
+                    bucket_id = str(serializer.validated_data["bucket_id"])
+                    BucketArticle.objects.filter(
+                        bucket_id=bucket_id,
+                        article__in=articles
+                    ).delete()
+                    message = f"Removed {count} articles from bucket"
+
+                elif action == "assign":
+                    assignee_id = str(serializer.validated_data["assignee_id"])
+                    for article in articles:
+                        EditorialAssignment.objects.create(
+                            article=article,
+                            assignee_id=assignee_id,
+                            assigned_by=request.user,
+                            assignment_type="edit",
+                        )
+                    message = f"Assigned {count} articles"
+                else:
+                    return Response(
+                        {"detail": f"Unknown action: {action}"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Log activity AFTER the action — if the action raised,
+                # the transaction rolls back and we don't leave a stale
+                # "Bulk Action" log row pointing at nothing.
+                EditorActivity.objects.create(
+                    user=request.user,
+                    activity_type=EditorActivity.ActivityType.BULK_ACTION,
+                    description=message,
+                    metadata={"action": action, "article_ids": article_ids},
                 )
-            message = f"Added {count} articles to bucket"
 
-        elif action == "remove_from_bucket":
-            bucket_id = serializer.validated_data["bucket_id"]
-            BucketArticle.objects.filter(
-                bucket_id=bucket_id,
-                article__in=articles
-            ).delete()
-            message = f"Removed {count} articles from bucket"
+            return Response({"message": message, "affected": count})
 
-        elif action == "assign":
-            assignee_id = serializer.validated_data["assignee_id"]
-            for article in articles:
-                EditorialAssignment.objects.create(
-                    article=article,
-                    assignee_id=assignee_id,
-                    assigned_by=request.user,
-                    assignment_type="edit",
-                )
-            message = f"Assigned {count} articles"
-
-        # Log activity
-        EditorActivity.objects.create(
-            user=request.user,
-            activity_type=EditorActivity.ActivityType.BULK_ACTION,
-            description=message,
-            metadata={"action": action, "article_ids": article_ids},
-        )
-
-        return Response({"message": message, "affected": count})
+        except Exception as e:
+            # Log the full traceback so we can see what's really failing
+            # in production (otherwise DEBUG=False just returns an opaque
+            # 500 HTML page the admin UI can't surface).
+            logger.exception(
+                "Bulk action %s failed for %d article_ids", action, len(article_ids),
+            )
+            return Response(
+                {
+                    "detail": f"Bulk action failed: {type(e).__name__}: {str(e)[:300]}",
+                    "action": action,
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
