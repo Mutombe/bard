@@ -1,5 +1,64 @@
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { authClient } from "./client";
+import { store } from "@/store";
+import { refreshToken, clearAuth } from "@/store/slices/authSlice";
+import { getVisitorId } from "@/lib/visitor";
 import type { PaginatedResponse } from "@/types";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// A dedicated axios instance for FormData uploads — crucially, NO default
+// Content-Type header. If we use the shared authClient (which defaults to
+// application/json), axios 1.6's transformRequest silently JSON-ifies the
+// FormData and the file never reaches the server. By creating a separate
+// client with no Content-Type, the browser's XHR layer sets
+// `multipart/form-data; boundary=…` correctly.
+const uploadClient = axios.create({
+  baseURL: `${API_URL}/api/v1`,
+  timeout: 120000, // uploads can be slow on mobile — give them 2 minutes
+});
+
+uploadClient.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("access_token");
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    const visitorId = getVisitorId();
+    if (visitorId && config.headers) {
+      config.headers["X-Visitor-Id"] = visitorId;
+    }
+  }
+  return config;
+});
+
+// Refresh-and-retry on 401 so a stale access token during a long editing
+// session doesn't silently kill uploads. Mirrors authClient's logic but
+// simpler — uploads are less concurrent so no queue is needed.
+uploadClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    if (error.response?.status === 401 && !originalRequest?._retry) {
+      originalRequest._retry = true;
+      try {
+        const result = await store.dispatch(refreshToken()).unwrap();
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${result.access}`;
+        }
+        return uploadClient(originalRequest);
+      } catch {
+        store.dispatch(clearAuth());
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          window.dispatchEvent(new CustomEvent("auth:session-expired"));
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 // =========================
 // Types
@@ -69,24 +128,11 @@ export const mediaService = {
     if (data?.alt_text) formData.append("alt_text", data.alt_text);
     if (data?.caption) formData.append("caption", data.caption);
 
-    // CRITICAL: The shared authClient has `Content-Type: application/json` as
-    // its default header. Axios 1.6's transformRequest sees FormData + JSON
-    // Content-Type and silently converts the FormData to a JSON object — the
-    // file payload becomes the literal string "[object File]" and Django's
-    // MultiPartParser sees an empty request. We must strip Content-Type for
-    // this call so the browser/XHR layer can set
-    // `multipart/form-data; boundary=…` with a valid boundary.
-    const response = await authClient.post<MediaFile>("/media/library/", formData, {
-      transformRequest: [
-        (payload, headers) => {
-          if (headers) {
-            delete (headers as Record<string, unknown>)["Content-Type"];
-            delete (headers as Record<string, unknown>)["content-type"];
-          }
-          return payload;
-        },
-      ],
-    });
+    // Use the dedicated uploadClient (no default Content-Type) so the browser
+    // sets `multipart/form-data; boundary=…` with a real boundary. If the
+    // shared authClient were used, axios 1.6's transformRequest would JSON-ify
+    // the FormData and the file would be lost.
+    const response = await uploadClient.post<MediaFile>("/media/library/", formData);
     return response.data;
   },
 
