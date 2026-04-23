@@ -686,6 +686,26 @@
     font-style: italic;
   }
 
+  /* Thin, understated scrollbar for the admin sidebar nav so the list
+     scrolls cleanly when there are more items than viewport height. */
+  .sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--terminal-border)) transparent;
+  }
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--terminal-border));
+    border-radius: 3px;
+  }
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
   /* Inline emphasis / formatting from the editor */
   .prose-journal strong, .prose-journal b { font-weight: 700; }
   .prose-journal em, .prose-journal i { font-style: italic; }

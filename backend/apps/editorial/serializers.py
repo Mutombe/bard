@@ -410,8 +410,12 @@ class EditorDashboardStatsSerializer(serializers.Serializer):
 class BulkActionSerializer(serializers.Serializer):
     """Serializer for bulk operations."""
 
+    # NewsArticle.id is a UUID (via BaseModel → UUIDModel), not an integer.
+    # Using IntegerField here rejected every bulk-delete request with a
+    # validation error — the frontend saw a generic "Failed" toast with no
+    # clue why.
     article_ids = serializers.ListField(
-        child=serializers.IntegerField(),
+        child=serializers.UUIDField(),
         min_length=1,
     )
     action = serializers.ChoiceField(
@@ -424,8 +428,9 @@ class BulkActionSerializer(serializers.Serializer):
             ("assign", "Assign"),
         ]
     )
-    bucket_id = serializers.IntegerField(required=False)
-    assignee_id = serializers.IntegerField(required=False)
+    # ContentBucket and User both use UUID primary keys too.
+    bucket_id = serializers.UUIDField(required=False)
+    assignee_id = serializers.UUIDField(required=False)
 
     def validate(self, data):
         if data["action"] == "add_to_bucket" and not data.get("bucket_id"):
