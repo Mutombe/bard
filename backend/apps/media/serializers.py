@@ -49,10 +49,40 @@ class MediaFileUploadSerializer(serializers.ModelSerializer):
     alt_text = serializers.CharField(required=False, allow_blank=True)
     caption = serializers.CharField(required=False, allow_blank=True)
     file_type = serializers.CharField(required=False, allow_blank=True)
+    # Expose the resolved (absolute) URL in the POST response so the inline
+    # editor can immediately insert <img src={url}> after a successful upload.
+    # Without this, response data has `file` (a storage-relative path) but
+    # no absolute URL, so the frontend throws "Upload returned no URL".
+    url = serializers.SerializerMethodField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    size = serializers.IntegerField(read_only=True)
+    size_display = serializers.CharField(read_only=True)
+    mime_type = serializers.CharField(read_only=True)
+    width = serializers.IntegerField(read_only=True)
+    height = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = MediaFile
-        fields = ["file", "name", "alt_text", "caption", "file_type"]
+        fields = [
+            "id",
+            "file",
+            "url",
+            "name",
+            "alt_text",
+            "caption",
+            "file_type",
+            "mime_type",
+            "size",
+            "size_display",
+            "width",
+            "height",
+        ]
+
+    def get_url(self, obj):
+        request = self.context.get("request")
+        if obj.file and request:
+            return request.build_absolute_uri(obj.file.url)
+        return obj.url if obj.file else None
 
     def create(self, validated_data):
         file = validated_data.get("file")
