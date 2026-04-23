@@ -55,6 +55,7 @@ import {
   CircleNotch,
 } from "@phosphor-icons/react";
 import mammoth from "mammoth";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface ModernEditorProps {
@@ -294,8 +295,23 @@ export function ModernEditor({
 
   // Handle image upload
   const handleImageUpload = async (file: File) => {
+    // Guard against unsupported/oversized files before hitting the network.
+    // Keep the cap generous (10 MB) — full-res stock images from Unsplash
+    // can exceed 5 MB. Backend has its own limit but a fast client-side
+    // check gives immediate feedback.
+    const MAX_BYTES = 10 * 1024 * 1024;
+    if (!file.type.startsWith("image/")) {
+      toast.error("That file is not an image.");
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      toast.error(`Image is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Max is 10 MB.`);
+      return;
+    }
+
     if (!onImageUpload) {
-      // Fallback to base64 for demo
+      // Fallback to base64 when the parent doesn't wire up a real uploader.
+      // Only used in demos — production pages pass onImageUpload.
       const reader = new FileReader();
       reader.onload = () => {
         editor?.chain().focus().setImage({ src: reader.result as string }).run();
@@ -305,11 +321,29 @@ export function ModernEditor({
     }
 
     setIsUploading(true);
+    const toastId = toast.loading(`Uploading ${file.name}…`);
     try {
       const url = await onImageUpload(file);
-      editor?.chain().focus().setImage({ src: url }).run();
-    } catch (error) {
-      console.error("Failed to upload image:", error);
+      if (!url) {
+        throw new Error("Upload returned no URL");
+      }
+      editor?.chain().focus().setImage({ src: url, alt: file.name }).run();
+      toast.success("Image uploaded.", { id: toastId });
+    } catch (error: any) {
+      const status = error?.response?.status;
+      const serverDetail =
+        error?.response?.data?.detail ||
+        error?.response?.data?.file?.[0] ||
+        error?.response?.data?.error;
+      const msg = serverDetail
+        ? `Upload failed: ${serverDetail}`
+        : status === 401
+        ? "Upload failed — your session may have expired. Please sign in again."
+        : status === 413
+        ? "Image is too large for the server. Try a smaller file."
+        : `Upload failed${status ? ` (${status})` : ""}. Check your connection and try again.`;
+      console.error("Inline image upload failed:", error);
+      toast.error(msg, { id: toastId });
     } finally {
       setIsUploading(false);
     }
@@ -563,10 +597,14 @@ export function ModernEditor({
         <div className="relative">
           <ToolbarButton
             onClick={() => setShowImagePopup(!showImagePopup)}
-            isActive={showImagePopup}
-            title="Insert Image"
+            isActive={showImagePopup || isUploading}
+            title={isUploading ? "Uploading image…" : "Insert Image"}
           >
-            <ImageIcon className="h-4 w-4" />
+            {isUploading ? (
+              <CircleNotch className="h-4 w-4 animate-spin" />
+            ) : (
+              <ImageIcon className="h-4 w-4" />
+            )}
           </ToolbarButton>
           {showImagePopup && (
             <div className="absolute top-full left-0 mt-2 z-50 p-3 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-xl w-72">
