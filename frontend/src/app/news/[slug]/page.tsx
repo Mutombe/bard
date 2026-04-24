@@ -282,6 +282,10 @@ export default function ArticlePage() {
   const [bookmarked, setBookmarked] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
+  // Lightbox state — when an editor-inserted image in the article body is
+  // clicked we show a full-screen overlay with the high-res source. ESC,
+  // clicking outside, or the × button all close it.
+  const [lightbox, setLightbox] = useState<{ src: string; alt?: string; caption?: string } | null>(null);
   const [subscribing, setSubscribing] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
@@ -322,6 +326,45 @@ export default function ArticlePage() {
       setBookmarked(Boolean(article.is_saved));
     }
   }, [article]);
+
+  // Close the lightbox with ESC. Body scroll is locked while open so the
+  // underlying article doesn't scroll behind the overlay.
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightbox(null);
+    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [lightbox]);
+
+  // Event delegation: any <img> the editor inserted into the article body
+  // opens the lightbox on click. We listen on the outer article element so
+  // dangerouslySetInnerHTML content stays reactive-to-clicks without having
+  // to attach individual handlers to every <img> after render.
+  const handleContentClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "IMG") {
+      const img = target as HTMLImageElement;
+      // Don't open lightbox for the tiny drop-cap or sponsor icons —
+      // only for content images in .prose-journal.
+      if (!target.closest(".prose-journal")) return;
+      e.preventDefault();
+      setLightbox({
+        src: img.src,
+        alt: img.alt || undefined,
+        caption:
+          img.getAttribute("data-caption") ||
+          img.closest("figure")?.querySelector("figcaption")?.textContent ||
+          undefined,
+      });
+    }
+  }, []);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -642,15 +685,30 @@ export default function ArticlePage() {
               />
             </header>
 
-            {/* Featured Image */}
+            {/* Featured Image — object-position biases toward the lower 2/3
+                of the image. Most editorial photos have subjects in the
+                bottom half (faces, skylines, products); tall images with
+                lots of sky were getting cropped to nothing-but-sky with a
+                default center crop. 65% from the top keeps subjects visible
+                while preserving useful headroom. */}
             {article.featured_image && (
               <div className="mb-8">
-                <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-terminal-bg-elevated">
+                <div
+                  className="relative aspect-[16/9] rounded-lg overflow-hidden bg-terminal-bg-elevated cursor-zoom-in group"
+                  onClick={() =>
+                    setLightbox({
+                      src: article.featured_image!,
+                      alt: article.title,
+                      caption: article.featured_image_caption || undefined,
+                    })
+                  }
+                >
                   <Image
                     src={article.featured_image}
                     alt={article.title}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-opacity group-hover:opacity-95"
+                    style={{ objectPosition: "center 65%" }}
                     unoptimized
                   />
                 </div>
@@ -684,8 +742,8 @@ export default function ArticlePage() {
               </div>
             )}
 
-            {/* Article Content */}
-            {renderContent()}
+            {/* Article Content — click delegate opens the image lightbox */}
+            <div onClick={handleContentClick}>{renderContent()}</div>
 
             {/* Topics & Tags */}
             {article.tags && article.tags.length > 0 && (
@@ -885,6 +943,48 @@ export default function ArticlePage() {
           </aside>
         </div>
       </article>
+
+      {/* Lightbox — full-screen overlay for clicked article images. Click the
+          backdrop or press ESC to close. Preserves any caption so readers
+          keep context. */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 md:p-8"
+          onClick={() => setLightbox(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview"
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setLightbox(null);
+            }}
+            aria-label="Close image preview"
+            className="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+          <figure
+            className="max-w-full max-h-full flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Using a plain img (not next/image) so the natural dimensions
+                drive sizing — we want the full-res original in preview. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={lightbox.src}
+              alt={lightbox.alt || ""}
+              className="max-w-full max-h-[calc(100vh-8rem)] object-contain rounded-md"
+            />
+            {lightbox.caption && (
+              <figcaption className="text-sm text-white/80 italic text-center max-w-2xl">
+                {lightbox.caption}
+              </figcaption>
+            )}
+          </figure>
+        </div>
+      )}
     </MainLayout>
   );
 }

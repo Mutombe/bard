@@ -37,6 +37,7 @@ import {
   TextAlignLeft,
   TextAlignCenter,
   TextAlignRight,
+  ArrowsOutSimple,
   Minus,
   ArrowCounterClockwise,
   ArrowClockwise,
@@ -180,6 +181,10 @@ export function ModernEditor({
   const [showImagePopup, setShowImagePopup] = useState(false);
   const [showDocumentPopup, setShowDocumentPopup] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  // Optional caption captured alongside an image insertion. Stored as a
+  // `data-caption` attribute on the img and rendered as <figcaption> via the
+  // Image node's renderHTML override.
+  const [pendingCaption, setPendingCaption] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -198,7 +203,56 @@ export function ModernEditor({
           class: "text-primary underline decoration-primary/50 hover:decoration-primary cursor-pointer",
         },
       }),
-      Image.configure({
+      Image.extend({
+        // Allow images to carry alignment + caption metadata. The detail page
+        // CSS reads data-align on the <img> or wrapping <figure> to produce
+        // left/right/center/full layouts. Captions are rendered as a sibling
+        // <figcaption> inside a <figure>, which is still valid HTML even for
+        // inline image nodes in TipTap.
+        addAttributes() {
+          return {
+            ...this.parent?.(),
+            "data-align": {
+              default: "center",
+              parseHTML: (el) =>
+                el.getAttribute("data-align") ||
+                el.closest("figure")?.getAttribute("data-align") ||
+                "center",
+              renderHTML: (attrs) => ({
+                "data-align": attrs["data-align"] || "center",
+              }),
+            },
+            "data-caption": {
+              default: null,
+              parseHTML: (el) =>
+                el.getAttribute("data-caption") ||
+                el.closest("figure")?.querySelector("figcaption")?.textContent ||
+                null,
+              renderHTML: (attrs) =>
+                attrs["data-caption"]
+                  ? { "data-caption": attrs["data-caption"] }
+                  : {},
+            },
+          };
+        },
+        renderHTML({ HTMLAttributes }) {
+          const {
+            "data-caption": caption,
+            "data-align": align = "center",
+            ...imgAttrs
+          } = HTMLAttributes as Record<string, any>;
+          const imgAttrsWithAlign = { ...imgAttrs, "data-align": align };
+          if (caption) {
+            return [
+              "figure",
+              { "data-align": align },
+              ["img", imgAttrsWithAlign],
+              ["figcaption", {}, caption],
+            ] as any;
+          }
+          return ["img", imgAttrsWithAlign] as any;
+        },
+      }).configure({
         HTMLAttributes: {
           class: "rounded-lg max-w-full mx-auto my-4",
         },
@@ -309,14 +363,28 @@ export function ModernEditor({
       return;
     }
 
+    // Snapshot caption at the start — editor might clear state while uploading.
+    const captionForThisUpload = pendingCaption.trim();
+
     if (!onImageUpload) {
       // Fallback to base64 when the parent doesn't wire up a real uploader.
       // Only used in demos — production pages pass onImageUpload.
       const reader = new FileReader();
       reader.onload = () => {
-        editor?.chain().focus().setImage({ src: reader.result as string }).run();
+        editor
+          ?.chain()
+          .focus()
+          .setImage({
+            src: reader.result as string,
+            alt: captionForThisUpload || file.name,
+            ...(captionForThisUpload
+              ? { "data-caption": captionForThisUpload }
+              : {}),
+          } as any)
+          .run();
       };
       reader.readAsDataURL(file);
+      setPendingCaption("");
       return;
     }
 
@@ -327,7 +395,18 @@ export function ModernEditor({
       if (!url) {
         throw new Error("Upload returned no URL");
       }
-      editor?.chain().focus().setImage({ src: url, alt: file.name }).run();
+      editor
+        ?.chain()
+        .focus()
+        .setImage({
+          src: url,
+          alt: captionForThisUpload || file.name,
+          ...(captionForThisUpload
+            ? { "data-caption": captionForThisUpload }
+            : {}),
+        } as any)
+        .run();
+      setPendingCaption("");
       toast.success("Image uploaded.", { id: toastId });
     } catch (error: any) {
       const status = error?.response?.status;
@@ -373,11 +452,20 @@ export function ModernEditor({
     }
   };
 
-  // Insert image from URL
+  // Insert image from URL (with optional caption)
   const insertImageFromUrl = () => {
     if (imageUrl) {
-      editor?.chain().focus().setImage({ src: imageUrl }).run();
+      const caption = pendingCaption.trim();
+      editor
+        ?.chain()
+        .focus()
+        .setImage({
+          src: imageUrl,
+          ...(caption ? { "data-caption": caption, alt: caption } : {}),
+        } as any)
+        .run();
       setImageUrl("");
+      setPendingCaption("");
       setShowImagePopup(false);
     }
   };
@@ -637,8 +725,23 @@ export function ModernEditor({
             )}
           </ToolbarButton>
           {showImagePopup && (
-            <div className="absolute top-full left-0 mt-2 z-[60] p-3 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-72">
+            <div className="absolute top-full left-0 mt-2 z-[60] p-3 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-80">
               <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-medium mb-1.5 text-muted-foreground">
+                    Caption <span className="opacity-60">(optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={pendingCaption}
+                    onChange={(e) => setPendingCaption(e.target.value)}
+                    placeholder="Describe the image for readers…"
+                    className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Appears below the image in italic. Applies to the next image you insert or upload.
+                  </p>
+                </div>
                 <div>
                   <label className="block text-xs font-medium mb-1.5 text-muted-foreground">Image URL</label>
                   <div className="flex gap-2">
@@ -873,6 +976,99 @@ export function ModernEditor({
           >
             <LinkIcon className="h-3.5 w-3.5" />
           </ToolbarButton>
+        </BubbleMenu>
+      )}
+
+      {/* Image-specific bubble menu — appears only when an image is selected.
+          Lets the editor pick an alignment variant (left-float / centered /
+          right-float / full-width) and edit the caption without leaving the
+          flow. Alignment writes `data-align` on the <img>; on render the
+          detail-page CSS (globals.css:671+) applies the matching layout. */}
+      {editor && (
+        <BubbleMenu
+          editor={editor}
+          shouldShow={({ editor }) => editor.isActive("image")}
+          className="flex items-center gap-0.5 p-1 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-xl"
+        >
+          {(() => {
+            const currentAlign =
+              (editor.getAttributes("image")["data-align"] as string) || "center";
+            const setAlign = (align: "left" | "center" | "right" | "full") =>
+              editor
+                .chain()
+                .focus()
+                .updateAttributes("image", { "data-align": align })
+                .run();
+            return (
+              <>
+                <ToolbarButton
+                  onClick={() => setAlign("left")}
+                  isActive={currentAlign === "left"}
+                  title="Float left (text wraps right)"
+                  className="p-1.5"
+                >
+                  <TextAlignLeft className="h-3.5 w-3.5" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => setAlign("center")}
+                  isActive={currentAlign === "center"}
+                  title="Centered (default)"
+                  className="p-1.5"
+                >
+                  <TextAlignCenter className="h-3.5 w-3.5" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => setAlign("right")}
+                  isActive={currentAlign === "right"}
+                  title="Float right (text wraps left)"
+                  className="p-1.5"
+                >
+                  <TextAlignRight className="h-3.5 w-3.5" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() => setAlign("full")}
+                  isActive={currentAlign === "full"}
+                  title="Full width"
+                  className="p-1.5"
+                >
+                  <ArrowsOutSimple className="h-3.5 w-3.5" />
+                </ToolbarButton>
+                <div className="w-px h-4 bg-terminal-border mx-0.5" />
+                <ToolbarButton
+                  onClick={() => {
+                    const current =
+                      (editor.getAttributes("image")["data-caption"] as string) ||
+                      "";
+                    const next = window.prompt(
+                      "Image caption (leave empty to remove):",
+                      current
+                    );
+                    if (next === null) return;
+                    editor
+                      .chain()
+                      .focus()
+                      .updateAttributes("image", {
+                        "data-caption": next.trim() || null,
+                      })
+                      .run();
+                  }}
+                  title="Edit caption"
+                  className="p-1.5"
+                >
+                  <TextT className="h-3.5 w-3.5" />
+                </ToolbarButton>
+                <ToolbarButton
+                  onClick={() =>
+                    editor.chain().focus().deleteSelection().run()
+                  }
+                  title="Remove image"
+                  className="p-1.5"
+                >
+                  <Trash className="h-3.5 w-3.5 text-red-400" />
+                </ToolbarButton>
+              </>
+            );
+          })()}
         </BubbleMenu>
       )}
 
