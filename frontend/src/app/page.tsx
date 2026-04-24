@@ -229,6 +229,12 @@ function ArticleImage({ article, fill = true, className = "" }: { article: NewsA
       alt={article.title}
       fill={fill}
       className={className}
+      // Bias the crop toward the lower portion of the photo. Most editorial
+      // imagery (skylines, people, products, markets) has its subject in the
+      // bottom half; a centered crop kept clipping landscape photos to
+      // "nothing but sky". 75% from the top keeps subjects front-and-centre
+      // while leaving a sliver of useful headroom.
+      style={{ objectPosition: "center 75%" }}
       onError={handleError}
       unoptimized
     />
