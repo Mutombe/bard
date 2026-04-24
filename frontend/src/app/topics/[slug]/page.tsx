@@ -8,7 +8,7 @@ import { CaretRight, Clock, ArrowRight } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 
 // Topic data - expandable as needed
 const topicData: Record<string, {
@@ -267,7 +267,7 @@ export default function TopicPage() {
       setLoading(true);
       try {
         // Try tag-based filter first
-        const tagResponse = await apiClient.get("/news/articles/", {
+        const tagResponse = await publicClient.get("/news/articles/", {
           params: { tag: slug, page_size: 12 },
         });
         let results = tagResponse.data.results || [];
@@ -276,7 +276,7 @@ export default function TopicPage() {
         if (results.length < 6) {
           const topicName = topic?.name || slug.replace(/-/g, " ");
           try {
-            const searchResponse = await apiClient.get("/news/articles/", {
+            const searchResponse = await publicClient.get("/news/articles/", {
               params: { search: topicName, page_size: 12 },
             });
             for (const r of (searchResponse.data.results || [])) {

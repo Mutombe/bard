@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 
 // Industry data
 const industryData: Record<string, {
@@ -206,7 +206,7 @@ export default function IndustryPage() {
         for (const cat of industry.categories) {
           if (results.length >= 12) break;
           try {
-            const response = await apiClient.get("/news/articles/", {
+            const response = await publicClient.get("/news/articles/", {
               params: { category: cat, page_size: 12 },
             });
             const catResults = response.data.results || [];
@@ -220,7 +220,7 @@ export default function IndustryPage() {
         // If still not enough, search by industry name keywords
         if (results.length < 6) {
           try {
-            const response = await apiClient.get("/news/articles/", {
+            const response = await publicClient.get("/news/articles/", {
               params: { search: industry.name.split("&")[0].trim(), page_size: 12 },
             });
             for (const r of (response.data.results || [])) {

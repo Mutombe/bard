@@ -1396,12 +1396,21 @@ export default function HomePage() {
     setMounted(true);
   }, []);
 
-  // Load more articles when initial load completes
+  // Load more articles when initial load completes.
+  //
+  // CRITICAL: use publicClient, not apiClient. The feed is public — attaching
+  // an expired bearer token here would fail on the shared `apiClient` (which
+  // 401s and tries to refresh), and if the refresh token is also expired
+  // (e.g. user has been logged in >30 days) the request is dropped entirely.
+  // The visible symptom was "article pictures stop loading after long
+  // sessions" — really it was the trailing 82 articles never arriving, so
+  // only the first 18 rendered with images. publicClient transparently
+  // retries without auth on 401, so the feed always fills.
   const loadMoreArticles = useCallback(async () => {
     if (loadingMore || hasLoadedMore) return;
     setLoadingMore(true);
     try {
-      const response = await apiClient.get("/news/articles/", {
+      const response = await publicClient.get("/news/articles/", {
         params: { page_size: 82, offset: 18 }
       });
       setExtendedArticles(response.data?.results || []);
