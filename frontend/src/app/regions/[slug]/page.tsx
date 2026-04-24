@@ -8,7 +8,7 @@ import { CaretRight, MapPin } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 
 // Region data
 const regionData: Record<string, {
@@ -136,7 +136,7 @@ export default function RegionPage() {
     const fetchArticles = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get("/news/articles/", {
+        const response = await publicClient.get("/news/articles/", {
           params: { limit: 9 },
         });
         setArticles(response.data.results || []);

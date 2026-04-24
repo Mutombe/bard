@@ -31,7 +31,7 @@ import { useAppSelector } from "@/store";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { authService } from "@/services/api/auth";
 import { toast } from "sonner";
-import apiClient from "@/services/api/client";
+import { publicClient } from "@/services/api/client";
 
 interface Person {
   slug: string;
@@ -237,7 +237,7 @@ export default function PersonPage() {
 
       try {
         // Fetch author's articles using author_name filter (matches by slug format)
-        const articlesResponse = await apiClient.get(
+        const articlesResponse = await publicClient.get(
           `/news/articles/?author_name=${encodeURIComponent(slug)}&page_size=12`
         );
         const results = articlesResponse.data.results || [];
