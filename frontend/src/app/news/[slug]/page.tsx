@@ -685,12 +685,11 @@ export default function ArticlePage() {
               />
             </header>
 
-            {/* Featured Image — object-position biases toward the lower 2/3
-                of the image. Most editorial photos have subjects in the
-                bottom half (faces, skylines, products); tall images with
-                lots of sky were getting cropped to nothing-but-sky with a
-                default center crop. 65% from the top keeps subjects visible
-                while preserving useful headroom. */}
+            {/* Featured Image — object-position biases toward the lower
+                half. Most editorial photos have subjects in the bottom half
+                (faces, skylines, products); tall images with lots of sky
+                were getting cropped to nothing-but-sky. 75% from the top
+                keeps subjects framed with only a sliver of headroom. */}
             {article.featured_image && (
               <div className="mb-8">
                 <div
@@ -708,7 +707,7 @@ export default function ArticlePage() {
                     alt={article.title}
                     fill
                     className="object-cover transition-opacity group-hover:opacity-95"
-                    style={{ objectPosition: "center 65%" }}
+                    style={{ objectPosition: "center 75%" }}
                     unoptimized
                   />
                 </div>
