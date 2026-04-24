@@ -1431,10 +1431,19 @@ export default function HomeView({ initialFeed }: HomeViewProps = {}) {
     if (loadingMore || hasLoadedMore) return;
     setLoadingMore(true);
     try {
-      const response = await publicClient.get("/news/articles/", {
-        params: { page_size: 82, offset: 18 }
+      // Route through the same-origin Next.js proxy (/api/feed) instead
+      // of calling bardiq-api.onrender.com directly. Direct calls were
+      // getting CORS-blocked when Render's proxy layer returned cold-
+      // start errors without Access-Control-Allow-Origin headers. The
+      // proxy makes the browser request same-origin (bgfi.global/api/feed)
+      // and does the server-to-server fetch on the backend.
+      const res = await fetch("/api/feed?page_size=82&offset=18", {
+        // 30s browser cache aligns with the route's Cache-Control.
+        cache: "default",
       });
-      setExtendedArticles(response.data?.results || []);
+      if (!res.ok) throw new Error(`feed proxy returned ${res.status}`);
+      const data = await res.json();
+      setExtendedArticles(data?.results || []);
       setHasLoadedMore(true);
     } catch (error) {
       console.error("Failed to load more articles:", error);
