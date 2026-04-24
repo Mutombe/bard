@@ -96,17 +96,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [isAuthenticated, openLogin]);
 
-  // Listen for session expiry events
-  useEffect(() => {
-    const handleSessionExpired = () => {
-      openLogin();
-    };
-
-    window.addEventListener("auth:session-expired", handleSessionExpired);
-    return () => {
-      window.removeEventListener("auth:session-expired", handleSessionExpired);
-    };
-  }, [openLogin]);
+  // NOTE: session-expired handling is now site-wide via
+  // <SessionExpiredModal /> mounted in the Providers tree. It shows a
+  // clear "Session expired" card with a Sign-in CTA on every page, not
+  // just /admin. The admin-only listener used to silently auto-open
+  // the login modal which was confusing — now the user sees an
+  // explicit reason before the login surface appears.
 
   // Show overlay while not authenticated - modal will handle the login
   if (!isAuthenticated) {
