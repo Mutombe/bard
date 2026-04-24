@@ -270,23 +270,39 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        # 30s cache — dashboard stat card, stale is fine. Fires once per
+        # admin tab open instead of 4 counts per open × every admin.
+        from django.core.cache import cache
+        CACHE_KEY = "user_stats:v1"
+        cached = cache.get(CACHE_KEY)
+        if cached is not None:
+            return Response(cached)
+
         today = timezone.now().date()
 
-        total_users = User.objects.count()
-        premium_users = User.objects.filter(
-            subscription_tier__in=["basic", "professional", "enterprise"]
-        ).count()
-        admin_count = User.objects.filter(
-            role__in=["super_admin", "editor", "analyst"]
-        ).count()
-        new_today = User.objects.filter(date_joined__date=today).count()
+        # Collapse 4 COUNT queries into 1 conditional aggregation.
+        from django.db.models import Count, Q
+        agg = User.objects.aggregate(
+            total_users=Count("id"),
+            premium_users=Count(
+                "id",
+                filter=Q(subscription_tier__in=["basic", "professional", "enterprise"]),
+            ),
+            admin_count=Count(
+                "id",
+                filter=Q(role__in=["super_admin", "editor", "analyst"]),
+            ),
+            new_today=Count("id", filter=Q(date_joined__date=today)),
+        )
 
-        return Response({
-            "total_users": total_users,
-            "premium_users": premium_users,
-            "admin_count": admin_count,
-            "new_today": new_today,
-        })
+        payload = {
+            "total_users": agg["total_users"] or 0,
+            "premium_users": agg["premium_users"] or 0,
+            "admin_count": agg["admin_count"] or 0,
+            "new_today": agg["new_today"] or 0,
+        }
+        cache.set(CACHE_KEY, payload, 30)
+        return Response(payload)
 
 
 class UserRegistrationView(viewsets.GenericViewSet):

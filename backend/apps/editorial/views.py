@@ -322,7 +322,25 @@ class EditorialAssignmentViewSet(viewsets.ModelViewSet):
         mine_only = self.request.query_params.get("mine")
         if mine_only:
             qs = qs.filter(assignee=self.request.user)
-        return qs.select_related("article", "assignee", "assigned_by")
+        # EditorialAssignmentSerializer nests the full NewsArticleListSerializer
+        # for `article`, which in turn serializes category, author (+profile),
+        # writer, and M2M tags/related_companies. Without prefetching those
+        # nested relations we fire 5+ queries PER assignment (N+1). The admin
+        # dashboard calls /assignments/ twice on mount (pending + in_progress),
+        # so a page with 20 assignments previously ran ~200 queries. With the
+        # prefetch chain below it runs ~8 regardless of row count.
+        return qs.select_related(
+            "article",
+            "article__category",
+            "article__author",
+            "article__author__profile",
+            "article__writer",
+            "assignee",
+            "assigned_by",
+        ).prefetch_related(
+            "article__tags",
+            "article__related_companies",
+        )
 
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
@@ -579,6 +597,13 @@ class AdminStatsView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    # Short TTL cache — editors loading the dashboard on navigation get the
+    # same stat payload within this window instead of re-running 4 count
+    # queries. 30s is short enough that newly-published articles show up
+    # fast; stale status counts are fine for a stat card.
+    CACHE_TTL_SECONDS = 30
+    CACHE_KEY = "admin_stats:v1"
+
     def get(self, request):
         user = request.user
         # Check if user is admin/editor using the model property
@@ -589,26 +614,41 @@ class AdminStatsView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
+        from django.core.cache import cache
+        cached = cache.get(self.CACHE_KEY)
+        if cached is not None:
+            return Response(cached)
+
         today = timezone.now().date()
 
-        # All article stats (not filtered by user)
-        all_articles = NewsArticle.objects.all()
+        # Single aggregation pass: total count + per-status counts + today's
+        # published — collapsed from 4 round-trips to Postgres into 1. Uses
+        # conditional aggregation (FILTER (WHERE ...)) which is a single
+        # sequential scan rather than four.
+        from django.db.models import Case, IntegerField, Sum, When
+        agg = NewsArticle.objects.aggregate(
+            articles_count=Count("id"),
+            published_today=Count(
+                "id",
+                filter=Q(status="published", published_at__date=today),
+            ),
+            pending_review=Count("id", filter=Q(status="pending_review")),
+            draft_count=Count("id", filter=Q(status="draft")),
+            published_count=Count("id", filter=Q(status="published")),
+            scheduled_count=Count("id", filter=Q(status="scheduled")),
+        )
 
-        # Status breakdown
-        status_counts = all_articles.values("status").annotate(count=Count("id"))
-        status_map = {item["status"]: item["count"] for item in status_counts}
+        payload = {
+            "articles_count": agg["articles_count"] or 0,
+            "published_today": agg["published_today"] or 0,
+            "pending_review": agg["pending_review"] or 0,
+            "draft_count": agg["draft_count"] or 0,
+            "published_count": agg["published_count"] or 0,
+            "scheduled_count": agg["scheduled_count"] or 0,
+        }
 
-        return Response({
-            "articles_count": all_articles.count(),
-            "published_today": all_articles.filter(
-                status="published",
-                published_at__date=today
-            ).count(),
-            "pending_review": status_map.get("pending_review", 0),
-            "draft_count": status_map.get("draft", 0),
-            "published_count": status_map.get("published", 0),
-            "scheduled_count": status_map.get("scheduled", 0),
-        })
+        cache.set(self.CACHE_KEY, payload, self.CACHE_TTL_SECONDS)
+        return Response(payload)
 
 
 class BulkActionView(APIView):
@@ -705,6 +745,13 @@ class BulkActionView(APIView):
                     description=message,
                     metadata={"action": action, "article_ids": article_ids},
                 )
+
+            # Bust the AdminStats cache so the dashboard stat cards refresh
+            # immediately after a bulk action (publish / delete / etc.).
+            # Otherwise the admin sees "123 pending" for up to 30s after
+            # publishing the last pending article.
+            from django.core.cache import cache
+            cache.delete(AdminStatsView.CACHE_KEY)
 
             return Response({"message": message, "affected": count})
 

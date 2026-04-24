@@ -34,6 +34,7 @@ from .models import (
 )
 from .serializers import (
     CategorySerializer,
+    NewsArticleAdminListSerializer,
     NewsArticleCreateSerializer,
     NewsArticleDetailSerializer,
     NewsArticleListSerializer,
@@ -205,16 +206,26 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
 
         queryset = super().get_queryset()
 
+        is_editor_request = (
+            self.request.user.is_authenticated and self.request.user.is_editor
+        )
+
         # Non-authenticated users only see published articles
         if not self.request.user.is_authenticated:
             queryset = queryset.filter(status=NewsArticle.Status.PUBLISHED)
-        elif not self.request.user.is_editor:
+        elif not is_editor_request:
             # Regular users see published articles
             queryset = queryset.filter(status=NewsArticle.Status.PUBLISHED)
 
         # For feed listings: scraped articles need 500+ chars to filter stubs,
-        # but editorial (in-house) articles always show regardless of length
-        if self.action == "list":
+        # and any article shown on the reader feed needs an image.
+        #
+        # IMPORTANT: Editors hitting this endpoint via /admin/articles MUST
+        # see drafts, half-written pieces, and articles without images — those
+        # are exactly the rows they need to edit. Skip both filters for
+        # editors; this also avoids the Length("content") full-table scan on
+        # the admin list which was the hottest part of the query plan.
+        if self.action == "list" and not is_editor_request:
             from django.db.models.functions import Length
             queryset = queryset.annotate(_content_len=Length("content"))
             queryset = queryset.filter(
@@ -224,6 +235,17 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
                 Q(featured_image__gt="") | Q(featured_image_url__gt="")
             )
 
+        # Drop the heavy prefetches for the admin list view — the admin
+        # serializer doesn't render tags or related_companies, so hydrating
+        # those M2Ms is pure waste (extra queries + payload bytes).
+        if self.action == "list" and is_editor_request:
+            queryset = queryset.select_related(
+                "category", "author", "writer"
+            )
+            # Reset the inherited prefetches — Django keeps them on the
+            # default manager queryset otherwise.
+            queryset = queryset.prefetch_related(None)
+
         return queryset
 
     def get_serializer_class(self):
@@ -231,6 +253,15 @@ class NewsArticleViewSet(viewsets.ModelViewSet):
             return NewsArticleDetailSerializer
         if self.action in ["create", "update", "partial_update"]:
             return NewsArticleCreateSerializer
+        # Editors hitting the list action get a lean serializer tailored for
+        # the admin table — no rich image building, no related_companies w/
+        # price data, no writer profile. Cuts response payload ~3-5x.
+        if (
+            self.action == "list"
+            and self.request.user.is_authenticated
+            and self.request.user.is_editor
+        ):
+            return NewsArticleAdminListSerializer
         return NewsArticleListSerializer
 
     def get_permissions(self):
