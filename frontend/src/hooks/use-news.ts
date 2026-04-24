@@ -72,7 +72,10 @@ export interface UseArticlesParams {
   ordering?: string;
 }
 
-export function useArticles(params?: UseArticlesParams) {
+export function useArticles(
+  params?: UseArticlesParams,
+  fallbackData?: CursorPaginatedResponse<NewsArticle>
+) {
   // Build a stable cache key based on params
   const paramString = params ? JSON.stringify(params) : "";
   const key = `/news/articles/?${paramString}`;
@@ -81,6 +84,10 @@ export function useArticles(params?: UseArticlesParams) {
     key,
     () => newsService.getArticles(params),
     {
+      // Hydrate immediately from the SSR fetch if present — lets the
+      // homepage paint real article content on first render (no shell
+      // flash, and Googlebot sees it).
+      fallbackData,
       // Articles update frequently - keep feed fresh
       revalidateOnFocus: true,
       revalidateIfStale: true,
