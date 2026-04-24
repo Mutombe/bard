@@ -140,11 +140,15 @@ export function useInfiniteArticles(params?: UseArticlesParams) {
   };
 }
 
-export function useArticle(slug: string | null) {
+export function useArticle(slug: string | null, fallbackData?: NewsArticle) {
   return useSWR<NewsArticle>(
     slug ? `/news/articles/${slug}/` : null,
     () => newsService.getArticle(slug!),
     {
+      // Hydrate immediately from the SSR fetch if present — this is what
+      // makes the article detail page render without a loading flash on
+      // first paint and lets Googlebot see real content in the HTML.
+      fallbackData,
       // Increment view count on the server
       revalidateOnFocus: false,
     }
