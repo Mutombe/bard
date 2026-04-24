@@ -237,8 +237,29 @@ def cache_market_list(view_func: Callable) -> Callable:
 
 
 def cache_news_list(view_func: Callable) -> Callable:
-    """Cache news article lists (short TTL)."""
-    return cache_response(ttl=CacheTTL.SHORT, key_prefix="news_list")(view_func)
+    """
+    Cache news article lists (short TTL).
+
+    Skips caching for authenticated editors — they see drafts/unpublished
+    content that anonymous users don't, so a shared cache would leak
+    unpublished articles AND serve editors stale/filtered data.
+    """
+    @functools.wraps(view_func)
+    def wrapper(self, request: Request, *args, **kwargs) -> Response:
+        user = getattr(request, "user", None)
+        is_editor = (
+            user is not None
+            and getattr(user, "is_authenticated", False)
+            and getattr(user, "is_editor", False)
+        )
+        if is_editor:
+            # Editors bypass the cache entirely.
+            return view_func(self, request, *args, **kwargs)
+        return cache_response(ttl=CacheTTL.SHORT, key_prefix="news_list")(view_func)(
+            self, request, *args, **kwargs
+        )
+
+    return wrapper
 
 
 def cache_reference_data(view_func: Callable) -> Callable:

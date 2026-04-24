@@ -58,6 +58,70 @@ def _get_featured_image(obj, context):
     return ULTIMATE_FALLBACK_IMAGE
 
 
+class NewsArticleAdminListSerializer(serializers.ModelSerializer):
+    """
+    Minimal serializer for the admin articles table.
+
+    The admin list only renders: title, slug, status, author full_name,
+    category name, source badge, view_count, and a date. Shipping the full
+    NewsArticleListSerializer payload (related_companies with live price
+    data, featured image URL building, writer profile, etc.) was bloating
+    each row ~3-5x and doing extra per-row work we never render.
+    """
+
+    category_name = serializers.CharField(source="category.name", read_only=True)
+    category_slug = serializers.CharField(source="category.slug", read_only=True)
+    author_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = NewsArticle
+        fields = [
+            "id",
+            "title",
+            "slug",
+            "status",
+            "source",
+            "content_type",
+            "is_featured",
+            "is_breaking",
+            "is_premium",
+            "view_count",
+            "published_at",
+            "created_at",
+            "updated_at",
+            "category_name",
+            "category_slug",
+            "author_name",
+        ]
+
+    def get_author_name(self, obj):
+        # Writer takes precedence (byline), else the uploading user's name.
+        # Avoid touching author__profile here — we don't need the avatar for
+        # the table view, so let's not force that join hydration.
+        if obj.writer_id and getattr(obj, "writer", None):
+            return obj.writer.full_name
+        if obj.author_id and getattr(obj, "author", None):
+            return obj.author.full_name or obj.author.email
+        return None
+
+    # --- Compat shim for the admin frontend which reads `article.author.full_name`
+    # and `article.category.name` as nested objects. Without this the admin
+    # table would render "Unknown" / "Uncategorized" everywhere.
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["author"] = (
+            {"full_name": data.pop("author_name", None)}
+            if data.get("author_name")
+            else None
+        )
+        # Strip the temp keys before reshaping category
+        data.pop("author_name", None)
+        cat_name = data.pop("category_name", None)
+        cat_slug = data.pop("category_slug", None)
+        data["category"] = {"name": cat_name, "slug": cat_slug} if cat_name else None
+        return data
+
+
 class NewsArticleListSerializer(serializers.ModelSerializer):
     """Serializer for article listings."""
 

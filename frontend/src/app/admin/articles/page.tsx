@@ -86,6 +86,11 @@ export default function ArticlesPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  // Debounced mirror of searchQuery — this is what actually drives the
+  // /news/articles/ request. Typing into the search box no longer fires
+  // one API request per keystroke; we wait 300ms after the user stops
+  // typing before hitting the backend.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedSource, setSelectedSource] = useState<"all" | "editorial" | "scraped">("all");
@@ -126,8 +131,8 @@ export default function ArticlesPage() {
         page_size: pagination.pageSize,
       };
 
-      if (searchQuery) {
-        params.search = searchQuery;
+      if (debouncedSearch) {
+        params.search = debouncedSearch;
       }
       if (selectedCategory !== "all") {
         params.category = selectedCategory;
@@ -153,7 +158,7 @@ export default function ArticlesPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [pagination.page, pagination.pageSize, searchQuery, selectedCategory, selectedStatus, selectedSource]);
+  }, [pagination.page, pagination.pageSize, debouncedSearch, selectedCategory, selectedStatus, selectedSource]);
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
@@ -176,10 +181,13 @@ export default function ArticlesPage() {
     fetchCategories();
   }, [fetchCategories]);
 
-  // Debounced search
+  // Debounce searchQuery → debouncedSearch. fetchArticles depends on
+  // debouncedSearch, so we only fire one request per keystroke burst
+  // (300ms after the last keystroke) instead of one per character.
   useEffect(() => {
     const timer = setTimeout(() => {
-      setPagination((prev) => ({ ...prev, page: 1 }));
+      setDebouncedSearch(searchQuery);
+      setPagination((prev) => (prev.page === 1 ? prev : { ...prev, page: 1 }));
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
