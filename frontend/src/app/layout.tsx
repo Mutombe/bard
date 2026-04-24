@@ -124,6 +124,62 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+// Site-wide structured data — emitted in the <head> of every page so
+// Google understands the publication entity and its search surface.
+// Organization + WebSite are the two schemas Google uses for knowledge-
+// panel eligibility and sitelinks-search-box (the in-result search box
+// that shows for recognised brands).
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://bgfi.global";
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "NewsMediaOrganization",
+  "@id": `${SITE_URL}#organization`,
+  name: "Bard Global Finance Institute",
+  alternateName: "BGFI",
+  url: SITE_URL,
+  logo: {
+    "@type": "ImageObject",
+    url: `${SITE_URL}/images/fav.png`,
+    width: 512,
+    height: 512,
+  },
+  description:
+    "Africa-based finance research institute. Comprehensive research, advisory and insights on African capital markets, economies, and policy leaders.",
+  foundingDate: "2024",
+  sameAs: [
+    "https://www.linkedin.com/company/bardiq/",
+    "https://twitter.com/BardGlobalFI",
+  ],
+  slogan: "Informed Capital is Transformative Capital",
+  knowsLanguage: ["en"],
+  areaServed: {
+    "@type": "Continent",
+    name: "Africa",
+  },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}#website`,
+  url: SITE_URL,
+  name: "Bard Global Finance Institute",
+  description:
+    "Africa-focused finance research, macroeconomic advisory, and editorial coverage of African capital markets.",
+  publisher: { "@id": `${SITE_URL}#organization` },
+  inLanguage: "en",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+    },
+    "query-input": "required name=search_term_string",
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -131,6 +187,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Site-wide structured data. Kept in the root layout so every
+            page inherits the Organization + WebSite entities — Google
+            links back to these via @id refs from page-level schemas
+            (e.g. NewsArticle.publisher -> this Organization). */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+      </head>
       <body
         className={`${bricolage.variable} ${mono.variable} ${fraunces.variable} ${newsreader.variable} min-h-screen bg-background antialiased`}
       >
