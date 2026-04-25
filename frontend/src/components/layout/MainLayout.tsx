@@ -441,7 +441,17 @@ export function MainLayout({ children }: MainLayoutProps) {
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Bard Global Finance Institute. All rights reserved.
               <span className="mx-2 opacity-40">·</span>
-              <span className="opacity-80">Developed by Bit Studio</span>
+              <span className="opacity-80">
+                Developed by{" "}
+                <a
+                  href="https://bitstudio.co.zw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground underline decoration-dotted underline-offset-2 transition-colors"
+                >
+                  Bit Studio
+                </a>
+              </span>
             </p>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <Link href="/terms" className="hover:text-foreground">Terms</Link>
