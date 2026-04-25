@@ -440,6 +440,8 @@ export function MainLayout({ children }: MainLayoutProps) {
           <div className="mt-12 pt-8 border-t border-terminal-border flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-muted-foreground">
               © {new Date().getFullYear()} Bard Global Finance Institute. All rights reserved.
+              <span className="mx-2 opacity-40">·</span>
+              <span className="opacity-80">Developed by Bit Studio</span>
             </p>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <Link href="/terms" className="hover:text-foreground">Terms</Link>
