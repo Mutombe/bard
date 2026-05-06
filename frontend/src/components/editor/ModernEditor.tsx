@@ -18,6 +18,10 @@ import CharacterCount from "@tiptap/extension-character-count";
 import Highlight from "@tiptap/extension-highlight";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
+import { BottomLine } from "./extensions/BottomLine";
+import { KeyMetric } from "./extensions/KeyMetric";
+import { PullQuoteAttribute } from "./extensions/PullQuoteAttribute";
+import { AnalysisTemplate } from "./extensions/AnalysisTemplate";
 import {
   TextB,
   TextItalic,
@@ -39,6 +43,9 @@ import {
   TextAlignRight,
   ArrowsOutSimple,
   Minus,
+  ChartBar,
+  BookmarkSimple,
+  Pencil,
   ArrowCounterClockwise,
   ArrowClockwise,
   TextT,
@@ -179,6 +186,16 @@ export function ModernEditor({
 }: ModernEditorProps) {
   const [showLinkPopup, setShowLinkPopup] = useState(false);
   const [showImagePopup, setShowImagePopup] = useState(false);
+  // Insert-block popover for editorial callouts (Bottom Line, Pull Quote,
+  // Key Metric, Analysis Template). Single dropdown so the toolbar stays
+  // tidy as we add more block types.
+  const [showInsertPopup, setShowInsertPopup] = useState(false);
+  // Key Metric form state — when an editor picks "Key Metric" from the
+  // insert menu, we collect figure/label/hint inline before insertion.
+  const [showMetricForm, setShowMetricForm] = useState(false);
+  const [metricFigure, setMetricFigure] = useState("");
+  const [metricLabel, setMetricLabel] = useState("");
+  const [metricHint, setMetricHint] = useState("");
   const [showDocumentPopup, setShowDocumentPopup] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   // Optional caption captured alongside an image insertion. Stored as a
@@ -291,6 +308,13 @@ export function ModernEditor({
       }),
       TextStyle,
       Color,
+      // Editorial callouts for the long-form analysis articles. Each
+      // emits stable HTML (data-callout attributes) that the prose-journal
+      // CSS in globals.css picks up on the reader side.
+      BottomLine,
+      KeyMetric,
+      PullQuoteAttribute,
+      AnalysisTemplate,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -895,6 +919,163 @@ export function ModernEditor({
               </div>
               <button
                 onClick={() => setShowDocumentPopup(false)}
+                className="absolute top-2 right-2 p-1 hover:bg-terminal-bg-elevated rounded"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Insert editorial blocks — Bottom Line, Pull Quote, Key Metric,
+            Analysis Template. Single dropdown to keep the toolbar tidy
+            as we add more block types over time. */}
+        <div className="relative">
+          <ToolbarButton
+            onClick={() => {
+              setShowInsertPopup((v) => !v);
+              setShowMetricForm(false);
+            }}
+            isActive={showInsertPopup}
+            title="Insert editorial block"
+          >
+            <Sparkle className="h-4 w-4" />
+          </ToolbarButton>
+          {showInsertPopup && (
+            <div className="absolute top-full left-0 mt-2 z-[60] p-2 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-72">
+              {!showMetricForm ? (
+                <div className="space-y-1">
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().insertAnalysisTemplate().run();
+                      setShowInsertPopup(false);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <FileText className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Analysis template</div>
+                      <div className="text-xs text-muted-foreground">5-section starter: Summary → Context → Argument → Risks → Implications</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().setBottomLine().run();
+                      setShowInsertPopup(false);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <BookmarkSimple className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Bottom Line callout</div>
+                      <div className="text-xs text-muted-foreground">Investor takeaway — actionable summary at article end</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().togglePullQuote().run();
+                      setShowInsertPopup(false);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <Quotes className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Pull quote</div>
+                      <div className="text-xs text-muted-foreground">Enlarged statement that breaks up dense analysis</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMetricFigure("");
+                      setMetricLabel("");
+                      setMetricHint("");
+                      setShowMetricForm(true);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <ChartBar className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Key metric</div>
+                      <div className="text-xs text-muted-foreground">Headline figure + label, e.g. "US$100M / Bond Offering"</div>
+                    </div>
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!metricFigure.trim()) return;
+                    editor
+                      .chain()
+                      .focus()
+                      .insertKeyMetric({
+                        figure: metricFigure.trim(),
+                        label: metricLabel.trim(),
+                        hint: metricHint.trim(),
+                      })
+                      .run();
+                    setShowInsertPopup(false);
+                    setShowMetricForm(false);
+                  }}
+                  className="space-y-2 p-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">Key metric</h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowMetricForm(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground mb-1">Figure</label>
+                    <input
+                      type="text"
+                      value={metricFigure}
+                      onChange={(e) => setMetricFigure(e.target.value)}
+                      placeholder="US$100M"
+                      autoFocus
+                      className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground mb-1">Label</label>
+                    <input
+                      type="text"
+                      value={metricLabel}
+                      onChange={(e) => setMetricLabel(e.target.value)}
+                      placeholder="Bond offering"
+                      className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-medium uppercase tracking-wide text-muted-foreground mb-1">
+                      Hint <span className="opacity-60 normal-case">(optional)</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={metricHint}
+                      onChange={(e) => setMetricHint(e.target.value)}
+                      placeholder="FY2025 forecast"
+                      className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!metricFigure.trim()}
+                    className="w-full py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  >
+                    Insert
+                  </button>
+                </form>
+              )}
+              <button
+                onClick={() => {
+                  setShowInsertPopup(false);
+                  setShowMetricForm(false);
+                }}
                 className="absolute top-2 right-2 p-1 hover:bg-terminal-bg-elevated rounded"
               >
                 <X className="h-3 w-3" />
