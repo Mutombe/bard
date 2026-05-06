@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils";
 const EMPTY_WRITER: Partial<Writer> = {
   full_name: "",
   email: "",
+  email_public: false,
   bio: "",
   title: "",
   organization: "",
@@ -65,6 +66,7 @@ export default function WritersPage() {
     setForm({
       full_name: w.full_name,
       email: w.email || "",
+      email_public: !!w.email_public,
       bio: w.bio || "",
       title: w.title || "",
       organization: w.organization || "",
@@ -264,6 +266,19 @@ export default function WritersPage() {
                   className="w-full px-3 py-2 bg-terminal-bg-secondary border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
                   placeholder="farai@bgfi.global"
                 />
+                <label className="flex items-center gap-2 mt-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!form.email_public}
+                    onChange={(e) =>
+                      setForm({ ...form, email_public: e.target.checked })
+                    }
+                    className="rounded border-terminal-border"
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    Show this email on the public byline so readers can reach the writer directly.
+                  </span>
+                </label>
               </div>
               <div>
                 <label className="block text-sm text-muted-foreground mb-1">Bio</label>

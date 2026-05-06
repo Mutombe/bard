@@ -137,6 +137,7 @@ class WriterSerializer(serializers.ModelSerializer):
             "full_name",
             "slug",
             "email",
+            "email_public",
             "bio",
             "title",
             "organization",
@@ -165,7 +166,13 @@ class WriterSerializer(serializers.ModelSerializer):
 
 
 class WriterMinimalSerializer(serializers.ModelSerializer):
-    """Minimal writer serializer for article references."""
+    """Minimal writer serializer for article references.
+
+    Used in article list payloads (cards, search results) where we want
+    the byline credit but not the full bio. Email is intentionally NOT
+    here — for the bio + email + LinkedIn shown at the foot of the
+    article detail page, use WriterBylineSerializer below.
+    """
 
     avatar_display = serializers.SerializerMethodField()
 
@@ -180,6 +187,48 @@ class WriterMinimalSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
         return obj.avatar_url or None
+
+
+class WriterBylineSerializer(serializers.ModelSerializer):
+    """
+    Expanded writer payload for the article-foot byline component.
+
+    Includes the bio, social handles, and (only when email_public=True)
+    the contact email. This is what powers the "About the author" card
+    on /news/[slug] under the article body — fostering direct
+    engagement between investors and BGFI analysts (proposal 3c).
+    """
+
+    avatar_display = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Writer
+        fields = [
+            "id",
+            "full_name",
+            "slug",
+            "title",
+            "organization",
+            "bio",
+            "avatar_display",
+            "linkedin",
+            "twitter",
+            "email",
+        ]
+
+    def get_avatar_display(self, obj):
+        if obj.avatar:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return obj.avatar_url or None
+
+    def get_email(self, obj):
+        # Honor the writer's privacy preference. email_public=False (the
+        # default) keeps the email out of the public API entirely.
+        return obj.email if obj.email_public and obj.email else None
 
 
 class UserPreferencesSerializer(serializers.Serializer):

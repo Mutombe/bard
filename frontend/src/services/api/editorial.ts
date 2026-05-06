@@ -60,6 +60,8 @@ export interface Writer {
   full_name: string;
   slug: string;
   email?: string;
+  /** When true, the writer's email is exposed in the public byline. */
+  email_public?: boolean;
   bio?: string;
   title?: string;
   organization?: string;
