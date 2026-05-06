@@ -813,6 +813,142 @@
     background: hsl(var(--muted-foreground));
   }
 
+  /* ---------------------------------------------------------------
+     Editorial callouts — Bottom Line, Pull Quote, Key Metric.
+     Emitted by the TipTap extensions in components/editor/extensions/.
+     CSS is shared between the editor surface (.ProseMirror inside
+     ModernEditor) and the reader (.prose-journal in the article detail
+     view) so editors see exactly what readers will see.
+     --------------------------------------------------------------- */
+
+  /* Bottom Line / Investor Takeaway — full-width card at end of article */
+  .prose-journal aside[data-callout="bottom-line"],
+  .ProseMirror aside[data-callout="bottom-line"] {
+    margin: 2.75rem 0;
+    padding: 1.5rem 1.75rem 1.25rem;
+    background: hsl(var(--terminal-bg-secondary));
+    border-left: 4px solid hsl(var(--primary));
+    border-radius: 0.25rem;
+    position: relative;
+  }
+  .prose-journal aside[data-callout="bottom-line"]::before,
+  .ProseMirror aside[data-callout="bottom-line"]::before {
+    content: "The Bottom Line";
+    display: block;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(var(--primary));
+    margin-bottom: 0.5rem;
+  }
+  .prose-journal aside[data-callout="bottom-line"] p,
+  .ProseMirror aside[data-callout="bottom-line"] p {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .prose-journal aside[data-callout="bottom-line"] p:last-child,
+  .ProseMirror aside[data-callout="bottom-line"] p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Pull Quote — magazine-style enlarged statement */
+  .prose-journal blockquote[data-style="pull"],
+  .ProseMirror blockquote[data-style="pull"] {
+    margin: 2.5rem 0;
+    padding: 0;
+    border: none;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 1.625rem;
+    line-height: 1.35;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: hsl(var(--foreground));
+    text-align: left;
+    position: relative;
+    padding-left: 2.25rem;
+  }
+  .prose-journal blockquote[data-style="pull"]::before,
+  .ProseMirror blockquote[data-style="pull"]::before {
+    content: "“";
+    position: absolute;
+    top: -0.75rem;
+    left: -0.25rem;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: hsl(var(--primary));
+    line-height: 1;
+    opacity: 0.85;
+  }
+  .prose-journal blockquote[data-style="pull"] p,
+  .ProseMirror blockquote[data-style="pull"] p {
+    margin: 0;
+    font-style: normal;
+    color: inherit;
+  }
+
+  /* Key Metric — call-out box highlighting a single figure */
+  .prose-journal aside[data-callout="metric"],
+  .ProseMirror aside[data-callout="metric"] {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin: 1.75rem 0;
+    padding: 1.25rem 1.5rem;
+    background: hsl(var(--terminal-bg-elevated));
+    border: 1px solid hsl(var(--terminal-border));
+    border-left: 3px solid hsl(var(--primary));
+    border-radius: 0.25rem;
+    min-width: 14rem;
+    max-width: 100%;
+  }
+  .prose-journal aside[data-callout="metric"] [data-metric-figure],
+  .ProseMirror aside[data-callout="metric"] [data-metric-figure] {
+    display: block;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: hsl(var(--primary));
+  }
+  .prose-journal aside[data-callout="metric"] [data-metric-label],
+  .ProseMirror aside[data-callout="metric"] [data-metric-label] {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: hsl(var(--foreground));
+    margin-top: 0.5rem;
+  }
+  .prose-journal aside[data-callout="metric"] [data-metric-hint],
+  .ProseMirror aside[data-callout="metric"] [data-metric-hint] {
+    display: block;
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    font-style: italic;
+    margin-top: 0.125rem;
+  }
+
+  /* Mobile: callouts stack full-width and reduce padding */
+  @media (max-width: 768px) {
+    .prose-journal aside[data-callout="bottom-line"],
+    .prose-journal aside[data-callout="metric"] {
+      padding: 1.25rem;
+    }
+    .prose-journal blockquote[data-style="pull"] {
+      font-size: 1.375rem;
+      padding-left: 1.75rem;
+    }
+    .prose-journal blockquote[data-style="pull"]::before {
+      font-size: 3.5rem;
+    }
+  }
+
   /* Inline emphasis / formatting from the editor */
   .prose-journal strong, .prose-journal b { font-weight: 700; }
   .prose-journal em, .prose-journal i { font-style: italic; }
