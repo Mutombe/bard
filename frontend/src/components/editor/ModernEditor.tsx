@@ -26,6 +26,7 @@ import { CompanionMedia } from "./extensions/CompanionMedia";
 import { ChartBlock } from "./extensions/ChartBlock";
 import { parseChartData } from "./extensions/chart-svg";
 import { StatsDashboard, type StatsDashboardItem } from "./extensions/StatsDashboard";
+import { SideNote } from "./extensions/SideNote";
 import { publicClient } from "@/services/api/client";
 import {
   TextB,
@@ -351,6 +352,7 @@ export function ModernEditor({
       CompanionMedia,
       ChartBlock,
       StatsDashboard,
+      SideNote,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -1670,6 +1672,31 @@ export function ModernEditor({
             className="p-1.5"
           >
             <LinkIcon className="h-3.5 w-3.5" />
+          </ToolbarButton>
+          {/* Side note — annotates the selected phrase with a margin
+              note. On wide viewports the note appears in the right
+              gutter alongside the text; on mobile it falls back to an
+              italic indented paragraph. */}
+          <ToolbarButton
+            onClick={() => {
+              const existing =
+                (editor.getAttributes("sideNote").note as string) || "";
+              const note = window.prompt(
+                "Margin note (leave empty to remove):",
+                existing
+              );
+              if (note === null) return;
+              if (!note.trim()) {
+                editor.chain().focus().unsetSideNote().run();
+                return;
+              }
+              editor.chain().focus().setSideNote(note.trim()).run();
+            }}
+            isActive={editor.isActive("sideNote")}
+            title="Margin note"
+            className="p-1.5"
+          >
+            <BookmarkSimple className="h-3.5 w-3.5" />
           </ToolbarButton>
         </BubbleMenu>
       )}

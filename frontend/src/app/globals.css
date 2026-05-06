@@ -1012,6 +1012,64 @@
     -webkit-box-orient: vertical;
   }
 
+  /* SideNote — margin annotation. On wide viewports the note appears in
+     the right gutter via a ::after pseudo-element pulled out of the text
+     flow. On narrower viewports it collapses into an italic, indented
+     paragraph immediately after the marked phrase. */
+  .prose-journal span[data-sidenote] {
+    /* Mark the anchor with a thin underline so the reader sees there's
+       additional context — like a footnote indicator. */
+    text-decoration: underline dotted hsl(var(--primary) / 0.5);
+    text-underline-offset: 4px;
+    cursor: help;
+  }
+  .prose-journal span[data-sidenote]::after {
+    content: attr(data-sidenote);
+    display: block;
+    margin: 0.5rem 0 1rem 0;
+    padding: 0.625rem 0.875rem;
+    background: hsl(var(--terminal-bg-secondary));
+    border-left: 2px solid hsl(var(--primary));
+    border-radius: 0 0.25rem 0.25rem 0;
+    font-family: var(--font-newsreader), Georgia, serif;
+    font-size: 0.8125rem;
+    font-style: italic;
+    line-height: 1.55;
+    color: hsl(var(--muted-foreground));
+    text-decoration: none;
+    cursor: text;
+  }
+  /* Wide viewports — float the note into the right gutter so it sits
+     alongside the anchored phrase, not below it. The reading column
+     under .prose-journal is bounded by the parent layout; we use
+     position: absolute relative to a positioned ancestor (the article
+     <main> sets position: relative below) and pull right by the
+     content width. */
+  @media (min-width: 1280px) {
+    .prose-journal {
+      /* Reserve gutter on the right for sidenotes. The detail-page main
+         column is ~700–760px; we widen its container to fit a 240px
+         note rail without clobbering the body. */
+      position: relative;
+    }
+    .prose-journal span[data-sidenote] {
+      position: relative;
+    }
+    .prose-journal span[data-sidenote]::after {
+      position: absolute;
+      top: 0;
+      left: 100%;
+      width: 14rem;
+      margin: 0 0 0 1.5rem;
+      padding: 0.5rem 0.75rem;
+      background: transparent;
+      border-left: 1px solid hsl(var(--terminal-border));
+      border-radius: 0;
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+  }
+
   /* Macro / sector data dashboard — half-page grid of indicators with
      deltas. Auto-arranges 1/2/3/4 cells per row depending on viewport. */
   .prose-journal aside[data-callout="stats-dashboard"],
