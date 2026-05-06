@@ -33,6 +33,7 @@ import { publicClient } from "@/services/api/client";
 import { editorialService } from "@/services/api/editorial";
 import { toast } from "sonner";
 import { addKeywordLinks } from "@/lib/keyword-linker";
+import { renderChartSvg, type ChartKind } from "@/components/editor/extensions/chart-svg";
 import { useArticle, useArticles } from "@/hooks";
 
 // Types
@@ -363,6 +364,39 @@ export default function ArticleView({ slug, initialArticle }: ArticleViewProps) 
       document.body.style.overflow = prevOverflow;
     };
   }, [lightbox]);
+
+  // Hydrate ChartBlock figures in the article body. The editor's
+  // renderHTML emits a slim <figure data-callout="chart"> with all the
+  // spec on data-attributes plus a <table data-chart-fallback> readable
+  // by crawlers / assistive tech. After the article HTML lands in the
+  // DOM we generate the SVG via the same renderChartSvg helper the
+  // editor uses and inject it ahead of the fallback table (which we
+  // visually hide with .sr-only-after-hydrate).
+  useEffect(() => {
+    if (!article?.content) return;
+    const figures = document.querySelectorAll<HTMLElement>(
+      'figure[data-callout="chart"]:not([data-chart-hydrated])'
+    );
+    figures.forEach((fig) => {
+      try {
+        const dataAttr = fig.getAttribute("data-chart-data") || "[]";
+        const data = JSON.parse(dataAttr);
+        if (!Array.isArray(data) || data.length === 0) return;
+        const svg = renderChartSvg({
+          kind: ((fig.getAttribute("data-chart-kind") as ChartKind) || "bar"),
+          data,
+          title: fig.getAttribute("data-chart-title") || "",
+          xLabel: fig.getAttribute("data-chart-xlabel") || "",
+          yLabel: fig.getAttribute("data-chart-ylabel") || "",
+        });
+        // Insert SVG ahead of the fallback table.
+        fig.insertAdjacentHTML("afterbegin", svg);
+        fig.setAttribute("data-chart-hydrated", "");
+      } catch {
+        // If parsing fails the table fallback stays visible.
+      }
+    });
+  }, [article?.content]);
 
   // Event delegation: any <img> the editor inserted into the article body
   // opens the lightbox on click. We listen on the outer article element so
