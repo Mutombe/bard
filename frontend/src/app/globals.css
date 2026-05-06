@@ -1012,6 +1012,40 @@
     -webkit-box-orient: vertical;
   }
 
+  /* Standardised analysis section headings — five-part architecture from
+     the AnalysisTemplate. Each H2 carries `data-analysis-section="01"`
+     etc.; we render a primary-tinted numeric eyebrow above the heading
+     and a thin top rule, so readers see the article is a structured
+     piece (proposal 2c). */
+  .prose-journal h2[data-analysis-section],
+  .ProseMirror h2[data-analysis-section] {
+    margin-top: 3.25rem;
+    padding-top: 2rem;
+    border-top: 1px solid hsl(var(--terminal-border));
+    position: relative;
+  }
+  .prose-journal h2[data-analysis-section]::before,
+  .ProseMirror h2[data-analysis-section]::before {
+    content: attr(data-analysis-section);
+    display: block;
+    margin-bottom: 0.5rem;
+    font-family: var(--font-fraunces), Georgia, serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: hsl(var(--primary));
+    /* Keep the eyebrow visually decoupled from the heading itself */
+    line-height: 1;
+  }
+  /* The very first analysis heading shouldn't carry a top rule — it's
+     directly under the article hero / lede. */
+  .prose-journal h2[data-analysis-section="01"]:first-of-type,
+  .ProseMirror h2[data-analysis-section="01"]:first-of-type {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 2.5rem;
+  }
+
   /* SideNote — margin annotation. On wide viewports the note appears in
      the right gutter via a ::after pseudo-element pulled out of the text
      flow. On narrower viewports it collapses into an italic, indented
