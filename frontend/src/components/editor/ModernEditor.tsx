@@ -23,6 +23,8 @@ import { KeyMetric } from "./extensions/KeyMetric";
 import { PullQuoteAttribute } from "./extensions/PullQuoteAttribute";
 import { AnalysisTemplate } from "./extensions/AnalysisTemplate";
 import { CompanionMedia } from "./extensions/CompanionMedia";
+import { ChartBlock } from "./extensions/ChartBlock";
+import { parseChartData } from "./extensions/chart-svg";
 import { publicClient } from "@/services/api/client";
 import {
   TextB,
@@ -214,6 +216,13 @@ export function ModernEditor({
     }>
   >([]);
   const [mediaSearching, setMediaSearching] = useState(false);
+  // Chart insert form state
+  const [showChartForm, setShowChartForm] = useState(false);
+  const [chartKind, setChartKind] = useState<"bar" | "line">("bar");
+  const [chartTitle, setChartTitle] = useState("");
+  const [chartXLabel, setChartXLabel] = useState("");
+  const [chartYLabel, setChartYLabel] = useState("");
+  const [chartDataInput, setChartDataInput] = useState("");
   const [showDocumentPopup, setShowDocumentPopup] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   // Optional caption captured alongside an image insertion. Stored as a
@@ -334,6 +343,7 @@ export function ModernEditor({
       PullQuoteAttribute,
       AnalysisTemplate,
       CompanionMedia,
+      ChartBlock,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -1029,7 +1039,7 @@ export function ModernEditor({
           </ToolbarButton>
           {showInsertPopup && (
             <div className="absolute top-full left-0 mt-2 z-[60] p-2 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-80">
-              {!showMetricForm && !showMediaPicker ? (
+              {!showMetricForm && !showMediaPicker && !showChartForm ? (
                 <div className="space-y-1">
                   <button
                     onClick={() => {
@@ -1100,7 +1110,127 @@ export function ModernEditor({
                       <div className="text-xs text-muted-foreground">Embed a "Listen" / "Watch" card for a related podcast or video</div>
                     </div>
                   </button>
+                  <button
+                    onClick={() => {
+                      setChartKind("bar");
+                      setChartTitle("");
+                      setChartXLabel("");
+                      setChartYLabel("");
+                      setChartDataInput("Q1: 12\nQ2: 18\nQ3: 24\nQ4: 21");
+                      setShowChartForm(true);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <ChartBar className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Inline chart</div>
+                      <div className="text-xs text-muted-foreground">Bar or line chart in burgundy — paste data as "label: value" lines or JSON</div>
+                    </div>
+                  </button>
                 </div>
+              ) : showChartForm ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const parsed = parseChartData(chartDataInput);
+                    if (parsed.length === 0) {
+                      toast.error(
+                        "Couldn't parse any data points — use either JSON or 'label: value' lines."
+                      );
+                      return;
+                    }
+                    editor
+                      .chain()
+                      .focus()
+                      .insertChart({
+                        kind: chartKind,
+                        title: chartTitle.trim(),
+                        xLabel: chartXLabel.trim(),
+                        yLabel: chartYLabel.trim(),
+                        dataJson: JSON.stringify(parsed),
+                      })
+                      .run();
+                    setShowChartForm(false);
+                    setShowInsertPopup(false);
+                  }}
+                  className="space-y-2 p-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">Inline chart</h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowChartForm(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setChartKind("bar")}
+                      className={cn(
+                        "flex-1 px-2 py-1 text-xs rounded-md transition-colors",
+                        chartKind === "bar"
+                          ? "bg-primary/20 text-primary"
+                          : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Bar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setChartKind("line")}
+                      className={cn(
+                        "flex-1 px-2 py-1 text-xs rounded-md transition-colors",
+                        chartKind === "line"
+                          ? "bg-primary/20 text-primary"
+                          : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Line
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={chartTitle}
+                    onChange={(e) => setChartTitle(e.target.value)}
+                    placeholder="Title (e.g. FDI inflows, US$bn)"
+                    className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={chartXLabel}
+                      onChange={(e) => setChartXLabel(e.target.value)}
+                      placeholder="X label"
+                      className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                    />
+                    <input
+                      type="text"
+                      value={chartYLabel}
+                      onChange={(e) => setChartYLabel(e.target.value)}
+                      placeholder="Y label"
+                      className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <textarea
+                    value={chartDataInput}
+                    onChange={(e) => setChartDataInput(e.target.value)}
+                    placeholder={'Q1: 12\nQ2: 18\nor JSON: [{"label":"Q1","value":12}]'}
+                    rows={6}
+                    className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary font-mono"
+                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    Accepts "label: value" or "label, value" per line, or a JSON array of {"{label, value}"}.
+                  </p>
+                  <button
+                    type="submit"
+                    className="w-full py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    Insert chart
+                  </button>
+                </form>
               ) : showMediaPicker ? (
                 <div className="space-y-2 p-1">
                   <div className="flex items-center justify-between">
@@ -1278,6 +1408,7 @@ export function ModernEditor({
                   setShowInsertPopup(false);
                   setShowMetricForm(false);
                   setShowMediaPicker(false);
+                  setShowChartForm(false);
                 }}
                 className="absolute top-2 right-2 p-1 hover:bg-terminal-bg-elevated rounded"
               >
