@@ -343,6 +343,14 @@ class Writer(TimeStampedModel):
     avatar_url = models.URLField("Avatar URL", max_length=500, blank=True)
     twitter = models.CharField("X / Twitter Handle", max_length=100, blank=True)
     linkedin = models.URLField("LinkedIn URL", max_length=300, blank=True)
+    # Editors opt in to exposing the writer's email on the public byline.
+    # Off by default — defensive for writers who don't want their inbox
+    # exposed by default. The serializer respects this flag.
+    email_public = models.BooleanField(
+        "Show email on byline",
+        default=False,
+        help_text="When on, the writer's email is included in the public byline so readers can reach out directly.",
+    )
     is_active = models.BooleanField("Active", default=True)
 
     user = models.OneToOneField(

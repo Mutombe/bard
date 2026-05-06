@@ -6,7 +6,11 @@ from rest_framework import serializers
 from apps.markets.models import Company
 from apps.markets.serializers import CompanyMinimalSerializer
 from apps.users.models import Writer
-from apps.users.serializers import UserSerializer, WriterMinimalSerializer
+from apps.users.serializers import (
+    UserSerializer,
+    WriterMinimalSerializer,
+    WriterBylineSerializer,
+)
 
 from .models import Category, NewsArticle, Tag, Comment, CommentLike
 
@@ -199,7 +203,9 @@ class NewsArticleDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     author = serializers.SerializerMethodField()
-    writer = WriterMinimalSerializer(read_only=True)
+    # Detail page uses the richer byline payload so the foot-of-article
+    # author card has bio, LinkedIn, and (if opted in) email.
+    writer = WriterBylineSerializer(read_only=True)
     editor = UserSerializer(read_only=True)
     related_companies = CompanyMinimalSerializer(many=True, read_only=True)
     featured_image = serializers.SerializerMethodField()

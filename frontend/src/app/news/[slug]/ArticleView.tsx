@@ -28,6 +28,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Skeleton } from "@/components/ui/loading";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { CommentSection } from "@/components/news";
+import { ExtendedByline } from "@/components/news/ExtendedByline";
 import { publicClient } from "@/services/api/client";
 import { editorialService } from "@/services/api/editorial";
 import { toast } from "sonner";
@@ -59,6 +60,21 @@ interface Article {
     full_name: string;
     email?: string;
   };
+  // Populated when the article has a Writer attached (vs the uploading
+  // user). Mirrors WriterBylineSerializer on the backend — bio +
+  // LinkedIn + (opted-in) email power the foot-of-article author card.
+  writer?: {
+    id: string;
+    slug: string;
+    full_name: string;
+    title?: string;
+    organization?: string;
+    bio?: string;
+    avatar_display?: string | null;
+    linkedin?: string;
+    twitter?: string;
+    email?: string | null;
+  } | null;
   published_at?: string;
   created_at?: string;
   is_featured?: boolean;
@@ -748,6 +764,12 @@ export default function ArticleView({ slug, initialArticle }: ArticleViewProps) 
 
             {/* Article Content — click delegate opens the image lightbox */}
             <div onClick={handleContentClick}>{renderContent()}</div>
+
+            {/* Author card — bio + LinkedIn / email / X. Only renders for
+                articles with a Writer attached (vs in-house staff
+                uploads). Email is conditionally exposed by the backend
+                based on the writer's email_public flag. */}
+            <ExtendedByline writer={article.writer} />
 
             {/* Topics & Tags */}
             {article.tags && article.tags.length > 0 && (
