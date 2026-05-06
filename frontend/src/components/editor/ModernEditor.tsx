@@ -25,6 +25,7 @@ import { AnalysisTemplate } from "./extensions/AnalysisTemplate";
 import { CompanionMedia } from "./extensions/CompanionMedia";
 import { ChartBlock } from "./extensions/ChartBlock";
 import { parseChartData } from "./extensions/chart-svg";
+import { StatsDashboard, type StatsDashboardItem } from "./extensions/StatsDashboard";
 import { publicClient } from "@/services/api/client";
 import {
   TextB,
@@ -223,6 +224,11 @@ export function ModernEditor({
   const [chartXLabel, setChartXLabel] = useState("");
   const [chartYLabel, setChartYLabel] = useState("");
   const [chartDataInput, setChartDataInput] = useState("");
+  // Stats Dashboard form state
+  const [showStatsForm, setShowStatsForm] = useState(false);
+  const [statsTitle, setStatsTitle] = useState("");
+  const [statsSource, setStatsSource] = useState("");
+  const [statsItems, setStatsItems] = useState<StatsDashboardItem[]>([]);
   const [showDocumentPopup, setShowDocumentPopup] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   // Optional caption captured alongside an image insertion. Stored as a
@@ -344,6 +350,7 @@ export function ModernEditor({
       AnalysisTemplate,
       CompanionMedia,
       ChartBlock,
+      StatsDashboard,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -1039,7 +1046,7 @@ export function ModernEditor({
           </ToolbarButton>
           {showInsertPopup && (
             <div className="absolute top-full left-0 mt-2 z-[60] p-2 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-80">
-              {!showMetricForm && !showMediaPicker && !showChartForm ? (
+              {!showMetricForm && !showMediaPicker && !showChartForm && !showStatsForm ? (
                 <div className="space-y-1">
                   <button
                     onClick={() => {
@@ -1127,7 +1134,179 @@ export function ModernEditor({
                       <div className="text-xs text-muted-foreground">Bar or line chart in burgundy — paste data as "label: value" lines or JSON</div>
                     </div>
                   </button>
+                  <button
+                    onClick={() => {
+                      setStatsTitle("");
+                      setStatsSource("");
+                      setStatsItems([
+                        { label: "GDP growth", value: "3.1%", delta: "+0.4 pp YoY" },
+                        { label: "Policy rate", value: "8.25%", delta: "0 bps" },
+                        { label: "USD/ZAR", value: "18.42", delta: "−1.2%" },
+                        { label: "Brent", value: "$74", delta: "+3.5% MoM" },
+                      ]);
+                      setShowStatsForm(true);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <Sparkle className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Data dashboard</div>
+                      <div className="text-xs text-muted-foreground">Half-page grid of macro / sector indicators with deltas and source citation</div>
+                    </div>
+                  </button>
                 </div>
+              ) : showStatsForm ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const cleaned = statsItems
+                      .map((it) => ({
+                        label: (it.label || "").trim(),
+                        value: (it.value || "").trim(),
+                        delta: (it.delta || "").trim() || undefined,
+                        hint: (it.hint || "").trim() || undefined,
+                      }))
+                      .filter((it) => it.label && it.value);
+                    if (cleaned.length === 0) {
+                      toast.error("Add at least one cell with a label + value.");
+                      return;
+                    }
+                    editor
+                      .chain()
+                      .focus()
+                      .insertStatsDashboard({
+                        title: statsTitle.trim(),
+                        source: statsSource.trim(),
+                        itemsJson: JSON.stringify(cleaned),
+                      })
+                      .run();
+                    setShowStatsForm(false);
+                    setShowInsertPopup(false);
+                  }}
+                  className="space-y-2 p-1"
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">Data dashboard</h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowStatsForm(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={statsTitle}
+                    onChange={(e) => setStatsTitle(e.target.value)}
+                    placeholder="Title (e.g. South Africa — Q4 2025)"
+                    className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                  />
+                  <div className="space-y-2 max-h-72 overflow-y-auto -mx-1 px-1">
+                    {statsItems.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="border border-terminal-border rounded-md p-2 bg-terminal-bg-elevated/40 space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                            Cell {idx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setStatsItems((prev) => prev.filter((_, i) => i !== idx))
+                            }
+                            className="text-xs text-red-400 hover:text-red-300"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={item.label}
+                          onChange={(e) =>
+                            setStatsItems((prev) =>
+                              prev.map((it, i) =>
+                                i === idx ? { ...it, label: e.target.value } : it
+                              )
+                            )
+                          }
+                          placeholder="Label (GDP growth)"
+                          className="w-full px-2 py-1 text-xs bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                        />
+                        <input
+                          type="text"
+                          value={item.value}
+                          onChange={(e) =>
+                            setStatsItems((prev) =>
+                              prev.map((it, i) =>
+                                i === idx ? { ...it, value: e.target.value } : it
+                              )
+                            )
+                          }
+                          placeholder="Value (3.1%)"
+                          className="w-full px-2 py-1 text-xs bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                        />
+                        <div className="grid grid-cols-2 gap-1">
+                          <input
+                            type="text"
+                            value={item.delta || ""}
+                            onChange={(e) =>
+                              setStatsItems((prev) =>
+                                prev.map((it, i) =>
+                                  i === idx ? { ...it, delta: e.target.value } : it
+                                )
+                              )
+                            }
+                            placeholder="Delta (+0.4 pp)"
+                            className="w-full px-2 py-1 text-xs bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                          />
+                          <input
+                            type="text"
+                            value={item.hint || ""}
+                            onChange={(e) =>
+                              setStatsItems((prev) =>
+                                prev.map((it, i) =>
+                                  i === idx ? { ...it, hint: e.target.value } : it
+                                )
+                              )
+                            }
+                            placeholder="Hint (forecast)"
+                            className="w-full px-2 py-1 text-xs bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                    {statsItems.length < 8 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setStatsItems((prev) => [
+                            ...prev,
+                            { label: "", value: "", delta: "", hint: "" },
+                          ])
+                        }
+                        className="w-full py-1.5 text-xs border border-dashed border-terminal-border rounded-md text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                      >
+                        + Add cell
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    value={statsSource}
+                    onChange={(e) => setStatsSource(e.target.value)}
+                    placeholder="Source (e.g. SARB, IMF WEO Oct 2025)"
+                    className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                  />
+                  <button
+                    type="submit"
+                    className="w-full py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    Insert dashboard
+                  </button>
+                </form>
               ) : showChartForm ? (
                 <form
                   onSubmit={(e) => {
@@ -1409,6 +1588,7 @@ export function ModernEditor({
                   setShowMetricForm(false);
                   setShowMediaPicker(false);
                   setShowChartForm(false);
+                  setShowStatsForm(false);
                 }}
                 className="absolute top-2 right-2 p-1 hover:bg-terminal-bg-elevated rounded"
               >
