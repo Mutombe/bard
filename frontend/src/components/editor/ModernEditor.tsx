@@ -22,6 +22,8 @@ import { BottomLine } from "./extensions/BottomLine";
 import { KeyMetric } from "./extensions/KeyMetric";
 import { PullQuoteAttribute } from "./extensions/PullQuoteAttribute";
 import { AnalysisTemplate } from "./extensions/AnalysisTemplate";
+import { CompanionMedia } from "./extensions/CompanionMedia";
+import { publicClient } from "@/services/api/client";
 import {
   TextB,
   TextItalic,
@@ -46,6 +48,7 @@ import {
   ChartBar,
   BookmarkSimple,
   Pencil,
+  Microphone,
   ArrowCounterClockwise,
   ArrowClockwise,
   TextT,
@@ -196,6 +199,21 @@ export function ModernEditor({
   const [metricFigure, setMetricFigure] = useState("");
   const [metricLabel, setMetricLabel] = useState("");
   const [metricHint, setMetricHint] = useState("");
+  // Companion media picker — search podcast episodes / videos to embed.
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
+  const [mediaKind, setMediaKind] = useState<"podcast" | "video">("podcast");
+  const [mediaQuery, setMediaQuery] = useState("");
+  const [mediaResults, setMediaResults] = useState<
+    Array<{
+      kind: "podcast" | "video";
+      slug: string;
+      title: string;
+      thumbnail?: string;
+      duration?: string;
+      url: string;
+    }>
+  >([]);
+  const [mediaSearching, setMediaSearching] = useState(false);
   const [showDocumentPopup, setShowDocumentPopup] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   // Optional caption captured alongside an image insertion. Stored as a
@@ -315,6 +333,7 @@ export function ModernEditor({
       KeyMetric,
       PullQuoteAttribute,
       AnalysisTemplate,
+      CompanionMedia,
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -475,6 +494,73 @@ export function ModernEditor({
       setIsUploading(false);
     }
   };
+
+  // Search podcast episodes / videos for the Companion Media picker.
+  // Hits the public episode/video list endpoints with `search=` filter
+  // and limits to a handful of results to keep the picker compact.
+  const searchCompanionMedia = useCallback(
+    async (kind: "podcast" | "video", query: string) => {
+      setMediaSearching(true);
+      try {
+        if (kind === "podcast") {
+          const res = await publicClient.get("/podcasts/episodes/", {
+            params: { search: query, page_size: 6, ordering: "-published_at" },
+          });
+          const items = Array.isArray(res.data?.results)
+            ? res.data.results
+            : Array.isArray(res.data)
+            ? res.data
+            : [];
+          setMediaResults(
+            items.map((e: any) => ({
+              kind: "podcast" as const,
+              slug: e.slug || "",
+              title: e.title || "",
+              thumbnail: e.thumbnail_url || "",
+              duration: e.duration_formatted || "",
+              url: e.show_slug
+                ? `/podcasts/${e.show_slug}/${e.slug}`
+                : `/podcasts/${e.slug}`,
+            }))
+          );
+        } else {
+          const res = await publicClient.get("/media/videos/", {
+            params: { search: query, page_size: 6, ordering: "-published_at" },
+          });
+          const items = Array.isArray(res.data?.results)
+            ? res.data.results
+            : Array.isArray(res.data)
+            ? res.data
+            : [];
+          setMediaResults(
+            items.map((v: any) => ({
+              kind: "video" as const,
+              slug: v.slug || "",
+              title: v.title || "",
+              thumbnail: v.thumbnail_url || "",
+              duration: v.duration_formatted || v.duration || "",
+              url: `/videos/${v.slug || ""}`,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Media search failed:", err);
+        setMediaResults([]);
+      } finally {
+        setMediaSearching(false);
+      }
+    },
+    []
+  );
+
+  // Debounce media search — fire 300ms after the user stops typing.
+  useEffect(() => {
+    if (!showMediaPicker) return;
+    const t = setTimeout(() => {
+      searchCompanionMedia(mediaKind, mediaQuery);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [showMediaPicker, mediaKind, mediaQuery, searchCompanionMedia]);
 
   // Insert image from URL (with optional caption)
   const insertImageFromUrl = () => {
@@ -942,8 +1028,8 @@ export function ModernEditor({
             <Sparkle className="h-4 w-4" />
           </ToolbarButton>
           {showInsertPopup && (
-            <div className="absolute top-full left-0 mt-2 z-[60] p-2 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-72">
-              {!showMetricForm ? (
+            <div className="absolute top-full left-0 mt-2 z-[60] p-2 bg-terminal-bg-secondary rounded-lg border border-terminal-border shadow-2xl w-80">
+              {!showMetricForm && !showMediaPicker ? (
                 <div className="space-y-1">
                   <button
                     onClick={() => {
@@ -999,6 +1085,122 @@ export function ModernEditor({
                       <div className="text-xs text-muted-foreground">Headline figure + label, e.g. "US$100M / Bond Offering"</div>
                     </div>
                   </button>
+                  <button
+                    onClick={() => {
+                      setMediaKind("podcast");
+                      setMediaQuery("");
+                      setMediaResults([]);
+                      setShowMediaPicker(true);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <Microphone className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Companion media</div>
+                      <div className="text-xs text-muted-foreground">Embed a "Listen" / "Watch" card for a related podcast or video</div>
+                    </div>
+                  </button>
+                </div>
+              ) : showMediaPicker ? (
+                <div className="space-y-2 p-1">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-medium">Embed companion media</h4>
+                    <button
+                      type="button"
+                      onClick={() => setShowMediaPicker(false)}
+                      className="text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                  <div className="flex gap-1 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setMediaKind("podcast")}
+                      className={cn(
+                        "flex-1 px-2 py-1 text-xs rounded-md transition-colors",
+                        mediaKind === "podcast"
+                          ? "bg-primary/20 text-primary"
+                          : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Podcasts
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMediaKind("video")}
+                      className={cn(
+                        "flex-1 px-2 py-1 text-xs rounded-md transition-colors",
+                        mediaKind === "video"
+                          ? "bg-primary/20 text-primary"
+                          : "bg-terminal-bg-elevated text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      Videos
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    value={mediaQuery}
+                    onChange={(e) => setMediaQuery(e.target.value)}
+                    placeholder={`Search ${mediaKind === "video" ? "videos" : "podcast episodes"}…`}
+                    autoFocus
+                    className="w-full px-3 py-1.5 text-sm bg-terminal-bg-elevated border border-terminal-border rounded-md focus:outline-none focus:border-primary"
+                  />
+                  <div className="max-h-72 overflow-y-auto -mx-1 px-1">
+                    {mediaSearching ? (
+                      <div className="py-4 flex items-center justify-center text-xs text-muted-foreground">
+                        <CircleNotch className="h-3.5 w-3.5 animate-spin mr-2" />
+                        Searching…
+                      </div>
+                    ) : mediaResults.length === 0 ? (
+                      <div className="py-4 text-xs text-muted-foreground text-center">
+                        {mediaQuery ? "No matches." : "Start typing to search."}
+                      </div>
+                    ) : (
+                      <ul className="space-y-1">
+                        {mediaResults.map((item) => (
+                          <li key={`${item.kind}-${item.slug}`}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                editor
+                                  .chain()
+                                  .focus()
+                                  .insertCompanionMedia(item)
+                                  .run();
+                                setShowMediaPicker(false);
+                                setShowInsertPopup(false);
+                              }}
+                              className="w-full text-left flex items-start gap-3 px-2 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                            >
+                              {item.thumbnail ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                  src={item.thumbnail}
+                                  alt={item.title}
+                                  className="w-12 h-12 object-cover rounded flex-shrink-0"
+                                />
+                              ) : (
+                                <div className="w-12 h-12 bg-terminal-bg-elevated rounded flex items-center justify-center flex-shrink-0">
+                                  <Microphone className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                                  {item.kind === "video" ? "Watch" : "Listen"}
+                                  {item.duration ? ` · ${item.duration}` : ""}
+                                </div>
+                                <div className="text-sm font-medium leading-tight truncate">
+                                  {item.title}
+                                </div>
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
               ) : (
                 <form
@@ -1075,6 +1277,7 @@ export function ModernEditor({
                 onClick={() => {
                   setShowInsertPopup(false);
                   setShowMetricForm(false);
+                  setShowMediaPicker(false);
                 }}
                 className="absolute top-2 right-2 p-1 hover:bg-terminal-bg-elevated rounded"
               >
