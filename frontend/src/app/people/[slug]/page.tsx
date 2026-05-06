@@ -30,6 +30,7 @@ import { Skeleton } from "@/components/ui/loading";
 import { useAppSelector } from "@/store";
 import { useAuthModal } from "@/contexts/AuthModalContext";
 import { authService } from "@/services/api/auth";
+import { editorialService, type Writer } from "@/services/api/editorial";
 import { toast } from "sonner";
 import { publicClient } from "@/services/api/client";
 
@@ -219,6 +220,11 @@ export default function PersonPage() {
   // State for API-fetched author data
   const [apiAuthor, setApiAuthor] = useState<ApiAuthor | null>(null);
   const [apiArticles, setApiArticles] = useState<ApiArticle[]>([]);
+  // When the slug matches a Writer (vs an in-house user), we hold the
+  // Writer record so we can render the richer profile (bio, social
+  // handles, organization). Writers without a linked User can't be
+  // followed — we hide the follow button in that case.
+  const [writerProfile, setWriterProfile] = useState<Writer | null>(null);
   const [loading, setLoading] = useState(!staticPerson);
   const [error, setError] = useState<string | null>(null);
 
@@ -227,18 +233,44 @@ export default function PersonPage() {
   const [isFollowLoading, setIsFollowLoading] = useState(false);
   const [checkingFollow, setCheckingFollow] = useState(false);
 
-  // Fetch author data from API if not found in static data
+  // Fetch author data from API if not found in static data.
+  // Resolution order:
+  //   1. Try Writer.objects.get(slug=...) — the byline path. Articles
+  //      are fetched via the new ?writer=<slug> filter.
+  //   2. If that 404s, fall back to user-based lookup via
+  //      ?author_name=<slug>, which matches by name/email fragments.
   useEffect(() => {
-    if (staticPerson) return; // Skip if we have static data
+    if (staticPerson) return;
 
     const fetchAuthorData = async () => {
       setLoading(true);
       setError(null);
 
+      // 1) Try writer first — most bylines now flow through Writer
       try {
-        // Fetch author's articles using author_name filter (matches by slug format)
+        const writer = await editorialService.getWriter(slug);
+        setWriterProfile(writer);
+        setApiAuthor({
+          id: 0, // Writers don't have a User id unless linked
+          full_name: writer.full_name,
+          avatar: writer.avatar_display || writer.avatar_url || writer.avatar,
+          bio: writer.bio,
+          title: writer.title,
+        });
         const articlesResponse = await publicClient.get(
-          `/news/articles/?author_name=${encodeURIComponent(slug)}&page_size=12`
+          `/news/articles/?writer=${encodeURIComponent(slug)}&page_size=12&ordering=-published_at`
+        );
+        setApiArticles(articlesResponse.data.results || []);
+        setLoading(false);
+        return;
+      } catch {
+        // Writer not found — fall through to author_name path
+      }
+
+      // 2) Fallback: user-based author lookup
+      try {
+        const articlesResponse = await publicClient.get(
+          `/news/articles/?author_name=${encodeURIComponent(slug)}&page_size=12&ordering=-published_at`
         );
         const results = articlesResponse.data.results || [];
 
@@ -376,7 +408,12 @@ export default function PersonPage() {
                   <div className="flex-1">
                     <h1 className="text-2xl font-bold mb-1">{apiAuthor.full_name}</h1>
                     {apiAuthor.title && (
-                      <p className="text-brand-orange mb-2">{apiAuthor.title}</p>
+                      <p className="text-brand-orange mb-2">
+                        {apiAuthor.title}
+                        {writerProfile?.organization
+                          ? ` · ${writerProfile.organization}`
+                          : ""}
+                      </p>
                     )}
                     {apiAuthor.bio && (
                       <p className="text-muted-foreground leading-relaxed">{apiAuthor.bio}</p>
@@ -385,6 +422,48 @@ export default function PersonPage() {
                       <FileText className="h-4 w-4" />
                       <span>{apiArticles.length} articles</span>
                     </div>
+                    {/* Writer social pills — LinkedIn, X, email. Email
+                        only renders if the writer's email_public flag
+                        was set on the backend (server-gated). */}
+                    {writerProfile && (writerProfile.linkedin || writerProfile.twitter || writerProfile.email) && (
+                      <div className="flex items-center gap-2 flex-wrap mt-4">
+                        {writerProfile.linkedin && (
+                          <a
+                            href={writerProfile.linkedin}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-terminal-bg-elevated hover:bg-terminal-bg border border-terminal-border rounded-md text-foreground hover:text-primary transition-colors"
+                          >
+                            <LinkedinLogo className="h-3.5 w-3.5" weight="fill" />
+                            LinkedIn
+                          </a>
+                        )}
+                        {writerProfile.twitter && (
+                          <a
+                            href={
+                              /^https?:\/\//i.test(writerProfile.twitter)
+                                ? writerProfile.twitter
+                                : `https://x.com/${writerProfile.twitter.replace(/^@/, "")}`
+                            }
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-terminal-bg-elevated hover:bg-terminal-bg border border-terminal-border rounded-md text-foreground hover:text-primary transition-colors"
+                          >
+                            <XLogo className="h-3.5 w-3.5" weight="fill" />
+                            X
+                          </a>
+                        )}
+                        {writerProfile.email && (
+                          <a
+                            href={`mailto:${writerProfile.email}`}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-terminal-bg-elevated hover:bg-terminal-bg border border-terminal-border rounded-md text-foreground hover:text-primary transition-colors"
+                          >
+                            <Envelope className="h-3.5 w-3.5" />
+                            {writerProfile.email}
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -64,6 +64,9 @@ class NewsArticleFilter(filters.FilterSet):
     company = filters.UUIDFilter(field_name="related_companies__id")
     author = filters.UUIDFilter(field_name="author__id")
     author_name = filters.CharFilter(method="filter_by_author_name")
+    # Writer (byline) filter — used by /people/<slug> when the slug
+    # matches a Writer profile rather than an in-house user.
+    writer = filters.CharFilter(field_name="writer__slug")
     is_featured = filters.BooleanFilter()
     is_premium = filters.BooleanFilter()
     source = filters.CharFilter(method="filter_by_source")
