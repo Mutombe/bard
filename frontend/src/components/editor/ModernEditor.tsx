@@ -21,7 +21,7 @@ import Color from "@tiptap/extension-color";
 import { BottomLine } from "./extensions/BottomLine";
 import { KeyMetric } from "./extensions/KeyMetric";
 import { PullQuoteAttribute } from "./extensions/PullQuoteAttribute";
-import { AnalysisTemplate } from "./extensions/AnalysisTemplate";
+import { AnalysisTemplate, AnalysisSectionHeading } from "./extensions/AnalysisTemplate";
 import { CompanionMedia } from "./extensions/CompanionMedia";
 import { ChartBlock } from "./extensions/ChartBlock";
 import { parseChartData } from "./extensions/chart-svg";
@@ -349,6 +349,7 @@ export function ModernEditor({
       KeyMetric,
       PullQuoteAttribute,
       AnalysisTemplate,
+      AnalysisSectionHeading,
       CompanionMedia,
       ChartBlock,
       StatsDashboard,
@@ -1134,6 +1135,65 @@ export function ModernEditor({
                     <div>
                       <div className="text-sm font-medium">Inline chart</div>
                       <div className="text-xs text-muted-foreground">Bar or line chart in burgundy — paste data as "label: value" lines or JSON</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      // Quick "publication reference" — link the selection
+                      // (or insert a labelled link) to one of BGFI's three
+                      // tier publications. Saves editors from typing URLs
+                      // every time and standardises the anchor text.
+                      const pubs: Array<{ name: string; href: string }> = [
+                        {
+                          name: "Finance Africa Quarterly",
+                          href: "/publications/finance-africa-quarterly",
+                        },
+                        {
+                          name: "Africa Finance Insights",
+                          href: "/publications/finance-africa-insights",
+                        },
+                        {
+                          name: "AfriFin Analytics",
+                          href: "/publications/afrifin-analytics",
+                        },
+                      ];
+                      const choice = window.prompt(
+                        "Which publication?\n  1. Finance Africa Quarterly\n  2. Africa Finance Insights\n  3. AfriFin Analytics\n\nEnter 1, 2, or 3:",
+                        "1"
+                      );
+                      const idx = Number((choice || "").trim()) - 1;
+                      const pub = pubs[idx];
+                      if (!pub) return;
+                      const sel = editor.state.doc.cut(
+                        editor.state.selection.from,
+                        editor.state.selection.to
+                      );
+                      const hasSelection =
+                        editor.state.selection.from !== editor.state.selection.to;
+                      if (hasSelection) {
+                        editor
+                          .chain()
+                          .focus()
+                          .extendMarkRange("link")
+                          .setLink({ href: pub.href })
+                          .run();
+                      } else {
+                        editor
+                          .chain()
+                          .focus()
+                          .insertContent(
+                            `<a href="${pub.href}">${pub.name}</a>`
+                          )
+                          .run();
+                      }
+                      setShowInsertPopup(false);
+                    }}
+                    className="w-full text-left flex items-start gap-3 px-3 py-2 rounded-md hover:bg-terminal-bg-elevated transition-colors"
+                  >
+                    <LinkIcon className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium">Publication link</div>
+                      <div className="text-xs text-muted-foreground">Quick-link to Quarterly / Insights / AfriFin Analytics</div>
                     </div>
                   </button>
                   <button
