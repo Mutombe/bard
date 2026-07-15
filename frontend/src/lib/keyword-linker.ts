@@ -36,20 +36,86 @@ const keywordMappings: KeywordMapping[] = [
     type: "topic",
   },
   {
-    keywords: ["monetary policy", "interest rate", "repo rate", "policy rate"],
+    keywords: [
+      "monetary policy",
+      "interest rate",
+      "repo rate",
+      "policy rate",
+      "rate hike",
+      "rate cut",
+      "Monetary Policy Committee",
+      "MPC",
+      "benchmark rate",
+    ],
     url: "/topics/central-banks",
+    type: "topic",
+  },
+  {
+    keywords: ["IMF", "International Monetary Fund"],
+    url: "/topics/imf",
+    type: "topic",
+  },
+  {
+    keywords: ["World Bank"],
+    url: "/topics/world-bank",
+    type: "topic",
+  },
+  {
+    keywords: ["African Development Bank", "AfDB"],
+    url: "/topics/african-development-bank",
     type: "topic",
   },
 
   // Economic Indicators
   {
-    keywords: ["inflation", "CPI", "consumer price index", "price index"],
+    keywords: [
+      "inflation",
+      "CPI",
+      "consumer price index",
+      "price index",
+      "headline inflation",
+      "core inflation",
+      "disinflation",
+    ],
     url: "/topics/inflation",
     type: "topic",
   },
   {
-    keywords: ["GDP", "gross domestic product", "economic growth"],
+    keywords: [
+      "GDP",
+      "gross domestic product",
+      "economic growth",
+      "recession",
+      "economic output",
+    ],
     url: "/economics/gdp",
+    type: "topic",
+  },
+  {
+    keywords: [
+      "sovereign debt",
+      "eurobond",
+      "debt restructuring",
+      "bond yield",
+      "treasury bills",
+      "government bonds",
+      "fiscal deficit",
+    ],
+    url: "/topics/sovereign-debt",
+    type: "topic",
+  },
+  {
+    keywords: [
+      "exchange rate",
+      "forex",
+      "foreign exchange",
+      "currency devaluation",
+      "the rand",
+      "the naira",
+      "the cedi",
+      "Kenyan shilling",
+    ],
+    url: "/markets/forex",
     type: "topic",
   },
   {
@@ -89,6 +155,26 @@ const keywordMappings: KeywordMapping[] = [
     url: "/topics/mergers-acquisitions",
     type: "topic",
   },
+  {
+    keywords: ["earnings season", "quarterly earnings", "annual results", "earnings report"],
+    url: "/economics/earnings",
+    type: "topic",
+  },
+  {
+    keywords: ["commodity prices", "commodities market", "commodity exports"],
+    url: "/markets/commodities",
+    type: "topic",
+  },
+  {
+    keywords: ["private equity", "asset management", "institutional investors", "pension funds"],
+    url: "/topics/asset-management",
+    type: "topic",
+  },
+  {
+    keywords: ["dividend", "share buyback", "shareholder returns"],
+    url: "/topics/equities",
+    type: "topic",
+  },
 
   // Commodities
   {
@@ -102,8 +188,28 @@ const keywordMappings: KeywordMapping[] = [
     type: "topic",
   },
   {
-    keywords: ["oil price", "crude oil", "Brent crude", "WTI"],
+    keywords: ["oil price", "crude oil", "Brent crude", "WTI", "OPEC", "petroleum"],
     url: "/topics/oil-gas",
+    type: "topic",
+  },
+  {
+    keywords: ["natural gas", "LNG", "liquefied natural gas"],
+    url: "/topics/oil-gas",
+    type: "topic",
+  },
+  {
+    keywords: ["bullion", "gold reserves"],
+    url: "/topics/gold",
+    type: "topic",
+  },
+  {
+    keywords: ["cocoa", "coffee exports", "cash crops"],
+    url: "/topics/agriculture",
+    type: "topic",
+  },
+  {
+    keywords: ["lithium", "cobalt", "critical minerals", "rare earth"],
+    url: "/topics/critical-minerals",
     type: "topic",
   },
   {
@@ -119,8 +225,18 @@ const keywordMappings: KeywordMapping[] = [
     type: "topic",
   },
   {
-    keywords: ["mobile money", "M-Pesa", "mobile payments"],
+    keywords: ["mobile money", "M-Pesa", "mobile payments", "digital payments"],
     url: "/topics/mobile-money",
+    type: "topic",
+  },
+  {
+    keywords: ["remittances", "diaspora remittances"],
+    url: "/topics/remittances",
+    type: "topic",
+  },
+  {
+    keywords: ["financial inclusion", "unbanked", "microfinance"],
+    url: "/topics/financial-inclusion",
     type: "topic",
   },
   {
@@ -209,6 +325,36 @@ const keywordMappings: KeywordMapping[] = [
   {
     keywords: ["Egypt", "Egyptian economy", "Cairo"],
     url: "/regions/north-africa",
+    type: "region",
+  },
+  {
+    keywords: ["Ghana", "Ghanaian economy", "Accra"],
+    url: "/regions/west-africa",
+    type: "region",
+  },
+  {
+    keywords: ["Ethiopia", "Addis Ababa", "Tanzania", "Uganda", "Rwanda"],
+    url: "/regions/east-africa",
+    type: "region",
+  },
+  {
+    keywords: ["Morocco", "Tunisia", "Algeria"],
+    url: "/regions/north-africa",
+    type: "region",
+  },
+  {
+    keywords: ["Zimbabwe", "Zambia", "Botswana", "Namibia", "Mozambique"],
+    url: "/regions/southern-africa",
+    type: "region",
+  },
+  {
+    keywords: ["Ivory Coast", "Côte d'Ivoire", "Senegal"],
+    url: "/regions/west-africa",
+    type: "region",
+  },
+  {
+    keywords: ["sub-Saharan Africa", "African markets", "African economies"],
+    url: "/regions",
     type: "region",
   },
 ];

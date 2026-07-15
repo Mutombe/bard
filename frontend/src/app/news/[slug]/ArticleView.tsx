@@ -33,6 +33,7 @@ import { publicClient } from "@/services/api/client";
 import { editorialService } from "@/services/api/editorial";
 import { toast } from "sonner";
 import { addKeywordLinks } from "@/lib/keyword-linker";
+import { linkCitations } from "@/lib/citation-linker";
 import { renderChartSvg, type ChartKind } from "@/components/editor/extensions/chart-svg";
 import { useArticle, useArticles } from "@/hooks";
 
@@ -406,7 +407,7 @@ export default function ArticleView({ slug, initialArticle }: ArticleViewProps) 
     const target = e.target as HTMLElement;
     if (target.tagName === "IMG") {
       const img = target as HTMLImageElement;
-      // Don't open lightbox for the tiny drop-cap or sponsor icons —
+      // Don't open lightbox for sponsor icons —
       // only for content images in .prose-journal.
       if (!target.closest(".prose-journal")) return;
       e.preventDefault();
@@ -533,19 +534,24 @@ export default function ArticleView({ slug, initialArticle }: ArticleViewProps) 
     window.open(`mailto:?subject=${subject}&body=${body}`);
   };
 
-  // Render article content - handle HTML content safely with drop cap and keyword links
+  // Render article content - handle HTML content safely with citation and keyword links
   const renderContent = () => {
     if (!article.content) return null;
 
     // If content looks like HTML, render it
     if (article.content.includes("<") && article.content.includes(">")) {
-      // Add drop-cap class to first paragraph and keyword links
+      // Strip empty paragraphs the editor leaves behind (double-Enter, paste
+      // artifacts) — they render as large unintended gaps. The publisher's
+      // real paragraph breaks keep their normal spacing.
       let processedContent = article.content.replace(
-        /<p>/,
-        '<p class="drop-cap">'
+        /<p(?:\s[^>]*)?>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi,
+        ""
       );
-      // Add keyword hyperlinks (max 2 per keyword)
-      processedContent = addKeywordLinks(processedContent, 2);
+      // Link [n] citation markers to the reference list and make source
+      // URLs in references clickable.
+      processedContent = linkCitations(processedContent);
+      // Add keyword hyperlinks (max 3 per keyword) for the editorial feel
+      processedContent = addKeywordLinks(processedContent, 3);
 
       return (
         <div
@@ -575,10 +581,10 @@ export default function ArticleView({ slug, initialArticle }: ArticleViewProps) 
 
     // Fallback: if regex didn't split well, just use the whole text as one paragraph
     if (sentences.length <= 1) {
-      const html = addKeywordLinks(text, 2);
+      const html = addKeywordLinks(text, 3);
       return (
         <div className="prose-journal max-w-none mb-8">
-          <p className="drop-cap" dangerouslySetInnerHTML={{ __html: html }} />
+          <p dangerouslySetInnerHTML={{ __html: html }} />
         </div>
       );
     }
@@ -595,8 +601,7 @@ export default function ArticleView({ slug, initialArticle }: ArticleViewProps) 
         {paragraphs.map((paragraph, index) => (
           <p
             key={index}
-            className={index === 0 ? "drop-cap" : ""}
-            dangerouslySetInnerHTML={{ __html: addKeywordLinks(paragraph, 2) }}
+            dangerouslySetInnerHTML={{ __html: addKeywordLinks(paragraph, 3) }}
           />
         ))}
       </div>

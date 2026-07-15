@@ -582,22 +582,6 @@
     background: linear-gradient(to right, #3b1042, #9b70b5, #e4603a);
   }
 
-  /* Drop cap - traditional journal style */
-  .drop-cap::first-letter {
-    font-family: var(--font-fraunces), Georgia, serif;
-    float: left;
-    font-size: 4.5rem;
-    line-height: 0.8;
-    font-weight: 800;
-    margin-right: 0.75rem;
-    margin-top: 0.25rem;
-    color: #3b1042;
-  }
-
-  .dark .drop-cap::first-letter {
-    color: #c4a7d9;
-  }
-
   /* Article prose styling — Newsreader for reading */
   .prose-journal {
     font-family: var(--font-newsreader), Georgia, serif;
@@ -609,6 +593,40 @@
 
   .prose-journal p {
     margin-bottom: 1.5rem;
+  }
+
+  /* Empty paragraphs from the editor (double-Enter artifacts) must never
+     add visual gaps — only the publisher's real paragraphs space the text. */
+  .prose-journal p:empty {
+    display: none;
+  }
+
+  /* Citations — inline [n] markers linking to the reference list */
+  .prose-journal sup.citation {
+    font-family: var(--font-bricolage), sans-serif;
+    font-size: 0.7em;
+    line-height: 0;
+  }
+  .prose-journal sup.citation a {
+    color: hsl(var(--primary));
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0 0.1em;
+  }
+  .prose-journal sup.citation a:hover {
+    text-decoration: underline;
+  }
+  .prose-journal .citation-ref {
+    scroll-margin-top: 7rem;
+    font-size: 0.9375rem;
+    color: hsl(var(--muted-foreground));
+  }
+  .prose-journal .citation-ref:target {
+    background: hsl(var(--primary) / 0.08);
+    transition: background 0.4s ease;
+  }
+  .prose-journal a.citation-source-link {
+    word-break: break-all;
   }
 
   .prose-journal h2 {
@@ -1649,10 +1667,6 @@
     .prose-journal {
       font-size: 12pt;
       line-height: 1.6;
-    }
-
-    .drop-cap::first-letter {
-      font-size: 48pt;
     }
   }
 }
