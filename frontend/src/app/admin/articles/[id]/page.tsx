@@ -138,6 +138,17 @@ export default function EditArticlePage() {
         // Fetch article by ID
         const article = await editorialService.getArticle(articleId);
 
+        // Never load a paywalled/truncated body into the editor — saving it
+        // would overwrite the article's real content in the database.
+        if ((article as any).requires_subscription) {
+          setError(
+            "The API returned a truncated (paywalled) version of this article, " +
+            "so editing is blocked to protect the full body. Your account needs " +
+            "premium/editor access — refresh after logging in with the right account."
+          );
+          return;
+        }
+
         // Populate form
         setTitle(article.title || "");
         setSlug(article.slug || "");

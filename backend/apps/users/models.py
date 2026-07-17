@@ -175,6 +175,11 @@ class User(AbstractBaseUser, PermissionsMixin, TimeStampedModel):
 
     @property
     def can_access_premium(self):
+        # Editors and admins must always see full content — otherwise the
+        # admin edit form loads the truncated premium body and saving it
+        # destroys the article's real content.
+        if self.is_editor or self.is_staff:
+            return True
         return self.subscription_tier in [
             SubscriptionTier.PROFESSIONAL,
             SubscriptionTier.ENTERPRISE,
