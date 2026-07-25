@@ -341,7 +341,8 @@ class WriterViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
-        return super().get_permissions()
+        from apps.news.views import IsEditorOrReadOnly
+        return [IsAuthenticated(), IsEditorOrReadOnly()]
 
     def get_queryset(self):
         qs = Writer.objects.all() if self.request.user.is_staff else Writer.objects.filter(is_active=True)

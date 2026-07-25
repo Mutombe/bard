@@ -776,6 +776,57 @@
     max-width: 36rem;
   }
 
+  /* ---------------------------------------------------------------
+     Editor canvas (TipTap .ProseMirror) — mirror the public alignment
+     system so the publisher SEES enlargement/float choices while
+     composing, exactly as readers will see them on the article page.
+     --------------------------------------------------------------- */
+  .ProseMirror img {
+    display: block;
+    height: auto;
+    max-width: min(100%, 36rem);
+    margin: 2.25rem auto;
+    border-radius: 0.5rem;
+  }
+  .ProseMirror img[data-align="center"] {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: min(100%, 36rem);
+    float: none;
+    clear: both;
+  }
+  .ProseMirror img[data-align="left"] {
+    float: left;
+    clear: left;
+    max-width: clamp(12rem, 38%, 22rem);
+    margin: 0.375rem 1.75rem 1.25rem 0;
+  }
+  .ProseMirror img[data-align="right"] {
+    float: right;
+    clear: right;
+    max-width: clamp(12rem, 38%, 22rem);
+    margin: 0.375rem 0 1.25rem 1.75rem;
+  }
+  .ProseMirror img[data-align="full"] {
+    width: 100%;
+    max-width: 100%;
+    margin: 2.75rem 0;
+    float: none;
+    clear: both;
+    border-radius: 0;
+  }
+  /* Selected image gets a visible ring so the bubble menu context is clear */
+  .ProseMirror img.ProseMirror-selectednode {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: 2px;
+  }
+  /* Headings and blocks clear floats in the editor too */
+  .ProseMirror h1, .ProseMirror h2, .ProseMirror h3,
+  .ProseMirror blockquote, .ProseMirror hr,
+  .ProseMirror ul, .ProseMirror ol, .ProseMirror pre {
+    clear: both;
+  }
+
   /* Suppress first-line indent on paragraphs that immediately follow
      a floated image — keeps the wrap looking deliberate, not accidental. */
   .prose-journal img[data-align="left"] + p,

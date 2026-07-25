@@ -16,6 +16,7 @@ import {
   FileText,
 } from "@phosphor-icons/react";
 import { editorialService, type Writer } from "@/services/api/editorial";
+import { mediaService } from "@/services/api/media";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,31 @@ export default function WritersPage() {
   const [editing, setEditing] = useState<Writer | null>(null);
   const [form, setForm] = useState<Partial<Writer>>(EMPTY_WRITER);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const handleAvatarUpload = async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image too large — max 5 MB");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const uploaded = await mediaService.uploadFile(file, {
+        name: `writer-avatar-${(form.full_name || "writer").toLowerCase().replace(/\s+/g, "-")}`,
+        alt_text: form.full_name || "Writer avatar",
+      });
+      setForm((f) => ({ ...f, avatar_url: uploaded.url }));
+      toast.success("Profile picture uploaded — remember to save");
+    } catch {
+      toast.error("Upload failed. Try again.");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
 
   const fetchWriters = async () => {
     try {
@@ -291,17 +317,53 @@ export default function WritersPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-muted-foreground mb-1">Avatar URL</label>
-                <input
-                  type="url"
-                  value={form.avatar_url || ""}
-                  onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
-                  className="w-full px-3 py-2 bg-terminal-bg-secondary border border-terminal-border rounded-md text-sm focus:outline-none focus:border-primary"
-                  placeholder="https://..."
-                />
-                {form.avatar_url && (
-                  <img src={form.avatar_url} alt="Preview" className="w-16 h-16 object-cover mt-2 border border-terminal-border" />
-                )}
+                <label className="block text-sm text-muted-foreground mb-1">Profile Picture</label>
+                <div className="flex items-start gap-3">
+                  <div className="w-16 h-16 bg-terminal-bg-elevated border border-terminal-border overflow-hidden flex-shrink-0">
+                    {form.avatar_url ? (
+                      <img src={form.avatar_url} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-xl font-bold text-muted-foreground">
+                        {(form.full_name || "?").charAt(0)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <label
+                      className={cn(
+                        "flex items-center justify-center gap-2 px-3 py-2 border border-terminal-border rounded-md text-sm cursor-pointer hover:bg-terminal-bg-secondary transition-colors",
+                        uploadingAvatar && "opacity-60 pointer-events-none"
+                      )}
+                    >
+                      {uploadingAvatar ? (
+                        <CircleNotch className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <PenNib className="h-4 w-4" />
+                      )}
+                      {uploadingAvatar ? "Uploading…" : "Upload photo"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) handleAvatarUpload(f);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    <input
+                      type="url"
+                      value={form.avatar_url || ""}
+                      onChange={(e) => setForm({ ...form, avatar_url: e.target.value })}
+                      className="w-full px-3 py-2 bg-terminal-bg-secondary border border-terminal-border rounded-md text-xs focus:outline-none focus:border-primary"
+                      placeholder="…or paste an image URL"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Appears on article bylines, the author page, and search — changes go live on save.
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
