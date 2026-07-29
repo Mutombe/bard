@@ -16,5 +16,6 @@ router.register(r"comments", views.CommentViewSet, basename="comments")
 
 urlpatterns = [
     path("unsplash-image/", views.unsplash_image_view, name="unsplash-image"),
+    path("partner/feed/", views.partner_feed_view, name="partner-feed"),
     path("", include(router.urls)),
 ]

@@ -806,3 +806,112 @@ def unsplash_image_view(request):
         category_slug="business",
     )
     return Response({"url": result.get("url", "")})
+
+
+# =========================
+# Partner Feed (API-key gated)
+# =========================
+@api_view(["GET", "OPTIONS"])
+@permission_classes([AllowAny])
+def partner_feed_view(request):
+    """
+    Read-only latest-articles feed for external partners (e.g. the Bard
+    Santner bank website). Gated by a PartnerApiKey passed as either the
+    X-API-Key header or the api_key query parameter (query param avoids a
+    CORS preflight for browser embeds).
+
+    Params: limit (default 10, max 50), category (slug), content_type.
+    """
+    from django.conf import settings
+    from django.core.cache import cache
+    from django.utils import timezone as dj_tz
+    from apps.core.models import PartnerApiKey
+
+    def cors(response, origin_setting=""):
+        origins = [o.strip() for o in origin_setting.split(",") if o.strip()]
+        request_origin = request.META.get("HTTP_ORIGIN", "")
+        if not origins:
+            response["Access-Control-Allow-Origin"] = "*"
+        elif request_origin in origins:
+            response["Access-Control-Allow-Origin"] = request_origin
+        response["Access-Control-Allow-Headers"] = "X-API-Key, Content-Type"
+        response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        return response
+
+    if request.method == "OPTIONS":
+        return cors(Response(status=status.HTTP_204_NO_CONTENT))
+
+    raw_key = request.headers.get("X-API-Key") or request.query_params.get("api_key", "")
+    if not raw_key:
+        return cors(Response(
+            {"error": "Missing API key. Pass X-API-Key header or ?api_key=."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        ))
+
+    api_key = PartnerApiKey.objects.filter(key=raw_key, is_active=True).first()
+    if not api_key:
+        return cors(Response(
+            {"error": "Invalid or revoked API key."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        ))
+
+    # Simple per-key rate limit: 120 requests/minute
+    rl_key = f"partner_feed_rl:{api_key.pk}:{dj_tz.now():%Y%m%d%H%M}"
+    hits = cache.get(rl_key, 0)
+    if hits >= 120:
+        return cors(Response(
+            {"error": "Rate limit exceeded (120 requests/minute)."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        ), api_key.allowed_origins)
+    cache.set(rl_key, hits + 1, 90)
+
+    try:
+        limit = min(max(int(request.query_params.get("limit", 10)), 1), 50)
+    except ValueError:
+        limit = 10
+
+    site_url = getattr(settings, "SITE_URL", "https://bgfi.global").rstrip("/")
+    cache_key = f"partner_feed:{limit}:{request.query_params.get('category','')}:{request.query_params.get('content_type','')}"
+    payload = cache.get(cache_key)
+
+    if payload is None:
+        qs = (
+            NewsArticle.objects.filter(status="published")
+            .select_related("category", "writer", "author")
+            .order_by("-published_at", "-created_at")
+        )
+        category = request.query_params.get("category")
+        if category:
+            qs = qs.filter(category__slug=category)
+        content_type = request.query_params.get("content_type")
+        if content_type:
+            qs = qs.filter(content_type=content_type)
+
+        items = []
+        for a in qs[:limit]:
+            image = a.featured_image_url or (a.featured_image.url if a.featured_image else "")
+            byline = None
+            if a.writer:
+                byline = a.writer.full_name
+            elif a.author:
+                byline = a.author.get_full_name() or None
+            items.append({
+                "title": a.title,
+                "slug": a.slug,
+                "url": f"{site_url}/news/{a.slug}",
+                "excerpt": a.excerpt or a.subtitle or "",
+                "image": image,
+                "category": a.category.name if a.category else None,
+                "author": byline,
+                "published_at": (a.published_at or a.created_at).isoformat(),
+                "read_time_minutes": a.read_time_minutes,
+            })
+        payload = {"source": "Bard Global Finance Institute", "site": site_url, "articles": items}
+        cache.set(cache_key, payload, 300)  # 5 min
+
+    from django.db.models import F
+    PartnerApiKey.objects.filter(pk=api_key.pk).update(
+        last_used_at=dj_tz.now(),
+        request_count=F("request_count") + 1,
+    )
+    return cors(Response(payload), api_key.allowed_origins)

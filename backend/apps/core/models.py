@@ -111,3 +111,50 @@ class BaseModel(UUIDModel, TimeStampedModel, SoftDeleteModel):
     class Meta:
         abstract = True
         ordering = ["-created_at"]
+
+
+def _generate_partner_key():
+    import secrets
+    return f"bgfi_live_{secrets.token_hex(20)}"
+
+
+class PartnerApiKey(TimeStampedModel):
+    """
+    API key for external partners consuming BGFI content (e.g. the
+    Bard Santner bank website embedding the latest-articles feed).
+    Keys gate the read-only partner endpoints and can be revoked by
+    flipping is_active — no deploy needed.
+    """
+
+    name = models.CharField(
+        "Partner name",
+        max_length=200,
+        help_text="Who this key belongs to, e.g. 'Bard Santner website'",
+    )
+    key = models.CharField(
+        "Key",
+        max_length=64,
+        unique=True,
+        db_index=True,
+        default=_generate_partner_key,
+    )
+    is_active = models.BooleanField("Active", default=True)
+    allowed_origins = models.TextField(
+        "Allowed origins",
+        blank=True,
+        help_text=(
+            "Optional comma-separated list of origins for CORS, e.g. "
+            "https://bardsantner.com. Leave blank to allow any origin "
+            "(content is public/read-only)."
+        ),
+    )
+    last_used_at = models.DateTimeField("Last used", null=True, blank=True)
+    request_count = models.PositiveBigIntegerField("Requests served", default=0)
+
+    class Meta:
+        verbose_name = "Partner API Key"
+        verbose_name_plural = "Partner API Keys"
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({'active' if self.is_active else 'revoked'})"
